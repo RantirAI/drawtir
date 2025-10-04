@@ -14,6 +14,7 @@ import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
+import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -931,6 +932,8 @@ export default function CanvasContainerNew() {
           downloadPoster();
         }}
       />
+
+      <DrawtirFooter />
 
       <input
         ref={imageInputRef}
