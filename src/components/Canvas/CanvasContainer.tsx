@@ -155,7 +155,7 @@ export default function CanvasContainer({ user }: CanvasContainerProps) {
 
     setIsSaving(true);
     try {
-      const { error } = await supabase.from('posters').insert({
+      const { error } = await (supabase as any).from('posters').insert({
         user_id: user.id,
         image_url: image,
         caption: caption,

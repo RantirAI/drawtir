@@ -35,7 +35,7 @@ export default function Gallery() {
 
   const fetchPosters = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('posters')
         .select('*')
         .order('created_at', { ascending: false });
@@ -102,7 +102,7 @@ export default function Gallery() {
     setDeletingId(id);
     try {
       const { error } = await supabase
-        .from('posters')
+        .from<any>('posters')
         .delete()
         .eq('id', id);
 

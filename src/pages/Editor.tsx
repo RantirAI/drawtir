@@ -79,11 +79,11 @@ export default function Editor() {
 
   const fetchPoster = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('posters')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
@@ -227,7 +227,7 @@ export default function Editor() {
       };
 
       // Save all poster settings
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('posters')
         .update({ 
           caption: captionData,
@@ -306,7 +306,7 @@ export default function Editor() {
         
         // Update database with base64 image
         const { error: updateError } = await supabase
-          .from('posters')
+          .from<any>('posters')
           .update({ image_url: base64String })
           .eq('id', poster.id);
 
@@ -350,7 +350,7 @@ export default function Editor() {
     try {
       // Clear the image from database
       const { error } = await supabase
-        .from('posters')
+        .from<any>('posters')
         .update({ image_url: '' })
         .eq('id', poster.id);
 

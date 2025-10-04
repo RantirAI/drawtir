@@ -92,7 +92,7 @@ export default function PosterGenerator() {
   }, [navigate]);
 
   const fetchRecentPosters = async (userId: string) => {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("posters")
       .select("*")
       .eq("user_id", userId)
@@ -223,7 +223,7 @@ export default function PosterGenerator() {
 
     setIsSaving(true);
     try {
-      const { error } = await supabase.from('posters').insert({
+      const { error } = await (supabase as any).from('posters').insert({
         user_id: user.id,
         image_url: image,
         caption: caption,
