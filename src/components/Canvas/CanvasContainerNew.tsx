@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Image as ImageIcon, Layers } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layers, SlidersHorizontal } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -435,14 +435,22 @@ export default function CanvasContainerNew({
 
   const handleShapeSelect = (shapeType: string) => {
     if (!selectedFrameId) return;
-    
+    const frame = frames.find(f => f.id === selectedFrameId);
+    if (!frame) return;
+
+    const defaultWidth = shapeType === "line" || shapeType === "arrow" ? Math.max(150, Math.floor(frame.width * 0.5)) : Math.floor(frame.width * 0.25);
+    const defaultHeight = shapeType === "line" || shapeType === "arrow" ? 2 : Math.floor(frame.height * 0.25);
+
+    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frame.height - (shapeType === "line" || shapeType === "arrow" ? Math.max(2, defaultHeight) : defaultHeight)) / 2));
+
     const newElement: Element = {
       id: `element-${Date.now()}`,
       type: "shape",
-      x: 50,
-      y: 50,
-      width: shapeType === "line" || shapeType === "arrow" ? 150 : 100,
-      height: shapeType === "line" || shapeType === "arrow" ? 2 : 100,
+      x,
+      y,
+      width: defaultWidth,
+      height: shapeType === "line" || shapeType === "arrow" ? Math.max(2, defaultHeight) : defaultHeight,
       shapeType: shapeType as any,
       fill: shapeType === "line" || shapeType === "arrow" ? "transparent" : penColor,
       stroke: penColor,
@@ -930,6 +938,16 @@ export default function CanvasContainerNew({
           }}
         >
           <Layers className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showShapeSettings || selectedElementIds.length > 0 ? 'ring-2 ring-blue-500' : ''
+          }`}
+          onClick={() => setShowShapeSettings(!showShapeSettings)}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
         </Button>
       </div>
       
