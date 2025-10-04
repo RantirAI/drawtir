@@ -114,7 +114,7 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "ring-2 ring-primary" : ""}`}
+      className={`absolute ${isSelected ? "ring-2 ring-blue-500" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -150,20 +150,25 @@ export default function ResizableFrame({
       
       {isSelected && (
         <>
+          {/* Dimension label at bottom in blue */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium z-50">
+            {Math.round(width)} × {Math.round(height)}
+          </div>
+          
           <div
-            className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-nw-resize"
+            className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border-2 border-white"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
           />
           <div
-            className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-ne-resize"
+            className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border-2 border-white"
             onMouseDown={(e) => handleResizeStart(e, "ne")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-sw-resize"
+            className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border-2 border-white"
             onMouseDown={(e) => handleResizeStart(e, "sw")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-se-resize"
+            className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border-2 border-white"
             onMouseDown={(e) => handleResizeStart(e, "se")}
           />
         </>

@@ -190,7 +190,7 @@ export default function ResizableElement({
 
   return (
     <div
-      className={`absolute cursor-move ${isSelected ? 'ring-2 ring-primary' : ''}`}
+      className={`absolute cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       style={{ left: x, top: y, width, height }}
       onMouseDown={handleMouseDown}
     >
@@ -209,16 +209,16 @@ export default function ResizableElement({
 
       {isSelected && (
         <>
-          {/* Dimension label */}
-          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded whitespace-nowrap pointer-events-none">
+          {/* Dimension label at bottom in blue */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium">
             {Math.round(width)} × {Math.round(height)}
           </div>
           
-          {/* Resize handles */}
-          <div className="absolute -top-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-nw-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-ne-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-sw-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-se-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "se")} />
+          {/* Resize handles in blue */}
+          <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
+          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
+          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
         </>
       )}
     </div>
