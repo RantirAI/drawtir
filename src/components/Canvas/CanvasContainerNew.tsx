@@ -483,12 +483,6 @@ export default function CanvasContainerNew() {
             </ResizableFrame>
           </div>
         ))}
-
-        <DrawingLayer
-          isActive={activeTool === "pen"}
-          color={penColor}
-          strokeWidth={strokeWidth}
-        />
       </div>
 
       {/* Panels */}
