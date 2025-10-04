@@ -54,18 +54,18 @@ export default function LayersPanel({
       defaultPosition={{ x: window.innerWidth - 320, y: 100 }}
       onClose={onClose}
     >
-      <ScrollArea className="h-[500px] pr-4">
-        <div className="space-y-2">
+      <ScrollArea className="h-[500px] pr-2">
+        <div className="space-y-0.5">
           {frames.map((frame) => {
             const isFrameSelected = frame.id === selectedFrameId;
             const isCollapsed = collapsedFrames.has(frame.id);
             const frameElements = frame.elements || [];
 
             return (
-              <div key={frame.id} className="space-y-1">
+              <div key={frame.id} className="space-y-0.5">
                 {/* Frame Layer */}
                 <div
-                  className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
+                  className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
                     isFrameSelected ? "bg-blue-500/20 border border-blue-500" : "bg-secondary/50 hover:bg-secondary"
                   }`}
                   onClick={() => onFrameSelect(frame.id)}
@@ -76,21 +76,21 @@ export default function LayersPanel({
                         e.stopPropagation();
                         toggleFrameCollapse(frame.id);
                       }}
-                      className="text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground w-4 h-4 flex items-center justify-center flex-shrink-0"
                     >
-                      {isCollapsed ? "▶" : "▼"}
+                      <span className="text-xs">{isCollapsed ? "▶" : "▼"}</span>
                     </button>
-                    <Layers className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">{frame.name}</span>
+                    <Layers className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-xs font-medium truncate">{frame.name}</span>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {frameElements.length} items
+                  <span className="text-xs text-muted-foreground flex-shrink-0">
+                    {frameElements.length}
                   </span>
                 </div>
 
                 {/* Elements inside frame */}
                 {!isCollapsed && frameElements.length > 0 && (
-                  <div className="ml-6 space-y-1">
+                  <div className="ml-4 space-y-0.5">
                     {frameElements.map((element) => {
                       const Icon = getElementIcon(element.type, element.shapeType);
                       const isSelected = selectedElementIds.includes(element.id);
@@ -98,7 +98,7 @@ export default function LayersPanel({
                       return (
                         <div
                           key={element.id}
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
+                          className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors group ${
                             isSelected ? "bg-blue-500/20 border border-blue-500" : "bg-secondary/30 hover:bg-secondary"
                           }`}
                           onClick={(e) => {
@@ -106,9 +106,9 @@ export default function LayersPanel({
                             onElementSelect(element.id, e.shiftKey || e.ctrlKey || e.metaKey);
                           }}
                         >
-                          <div className="flex items-center gap-2">
-                            <Icon className="w-3.5 h-3.5 text-muted-foreground" />
-                            <span className="text-xs">
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <Icon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                            <span className="text-xs truncate">
                               {element.type === "text"
                                 ? element.text || "Text"
                                 : element.type === "drawing"
@@ -119,7 +119,7 @@ export default function LayersPanel({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 opacity-0 group-hover:opacity-100 hover:bg-destructive/20"
+                            className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-destructive/20 flex-shrink-0"
                             onClick={(e) => {
                               e.stopPropagation();
                               onElementDelete(element.id);

@@ -39,6 +39,8 @@ export default function ResizableElement({
 }: ResizableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
 
@@ -97,6 +99,32 @@ export default function ResizableElement({
       onSelect(e);
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
+    }
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    if (type === "text") {
+      e.stopPropagation();
+      setIsEditing(true);
+      setEditText(text || "");
+    }
+  };
+
+  const handleTextBlur = () => {
+    setIsEditing(false);
+    if (editText !== text) {
+      onUpdate(id, { text: editText } as any);
+    }
+  };
+
+  const handleTextKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleTextBlur();
+    }
+    if (e.key === "Escape") {
+      setIsEditing(false);
+      setEditText(text || "");
     }
   };
 
@@ -193,16 +221,29 @@ export default function ResizableElement({
       className={`absolute cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       style={{ left: x, top: y, width, height }}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
     >
       {type === "image" && src ? (
         <img src={src} alt="Element" className="w-full h-full object-cover rounded" />
       ) : type === "text" ? (
-        <div 
-          className="w-full h-full flex items-center justify-center text-center px-2"
-          style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
-        >
-          {text || "Text"}
-        </div>
+        isEditing ? (
+          <textarea
+            autoFocus
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onBlur={handleTextBlur}
+            onKeyDown={handleTextKeyDown}
+            className="w-full h-full resize-none bg-transparent border-none outline-none text-center px-2 flex items-center justify-center"
+            style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
+          />
+        ) : (
+          <div 
+            className="w-full h-full flex items-center justify-center text-center px-2 pointer-events-none"
+            style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
+          >
+            {text || "Double click to edit"}
+          </div>
+        )
       ) : (
         renderShape()
       )}

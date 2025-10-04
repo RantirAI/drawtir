@@ -63,6 +63,10 @@ export default function CanvasContainerNew() {
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
   const [penColor, setPenColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
+  const [zoom, setZoom] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
   const [showImagePanel, setShowImagePanel] = useState(false);
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
@@ -88,7 +92,7 @@ export default function CanvasContainerNew() {
     setHistoryIndex(newHistory.length - 1);
   }, [frames]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts and zoom controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
@@ -105,10 +109,33 @@ export default function CanvasContainerNew() {
           handleElementsDelete();
         }
       }
+      if (e.key === ' ') {
+        setIsPanning(true);
+      }
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === ' ') {
+        setIsPanning(false);
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setZoom(prev => Math.max(0.1, Math.min(3, prev + delta)));
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('wheel', handleWheel);
+    };
   }, [historyIndex, history, selectedElementIds]);
 
   const handleUndo = () => {
@@ -427,7 +454,25 @@ export default function CanvasContainerNew() {
       />
 
       {/* Canvas Area */}
-      <div className="w-full h-full">
+      <div 
+        className="w-full h-full"
+        onMouseDown={(e) => {
+          if (isPanning && e.button === 0) {
+            setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+          }
+        }}
+        onMouseMove={(e) => {
+          if (isPanning && e.buttons === 1) {
+            setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
+          }
+        }}
+        style={{
+          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+          transformOrigin: 'center',
+          transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+          cursor: isPanning ? 'grab' : 'default'
+        }}
+      >
         {frames.map((frame) => (
           <div key={frame.id}>
             <FrameBadge
@@ -609,9 +654,11 @@ export default function CanvasContainerNew() {
       {/* Quick Action Buttons */}
       <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
         <Button
-          variant={showGeneratePanel ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showGeneratePanel ? 'ring-2 ring-blue-500' : ''
+          }`}
           onClick={() => {
             setShowGeneratePanel(!showGeneratePanel);
             setShowImagePanel(false);
@@ -620,9 +667,11 @@ export default function CanvasContainerNew() {
           <Sparkles className="h-4 w-4" />
         </Button>
         <Button
-          variant={showImagePanel ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showImagePanel ? 'ring-2 ring-blue-500' : ''
+          }`}
           onClick={() => {
             setShowImagePanel(!showImagePanel);
             setShowGeneratePanel(false);
@@ -631,15 +680,43 @@ export default function CanvasContainerNew() {
           <ImageIcon className="h-4 w-4" />
         </Button>
         <Button
-          variant={showLayersPanel ? "default" : "outline"}
+          variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showLayersPanel ? 'ring-2 ring-blue-500' : ''
+          }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
           }}
         >
           <Layers className="h-4 w-4" />
         </Button>
+      </div>
+      
+      {/* Zoom Controls */}
+      <div className="fixed right-6 bottom-24 flex flex-col gap-2 z-40 bg-card/80 backdrop-blur-xl rounded-lg p-2 border">
+        <button
+          onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
+          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors"
+        >
+          +
+        </button>
+        <div className="text-xs font-medium text-center px-2">{Math.round(zoom * 100)}%</div>
+        <button
+          onClick={() => setZoom(prev => Math.max(0.1, prev - 0.1))}
+          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors"
+        >
+          -
+        </button>
+        <button
+          onClick={() => {
+            setZoom(1);
+            setPanOffset({ x: 0, y: 0 });
+          }}
+          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors border-t"
+        >
+          Reset
+        </button>
       </div>
 
       <BottomToolbar
@@ -657,29 +734,35 @@ export default function CanvasContainerNew() {
         onDelete={handleDelete}
       />
       
-      <DrawingLayer
-        isActive={activeTool === "pen"}
-        color={penColor}
-        strokeWidth={strokeWidth}
-        frameId={selectedFrameId}
-        onPathComplete={(pathData, color, strokeW) => {
-          if (!selectedFrameId) return;
-          const newElement: Element = {
-            id: `element-${Date.now()}`,
-            type: "drawing",
-            x: 50,
-            y: 50,
-            width: 200,
-            height: 200,
-            pathData,
-            stroke: color,
-            strokeWidth: strokeW,
-          };
-          setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
-          setSelectedElementIds([newElement.id]);
-          setShowShapeSettings(true);
-        }}
-      />
+      {selectedFrame && (
+        <DrawingLayer
+          isActive={activeTool === "pen"}
+          color={penColor}
+          strokeWidth={strokeWidth}
+          frameId={selectedFrameId}
+          frameX={selectedFrame.x}
+          frameY={selectedFrame.y}
+          frameWidth={selectedFrame.width}
+          frameHeight={selectedFrame.height}
+          onPathComplete={(pathData, color, strokeW, bounds) => {
+            if (!selectedFrameId) return;
+            const newElement: Element = {
+              id: `element-${Date.now()}`,
+              type: "drawing",
+              x: bounds.x,
+              y: bounds.y,
+              width: bounds.width,
+              height: bounds.height,
+              pathData,
+              stroke: color,
+              strokeWidth: strokeW,
+            };
+            setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
+            setSelectedElementIds([newElement.id]);
+            setShowShapeSettings(true);
+          }}
+        />
+      )}
 
       <ShareDialog
         open={showShareDialog}

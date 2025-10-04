@@ -7,7 +7,9 @@ interface DrawingLayerProps {
   frameId?: string;
   frameX?: number;
   frameY?: number;
-  onPathComplete?: (pathData: string, color: string, strokeWidth: number) => void;
+  frameWidth?: number;
+  frameHeight?: number;
+  onPathComplete?: (pathData: string, color: string, strokeWidth: number, bounds: { x: number; y: number; width: number; height: number }) => void;
 }
 
 export default function DrawingLayer({ 
@@ -17,12 +19,14 @@ export default function DrawingLayer({
   frameId,
   frameX = 0,
   frameY = 0,
+  frameWidth = 400,
+  frameHeight = 600,
   onPathComplete 
 }: DrawingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [paths, setPaths] = useState<string[]>([]);
   const [currentPath, setCurrentPath] = useState<string>("");
+  const [pathPoints, setPathPoints] = useState<{x: number, y: number}[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -34,16 +38,6 @@ export default function DrawingLayer({
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Redraw all paths
-    paths.forEach(path => {
-      const pathObj = new Path2D(path);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = strokeWidth;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.stroke(pathObj);
-    });
-
     // Draw current path
     if (currentPath) {
       const pathObj = new Path2D(currentPath);
@@ -53,7 +47,7 @@ export default function DrawingLayer({
       ctx.lineJoin = "round";
       ctx.stroke(pathObj);
     }
-  }, [paths, currentPath, color, strokeWidth]);
+  }, [currentPath, color, strokeWidth]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isActive) return;
@@ -65,6 +59,7 @@ export default function DrawingLayer({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setCurrentPath(`M ${x} ${y}`);
+    setPathPoints([{x, y}]);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -76,15 +71,36 @@ export default function DrawingLayer({
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setCurrentPath(prev => `${prev} L ${x} ${y}`);
+    setPathPoints(prev => [...prev, {x, y}]);
   };
 
   const stopDrawing = () => {
-    if (isDrawing && currentPath) {
-      setPaths(prev => [...prev, currentPath]);
+    if (isDrawing && currentPath && pathPoints.length > 0) {
+      // Calculate bounds
+      const xs = pathPoints.map(p => p.x);
+      const ys = pathPoints.map(p => p.y);
+      const minX = Math.min(...xs);
+      const minY = Math.min(...ys);
+      const maxX = Math.max(...xs);
+      const maxY = Math.max(...ys);
+      
+      // Translate path to origin
+      const translatedPath = pathPoints.map((p, i) => {
+        const x = p.x - minX;
+        const y = p.y - minY;
+        return i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+      }).join(' ');
+      
       if (onPathComplete) {
-        onPathComplete(currentPath, color, strokeWidth);
+        onPathComplete(translatedPath, color, strokeWidth, {
+          x: minX,
+          y: minY,
+          width: Math.max(20, maxX - minX),
+          height: Math.max(20, maxY - minY)
+        });
       }
       setCurrentPath("");
+      setPathPoints([]);
     }
     setIsDrawing(false);
   };
@@ -92,14 +108,18 @@ export default function DrawingLayer({
   return (
     <canvas
       ref={canvasRef}
-      width={window.innerWidth}
-      height={window.innerHeight}
-      className={`absolute inset-0 pointer-events-${isActive ? 'auto' : 'none'} z-20`}
+      width={frameWidth}
+      height={frameHeight}
+      className={`absolute pointer-events-${isActive ? 'auto' : 'none'} z-20`}
       onMouseDown={startDrawing}
       onMouseMove={draw}
       onMouseUp={stopDrawing}
       onMouseLeave={stopDrawing}
-      style={{ cursor: isActive ? 'crosshair' : 'default' }}
+      style={{ 
+        left: frameX,
+        top: frameY,
+        cursor: isActive ? 'crosshair' : 'default'
+      }}
     />
   );
 }
