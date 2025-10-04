@@ -124,7 +124,10 @@ export default function ShapeSettingsPanel({
             {presetColors.map((color) => (
               <button
                 key={color}
-                onClick={() => onFillChange?.(color) || onBackgroundColorChange?.(color)}
+                onClick={() => {
+                  if (onFillChange) onFillChange(color);
+                  if (onBackgroundColorChange) onBackgroundColorChange(color);
+                }}
                 className="w-8 h-8 rounded border-2 border-border hover:border-primary transition-colors"
                 style={{ backgroundColor: color }}
               />
@@ -141,7 +144,8 @@ export default function ShapeSettingsPanel({
             className="h-8 text-xs"
             onChange={(e) => {
               if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                onFillChange?.(e.target.value) || onBackgroundColorChange?.(e.target.value);
+                if (onFillChange) onFillChange(e.target.value);
+                if (onBackgroundColorChange) onBackgroundColorChange(e.target.value);
               }
             }}
           />
