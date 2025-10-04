@@ -27,15 +27,15 @@ export default function EditorTopBar({ projectName = "Untitled Poster", onExport
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-4 bg-background/80 backdrop-blur-xl border-b">
-      <div className="flex items-center gap-3">
+    <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
+      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-9 w-9">
-              <Menu className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <Menu className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuContent align="start" className="w-40">
             <DropdownMenuItem onClick={() => navigate("/")}>
               Home
             </DropdownMenuItem>
@@ -47,23 +47,16 @@ export default function EditorTopBar({ projectName = "Untitled Poster", onExport
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="h-3.5 w-3.5 mr-2" />
               Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <span className="text-sm font-semibold">{projectName}</span>
-      </div>
+        
+        <span className="text-xs font-semibold px-2">{projectName}</span>
 
-      <div className="flex items-center gap-2">
-        <ThemeToggle />
-        <Button variant="ghost" size="sm" className="gap-2">
-          <Share2 className="h-4 w-4" />
-          Share
-        </Button>
-        <Button variant="default" size="sm" className="gap-2" onClick={onExport}>
-          <Download className="h-4 w-4" />
-          Export
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onExport}>
+          <Download className="h-3.5 w-3.5" />
         </Button>
       </div>
     </div>

@@ -305,8 +305,8 @@ export default function Editor() {
         const base64String = reader.result as string;
         
         // Update database with base64 image
-        const { error: updateError } = await supabase
-          .from<any>('posters')
+        const { error: updateError } = await (supabase as any)
+          .from('posters')
           .update({ image_url: base64String })
           .eq('id', poster.id);
 
@@ -349,8 +349,8 @@ export default function Editor() {
     
     try {
       // Clear the image from database
-      const { error } = await supabase
-        .from<any>('posters')
+      const { error } = await (supabase as any)
+        .from('posters')
         .update({ image_url: '' })
         .eq('id', poster.id);
 

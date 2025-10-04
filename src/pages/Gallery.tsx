@@ -101,8 +101,8 @@ export default function Gallery() {
     e.stopPropagation();
     setDeletingId(id);
     try {
-      const { error } = await supabase
-        .from<any>('posters')
+      const { error } = await (supabase as any)
+        .from('posters')
         .delete()
         .eq('id', id);
 

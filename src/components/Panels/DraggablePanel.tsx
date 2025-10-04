@@ -68,35 +68,29 @@ export default function DraggablePanel({
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "auto",
-        minWidth: "280px",
-        maxWidth: "400px",
+        minWidth: "200px",
       }}
     >
       <div
-        className="flex items-center justify-between p-3 border-b cursor-grab active:cursor-grabbing"
+        className="flex items-center justify-between p-2 border-b cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
       >
-        <div className="flex items-center gap-2">
-          <GripHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-semibold">{title}</span>
+        <div className="flex items-center gap-1.5">
+          <GripHorizontal className="h-3 w-3 text-muted-foreground" />
+          <span className="text-xs font-semibold">{title}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => setIsMinimized(!isMinimized)}
-          >
-            {isMinimized ? <Maximize2 className="h-3 w-3" /> : <Minimize2 className="h-3 w-3" />}
+        <div className="flex items-center gap-0.5">
+          <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setIsMinimized(!isMinimized)}>
+            {isMinimized ? <Maximize2 className="h-2.5 w-2.5" /> : <Minimize2 className="h-2.5 w-2.5" />}
           </Button>
           {onClose && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
-              <X className="h-3 w-3" />
+            <Button variant="ghost" size="icon" className="h-5 w-5" onClick={onClose}>
+              <X className="h-2.5 w-2.5" />
             </Button>
           )}
         </div>
       </div>
-      {!isMinimized && <div className="p-4">{children}</div>}
+      {!isMinimized && <div className="p-3">{children}</div>}
     </Card>
   );
 }

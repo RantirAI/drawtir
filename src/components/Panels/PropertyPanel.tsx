@@ -14,15 +14,15 @@ interface PropertyPanelProps {
 
 export default function PropertyPanel({ strokeWidth = 2, onStrokeWidthChange }: PropertyPanelProps) {
   return (
-    <div className="fixed right-4 top-20 z-40 w-64">
-      <div className="bg-card/90 backdrop-blur-xl border rounded-2xl shadow-2xl p-4 space-y-4">
+    <div className="fixed right-4 top-16 z-40 w-48">
+      <div className="bg-card/90 backdrop-blur-xl border rounded-2xl shadow-2xl p-3 space-y-3">
         <div>
-          <Label className="text-xs font-semibold mb-3 block">Colors</Label>
-          <div className="grid grid-cols-4 gap-2">
+          <Label className="text-[10px] font-semibold mb-2 block">Colors</Label>
+          <div className="grid grid-cols-4 gap-1.5">
             {colors.map((color) => (
               <button
                 key={color}
-                className="w-12 h-12 rounded-lg border-2 border-border hover:border-primary transition-colors"
+                className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors"
                 style={{ backgroundColor: color }}
               />
             ))}
@@ -30,42 +30,42 @@ export default function PropertyPanel({ strokeWidth = 2, onStrokeWidthChange }: 
         </div>
 
         <div>
-          <Label className="text-xs font-semibold mb-2 block">Stroke</Label>
+          <Label className="text-[10px] font-semibold mb-1.5 block">Stroke</Label>
           <Slider
             value={[strokeWidth]}
             onValueChange={(v) => onStrokeWidthChange?.(v[0])}
             min={1}
             max={20}
             step={1}
-            className="mt-2"
+            className="mt-1"
           />
         </div>
 
         <div>
-          <Label className="text-xs font-semibold mb-3 block">Style</Label>
-          <div className="grid grid-cols-4 gap-2">
-            <button className="w-12 h-12 rounded-lg border-2 border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-6 h-6 bg-foreground rounded" />
+          <Label className="text-[10px] font-semibold mb-2 block">Style</Label>
+          <div className="grid grid-cols-4 gap-1.5">
+            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
+              <div className="w-4 h-4 bg-foreground rounded" />
             </button>
-            <button className="w-12 h-12 rounded-lg border-2 border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-foreground rounded" />
+            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
+              <div className="w-4 h-4 border border-foreground rounded" />
             </button>
-            <button className="w-12 h-12 rounded-lg border-2 border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-6 h-6 border-2 border-dashed border-foreground rounded" />
+            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
+              <div className="w-4 h-4 border border-dashed border-foreground rounded" />
             </button>
-            <button className="w-12 h-12 rounded-lg border-2 border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-6 h-6 bg-transparent border-2 border-foreground rounded" />
+            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
+              <div className="w-4 h-4 bg-transparent border border-foreground rounded" />
             </button>
           </div>
         </div>
 
         <div>
-          <Label className="text-xs font-semibold mb-3 block">Size</Label>
-          <div className="flex gap-2">
+          <Label className="text-[10px] font-semibold mb-2 block">Size</Label>
+          <div className="flex gap-1.5">
             {["S", "M", "L", "XL"].map((size) => (
               <button
                 key={size}
-                className="flex-1 h-10 rounded-lg border-2 border-border hover:border-primary transition-colors text-sm font-semibold"
+                className="flex-1 h-7 rounded-md border border-border hover:border-primary transition-colors text-[10px] font-semibold"
               >
                 {size}
               </button>

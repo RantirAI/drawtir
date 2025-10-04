@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
-import CanvasContainer from "@/components/Canvas/CanvasContainer";
+import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -35,7 +35,7 @@ const Index = () => {
     return null;
   }
 
-  return <CanvasContainer user={user} />;
+  return <CanvasContainerNew user={user} />;
 };
 
 export default Index;

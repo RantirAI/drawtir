@@ -20,7 +20,7 @@ export default function SliderControl({
 }: SliderControlProps) {
   return (
     <div>
-      <Label className="text-xs mb-2">{label}: {value}</Label>
+      <Label className="text-[10px] mb-1.5 block">{label}: {value}</Label>
       <Slider
         value={[value]}
         onValueChange={(v) => onChange(v[0])}
