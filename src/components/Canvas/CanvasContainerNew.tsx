@@ -934,26 +934,27 @@ export default function CanvasContainerNew({
       </div>
       
       {/* Zoom Controls */}
-      <div className="fixed right-6 bottom-24 flex flex-col gap-2 z-40 bg-card/80 backdrop-blur-xl rounded-lg p-2 border">
+      <div className="fixed left-4 bottom-4 flex flex-row items-center gap-1 z-40 bg-card/80 backdrop-blur-xl rounded-full px-2 py-1 border shadow-sm">
         <button
           onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
-          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors"
+          className="text-xs font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
         >
           +
         </button>
-        <div className="text-xs font-medium text-center px-2">{Math.round(zoom * 100)}%</div>
+        <div className="text-[10px] font-medium px-2 min-w-[40px] text-center">{Math.round(zoom * 100)}%</div>
         <button
           onClick={() => setZoom(prev => Math.max(0.1, prev - 0.1))}
-          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors"
+          className="text-xs font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
         >
           -
         </button>
+        <div className="w-px h-3 bg-border mx-1" />
         <button
           onClick={() => {
             setZoom(1);
             setPanOffset({ x: 0, y: 0 });
           }}
-          className="text-xs font-medium px-3 py-1 hover:bg-secondary rounded transition-colors border-t"
+          className="text-[10px] font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
         >
           Reset
         </button>
