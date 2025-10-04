@@ -39,19 +39,34 @@ export interface Element {
 
 export interface Frame {
   id: string;
-  type: "frame";
+  name: string;
   x: number;
   y: number;
   width: number;
   height: number;
-  rotation: number;
+  rotation?: number;
   backgroundColor: string;
   backgroundImage?: string;
+  image?: string | null;
+  topCaption?: string;
+  bottomCaption?: string;
+  textColor?: string;
+  textAlign?: "left" | "center" | "right";
+  textSize?: number;
+  textOpacity?: number;
+  imageStyle?: string;
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  blur?: number;
+  linkText?: string;
+  linkPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+  gradientIntensity?: number;
   flexDirection?: "row" | "column";
   justifyContent?: string;
   alignItems?: string;
   gap?: number;
-  elements: Element[];
+  elements?: Element[];
   opacity?: number;
   cornerRadius?: number;
 }

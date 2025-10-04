@@ -5,6 +5,7 @@ import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
 import PropertyPanel from "../Panels/PropertyPanel";
+import LayersPanel from "../Panels/LayersPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
@@ -16,54 +17,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Image as ImageIcon, Type, Palette } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Layers } from "lucide-react";
+import { Frame, Element } from "@/types/elements";
 
-interface Element {
-  id: string;
-  type: "image" | "shape" | "text";
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  src?: string;
-  text?: string;
-  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
-  fill?: string;
-  stroke?: string;
-  strokeWidth?: number;
-  pathData?: string;
-  frameId: string;
-}
-
-interface Frame {
-  id: string;
-  name: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  backgroundColor: string;
-  image: string | null;
-  topCaption: string;
-  bottomCaption: string;
-  textColor: string;
-  textAlign: "left" | "center" | "right";
-  textSize: number;
-  textOpacity: number;
-  imageStyle: string;
-  brightness: number;
-  contrast: number;
-  saturation: number;
-  blur: number;
-  linkText: string;
-  linkPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
-  gradientIntensity: number;
-  flexDirection: "row" | "column";
-  justifyContent: string;
-  alignItems: string;
-  gap: number;
-  elements?: Element[];
-}
+// Using types from @/types/elements
 
 export default function CanvasContainerNew() {
   const [projectTitle, setProjectTitle] = useState("Untitled Poster");
@@ -98,10 +55,11 @@ export default function CanvasContainerNew() {
       alignItems: "start",
       gap: 0,
       elements: [],
+      cornerRadius: 0,
     },
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
   const [penColor, setPenColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
@@ -110,6 +68,7 @@ export default function CanvasContainerNew() {
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showLayersPanel, setShowLayersPanel] = useState(false);
 
   const [description, setDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -118,7 +77,8 @@ export default function CanvasContainerNew() {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const selectedFrame = frames.find((f) => f.id === selectedFrameId);
-  const selectedElement = selectedFrame?.elements?.find((e) => e.id === selectedElementId);
+  const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
+  const selectedElement = selectedElements.length === 1 ? selectedElements[0] : null;
 
   // Save to history when frames change
   useEffect(() => {
@@ -139,11 +99,17 @@ export default function CanvasContainerNew() {
         e.preventDefault();
         handleRedo();
       }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedElementIds.length > 0) {
+          e.preventDefault();
+          handleElementsDelete();
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [historyIndex, history]);
+  }, [historyIndex, history, selectedElementIds]);
 
   const handleUndo = () => {
     if (historyIndex > 0) {
@@ -201,6 +167,7 @@ export default function CanvasContainerNew() {
       alignItems: "start",
       gap: 0,
       elements: [],
+      cornerRadius: 0,
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
@@ -353,7 +320,6 @@ export default function CanvasContainerNew() {
       shapeType: shapeType as any,
       fill: penColor,
       stroke: penColor,
-      frameId: selectedFrameId,
     };
 
     setFrames(frames.map(f => {
@@ -362,7 +328,7 @@ export default function CanvasContainerNew() {
       }
       return f;
     }));
-    setSelectedElementId(newElement.id);
+    setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
     toast.success(`${shapeType} added!`);
@@ -393,7 +359,6 @@ export default function CanvasContainerNew() {
       width: 200,
       height: 50,
       text: "Double click to edit",
-      frameId: selectedFrameId,
       fill: penColor,
     };
 
@@ -403,10 +368,44 @@ export default function CanvasContainerNew() {
       }
       return f;
     }));
-    setSelectedElementId(newElement.id);
+    setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
     toast.success("Text added!");
+  };
+
+  const handleElementSelect = (elementId: string, multiSelect = false) => {
+    if (multiSelect) {
+      if (selectedElementIds.includes(elementId)) {
+        setSelectedElementIds(selectedElementIds.filter(id => id !== elementId));
+      } else {
+        setSelectedElementIds([...selectedElementIds, elementId]);
+      }
+    } else {
+      setSelectedElementIds([elementId]);
+    }
+    setShowShapeSettings(true);
+  };
+
+  const handleElementsDelete = () => {
+    if (selectedElementIds.length === 0) return;
+    
+    setFrames(frames.map(f => ({
+      ...f,
+      elements: (f.elements || []).filter(e => !selectedElementIds.includes(e.id))
+    })));
+    setSelectedElementIds([]);
+    setShowShapeSettings(false);
+    toast.success(`Deleted ${selectedElementIds.length} item(s)`);
+  };
+
+  const handleElementDelete = (elementId: string) => {
+    setFrames(frames.map(f => ({
+      ...f,
+      elements: (f.elements || []).filter(e => e.id !== elementId)
+    })));
+    setSelectedElementIds(selectedElementIds.filter(id => id !== elementId));
+    toast.success("Element deleted");
   };
 
   return (
@@ -456,6 +455,7 @@ export default function CanvasContainerNew() {
               linkText={frame.linkText}
               linkPosition={frame.linkPosition}
               gradientIntensity={frame.gradientIntensity}
+              cornerRadius={frame.cornerRadius || 0}
               isSelected={frame.id === selectedFrameId}
               onUpdate={handleFrameUpdate}
               onSelect={() => setSelectedFrameId(frame.id)}
@@ -465,19 +465,21 @@ export default function CanvasContainerNew() {
                 <ResizableElement
                   key={element.id}
                   id={element.id}
-                  type={element.type}
+                  type={element.type === "drawing" ? "shape" : element.type}
                   x={element.x}
                   y={element.y}
                   width={element.width}
                   height={element.height}
-                  src={element.src}
+                  src={element.imageUrl}
                   text={element.text}
                   shapeType={element.shapeType}
                   fill={element.fill}
                   stroke={element.stroke}
-                  isSelected={element.id === selectedElementId}
+                  pathData={element.pathData}
+                  strokeWidth={element.strokeWidth}
+                  isSelected={selectedElementIds.includes(element.id)}
                   onUpdate={handleElementUpdate}
-                  onSelect={() => setSelectedElementId(element.id)}
+                  onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                 />
               ))}
             </ResizableFrame>
@@ -523,10 +525,10 @@ export default function CanvasContainerNew() {
       )}
 
       {/* Unified Shape Settings Panel */}
-      {showShapeSettings && (selectedElement || selectedFrame) && (
+      {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
-          elementType={selectedElementId ? selectedElement?.type : "frame"}
-          elementName={selectedElementId ? `${selectedElement?.type}` : selectedFrame?.name}
+          elementType={selectedElement ? selectedElement.type : "frame"}
+          elementName={selectedElement ? `${selectedElement.type}` : selectedFrame?.name}
           backgroundColor={selectedFrame?.backgroundColor}
           fill={selectedElement?.fill || penColor}
           stroke={selectedElement?.stroke || penColor}
@@ -535,14 +537,46 @@ export default function CanvasContainerNew() {
           height={selectedElement?.height || selectedFrame?.height}
           x={selectedElement?.x}
           y={selectedElement?.y}
+          cornerRadius={selectedFrame?.cornerRadius}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
-          onFillChange={(color) => selectedElementId ? handleElementUpdate(selectedElementId, { fill: color }) : setPenColor(color)}
-          onStrokeChange={(color) => selectedElementId ? handleElementUpdate(selectedElementId, { stroke: color }) : setPenColor(color)}
-          onStrokeWidthChange={(w) => selectedElementId ? handleElementUpdate(selectedElementId, { strokeWidth: w }) : setStrokeWidth(w)}
-          onWidthChange={(w) => selectedElementId ? handleElementUpdate(selectedElementId, { width: w }) : handleFrameUpdate(selectedFrameId, { width: w })}
-          onHeightChange={(h) => selectedElementId ? handleElementUpdate(selectedElementId, { height: h }) : handleFrameUpdate(selectedFrameId, { height: h })}
-          onXChange={(x) => selectedElementId && handleElementUpdate(selectedElementId, { x })}
-          onYChange={(y) => selectedElementId && handleElementUpdate(selectedElementId, { y })}
+          onFillChange={(color) => {
+            if (selectedElementIds.length > 0) {
+              selectedElementIds.forEach(id => handleElementUpdate(id, { fill: color }));
+            } else {
+              setPenColor(color);
+            }
+          }}
+          onStrokeChange={(color) => {
+            if (selectedElementIds.length > 0) {
+              selectedElementIds.forEach(id => handleElementUpdate(id, { stroke: color }));
+            } else {
+              setPenColor(color);
+            }
+          }}
+          onStrokeWidthChange={(w) => {
+            if (selectedElementIds.length > 0) {
+              selectedElementIds.forEach(id => handleElementUpdate(id, { strokeWidth: w }));
+            } else {
+              setStrokeWidth(w);
+            }
+          }}
+          onWidthChange={(w) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { width: w });
+            } else {
+              handleFrameUpdate(selectedFrameId, { width: w });
+            }
+          }}
+          onHeightChange={(h) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { height: h });
+            } else {
+              handleFrameUpdate(selectedFrameId, { height: h });
+            }
+          }}
+          onXChange={(x) => selectedElement && handleElementUpdate(selectedElement.id, { x })}
+          onYChange={(y) => selectedElement && handleElementUpdate(selectedElement.id, { y })}
+          onCornerRadiusChange={(r) => handleFrameUpdate(selectedFrameId, { cornerRadius: r })}
           onAlign={handleAlign}
           onArrange={handleArrange}
           flexDirection={selectedFrame?.flexDirection}
@@ -551,8 +585,24 @@ export default function CanvasContainerNew() {
           gap={selectedFrame?.gap}
           onClose={() => {
             setShowShapeSettings(false);
-            setSelectedElementId(null);
+            setSelectedElementIds([]);
           }}
+        />
+      )}
+
+      {/* Layers Panel */}
+      {showLayersPanel && (
+        <LayersPanel
+          frames={frames}
+          selectedFrameId={selectedFrameId}
+          selectedElementIds={selectedElementIds}
+          onElementSelect={handleElementSelect}
+          onFrameSelect={(id) => {
+            setSelectedFrameId(id);
+            setSelectedElementIds([]);
+          }}
+          onElementDelete={handleElementDelete}
+          onClose={() => setShowLayersPanel(false)}
         />
       )}
 
@@ -580,6 +630,16 @@ export default function CanvasContainerNew() {
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
+        <Button
+          variant={showLayersPanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          onClick={() => {
+            setShowLayersPanel(!showLayersPanel);
+          }}
+        >
+          <Layers className="h-4 w-4" />
+        </Button>
       </div>
 
       <BottomToolbar
@@ -606,7 +666,7 @@ export default function CanvasContainerNew() {
           if (!selectedFrameId) return;
           const newElement: Element = {
             id: `element-${Date.now()}`,
-            type: "shape",
+            type: "drawing",
             x: 50,
             y: 50,
             width: 200,
@@ -614,10 +674,9 @@ export default function CanvasContainerNew() {
             pathData,
             stroke: color,
             strokeWidth: strokeW,
-            frameId: selectedFrameId,
           };
           setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
-          setSelectedElementId(newElement.id);
+          setSelectedElementIds([newElement.id]);
           setShowShapeSettings(true);
         }}
       />

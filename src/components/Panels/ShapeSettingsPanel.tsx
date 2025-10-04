@@ -25,6 +25,43 @@ const presetColors = [
   "#6b7280", "#f3f4f6", "#fecaca", "#fef3c7",
 ];
 
+// Element-specific style presets
+const elementPresets = {
+  frame: [
+    { name: "Dark", backgroundColor: "#000000", opacity: 100 },
+    { name: "Light", backgroundColor: "#ffffff", opacity: 100 },
+    { name: "Red", backgroundColor: "#ef4444", opacity: 100 },
+    { name: "Blue", backgroundColor: "#3b82f6", opacity: 100 },
+    { name: "Purple", backgroundColor: "#8b5cf6", opacity: 100 },
+    { name: "Gradient", backgroundColor: "#1a1a1a", opacity: 100 },
+  ],
+  shape: [
+    { name: "Solid Black", fill: "#000000", stroke: "#000000", opacity: 100 },
+    { name: "Outline", fill: "transparent", stroke: "#000000", opacity: 100 },
+    { name: "Red Fill", fill: "#ef4444", stroke: "#ef4444", opacity: 100 },
+    { name: "Blue Fill", fill: "#3b82f6", stroke: "#3b82f6", opacity: 100 },
+    { name: "Transparent", fill: "transparent", stroke: "#6b7280", opacity: 50 },
+  ],
+  text: [
+    { name: "Bold Black", fill: "#000000", opacity: 100 },
+    { name: "White", fill: "#ffffff", opacity: 100 },
+    { name: "Semi-transparent", fill: "#000000", opacity: 70 },
+    { name: "Accent", fill: "#3b82f6", opacity: 100 },
+  ],
+  image: [
+    { name: "Normal", opacity: 100 },
+    { name: "Faded", opacity: 70 },
+    { name: "Subtle", opacity: 50 },
+    { name: "Very Subtle", opacity: 30 },
+  ],
+  drawing: [
+    { name: "Black Line", stroke: "#000000", strokeWidth: 2, opacity: 100 },
+    { name: "Thick Black", stroke: "#000000", strokeWidth: 4, opacity: 100 },
+    { name: "Blue Sketch", stroke: "#3b82f6", strokeWidth: 2, opacity: 70 },
+    { name: "Thin Gray", stroke: "#6b7280", strokeWidth: 1, opacity: 50 },
+  ],
+};
+
 interface ShapeSettingsPanelProps {
   elementType?: "frame" | "shape" | "text" | "image" | "drawing" | null;
   elementName?: string;
@@ -358,7 +395,7 @@ export default function ShapeSettingsPanel({
               
               {/* Presets */}
               <div>
-                <Label className="text-xs mb-2 block">Presets</Label>
+                <Label className="text-xs mb-2 block">Color Presets</Label>
                 <div className="grid grid-cols-8 gap-1">
                   {presetColors.map((color) => (
                     <button
@@ -373,6 +410,42 @@ export default function ShapeSettingsPanel({
                   ))}
                 </div>
               </div>
+              
+              {/* Element-specific style presets */}
+              {elementType && elementPresets[elementType] && (
+                <div className="mt-3">
+                  <Label className="text-xs mb-2 block">Style Presets</Label>
+                  <div className="grid grid-cols-2 gap-1">
+                    {elementPresets[elementType].map((preset: any) => (
+                      <Button
+                        key={preset.name}
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px]"
+                        onClick={() => {
+                          if (preset.backgroundColor && onBackgroundColorChange) {
+                            onBackgroundColorChange(preset.backgroundColor);
+                          }
+                          if (preset.fill && onFillChange) {
+                            onFillChange(preset.fill);
+                          }
+                          if (preset.stroke && onStrokeChange) {
+                            onStrokeChange(preset.stroke);
+                          }
+                          if (preset.strokeWidth && onStrokeWidthChange) {
+                            onStrokeWidthChange(preset.strokeWidth);
+                          }
+                          if (preset.opacity && onOpacityChange) {
+                            onOpacityChange(preset.opacity);
+                          }
+                        }}
+                      >
+                        {preset.name}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         )}

@@ -20,7 +20,8 @@ interface ResizableFrameProps {
   linkText: string;
   linkPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   gradientIntensity: number;
-  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string }>) => void;
+  cornerRadius?: number;
+  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
   children?: ReactNode;
@@ -45,6 +46,7 @@ export default function ResizableFrame({
   linkText,
   linkPosition,
   gradientIntensity,
+  cornerRadius = 0,
   onUpdate,
   isSelected,
   onSelect,
@@ -122,6 +124,7 @@ export default function ResizableFrame({
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
         overflow: "hidden",
+        borderRadius: `${cornerRadius}px`,
       }}
       onMouseDown={handleMouseDown}
     >

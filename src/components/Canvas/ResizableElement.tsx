@@ -16,7 +16,7 @@ interface ResizableElementProps {
   stroke?: string;
   isSelected: boolean;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number }>) => void;
-  onSelect: () => void;
+  onSelect: (e?: React.MouseEvent) => void;
 }
 
 export default function ResizableElement({
@@ -94,7 +94,7 @@ export default function ResizableElement({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       e.stopPropagation();
-      onSelect();
+      onSelect(e);
       setIsDragging(true);
       setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
     }
