@@ -1,4 +1,5 @@
 import DraggablePanel from "./DraggablePanel";
+import ColorPicker from "./ColorPicker";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,49 +26,48 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box
 } from "lucide-react";
+import { useState } from "react";
 
-const presetColors = [
-  "#000000", "#ffffff", "#ef4444", "#f59e0b",
-  "#10b981", "#3b82f6", "#8b5cf6", "#ec4899",
-  "#6b7280", "#f3f4f6", "#fecaca", "#fef3c7",
+const GOOGLE_FONTS = [
+  { value: "Inter", label: "Inter" },
+  { value: "Roboto", label: "Roboto" },
+  { value: "Open Sans", label: "Open Sans" },
+  { value: "Montserrat", label: "Montserrat" },
+  { value: "Lato", label: "Lato" },
+  { value: "Poppins", label: "Poppins" },
+  { value: "Nunito", label: "Nunito" },
+  { value: "Raleway", label: "Raleway" },
+  { value: "Oswald", label: "Oswald" },
+  { value: "Merriweather", label: "Merriweather" },
+  { value: "Playfair Display", label: "Playfair Display" },
+  { value: "Source Sans 3", label: "Source Sans 3" },
+  { value: "PT Sans", label: "PT Sans" },
+  { value: "Quicksand", label: "Quicksand" },
+  { value: "Crimson Text", label: "Crimson Text" },
+  { value: "Ubuntu", label: "Ubuntu" },
+  { value: "Bebas Neue", label: "Bebas Neue" },
+  { value: "Lobster", label: "Lobster" },
+  { value: "Pacifico", label: "Pacifico" },
+  { value: "Dancing Script", label: "Dancing Script" },
+  { value: "Caveat", label: "Caveat" },
+  { value: "Righteous", label: "Righteous" },
+  { value: "Archivo Black", label: "Archivo Black" },
+  { value: "Anton", label: "Anton" },
+  { value: "Abril Fatface", label: "Abril Fatface" },
+  { value: "Satisfy", label: "Satisfy" },
+  { value: "Great Vibes", label: "Great Vibes" },
+  { value: "Sacramento", label: "Sacramento" },
+  { value: "Tangerine", label: "Tangerine" },
+  { value: "Josefin Sans", label: "Josefin Sans" },
+  { value: "Libre Baskerville", label: "Libre Baskerville" },
+  { value: "EB Garamond", label: "EB Garamond" },
+  { value: "Cormorant Garamond", label: "Cormorant Garamond" },
+  { value: "Work Sans", label: "Work Sans" },
+  { value: "Bitter", label: "Bitter" },
+  { value: "Barlow", label: "Barlow" },
+  { value: "DM Sans", label: "DM Sans" },
+  { value: "Space Grotesk", label: "Space Grotesk" },
 ];
-
-// Element-specific style presets
-const elementPresets = {
-  frame: [
-    { name: "Dark", backgroundColor: "#000000", opacity: 100 },
-    { name: "Light", backgroundColor: "#ffffff", opacity: 100 },
-    { name: "Red", backgroundColor: "#ef4444", opacity: 100 },
-    { name: "Blue", backgroundColor: "#3b82f6", opacity: 100 },
-    { name: "Purple", backgroundColor: "#8b5cf6", opacity: 100 },
-    { name: "Gradient", backgroundColor: "#1a1a1a", opacity: 100 },
-  ],
-  shape: [
-    { name: "Solid Black", fill: "#000000", stroke: "#000000", opacity: 100 },
-    { name: "Outline", fill: "transparent", stroke: "#000000", opacity: 100 },
-    { name: "Red Fill", fill: "#ef4444", stroke: "#ef4444", opacity: 100 },
-    { name: "Blue Fill", fill: "#3b82f6", stroke: "#3b82f6", opacity: 100 },
-    { name: "Transparent", fill: "transparent", stroke: "#6b7280", opacity: 50 },
-  ],
-  text: [
-    { name: "Bold Black", fill: "#000000", opacity: 100 },
-    { name: "White", fill: "#ffffff", opacity: 100 },
-    { name: "Semi-transparent", fill: "#000000", opacity: 70 },
-    { name: "Accent", fill: "#3b82f6", opacity: 100 },
-  ],
-  image: [
-    { name: "Normal", opacity: 100 },
-    { name: "Faded", opacity: 70 },
-    { name: "Subtle", opacity: 50 },
-    { name: "Very Subtle", opacity: 30 },
-  ],
-  drawing: [
-    { name: "Black Line", stroke: "#000000", strokeWidth: 2, opacity: 100 },
-    { name: "Thick Black", stroke: "#000000", strokeWidth: 4, opacity: 100 },
-    { name: "Blue Sketch", stroke: "#3b82f6", strokeWidth: 2, opacity: 70 },
-    { name: "Thin Gray", stroke: "#6b7280", strokeWidth: 1, opacity: 50 },
-  ],
-};
 
 interface ShapeSettingsPanelProps {
   elementType?: "frame" | "shape" | "text" | "image" | "drawing" | null;
@@ -85,6 +85,10 @@ interface ShapeSettingsPanelProps {
   cornerRadius?: number;
   blendMode?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
+  fontFamily?: string;
+  fontWeight?: string;
+  textAlign?: "left" | "center" | "right";
+  fontSize?: number;
   onBackgroundColorChange?: (color: string) => void;
   onFillChange?: (color: string) => void;
   onStrokeChange?: (color: string) => void;
@@ -98,6 +102,10 @@ interface ShapeSettingsPanelProps {
   onCornerRadiusChange?: (radius: number) => void;
   onBlendModeChange?: (mode: string) => void;
   onImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
+  onFontFamilyChange?: (font: string) => void;
+  onFontWeightChange?: (weight: string) => void;
+  onTextAlignChange?: (align: "left" | "center" | "right") => void;
+  onFontSizeChange?: (size: number) => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
   flexDirection?: "row" | "column";
@@ -138,6 +146,10 @@ export default function ShapeSettingsPanel({
   cornerRadius = 0,
   blendMode = "normal",
   imageFit = "cover",
+  fontFamily = "Inter",
+  fontWeight = "400",
+  textAlign = "left",
+  fontSize = 16,
   onBackgroundColorChange,
   onFillChange,
   onStrokeChange,
@@ -151,6 +163,10 @@ export default function ShapeSettingsPanel({
   onCornerRadiusChange,
   onBlendModeChange,
   onImageFitChange,
+  onFontFamilyChange,
+  onFontWeightChange,
+  onTextAlignChange,
+  onFontSizeChange,
   onAlign,
   onArrange,
   flexDirection = "row",
@@ -164,6 +180,8 @@ export default function ShapeSettingsPanel({
   onClose,
 }: ShapeSettingsPanelProps) {
   const ElementIcon = getElementIcon(elementType);
+  const [fillModalOpen, setFillModalOpen] = useState(false);
+  const [strokeModalOpen, setStrokeModalOpen] = useState(false);
   
   return (
     <DraggablePanel
@@ -183,7 +201,7 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "type"]} className="w-full">
         {/* Position Section */}
         {(onXChange || onYChange || onRotationChange) && (
           <AccordionItem value="position">
@@ -255,6 +273,101 @@ export default function ShapeSettingsPanel({
           </AccordionItem>
         )}
 
+        {/* Type Section - For Text Elements */}
+        {elementType === "text" && (
+          <AccordionItem value="type">
+            <AccordionTrigger className="text-xs font-medium py-2">Type</AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-3">
+              {/* Font Family */}
+              {onFontFamilyChange && (
+                <div>
+                  <Label className="text-xs mb-1 block">Font</Label>
+                  <Select value={fontFamily} onValueChange={onFontFamilyChange}>
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-64">
+                      {GOOGLE_FONTS.map((font) => (
+                        <SelectItem key={font.value} value={font.value} className="text-xs">
+                          <span style={{ fontFamily: font.value }}>{font.label}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Font Size */}
+              {onFontSizeChange && (
+                <div>
+                  <Label className="text-xs mb-1 block">Size: {fontSize}px</Label>
+                  <Slider
+                    value={[fontSize]}
+                    onValueChange={([v]) => onFontSizeChange(v)}
+                    min={8}
+                    max={200}
+                    step={1}
+                  />
+                </div>
+              )}
+
+              {/* Font Weight */}
+              {onFontWeightChange && (
+                <div>
+                  <Label className="text-xs mb-1 block">Weight</Label>
+                  <Select value={fontWeight} onValueChange={onFontWeightChange}>
+                    <SelectTrigger className="h-7 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="300">Light</SelectItem>
+                      <SelectItem value="400">Regular</SelectItem>
+                      <SelectItem value="500">Medium</SelectItem>
+                      <SelectItem value="600">Semi Bold</SelectItem>
+                      <SelectItem value="700">Bold</SelectItem>
+                      <SelectItem value="800">Extra Bold</SelectItem>
+                      <SelectItem value="900">Black</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Text Alignment */}
+              {onTextAlignChange && (
+                <div>
+                  <Label className="text-xs mb-1 block">Align</Label>
+                  <div className="grid grid-cols-3 gap-1">
+                    <Button
+                      variant={textAlign === "left" ? "default" : "outline"}
+                      size="icon"
+                      className="h-7 w-full"
+                      onClick={() => onTextAlignChange("left")}
+                    >
+                      <AlignLeft className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant={textAlign === "center" ? "default" : "outline"}
+                      size="icon"
+                      className="h-7 w-full"
+                      onClick={() => onTextAlignChange("center")}
+                    >
+                      <AlignCenter className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant={textAlign === "right" ? "default" : "outline"}
+                      size="icon"
+                      className="h-7 w-full"
+                      onClick={() => onTextAlignChange("right")}
+                    >
+                      <AlignRight className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
         {/* Layout/Dimensions Section */}
         {(onWidthChange || onHeightChange) && (
           <AccordionItem value="layout">
@@ -285,26 +398,103 @@ export default function ShapeSettingsPanel({
                 )}
               </div>
               
-              {/* Flex Layout for Frames */}
-              {elementType === "frame" && onFlexDirectionChange && (
+              {/* Frame Content Alignment */}
+              {elementType === "frame" && (onJustifyContentChange || onAlignItemsChange) && (
                 <>
-                  <div className="grid grid-cols-2 gap-1 mt-2">
-                    <Button 
-                      variant={flexDirection === "row" ? "default" : "outline"} 
-                      size="sm" 
-                      className="h-6 text-[10px]"
-                      onClick={() => onFlexDirectionChange("row")}
-                    >
-                      Row
-                    </Button>
-                    <Button 
-                      variant={flexDirection === "column" ? "default" : "outline"} 
-                      size="sm" 
-                      className="h-6 text-[10px]"
-                      onClick={() => onFlexDirectionChange("column")}
-                    >
-                      Column
-                    </Button>
+                  <div className="mt-3">
+                    <Label className="text-xs mb-2 block">Content Alignment</Label>
+                    
+                    {/* Direction */}
+                    {onFlexDirectionChange && (
+                      <div className="grid grid-cols-2 gap-1 mb-2">
+                        <Button 
+                          variant={flexDirection === "row" ? "default" : "outline"} 
+                          size="sm" 
+                          className="h-6 text-[10px]"
+                          onClick={() => onFlexDirectionChange("row")}
+                        >
+                          Row
+                        </Button>
+                        <Button 
+                          variant={flexDirection === "column" ? "default" : "outline"} 
+                          size="sm" 
+                          className="h-6 text-[10px]"
+                          onClick={() => onFlexDirectionChange("column")}
+                        >
+                          Column
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Justify (Main Axis) */}
+                    {onJustifyContentChange && (
+                      <div className="mb-2">
+                        <Label className="text-[10px] mb-1 block text-muted-foreground">
+                          {flexDirection === "row" ? "Horizontal" : "Vertical"}
+                        </Label>
+                        <div className="grid grid-cols-3 gap-1">
+                          <Button
+                            variant={justifyContent === "start" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onJustifyContentChange("start")}
+                          >
+                            Start
+                          </Button>
+                          <Button
+                            variant={justifyContent === "center" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onJustifyContentChange("center")}
+                          >
+                            Center
+                          </Button>
+                          <Button
+                            variant={justifyContent === "end" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onJustifyContentChange("end")}
+                          >
+                            End
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Align (Cross Axis) */}
+                    {onAlignItemsChange && (
+                      <div>
+                        <Label className="text-[10px] mb-1 block text-muted-foreground">
+                          {flexDirection === "row" ? "Vertical" : "Horizontal"}
+                        </Label>
+                        <div className="grid grid-cols-3 gap-1">
+                          <Button
+                            variant={alignItems === "start" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onAlignItemsChange("start")}
+                          >
+                            Start
+                          </Button>
+                          <Button
+                            variant={alignItems === "center" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onAlignItemsChange("center")}
+                          >
+                            Center
+                          </Button>
+                          <Button
+                            variant={alignItems === "end" ? "default" : "outline"}
+                            size="sm"
+                            className="h-6 text-[10px]"
+                            onClick={() => onAlignItemsChange("end")}
+                          >
+                            End
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   {onGapChange && (
@@ -352,7 +542,7 @@ export default function ShapeSettingsPanel({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="normal">Pass Through</SelectItem>
                     <SelectItem value="multiply">Multiply</SelectItem>
                     <SelectItem value="screen">Screen</SelectItem>
                     <SelectItem value="overlay">Overlay</SelectItem>
@@ -390,99 +580,28 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="fill">
             <AccordionTrigger className="text-xs font-medium py-2">Fill</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
-              <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors"
-                      style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
-                    >
-                      <span className="sr-only">Color</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-64 p-3">
-                    <Label className="text-xs mb-2 block">Color</Label>
-                    <Input
-                      type="color"
-                      value={onBackgroundColorChange ? backgroundColor : fill}
-                      onChange={(e) => {
-                        if (onBackgroundColorChange) onBackgroundColorChange(e.target.value);
-                        if (onFillChange) onFillChange(e.target.value);
-                      }}
-                      className="h-8 w-full mb-2"
-                    />
-                    <Input
-                      type="text"
-                      value={onBackgroundColorChange ? backgroundColor : fill}
-                      onChange={(e) => {
-                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                          if (onBackgroundColorChange) onBackgroundColorChange(e.target.value);
-                          if (onFillChange) onFillChange(e.target.value);
-                        }
-                      }}
-                      placeholder="#000000"
-                      className="h-7 text-xs"
-                    />
-                  </PopoverContent>
-                </Popover>
-                <span className="text-xs text-muted-foreground flex-1">
-                  {onBackgroundColorChange ? backgroundColor : fill}
-                </span>
-              </div>
-              
-              {/* Presets */}
-              <div>
-                <Label className="text-xs mb-2 block">Color Presets</Label>
-                <div className="grid grid-cols-8 gap-1">
-                  {presetColors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        if (onFillChange) onFillChange(color);
-                        if (onBackgroundColorChange) onBackgroundColorChange(color);
-                      }}
-                      className="w-6 h-6 rounded border border-border hover:border-primary transition-colors"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </div>
-              
-              {/* Element-specific style presets */}
-              {elementType && elementPresets[elementType] && (
-                <div className="mt-3">
-                  <Label className="text-xs mb-2 block">Style Presets</Label>
-                  <div className="grid grid-cols-2 gap-1">
-                    {elementPresets[elementType].map((preset: any) => (
-                      <Button
-                        key={preset.name}
-                        variant="outline"
-                        size="sm"
-                        className="h-7 text-[10px]"
-                        onClick={() => {
-                          if (preset.backgroundColor && onBackgroundColorChange) {
-                            onBackgroundColorChange(preset.backgroundColor);
-                          }
-                          if (preset.fill && onFillChange) {
-                            onFillChange(preset.fill);
-                          }
-                          if (preset.stroke && onStrokeChange) {
-                            onStrokeChange(preset.stroke);
-                          }
-                          if (preset.strokeWidth && onStrokeWidthChange) {
-                            onStrokeWidthChange(preset.strokeWidth);
-                          }
-                          if (preset.opacity && onOpacityChange) {
-                            onOpacityChange(preset.opacity);
-                          }
-                        }}
-                      >
-                        {preset.name}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <Popover open={fillModalOpen} onOpenChange={setFillModalOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center"
+                    style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
+                  >
+                    <span className="sr-only">Fill Color</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="right" className="w-80 p-3">
+                  <ColorPicker
+                    color={onBackgroundColorChange ? backgroundColor : fill}
+                    onChange={(color) => {
+                      if (onBackgroundColorChange) onBackgroundColorChange(color);
+                      if (onFillChange) onFillChange(color);
+                    }}
+                    opacity={opacity}
+                    onOpacityChange={onOpacityChange}
+                    showOpacity={!!onOpacityChange}
+                  />
+                </PopoverContent>
+              </Popover>
             </AccordionContent>
           </AccordionItem>
         )}
@@ -492,51 +611,36 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="stroke">
             <AccordionTrigger className="text-xs font-medium py-2">Stroke</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
-              <div className="flex items-center gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors"
-                      style={{ backgroundColor: stroke }}
-                    >
-                      <span className="sr-only">Stroke</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-64 p-3">
-                    <Label className="text-xs mb-2 block">Stroke Color</Label>
-                    <Input
-                      type="color"
-                      value={stroke}
-                      onChange={(e) => onStrokeChange?.(e.target.value)}
-                      className="h-8 w-full mb-2"
-                    />
-                    <Input
-                      type="text"
-                      value={stroke}
-                      onChange={(e) => {
-                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                          onStrokeChange?.(e.target.value);
-                        }
-                      }}
-                      placeholder="#000000"
-                      className="h-7 text-xs mb-2"
-                    />
-                    {onStrokeWidthChange && (
-                      <>
-                        <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
-                        <Slider
-                          value={[strokeWidth]}
-                          onValueChange={([v]) => onStrokeWidthChange(v)}
-                          min={1}
-                          max={20}
-                          step={1}
-                        />
-                      </>
-                    )}
-                  </PopoverContent>
-                </Popover>
-                <span className="text-xs text-muted-foreground flex-1">{stroke}</span>
-              </div>
+              <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center"
+                    style={{ backgroundColor: stroke }}
+                  >
+                    <span className="sr-only">Stroke Color</span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent side="right" className="w-80 p-3">
+                  <ColorPicker
+                    color={stroke}
+                    onChange={(color) => onStrokeChange?.(color)}
+                    showOpacity={false}
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              {onStrokeWidthChange && (
+                <div className="mt-2">
+                  <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
+                  <Slider
+                    value={[strokeWidth]}
+                    onValueChange={([v]) => onStrokeWidthChange(v)}
+                    min={1}
+                    max={20}
+                    step={1}
+                  />
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         )}

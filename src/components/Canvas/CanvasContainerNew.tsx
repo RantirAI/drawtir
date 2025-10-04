@@ -704,6 +704,11 @@ export default function CanvasContainerNew() {
           opacity={selectedElement?.opacity || selectedFrame?.opacity || 100}
           cornerRadius={selectedElement?.cornerRadius || selectedFrame?.cornerRadius || 0}
           blendMode={selectedElement?.blendMode || selectedFrame?.blendMode || "normal"}
+          fontFamily={selectedElement?.fontFamily}
+          fontWeight={selectedElement?.fontWeight}
+          textAlign={selectedElement?.textAlign}
+          fontSize={selectedElement?.fontSize}
+          imageFit={selectedElement?.imageFit}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
           onFillChange={(color) => {
             if (selectedElementIds.length > 0) {
@@ -766,9 +771,18 @@ export default function CanvasContainerNew() {
           onAlign={handleAlign}
           onArrange={handleArrange}
           flexDirection={selectedFrame?.flexDirection}
+          justifyContent={selectedFrame?.justifyContent}
+          alignItems={selectedFrame?.alignItems}
           onFlexDirectionChange={(dir) => handleFrameUpdate(selectedFrameId, { flexDirection: dir })}
+          onJustifyContentChange={(val) => handleFrameUpdate(selectedFrameId, { justifyContent: val })}
+          onAlignItemsChange={(val) => handleFrameUpdate(selectedFrameId, { alignItems: val })}
           onGapChange={(val) => handleFrameUpdate(selectedFrameId, { gap: val })}
           gap={selectedFrame?.gap}
+          onFontFamilyChange={(font) => selectedElement && handleElementUpdate(selectedElement.id, { fontFamily: font })}
+          onFontWeightChange={(weight) => selectedElement && handleElementUpdate(selectedElement.id, { fontWeight: weight })}
+          onTextAlignChange={(align) => selectedElement && handleElementUpdate(selectedElement.id, { textAlign: align })}
+          onFontSizeChange={(size) => selectedElement && handleElementUpdate(selectedElement.id, { fontSize: size })}
+          onImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { imageFit: fit })}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);
