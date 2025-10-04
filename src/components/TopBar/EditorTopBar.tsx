@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, LogOut } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,14 +10,27 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import EditableTitle from "@/components/Canvas/EditableTitle";
 
 interface EditorTopBarProps {
   projectName?: string;
+  onProjectNameChange?: (name: string) => void;
+  onSave?: () => void;
+  onDownload?: () => void;
   onExport?: () => void;
+  onShare?: () => void;
+  isSaving?: boolean;
 }
 
-export default function EditorTopBar({ projectName = "Untitled Poster", onExport }: EditorTopBarProps) {
+export default function EditorTopBar({ 
+  projectName = "Untitled Poster", 
+  onProjectNameChange,
+  onSave,
+  onDownload,
+  onExport, 
+  onShare,
+  isSaving 
+}: EditorTopBarProps) {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -28,11 +41,11 @@ export default function EditorTopBar({ projectName = "Untitled Poster", onExport
 
   return (
     <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
+      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-7 w-7">
-              <Menu className="h-3.5 w-3.5" />
+            <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Menu className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-40">
@@ -46,17 +59,29 @@ export default function EditorTopBar({ projectName = "Untitled Poster", onExport
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onExport}>
+              <FileDown className="h-3 w-3 mr-2" />
+              Export
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
-              <LogOut className="h-3.5 w-3.5 mr-2" />
               Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         
-        <span className="text-xs font-semibold px-2">{projectName}</span>
+        <EditableTitle value={projectName} onChange={onProjectNameChange || (() => {})} />
 
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onExport}>
-          <Download className="h-3.5 w-3.5" />
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
+          <Save className="h-3 w-3" />
+        </Button>
+
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onDownload}>
+          <Download className="h-3 w-3" />
+        </Button>
+
+        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShare}>
+          <Share2 className="h-3 w-3" />
         </Button>
       </div>
     </div>

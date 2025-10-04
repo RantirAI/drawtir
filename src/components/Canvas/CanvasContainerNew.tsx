@@ -1,26 +1,25 @@
-import { useRef, useState } from "react";
-import CanvasBackground from "./CanvasBackground";
-import ResizableFrame from "./ResizableFrame";
-import BottomToolbar from "../Toolbar/BottomToolbar";
-import DraggablePanel from "../Panels/DraggablePanel";
-import ColorPanel from "../Panels/ColorPanel";
-import FrameBackgroundPanel from "./FrameBackgroundPanel";
-import EditorTopBar from "../TopBar/EditorTopBar";
-import EditableTitle from "./EditableTitle";
-import SliderControl from "./SliderControl";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Loader2, RotateCcw } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
-
-type ImageStyle = "cover" | "contain" | "fill" | "scale-down" | "none";
+import ResizableFrame from "./ResizableFrame";
+import DraggablePanel from "../Panels/DraggablePanel";
+import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
+import PropertyPanel from "../Panels/PropertyPanel";
+import BottomToolbar from "../Toolbar/BottomToolbar";
+import EditorTopBar from "../TopBar/EditorTopBar";
+import CanvasBackground from "./CanvasBackground";
+import FrameBadge from "./FrameBadge";
+import DrawingLayer from "./DrawingLayer";
+import ShareDialog from "./ShareDialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Sparkles, Image as ImageIcon, Type, Palette } from "lucide-react";
 
 interface Frame {
   id: string;
+  name: string;
   x: number;
   y: number;
   width: number;
@@ -33,26 +32,30 @@ interface Frame {
   textAlign: "left" | "center" | "right";
   textSize: number;
   textOpacity: number;
-  imageStyle: ImageStyle;
+  imageStyle: string;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  blur: number;
   linkText: string;
   linkPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   gradientIntensity: number;
+  flexDirection: "row" | "column";
+  justifyContent: string;
+  alignItems: string;
+  gap: number;
 }
 
-interface CanvasContainerProps {
-  user: User | null;
-}
-
-export default function CanvasContainer({ user }: CanvasContainerProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [projectTitle, setProjectTitle] = useState("Untitled Project");
+export default function CanvasContainerNew() {
+  const [projectTitle, setProjectTitle] = useState("Untitled Poster");
   const [frames, setFrames] = useState<Frame[]>([
     {
       id: "frame-1",
-      x: 400,
-      y: 150,
+      name: "Frame 1",
+      x: 100,
+      y: 100,
       width: 400,
-      height: 533,
+      height: 600,
       backgroundColor: "#000000",
       image: null,
       topCaption: "",
@@ -62,47 +65,53 @@ export default function CanvasContainer({ user }: CanvasContainerProps) {
       textSize: 3,
       textOpacity: 100,
       imageStyle: "cover",
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
       linkText: "",
       linkPosition: "top-right",
       gradientIntensity: 80,
+      flexDirection: "row",
+      justifyContent: "start",
+      alignItems: "start",
+      gap: 0,
     },
   ]);
-  const [selectedFrameId, setSelectedFrameId] = useState<string | null>("frame-1");
+  const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
+  const [activeTool, setActiveTool] = useState<string>("select");
+  const [penColor, setPenColor] = useState("#000000");
+  const [strokeWidth, setStrokeWidth] = useState(2);
+
+  const [showImagePanel, setShowImagePanel] = useState(false);
+  const [showTextPanel, setShowTextPanel] = useState(false);
+  const [showGeneratePanel, setShowGeneratePanel] = useState(false);
+  const [showShapePanel, setShowShapePanel] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+
   const [description, setDescription] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Editor states for selected frame
-  const [temperature, setTemperature] = useState(0);
-  const [brightness, setBrightness] = useState(0);
-  const [contrast, setContrast] = useState(0);
-  const [saturation, setSaturation] = useState(0);
-  const [blur, setBlur] = useState(0);
-  const [penColor, setPenColor] = useState("#000000");
-
-  // Panel visibility
-  const [showImagePanel, setShowImagePanel] = useState(false);
-  const [showTextPanel, setShowTextPanel] = useState(false);
-  const [showGeneratePanel, setShowGeneratePanel] = useState(false);
-  const [showColorPanel, setShowColorPanel] = useState(false);
-  const [showFrameBgPanel, setShowFrameBgPanel] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const selectedFrame = frames.find((f) => f.id === selectedFrameId);
 
   const getFilterStyle = () => {
+    if (!selectedFrame) return {};
     return {
-      objectFit: selectedFrame?.imageStyle as any,
-      filter: `brightness(${1 + brightness / 100}) contrast(${1 + contrast / 100}) saturate(${1 + saturation / 100}) blur(${blur}px)`,
+      filter: `brightness(${selectedFrame.brightness}%) contrast(${selectedFrame.contrast}%) saturate(${selectedFrame.saturation}%) blur(${selectedFrame.blur}px)`,
     };
   };
 
   const handleAddFrame = () => {
     const newFrame: Frame = {
-      id: `frame-${Date.now()}`,
-      x: 100 + frames.length * 50,
-      y: 100 + frames.length * 50,
+      id: `frame-${frames.length + 1}`,
+      name: `Frame ${frames.length + 1}`,
+      x: 150 + frames.length * 50,
+      y: 150 + frames.length * 50,
       width: 400,
-      height: 533,
+      height: 600,
       backgroundColor: "#000000",
       image: null,
       topCaption: "",
@@ -112,34 +121,39 @@ export default function CanvasContainer({ user }: CanvasContainerProps) {
       textSize: 3,
       textOpacity: 100,
       imageStyle: "cover",
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
       linkText: "",
       linkPosition: "top-right",
       gradientIntensity: 80,
+      flexDirection: "row",
+      justifyContent: "start",
+      alignItems: "start",
+      gap: 0,
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
-    toast.success("Frame added");
+    toast.success("Frame added!");
   };
 
   const handleFrameUpdate = (id: string, updates: Partial<Frame>) => {
     setFrames(frames.map((f) => (f.id === id ? { ...f, ...updates } : f)));
   };
 
-  const handleImageUpload = (e?: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e?.target || fileInputRef.current;
-    const file = input?.files?.[0];
-    if (file && selectedFrame) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Image must be less than 10MB");
-        return;
-      }
+  const handleImageUpload = () => {
+    imageInputRef.current?.click();
+  };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && selectedFrameId) {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageData = e.target?.result as string;
-        handleFrameUpdate(selectedFrame.id, { image: imageData });
-        setShowImagePanel(true);
-        toast.success("Image uploaded");
+      reader.onload = (event) => {
+        const imageUrl = event.target?.result as string;
+        handleFrameUpdate(selectedFrameId, { image: imageUrl });
+        toast.success("Image uploaded!");
       };
       reader.readAsDataURL(file);
     }
@@ -147,345 +161,324 @@ export default function CanvasContainer({ user }: CanvasContainerProps) {
 
   const generateCaption = async () => {
     if (!description.trim()) {
-      toast.error("Please describe your poster");
-      return;
-    }
-
-    if (!selectedFrame?.image) {
-      toast.error("Please upload an image first");
+      toast.error("Please enter a description");
       return;
     }
 
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-poster-caption", {
-        body: {
-          description: description.trim(),
-          imageContext: selectedFrame.image ? "an uploaded image" : null,
-        },
+        body: { description, imageContext: selectedFrame?.image ? "with image" : "no image" },
       });
 
       if (error) throw error;
-      if (data?.error) throw new Error(data.error);
 
-      handleFrameUpdate(selectedFrame.id, { bottomCaption: data.caption });
-      setShowTextPanel(true);
-      toast.success("Caption generated!");
-    } catch (error) {
-      console.error("Error:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to generate caption");
+      if (data.caption && selectedFrameId) {
+        handleFrameUpdate(selectedFrameId, { bottomCaption: data.caption });
+        toast.success("Caption generated!");
+      }
+    } catch (error: any) {
+      console.error("Error generating caption:", error);
+      toast.error(error.message || "Failed to generate caption");
     } finally {
       setIsGenerating(false);
     }
   };
 
   const savePoster = async () => {
-    if (!selectedFrame?.image || !user) {
-      toast.error("Please add an image first");
-      return;
-    }
-
     setIsSaving(true);
     try {
-      const { error } = await (supabase as any).from("posters").insert({
-        user_id: user.id,
-        image_url: selectedFrame.image,
-        caption: selectedFrame.bottomCaption || selectedFrame.topCaption || "",
-        image_style: selectedFrame.imageStyle,
-      });
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
+      const posterData = {
+        user_id: user.id,
+        title: projectTitle,
+        frames: frames,
+      };
+
+      const { error } = await (supabase as any).from("posters").insert(posterData);
       if (error) throw error;
+
       toast.success("Poster saved!");
-    } catch (error) {
-      console.error("Error saving:", error);
-      toast.error("Failed to save poster");
+    } catch (error: any) {
+      console.error("Error saving poster:", error);
+      toast.error(error.message || "Failed to save poster");
     } finally {
       setIsSaving(false);
     }
   };
 
   const downloadPoster = () => {
-    if (!selectedFrame?.image) {
-      toast.error("Please upload an image first");
+    if (!selectedFrame) {
+      toast.error("No frame selected");
       return;
     }
 
     const canvas = document.createElement("canvas");
+    canvas.width = selectedFrame.width;
+    canvas.height = selectedFrame.height;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      canvas.width = 1200;
-      canvas.height = 1600;
-
+    
+    if (ctx) {
       ctx.fillStyle = selectedFrame.backgroundColor;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.filter = `brightness(${1 + brightness / 100}) contrast(${1 + contrast / 100}) saturate(${1 + saturation / 100}) blur(${blur}px)`;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      ctx.filter = "none";
 
-      const fontSizes = [40, 50, 60, 75, 90];
-      const fontSize = fontSizes[selectedFrame.textSize - 1] || 60;
-      ctx.fillStyle = selectedFrame.textColor;
-      ctx.font = `bold ${fontSize}px 'Instrument Sans', Arial, sans-serif`;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.8)";
-      ctx.shadowBlur = 20;
-      ctx.globalAlpha = selectedFrame.textOpacity / 100;
-      ctx.textAlign = selectedFrame.textAlign;
-      const xPosition =
-        selectedFrame.textAlign === "left" ? 80 : selectedFrame.textAlign === "right" ? canvas.width - 80 : canvas.width / 2;
-
-      if (selectedFrame.topCaption) {
-        const topLines = selectedFrame.topCaption.split("\n");
-        const lineHeight = fontSize * 1.3;
-        topLines.forEach((line, index) => {
-          ctx.fillText(line, xPosition, 100 + index * lineHeight);
-        });
-      }
-
-      if (selectedFrame.bottomCaption) {
-        const gradientHeight = canvas.height * 0.4;
-        const gradient = ctx.createLinearGradient(0, canvas.height - gradientHeight, 0, canvas.height);
-        gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
-        gradient.addColorStop(0.4, `rgba(0, 0, 0, ${selectedFrame.gradientIntensity / 200})`);
-        gradient.addColorStop(1, `rgba(0, 0, 0, ${selectedFrame.gradientIntensity / 100})`);
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, canvas.height - gradientHeight, canvas.width, gradientHeight);
-
-        ctx.globalAlpha = selectedFrame.textOpacity / 100;
-        ctx.fillStyle = selectedFrame.textColor;
-        const bottomLines = selectedFrame.bottomCaption.split("\n");
-        const lineHeight = fontSize * 1.3;
-        const startY = canvas.height - bottomLines.length * lineHeight - 80;
-        bottomLines.forEach((line, index) => {
-          ctx.fillText(line, xPosition, startY + index * lineHeight);
-        });
-      }
-
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const url = URL.createObjectURL(blob);
+      if (selectedFrame.image) {
+        const img = new Image();
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           const link = document.createElement("a");
-          link.href = url;
-          link.download = `poster-${Date.now()}.png`;
+          link.download = `${projectTitle}-${selectedFrame.name}.png`;
+          link.href = canvas.toDataURL();
           link.click();
-          URL.revokeObjectURL(url);
-          toast.success("Downloaded!");
-        }
-      });
-    };
-    img.src = selectedFrame.image;
+          toast.success("Poster downloaded!");
+        };
+        img.src = selectedFrame.image;
+      } else {
+        const link = document.createElement("a");
+        link.download = `${projectTitle}-${selectedFrame.name}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+        toast.success("Poster downloaded!");
+      }
+    }
+  };
+
+  const handleDuplicate = () => {
+    if (!selectedFrame) return;
+    const newFrame = { ...selectedFrame, id: `frame-${frames.length + 1}`, name: `${selectedFrame.name} Copy`, x: selectedFrame.x + 50, y: selectedFrame.y + 50 };
+    setFrames([...frames, newFrame]);
+    setSelectedFrameId(newFrame.id);
+    toast.success("Frame duplicated!");
+  };
+
+  const handleDelete = () => {
+    if (!selectedFrame || frames.length === 1) {
+      toast.error("Cannot delete the last frame");
+      return;
+    }
+    setFrames(frames.filter((f) => f.id !== selectedFrameId));
+    setSelectedFrameId(frames[0].id);
+    toast.success("Frame deleted!");
+  };
+
+  const handleAlign = (type: string) => {
+    toast.info(`Align ${type} - coming soon!`);
+  };
+
+  const handleArrange = (type: string) => {
+    toast.info(`Arrange ${type} - coming soon!`);
   };
 
   return (
-    <>
-      <div className="h-screen w-full relative overflow-hidden">
-        <CanvasBackground pattern="dots" />
+    <div className="w-full h-screen relative overflow-hidden">
+      <CanvasBackground />
 
-        {/* Editable Title at Top */}
-        <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
-            <EditableTitle value={projectTitle} onChange={setProjectTitle} />
-          </div>
-        </div>
+      <EditorTopBar
+        projectName={projectTitle}
+        onProjectNameChange={setProjectTitle}
+        onSave={savePoster}
+        onDownload={downloadPoster}
+        onExport={downloadPoster}
+        onShare={() => setShowShareDialog(true)}
+        isSaving={isSaving}
+      />
 
-        {/* Canvas Area */}
-        <div className="absolute inset-0">
-          {frames.map((frame) => (
-            <ResizableFrame
-              key={frame.id}
-              {...frame}
-              filterStyle={getFilterStyle()}
-              isSelected={selectedFrameId === frame.id}
-              onSelect={() => setSelectedFrameId(frame.id)}
-              onUpdate={handleFrameUpdate}
+      {/* Canvas Area */}
+      <div className="w-full h-full">
+        {frames.map((frame) => (
+          <div key={frame.id}>
+            <FrameBadge
+              name={frame.name}
+              x={frame.x + frame.width / 2 - 40}
+              y={frame.y}
+              onChange={(name) => handleFrameUpdate(frame.id, { name })}
             />
-          ))}
-        </div>
+            <ResizableFrame
+              id={frame.id}
+              x={frame.x}
+              y={frame.y}
+              width={frame.width}
+              height={frame.height}
+              backgroundColor={frame.backgroundColor}
+              image={frame.image}
+              topCaption={frame.topCaption}
+              bottomCaption={frame.bottomCaption}
+              textColor={frame.textColor}
+              textAlign={frame.textAlign}
+              textSize={frame.textSize}
+              textOpacity={frame.textOpacity}
+              imageStyle={frame.imageStyle}
+              filterStyle={frame.id === selectedFrameId ? getFilterStyle() : {}}
+              linkText={frame.linkText}
+              linkPosition={frame.linkPosition}
+              gradientIntensity={frame.gradientIntensity}
+              isSelected={frame.id === selectedFrameId}
+              onUpdate={handleFrameUpdate}
+              onSelect={() => setSelectedFrameId(frame.id)}
+            />
+          </div>
+        ))}
 
-        {/* Floating Panels */}
-        {showGeneratePanel && (
-          <DraggablePanel
-            title="Generate"
-            defaultPosition={{ x: 50, y: 100 }}
-            onClose={() => setShowGeneratePanel(false)}
-            className="w-64"
-          >
-            <div className="space-y-2">
-              <div>
-                <Label className="text-xs mb-1.5">Description</Label>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your poster..."
-                  className="min-h-20 text-xs"
-                />
-              </div>
-              <Button onClick={generateCaption} disabled={isGenerating || !description.trim() || !selectedFrame?.image} size="sm" className="w-full gap-2 h-7">
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-3 h-3" />
-                    Generate
-                  </>
-                )}
-              </Button>
-            </div>
-          </DraggablePanel>
-        )}
-
-        {showImagePanel && selectedFrame && (
-          <DraggablePanel
-            title="Image"
-            defaultPosition={{ x: 50, y: 280 }}
-            onClose={() => setShowImagePanel(false)}
-            className="w-56"
-          >
-            <div className="space-y-2">
-              <div>
-                <Label className="text-xs mb-1.5">Style</Label>
-                <Select
-                  value={selectedFrame.imageStyle}
-                  onValueChange={(v: ImageStyle) => handleFrameUpdate(selectedFrame.id, { imageStyle: v })}
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cover">Cover</SelectItem>
-                    <SelectItem value="contain">Contain</SelectItem>
-                    <SelectItem value="fill">Fill</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <SliderControl label="Brightness" value={brightness} onChange={setBrightness} min={-100} max={100} />
-              <SliderControl label="Contrast" value={contrast} onChange={setContrast} min={-100} max={100} />
-              <SliderControl label="Saturation" value={saturation} onChange={setSaturation} min={-100} max={100} />
-              <SliderControl label="Blur" value={blur} onChange={setBlur} min={0} max={20} />
-              <Button onClick={() => { setBrightness(0); setContrast(0); setSaturation(0); setBlur(0); }} variant="outline" size="sm" className="w-full h-7 text-xs">
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset
-              </Button>
-            </div>
-          </DraggablePanel>
-        )}
-
-        {showTextPanel && selectedFrame && (
-          <DraggablePanel
-            title="Text"
-            defaultPosition={{ x: window.innerWidth - 350, y: 100 }}
-            onClose={() => setShowTextPanel(false)}
-            className="w-64"
-          >
-            <div className="space-y-2">
-              <div>
-                <Label className="text-xs mb-1.5">Top Caption</Label>
-                <Textarea
-                  value={selectedFrame.topCaption}
-                  onChange={(e) => handleFrameUpdate(selectedFrame.id, { topCaption: e.target.value })}
-                  placeholder="Top text..."
-                  className="min-h-16 text-xs"
-                />
-              </div>
-              <div>
-                <Label className="text-xs mb-1.5">Bottom Caption</Label>
-                <Textarea
-                  value={selectedFrame.bottomCaption}
-                  onChange={(e) => handleFrameUpdate(selectedFrame.id, { bottomCaption: e.target.value })}
-                  placeholder="Bottom text..."
-                  className="min-h-16 text-xs"
-                />
-              </div>
-              <SliderControl
-                label="Size"
-                value={selectedFrame.textSize}
-                onChange={(v) => handleFrameUpdate(selectedFrame.id, { textSize: v })}
-                min={1}
-                max={5}
-                step={1}
-              />
-              <SliderControl
-                label="Opacity"
-                value={selectedFrame.textOpacity}
-                onChange={(v) => handleFrameUpdate(selectedFrame.id, { textOpacity: v })}
-                min={0}
-                max={100}
-              />
-              <div>
-                <Label className="text-xs mb-1.5">Alignment</Label>
-                <Select
-                  value={selectedFrame.textAlign}
-                  onValueChange={(v: any) => handleFrameUpdate(selectedFrame.id, { textAlign: v })}
-                >
-                  <SelectTrigger className="h-7 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="left">Left</SelectItem>
-                    <SelectItem value="center">Center</SelectItem>
-                    <SelectItem value="right">Right</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </DraggablePanel>
-        )}
-
-        {showColorPanel && (
-          <ColorPanel
-            selectedColor={penColor}
-            onColorSelect={(color) => {
-              setPenColor(color);
-              toast.success("Pen color updated");
-            }}
-            onClose={() => setShowColorPanel(false)}
-          />
-        )}
-
-        {showFrameBgPanel && selectedFrame && (
-          <FrameBackgroundPanel
-            backgroundColor={selectedFrame.backgroundColor}
-            onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrame.id, { backgroundColor: color })}
-            onClose={() => setShowFrameBgPanel(false)}
-          />
-        )}
-
-        <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-
-        <BottomToolbar
-          onImageUpload={() => fileInputRef.current?.click()}
-          onDownload={downloadPoster}
-          onSave={savePoster}
-          onAddFrame={handleAddFrame}
-          isSaving={isSaving}
+        <DrawingLayer
+          isActive={activeTool === "pen"}
+          color={penColor}
+          strokeWidth={strokeWidth}
         />
-
-        {/* Quick action buttons for panels */}
-        <div className="fixed left-4 top-16 z-40 flex flex-col gap-2">
-          <Button size="sm" variant="outline" onClick={() => setShowGeneratePanel(!showGeneratePanel)} className="h-7 text-xs">
-            Generate
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowImagePanel(!showImagePanel)} className="h-7 text-xs">
-            Image
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowTextPanel(!showTextPanel)} className="h-7 text-xs">
-            Text
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowColorPanel(!showColorPanel)} className="h-7 text-xs">
-            Colors
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setShowFrameBgPanel(!showFrameBgPanel)} className="h-7 text-xs">
-            Background
-          </Button>
-        </div>
       </div>
-    </>
+
+      {/* Panels */}
+      {showGeneratePanel && (
+        <DraggablePanel title="Generate Caption" defaultPosition={{ x: 50, y: 150 }} onClose={() => setShowGeneratePanel(false)}>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs mb-1 block">Description</Label>
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Describe your poster..."
+                className="h-20 text-xs"
+              />
+            </div>
+            <Button onClick={generateCaption} disabled={isGenerating} className="w-full h-8 text-xs">
+              <Sparkles className="h-3 w-3 mr-2" />
+              {isGenerating ? "Generating..." : "Generate"}
+            </Button>
+          </div>
+        </DraggablePanel>
+      )}
+
+      {showImagePanel && selectedFrame && (
+        <PropertyPanel
+          brightness={selectedFrame.brightness}
+          contrast={selectedFrame.contrast}
+          saturation={selectedFrame.saturation}
+          blur={selectedFrame.blur}
+          onBrightnessChange={(val) => handleFrameUpdate(selectedFrameId, { brightness: val })}
+          onContrastChange={(val) => handleFrameUpdate(selectedFrameId, { contrast: val })}
+          onSaturationChange={(val) => handleFrameUpdate(selectedFrameId, { saturation: val })}
+          onBlurChange={(val) => handleFrameUpdate(selectedFrameId, { blur: val })}
+          onClose={() => setShowImagePanel(false)}
+        />
+      )}
+
+      {showTextPanel && selectedFrame && (
+        <DraggablePanel title="Text Settings" defaultPosition={{ x: window.innerWidth - 250, y: 150 }} onClose={() => setShowTextPanel(false)} className="w-48">
+          <div className="space-y-3">
+            <div>
+              <Label className="text-xs mb-1 block">Top Caption</Label>
+              <Input
+                value={selectedFrame.topCaption}
+                onChange={(e) => handleFrameUpdate(selectedFrameId, { topCaption: e.target.value })}
+                className="h-8 text-xs"
+              />
+            </div>
+            <div>
+              <Label className="text-xs mb-1 block">Bottom Caption</Label>
+              <Input
+                value={selectedFrame.bottomCaption}
+                onChange={(e) => handleFrameUpdate(selectedFrameId, { bottomCaption: e.target.value })}
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
+        </DraggablePanel>
+      )}
+
+      {showShapePanel && selectedFrame && (
+        <ShapeSettingsPanel
+          backgroundColor={selectedFrame.backgroundColor}
+          fill={penColor}
+          stroke={penColor}
+          strokeWidth={strokeWidth}
+          onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
+          onFillChange={setPenColor}
+          onStrokeChange={setPenColor}
+          onStrokeWidthChange={setStrokeWidth}
+          onAlign={handleAlign}
+          onArrange={handleArrange}
+          flexDirection={selectedFrame.flexDirection}
+          justifyContent={selectedFrame.justifyContent}
+          alignItems={selectedFrame.alignItems}
+          gap={selectedFrame.gap}
+          onFlexDirectionChange={(dir) => handleFrameUpdate(selectedFrameId, { flexDirection: dir })}
+          onJustifyContentChange={(val) => handleFrameUpdate(selectedFrameId, { justifyContent: val })}
+          onAlignItemsChange={(val) => handleFrameUpdate(selectedFrameId, { alignItems: val })}
+          onGapChange={(val) => handleFrameUpdate(selectedFrameId, { gap: val })}
+          onClose={() => setShowShapePanel(false)}
+        />
+      )}
+
+      {/* Quick Action Buttons */}
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
+        <Button
+          variant={showGeneratePanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
+          onClick={() => setShowGeneratePanel(!showGeneratePanel)}
+        >
+          <Sparkles className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={showImagePanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
+          onClick={() => setShowImagePanel(!showImagePanel)}
+        >
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={showTextPanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
+          onClick={() => setShowTextPanel(!showTextPanel)}
+        >
+          <Type className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={showShapePanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
+          onClick={() => setShowShapePanel(!showShapePanel)}
+        >
+          <Palette className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <BottomToolbar
+        activeTool={activeTool}
+        onToolChange={setActiveTool}
+        onImageUpload={handleImageUpload}
+        onAddFrame={handleAddFrame}
+        onShowGenerate={() => setShowGeneratePanel(!showGeneratePanel)}
+        onShowImage={() => setShowImagePanel(!showImagePanel)}
+        onShowText={() => setShowTextPanel(!showTextPanel)}
+        onShowColors={() => setShowShapePanel(!showShapePanel)}
+        onAlign={handleAlign}
+        onArrange={handleArrange}
+        onDuplicate={handleDuplicate}
+        onDelete={handleDelete}
+      />
+
+      <ShareDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        framePreview={selectedFrame?.image || undefined}
+        frameName={selectedFrame?.name}
+        onExport={(format, resolution) => {
+          console.log(`Exporting as ${format} at ${resolution}px`);
+          downloadPoster();
+        }}
+      />
+
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleImageChange}
+      />
+    </div>
   );
 }

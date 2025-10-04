@@ -1,78 +1,43 @@
+import DraggablePanel from "./DraggablePanel";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
-
-const colors = [
-  "#000000", "#ffffff", "#ef4444", "#f59e0b",
-  "#10b981", "#3b82f6", "#8b5cf6", "#ec4899",
-  "#6b7280", "#f3f4f6", "#fecaca", "#fef3c7",
-];
+import SliderControl from "@/components/Canvas/SliderControl";
 
 interface PropertyPanelProps {
-  strokeWidth?: number;
-  onStrokeWidthChange?: (value: number) => void;
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  blur?: number;
+  onBrightnessChange?: (value: number) => void;
+  onContrastChange?: (value: number) => void;
+  onSaturationChange?: (value: number) => void;
+  onBlurChange?: (value: number) => void;
+  onClose?: () => void;
 }
 
-export default function PropertyPanel({ strokeWidth = 2, onStrokeWidthChange }: PropertyPanelProps) {
+export default function PropertyPanel({ 
+  brightness = 100, 
+  contrast = 100, 
+  saturation = 100, 
+  blur = 0,
+  onBrightnessChange,
+  onContrastChange,
+  onSaturationChange,
+  onBlurChange,
+  onClose
+}: PropertyPanelProps) {
   return (
-    <div className="fixed right-4 top-16 z-40 w-48">
-      <div className="bg-card/90 backdrop-blur-xl border rounded-2xl shadow-2xl p-3 space-y-3">
-        <div>
-          <Label className="text-[10px] font-semibold mb-2 block">Colors</Label>
-          <div className="grid grid-cols-4 gap-1.5">
-            {colors.map((color) => (
-              <button
-                key={color}
-                className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors"
-                style={{ backgroundColor: color }}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <Label className="text-[10px] font-semibold mb-1.5 block">Stroke</Label>
-          <Slider
-            value={[strokeWidth]}
-            onValueChange={(v) => onStrokeWidthChange?.(v[0])}
-            min={1}
-            max={20}
-            step={1}
-            className="mt-1"
-          />
-        </div>
-
-        <div>
-          <Label className="text-[10px] font-semibold mb-2 block">Style</Label>
-          <div className="grid grid-cols-4 gap-1.5">
-            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-4 h-4 bg-foreground rounded" />
-            </button>
-            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-4 h-4 border border-foreground rounded" />
-            </button>
-            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-4 h-4 border border-dashed border-foreground rounded" />
-            </button>
-            <button className="w-8 h-8 rounded-md border border-border hover:border-primary transition-colors flex items-center justify-center">
-              <div className="w-4 h-4 bg-transparent border border-foreground rounded" />
-            </button>
-          </div>
-        </div>
-
-        <div>
-          <Label className="text-[10px] font-semibold mb-2 block">Size</Label>
-          <div className="flex gap-1.5">
-            {["S", "M", "L", "XL"].map((size) => (
-              <button
-                key={size}
-                className="flex-1 h-7 rounded-md border border-border hover:border-primary transition-colors text-[10px] font-semibold"
-              >
-                {size}
-              </button>
-            ))}
-          </div>
-        </div>
+    <DraggablePanel
+      title="Image Properties"
+      defaultPosition={{ x: 50, y: 300 }}
+      onClose={onClose}
+      className="w-56"
+    >
+      <div className="space-y-2">
+        <SliderControl label="Brightness" value={brightness} onChange={onBrightnessChange || (() => {})} min={0} max={200} />
+        <SliderControl label="Contrast" value={contrast} onChange={onContrastChange || (() => {})} min={0} max={200} />
+        <SliderControl label="Saturation" value={saturation} onChange={onSaturationChange || (() => {})} min={0} max={200} />
+        <SliderControl label="Blur" value={blur} onChange={onBlurChange || (() => {})} min={0} max={20} />
       </div>
-    </div>
+    </DraggablePanel>
   );
 }

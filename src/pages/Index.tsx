@@ -35,7 +35,7 @@ const Index = () => {
     return null;
   }
 
-  return <CanvasContainerNew user={user} />;
+  return <CanvasContainerNew />;
 };
 
 export default Index;
