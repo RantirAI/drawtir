@@ -17,36 +17,36 @@ export type Database = {
       posters: {
         Row: {
           canvas_data: Json | null
-          caption: string
+          caption: string | null
           created_at: string | null
           editor_settings: Json | null
           id: string
           image_style: string | null
-          image_url: string
+          image_url: string | null
           project_name: string | null
           thumbnail_url: string | null
           user_id: string
         }
         Insert: {
           canvas_data?: Json | null
-          caption: string
+          caption?: string | null
           created_at?: string | null
           editor_settings?: Json | null
           id?: string
           image_style?: string | null
-          image_url: string
+          image_url?: string | null
           project_name?: string | null
           thumbnail_url?: string | null
           user_id: string
         }
         Update: {
           canvas_data?: Json | null
-          caption?: string
+          caption?: string | null
           created_at?: string | null
           editor_settings?: Json | null
           id?: string
           image_style?: string | null
-          image_url?: string
+          image_url?: string | null
           project_name?: string | null
           thumbnail_url?: string | null
           user_id?: string
