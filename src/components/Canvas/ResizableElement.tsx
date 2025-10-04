@@ -176,13 +176,13 @@ export default function ResizableElement({
         return (
           <div
             className="w-full h-full rounded-full"
-            style={{ backgroundColor: fill, border: `2px solid ${stroke}` }}
+            style={{ backgroundColor: fill, border: `${strokeWidth}px solid ${stroke}` }}
           />
         );
       case "line":
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth="2" />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth={strokeWidth} />
           </svg>
         );
       case "arrow":
@@ -193,14 +193,14 @@ export default function ResizableElement({
                 <polygon points="0 0, 10 3.5, 0 7" fill={stroke} />
               </marker>
             </defs>
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth="2" markerEnd={`url(#arrowhead-${id})`} />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth={strokeWidth} markerEnd={`url(#arrowhead-${id})`} />
           </svg>
         );
       case "polygon":
         const hexPoints = `${width / 2},0 ${width},${height / 4} ${width},${height * 3 / 4} ${width / 2},${height} 0,${height * 3 / 4} 0,${height / 4}`;
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <polygon points={hexPoints} fill={fill} stroke={stroke} strokeWidth="2" />
+            <polygon points={hexPoints} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
           </svg>
         );
       case "star":
@@ -215,7 +215,7 @@ export default function ResizableElement({
         }).join(' ');
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <polygon points={starPoints} fill={fill} stroke={stroke} strokeWidth="2" />
+            <polygon points={starPoints} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
           </svg>
         );
       default:
@@ -224,7 +224,7 @@ export default function ResizableElement({
             className="w-full h-full"
             style={{ 
               backgroundColor: fill, 
-              border: `2px solid ${stroke}`,
+              border: `${strokeWidth}px solid ${stroke}`,
               borderRadius: borderRadiusStyle
             }}
           />

@@ -444,8 +444,9 @@ export default function CanvasContainerNew({
       width: shapeType === "line" || shapeType === "arrow" ? 150 : 100,
       height: shapeType === "line" || shapeType === "arrow" ? 2 : 100,
       shapeType: shapeType as any,
-      fill: penColor,
+      fill: shapeType === "line" || shapeType === "arrow" ? "transparent" : penColor,
       stroke: penColor,
+      strokeWidth: shapeType === "line" || shapeType === "arrow" ? 3 : 2,
       opacity: 100,
       cornerRadius: 0,
       blendMode: "normal",
@@ -767,7 +768,16 @@ export default function CanvasContainerNew({
       {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
           elementType={selectedElement ? selectedElement.type : "frame"}
-          elementName={selectedElement ? `${selectedElement.type}` : selectedFrame?.name}
+          elementName={
+            selectedElement 
+              ? selectedElement.type === "shape" && selectedElement.shapeType
+                ? `Shape - ${selectedElement.shapeType.charAt(0).toUpperCase() + selectedElement.shapeType.slice(1)}`
+                : selectedElement.text 
+                  ? selectedElement.text.substring(0, 20)
+                  : selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)
+              : selectedFrame?.name
+          }
+          shapeType={selectedElement?.shapeType}
           backgroundColor={selectedFrame?.backgroundColor}
           fill={selectedElement?.fill || penColor}
           stroke={selectedElement?.stroke || penColor}

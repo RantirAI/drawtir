@@ -72,6 +72,7 @@ const GOOGLE_FONTS = [
 interface ShapeSettingsPanelProps {
   elementType?: "frame" | "shape" | "text" | "image" | "drawing" | null;
   elementName?: string;
+  shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   backgroundColor?: string;
   fill?: string;
   stroke?: string;
@@ -133,6 +134,7 @@ const getElementIcon = (type?: "frame" | "shape" | "text" | "image" | "drawing" 
 export default function ShapeSettingsPanel({
   elementType,
   elementName = "Nothing selected",
+  shapeType,
   backgroundColor = "#000000",
   fill = "#000000",
   stroke = "#000000",
@@ -201,7 +203,7 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "type"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type"]} className="w-full">
         {/* Position Section */}
         {(onXChange || onYChange || onRotationChange) && (
           <AccordionItem value="position">
@@ -559,15 +561,15 @@ export default function ShapeSettingsPanel({
               </div>
             )}
             
-            {/* Corner Radius */}
-            {onCornerRadiusChange && (
+            {/* Corner Radius - only for rectangles and frames */}
+            {onCornerRadiusChange && (elementType === "frame" || (elementType === "shape" && (shapeType === "rectangle" || !shapeType))) && (
               <div>
                 <Label className="text-xs mb-1 block">Corner: {cornerRadius}px</Label>
                 <Slider
                   value={[cornerRadius]}
                   onValueChange={([v]) => onCornerRadiusChange(v)}
                   min={0}
-                  max={50}
+                  max={100}
                   step={1}
                 />
               </div>
@@ -580,67 +582,74 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="fill">
             <AccordionTrigger className="text-xs font-medium py-2">Fill</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
-              <Popover open={fillModalOpen} onOpenChange={setFillModalOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center"
-                    style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
-                  >
-                    <span className="sr-only">Fill Color</span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="right" className="w-80 p-3">
-                  <ColorPicker
-                    color={onBackgroundColorChange ? backgroundColor : fill}
-                    onChange={(color) => {
-                      if (onBackgroundColorChange) onBackgroundColorChange(color);
-                      if (onFillChange) onFillChange(color);
-                    }}
-                    opacity={opacity}
-                    onOpacityChange={onOpacityChange}
-                    showOpacity={!!onOpacityChange}
-                  />
-                </PopoverContent>
-              </Popover>
+              <div className="flex items-center gap-2">
+                <Popover open={fillModalOpen} onOpenChange={setFillModalOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
+                    >
+                      <span className="sr-only">Fill Color</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" className="w-80 p-3">
+                    <ColorPicker
+                      color={onBackgroundColorChange ? backgroundColor : fill}
+                      onChange={(color) => {
+                        if (onBackgroundColorChange) onBackgroundColorChange(color);
+                        if (onFillChange) onFillChange(color);
+                      }}
+                      opacity={opacity}
+                      onOpacityChange={onOpacityChange}
+                      showOpacity={!!onOpacityChange}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground">
+                  {onBackgroundColorChange ? backgroundColor : fill}
+                </span>
+              </div>
             </AccordionContent>
           </AccordionItem>
         )}
 
-        {/* Stroke Section */}
-        {(onStrokeChange || elementType === "drawing") && (
+        {/* Stroke Section - for shapes and drawings */}
+        {(onStrokeChange && (elementType === "shape" || elementType === "drawing")) && (
           <AccordionItem value="stroke">
             <AccordionTrigger className="text-xs font-medium py-2">Stroke</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
-              <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center"
-                    style={{ backgroundColor: stroke }}
-                  >
-                    <span className="sr-only">Stroke Color</span>
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent side="right" className="w-80 p-3">
-                  <ColorPicker
-                    color={stroke}
-                    onChange={(color) => onStrokeChange?.(color)}
-                    showOpacity={false}
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              {onStrokeWidthChange && (
-                <div className="mt-2">
-                  <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
-                  <Slider
-                    value={[strokeWidth]}
-                    onValueChange={([v]) => onStrokeWidthChange(v)}
-                    min={1}
-                    max={20}
-                    step={1}
-                  />
-                </div>
-              )}
+              <div className="flex items-start gap-2">
+                <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: stroke }}
+                    >
+                      <span className="sr-only">Stroke Color</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" className="w-80 p-3">
+                    <ColorPicker
+                      color={stroke}
+                      onChange={(color) => onStrokeChange?.(color)}
+                      showOpacity={false}
+                    />
+                  </PopoverContent>
+                </Popover>
+                
+                {onStrokeWidthChange && (
+                  <div className="flex-1">
+                    <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
+                    <Slider
+                      value={[strokeWidth]}
+                      onValueChange={([v]) => onStrokeWidthChange(v)}
+                      min={0}
+                      max={20}
+                      step={1}
+                    />
+                  </div>
+                )}
+              </div>
             </AccordionContent>
           </AccordionItem>
         )}
