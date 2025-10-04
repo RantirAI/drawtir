@@ -21,9 +21,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Image as ImageIcon, Layers } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
+import type { CanvasSnapshot } from "@/types/snapshot";
+import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
+import { useAutoSave } from "@/hooks/useAutoSave";
 
-export default function CanvasContainerNew() {
-  const [projectTitle, setProjectTitle] = useState("Untitled Poster");
+interface CanvasContainerNewProps {
+  isEmbedded?: boolean;
+  initialSnapshot?: CanvasSnapshot;
+  onSnapshotChange?: (snapshot: CanvasSnapshot) => void;
+  onSaveRequest?: (snapshot: CanvasSnapshot) => void | Promise<void>;
+  readOnly?: boolean;
+}
+
+export default function CanvasContainerNew({
+  isEmbedded = false,
+  initialSnapshot,
+  onSnapshotChange,
+  onSaveRequest,
+  readOnly = false,
+}: CanvasContainerNewProps = {}) {
+  const [projectTitle, setProjectTitle] = useState(initialSnapshot?.metadata.title || "Untitled Poster");
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [history, setHistory] = useState<Frame[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [frames, setFrames] = useState<Frame[]>([
@@ -275,29 +293,83 @@ export default function CanvasContainerNew() {
     }
   };
 
-  const savePoster = async () => {
+  const saveToCloud = async () => {
+    if (isEmbedded && onSaveRequest) {
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      await onSaveRequest(snapshot);
+      toast.success("Saved!");
+      return;
+    }
+
     setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      const thumbnail = await generateThumbnail(frames);
+
       const posterData = {
         user_id: user.id,
-        title: projectTitle,
-        frames: frames,
+        project_name: projectTitle,
+        canvas_data: snapshot as any,
+        thumbnail_url: thumbnail,
       };
 
-      const { error } = await (supabase as any).from("posters").insert(posterData);
-      if (error) throw error;
+      if (projectId) {
+        const { error } = await supabase
+          .from("posters")
+          .update(posterData)
+          .eq("id", projectId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await supabase
+          .from("posters")
+          .insert([posterData] as any)
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) setProjectId(data.id);
+      }
 
-      toast.success("Poster saved!");
+      toast.success("Project saved!");
     } catch (error: any) {
-      console.error("Error saving poster:", error);
-      toast.error(error.message || "Failed to save poster");
+      console.error("Error saving project:", error);
+      toast.error(error.message || "Failed to save project");
     } finally {
       setIsSaving(false);
     }
   };
+
+  const { isSaving: isAutoSaving, lastSaved, debouncedSave, forceSave } = useAutoSave({
+    onSave: saveToCloud,
+    enabled: !isEmbedded && projectId !== null,
+  });
+
+  // Trigger auto-save when frames change
+  useEffect(() => {
+    if (!isEmbedded && projectId) {
+      debouncedSave();
+    }
+  }, [frames, projectTitle, zoom, panOffset, isEmbedded, projectId]);
+
+  // Notify parent of changes in embedded mode
+  useEffect(() => {
+    if (isEmbedded && onSnapshotChange) {
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      onSnapshotChange(snapshot);
+    }
+  }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange]);
+
+  // Load initial snapshot
+  useEffect(() => {
+    if (initialSnapshot && validateSnapshot(initialSnapshot)) {
+      setProjectTitle(initialSnapshot.metadata.title);
+      setFrames(initialSnapshot.frames);
+      setZoom(initialSnapshot.canvas.zoom);
+      setPanOffset(initialSnapshot.canvas.panOffset);
+    }
+  }, []);
 
   const downloadPoster = () => {
     if (!selectedFrame) {
@@ -546,7 +618,7 @@ export default function CanvasContainerNew() {
       <EditorTopBar
         projectName={projectTitle}
         onProjectNameChange={setProjectTitle}
-        onSave={savePoster}
+        onSave={saveToCloud}
         onDownload={downloadPoster}
         onExport={downloadPoster}
         onShare={() => setShowShareDialog(true)}
@@ -555,6 +627,7 @@ export default function CanvasContainerNew() {
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
         isSaving={isSaving}
+        hideCloudFeatures={isEmbedded}
       />
 
       {/* Canvas Area */}

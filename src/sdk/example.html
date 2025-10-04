@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drawtir SDK Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1rem;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    button {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd;
+      border-radius: 0.375rem;
+      background: white;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+
+    button:hover {
+      background: #f5f5f5;
+    }
+
+    button.primary {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    button.primary:hover {
+      background: #2563eb;
+    }
+
+    #canvas-container {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .status {
+      padding: 0.5rem 1rem;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Drawtir SDK Example</h1>
+    <button class="primary" onclick="save()">Save</button>
+    <button onclick="load()">Load</button>
+    <button onclick="clear()">Clear</button>
+    <button onclick="exportPNG()">Export PNG</button>
+    <div class="status" id="status" style="display: none;"></div>
+  </header>
+
+  <div id="canvas-container"></div>
+
+  <script type="module">
+    import { DrawtirSDK } from './DrawtirSDK.ts';
+
+    let drawtir;
+
+    // Initialize SDK
+    window.addEventListener('DOMContentLoaded', () => {
+      drawtir = new DrawtirSDK({
+        container: '#canvas-container',
+        onSave: (snapshot) => {
+          showStatus('Saving...');
+          // Simulate async save
+          setTimeout(() => {
+            localStorage.setItem('drawtir-canvas', JSON.stringify(snapshot));
+            showStatus('Saved successfully!');
+          }, 500);
+        },
+        onChange: (snapshot) => {
+          console.log('Canvas changed');
+        },
+        autoSave: false
+      });
+
+      // Load saved snapshot
+      const saved = localStorage.getItem('drawtir-canvas');
+      if (saved) {
+        try {
+          drawtir.loadSnapshot(JSON.parse(saved));
+          showStatus('Loaded from storage');
+        } catch (e) {
+          console.error('Failed to load:', e);
+        }
+      }
+
+      // Make drawtir globally available
+      window.drawtir = drawtir;
+    });
+
+    window.save = () => {
+      const snapshot = drawtir.getSnapshot();
+      localStorage.setItem('drawtir-canvas', JSON.stringify(snapshot));
+      showStatus('Saved to localStorage!');
+    };
+
+    window.load = () => {
+      const saved = localStorage.getItem('drawtir-canvas');
+      if (saved) {
+        drawtir.loadSnapshot(JSON.parse(saved));
+        showStatus('Loaded from localStorage!');
+      } else {
+        showStatus('No saved data found', true);
+      }
+    };
+
+    window.clear = () => {
+      if (confirm('Clear the canvas?')) {
+        drawtir.clear();
+        localStorage.removeItem('drawtir-canvas');
+        showStatus('Canvas cleared!');
+      }
+    };
+
+    window.exportPNG = async () => {
+      showStatus('Exporting...');
+      const blob = await drawtir.exportPNG();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'canvas.png';
+      a.click();
+      URL.revokeObjectURL(url);
+      showStatus('Exported as PNG!');
+    };
+
+    function showStatus(message, isError = false) {
+      const status = document.getElementById('status');
+      status.textContent = message;
+      status.style.display = 'block';
+      status.style.background = isError ? '#fef2f2' : '#f0fdf4';
+      status.style.borderColor = isError ? '#fca5a5' : '#86efac';
+      status.style.color = isError ? '#991b1b' : '#166534';
+      
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 3000);
+    }
+  </script>
+</body>
+</html>

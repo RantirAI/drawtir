@@ -25,6 +25,7 @@ interface EditorTopBarProps {
   canUndo?: boolean;
   canRedo?: boolean;
   isSaving?: boolean;
+  hideCloudFeatures?: boolean;
 }
 
 export default function EditorTopBar({ 
@@ -38,7 +39,8 @@ export default function EditorTopBar({
   onRedo,
   canUndo = false,
   canRedo = false,
-  isSaving 
+  isSaving,
+  hideCloudFeatures = false,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
 
@@ -92,9 +94,11 @@ export default function EditorTopBar({
         
         <EditableTitle value={projectName} onChange={onProjectNameChange || (() => {})} />
 
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
-          <Save className="h-3 w-3" />
-        </Button>
+        {onSave && !hideCloudFeatures && (
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
+            <Save className="h-3 w-3" />
+          </Button>
+        )}
 
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onDownload}>
           <Download className="h-3 w-3" />

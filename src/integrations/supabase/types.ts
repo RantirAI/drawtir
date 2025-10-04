@@ -16,30 +16,39 @@ export type Database = {
     Tables: {
       posters: {
         Row: {
+          canvas_data: Json | null
           caption: string
           created_at: string | null
           editor_settings: Json | null
           id: string
           image_style: string | null
           image_url: string
+          project_name: string | null
+          thumbnail_url: string | null
           user_id: string
         }
         Insert: {
+          canvas_data?: Json | null
           caption: string
           created_at?: string | null
           editor_settings?: Json | null
           id?: string
           image_style?: string | null
           image_url: string
+          project_name?: string | null
+          thumbnail_url?: string | null
           user_id: string
         }
         Update: {
+          canvas_data?: Json | null
           caption?: string
           created_at?: string | null
           editor_settings?: Json | null
           id?: string
           image_style?: string | null
           image_url?: string
+          project_name?: string | null
+          thumbnail_url?: string | null
           user_id?: string
         }
         Relationships: []
