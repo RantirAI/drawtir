@@ -77,7 +77,7 @@ export default function DraggablePanel({
       >
         <div className="flex items-center gap-1.5">
           <GripHorizontal className="h-3 w-3 text-muted-foreground" />
-          <span className="text-xs font-semibold">{title}</span>
+          {title && <span className="text-xs font-semibold">{title}</span>}
         </div>
         <div className="flex items-center gap-0.5">
           <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => setIsMinimized(!isMinimized)}>

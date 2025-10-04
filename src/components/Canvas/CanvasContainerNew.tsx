@@ -13,6 +13,7 @@ import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
 import ResizableElement from "./ResizableElement";
+import CanvasContextMenu from "./ContextMenu";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -56,6 +57,8 @@ export default function CanvasContainerNew() {
       gap: 0,
       elements: [],
       cornerRadius: 0,
+      opacity: 100,
+      blendMode: "normal",
     },
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
@@ -195,6 +198,8 @@ export default function CanvasContainerNew() {
       gap: 0,
       elements: [],
       cornerRadius: 0,
+      opacity: 100,
+      blendMode: "normal",
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
@@ -206,6 +211,7 @@ export default function CanvasContainerNew() {
   };
 
   const handleImageUpload = () => {
+    // Now creates an image element instead of setting frame image
     imageInputRef.current?.click();
   };
 
@@ -215,8 +221,30 @@ export default function CanvasContainerNew() {
       const reader = new FileReader();
       reader.onload = (event) => {
         const imageUrl = event.target?.result as string;
-        handleFrameUpdate(selectedFrameId, { image: imageUrl });
-        toast.success("Image uploaded!");
+        
+        // Create image element instead of setting frame image
+        const newElement: Element = {
+          id: `element-${Date.now()}`,
+          type: "image",
+          x: 50,
+          y: 50,
+          width: 200,
+          height: 200,
+          imageUrl,
+          imageFit: "cover",
+          opacity: 100,
+          cornerRadius: 0,
+        };
+
+        setFrames(frames.map(f => {
+          if (f.id === selectedFrameId) {
+            return { ...f, elements: [...(f.elements || []), newElement] };
+          }
+          return f;
+        }));
+        setSelectedElementIds([newElement.id]);
+        setShowShapeSettings(true);
+        toast.success("Image added!");
       };
       reader.readAsDataURL(file);
     }
@@ -347,6 +375,9 @@ export default function CanvasContainerNew() {
       shapeType: shapeType as any,
       fill: penColor,
       stroke: penColor,
+      opacity: 100,
+      cornerRadius: 0,
+      blendMode: "normal",
     };
 
     setFrames(frames.map(f => {
@@ -387,6 +418,8 @@ export default function CanvasContainerNew() {
       height: 50,
       text: "Double click to edit",
       fill: penColor,
+      opacity: 100,
+      blendMode: "normal",
     };
 
     setFrames(frames.map(f => {
@@ -435,6 +468,78 @@ export default function CanvasContainerNew() {
     toast.success("Element deleted");
   };
 
+  const handleElementDuplicate = (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element) return;
+
+    const newElement = { ...element, id: `element-${Date.now()}`, x: element.x + 20, y: element.y + 20 };
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    toast.success("Element duplicated!");
+  };
+
+  const handleWrapInFrame = () => {
+    if (selectedElementIds.length === 0) return;
+    
+    const elements = selectedFrame?.elements?.filter(e => selectedElementIds.includes(e.id)) || [];
+    if (elements.length === 0) return;
+
+    // Calculate bounds
+    const minX = Math.min(...elements.map(e => e.x));
+    const minY = Math.min(...elements.map(e => e.y));
+    const maxX = Math.max(...elements.map(e => e.x + e.width));
+    const maxY = Math.max(...elements.map(e => e.y + e.height));
+
+    const newFrame: Frame = {
+      id: `frame-${frames.length + 1}`,
+      name: `Frame ${frames.length + 1}`,
+      x: (selectedFrame?.x || 0) + minX - 20,
+      y: (selectedFrame?.y || 0) + minY - 20,
+      width: maxX - minX + 40,
+      height: maxY - minY + 40,
+      backgroundColor: "transparent",
+      image: null,
+      topCaption: "",
+      bottomCaption: "",
+      textColor: "#ffffff",
+      textAlign: "center",
+      textSize: 3,
+      textOpacity: 100,
+      imageStyle: "cover",
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
+      linkText: "",
+      linkPosition: "top-right",
+      gradientIntensity: 80,
+      flexDirection: "row",
+      justifyContent: "start",
+      alignItems: "start",
+      gap: 0,
+      elements: elements.map(e => ({ ...e, x: e.x - minX + 20, y: e.y - minY + 20 })),
+      cornerRadius: 0,
+      opacity: 100,
+      blendMode: "normal",
+    };
+
+    // Remove elements from current frame
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, elements: (f.elements || []).filter(e => !selectedElementIds.includes(e.id)) };
+      }
+      return f;
+    }).concat(newFrame));
+    
+    setSelectedFrameId(newFrame.id);
+    setSelectedElementIds([]);
+    toast.success("Wrapped in new frame!");
+  };
+
   return (
     <div className="w-full h-screen relative overflow-hidden">
       <CanvasBackground />
@@ -481,53 +586,69 @@ export default function CanvasContainerNew() {
               y={frame.y}
               onChange={(name) => handleFrameUpdate(frame.id, { name })}
             />
-            <ResizableFrame
-              id={frame.id}
-              x={frame.x}
-              y={frame.y}
-              width={frame.width}
-              height={frame.height}
-              backgroundColor={frame.backgroundColor}
-              image={frame.image}
-              topCaption={frame.topCaption}
-              bottomCaption={frame.bottomCaption}
-              textColor={frame.textColor}
-              textAlign={frame.textAlign}
-              textSize={frame.textSize}
-              textOpacity={frame.textOpacity}
-              imageStyle={frame.imageStyle}
-              filterStyle={frame.id === selectedFrameId ? getFilterStyle() : {}}
-              linkText={frame.linkText}
-              linkPosition={frame.linkPosition}
-              gradientIntensity={frame.gradientIntensity}
-              cornerRadius={frame.cornerRadius || 0}
-              isSelected={frame.id === selectedFrameId}
-              onUpdate={handleFrameUpdate}
-              onSelect={() => setSelectedFrameId(frame.id)}
+            <CanvasContextMenu
+              onDelete={() => frame.id === selectedFrameId && handleDelete()}
+              onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
             >
-              {/* Elements inside frame */}
-              {(frame.elements || []).map((element) => (
-                <ResizableElement
-                  key={element.id}
-                  id={element.id}
-                  type={element.type === "drawing" ? "shape" : element.type}
-                  x={element.x}
-                  y={element.y}
-                  width={element.width}
-                  height={element.height}
-                  src={element.imageUrl}
-                  text={element.text}
-                  shapeType={element.shapeType}
-                  fill={element.fill}
-                  stroke={element.stroke}
-                  pathData={element.pathData}
-                  strokeWidth={element.strokeWidth}
-                  isSelected={selectedElementIds.includes(element.id)}
-                  onUpdate={handleElementUpdate}
-                  onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
-                />
-              ))}
-            </ResizableFrame>
+              <ResizableFrame
+                id={frame.id}
+                x={frame.x}
+                y={frame.y}
+                width={frame.width}
+                height={frame.height}
+                backgroundColor={frame.backgroundColor}
+                image={frame.image}
+                topCaption={frame.topCaption}
+                bottomCaption={frame.bottomCaption}
+                textColor={frame.textColor}
+                textAlign={frame.textAlign}
+                textSize={frame.textSize}
+                textOpacity={frame.textOpacity}
+                imageStyle={frame.imageStyle}
+                filterStyle={frame.id === selectedFrameId ? getFilterStyle() : {}}
+                linkText={frame.linkText}
+                linkPosition={frame.linkPosition}
+                gradientIntensity={frame.gradientIntensity}
+                cornerRadius={frame.cornerRadius || 0}
+                isSelected={frame.id === selectedFrameId}
+                onUpdate={handleFrameUpdate}
+                onSelect={() => setSelectedFrameId(frame.id)}
+              >
+                {/* Elements inside frame */}
+                {(frame.elements || []).map((element) => (
+                  <CanvasContextMenu
+                    key={element.id}
+                    onDelete={() => handleElementDelete(element.id)}
+                    onDuplicate={() => handleElementDuplicate(element.id)}
+                    onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
+                  >
+                    <ResizableElement
+                      id={element.id}
+                      type={element.type === "drawing" ? "shape" : element.type}
+                      x={element.x}
+                      y={element.y}
+                      width={element.width}
+                      height={element.height}
+                      src={element.imageUrl}
+                      text={element.text}
+                      shapeType={element.shapeType}
+                      fill={element.fill}
+                      stroke={element.stroke}
+                      pathData={element.pathData}
+                      strokeWidth={element.strokeWidth}
+                      opacity={element.opacity}
+                      cornerRadius={element.cornerRadius}
+                      blendMode={element.blendMode}
+                      isSelected={selectedElementIds.includes(element.id)}
+                      onUpdate={handleElementUpdate}
+                      onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
+                      onDelete={() => handleElementDelete(element.id)}
+                      onDuplicate={() => handleElementDuplicate(element.id)}
+                    />
+                  </CanvasContextMenu>
+                ))}
+              </ResizableFrame>
+            </CanvasContextMenu>
           </div>
         ))}
       </div>
@@ -582,7 +703,9 @@ export default function CanvasContainerNew() {
           height={selectedElement?.height || selectedFrame?.height}
           x={selectedElement?.x}
           y={selectedElement?.y}
-          cornerRadius={selectedFrame?.cornerRadius}
+          opacity={selectedElement?.opacity || selectedFrame?.opacity || 100}
+          cornerRadius={selectedElement?.cornerRadius || selectedFrame?.cornerRadius || 0}
+          blendMode={selectedElement?.blendMode || selectedFrame?.blendMode || "normal"}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
           onFillChange={(color) => {
             if (selectedElementIds.length > 0) {
@@ -621,7 +744,27 @@ export default function CanvasContainerNew() {
           }}
           onXChange={(x) => selectedElement && handleElementUpdate(selectedElement.id, { x })}
           onYChange={(y) => selectedElement && handleElementUpdate(selectedElement.id, { y })}
-          onCornerRadiusChange={(r) => handleFrameUpdate(selectedFrameId, { cornerRadius: r })}
+          onOpacityChange={(o) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { opacity: o });
+            } else {
+              handleFrameUpdate(selectedFrameId, { opacity: o });
+            }
+          }}
+          onCornerRadiusChange={(r) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { cornerRadius: r });
+            } else {
+              handleFrameUpdate(selectedFrameId, { cornerRadius: r });
+            }
+          }}
+          onBlendModeChange={(m) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { blendMode: m });
+            } else {
+              handleFrameUpdate(selectedFrameId, { blendMode: m });
+            }
+          }}
           onAlign={handleAlign}
           onArrange={handleArrange}
           flexDirection={selectedFrame?.flexDirection}
@@ -756,6 +899,8 @@ export default function CanvasContainerNew() {
               pathData,
               stroke: color,
               strokeWidth: strokeW,
+              opacity: 100,
+              blendMode: "normal",
             };
             setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
             setSelectedElementIds([newElement.id]);

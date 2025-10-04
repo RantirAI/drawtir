@@ -35,6 +35,7 @@ export interface Element {
   // Common properties
   opacity?: number;
   cornerRadius?: number;
+  blendMode?: string;
 }
 
 export interface Frame {
@@ -69,4 +70,5 @@ export interface Frame {
   elements?: Element[];
   opacity?: number;
   cornerRadius?: number;
+  blendMode?: string;
 }

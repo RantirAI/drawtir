@@ -14,6 +14,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box
@@ -76,6 +83,7 @@ interface ShapeSettingsPanelProps {
   rotation?: number;
   opacity?: number;
   cornerRadius?: number;
+  blendMode?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
   onBackgroundColorChange?: (color: string) => void;
   onFillChange?: (color: string) => void;
@@ -88,6 +96,7 @@ interface ShapeSettingsPanelProps {
   onRotationChange?: (rotation: number) => void;
   onOpacityChange?: (opacity: number) => void;
   onCornerRadiusChange?: (radius: number) => void;
+  onBlendModeChange?: (mode: string) => void;
   onImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
@@ -127,6 +136,7 @@ export default function ShapeSettingsPanel({
   rotation = 0,
   opacity = 100,
   cornerRadius = 0,
+  blendMode = "normal",
   imageFit = "cover",
   onBackgroundColorChange,
   onFillChange,
@@ -139,6 +149,7 @@ export default function ShapeSettingsPanel({
   onRotationChange,
   onOpacityChange,
   onCornerRadiusChange,
+  onBlendModeChange,
   onImageFitChange,
   onAlign,
   onArrange,
@@ -156,7 +167,7 @@ export default function ShapeSettingsPanel({
   
   return (
     <DraggablePanel
-      title=""
+      title="Style"
       defaultPosition={{ x: 50, y: 500 }}
       onClose={onClose}
       className="w-72"
@@ -329,6 +340,32 @@ export default function ShapeSettingsPanel({
                   max={100}
                   step={1}
                 />
+              </div>
+            )}
+
+            {/* Blend Mode */}
+            {onBlendModeChange && (
+              <div>
+                <Label className="text-xs mb-1 block">Blend Mode</Label>
+                <Select value={blendMode} onValueChange={onBlendModeChange}>
+                  <SelectTrigger className="h-7 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="multiply">Multiply</SelectItem>
+                    <SelectItem value="screen">Screen</SelectItem>
+                    <SelectItem value="overlay">Overlay</SelectItem>
+                    <SelectItem value="darken">Darken</SelectItem>
+                    <SelectItem value="lighten">Lighten</SelectItem>
+                    <SelectItem value="color-dodge">Color Dodge</SelectItem>
+                    <SelectItem value="color-burn">Color Burn</SelectItem>
+                    <SelectItem value="hard-light">Hard Light</SelectItem>
+                    <SelectItem value="soft-light">Soft Light</SelectItem>
+                    <SelectItem value="difference">Difference</SelectItem>
+                    <SelectItem value="exclusion">Exclusion</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             )}
             

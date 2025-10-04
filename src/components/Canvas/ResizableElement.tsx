@@ -14,9 +14,14 @@ interface ResizableElementProps {
   strokeWidth?: number;
   fill?: string;
   stroke?: string;
+  opacity?: number;
+  cornerRadius?: number;
+  blendMode?: string;
   isSelected: boolean;
-  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number }>) => void;
+  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
   onSelect: (e?: React.MouseEvent) => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
 }
 
 export default function ResizableElement({
@@ -33,9 +38,14 @@ export default function ResizableElement({
   stroke = "#000000",
   pathData,
   strokeWidth = 2,
+  opacity = 100,
+  cornerRadius = 0,
+  blendMode = "normal",
   isSelected,
   onUpdate,
   onSelect,
+  onDelete,
+  onDuplicate,
 }: ResizableElementProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
@@ -157,6 +167,8 @@ export default function ResizableElement({
       );
     }
 
+    const borderRadiusStyle = cornerRadius ? `${cornerRadius}px` : '0';
+
     // Shapes
     switch (shapeType) {
       case "circle":
@@ -209,8 +221,12 @@ export default function ResizableElement({
       default:
         return (
           <div
-            className="w-full h-full rounded"
-            style={{ backgroundColor: fill, border: `2px solid ${stroke}` }}
+            className="w-full h-full"
+            style={{ 
+              backgroundColor: fill, 
+              border: `2px solid ${stroke}`,
+              borderRadius: borderRadiusStyle
+            }}
           />
         );
     }
@@ -219,12 +235,24 @@ export default function ResizableElement({
   return (
     <div
       className={`absolute cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
-      style={{ left: x, top: y, width, height }}
+      style={{ 
+        left: x, 
+        top: y, 
+        width, 
+        height,
+        opacity: opacity / 100,
+        mixBlendMode: (blendMode || 'normal') as any
+      }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >
       {type === "image" && src ? (
-        <img src={src} alt="Element" className="w-full h-full object-cover rounded" />
+        <img 
+          src={src} 
+          alt="Element" 
+          className="w-full h-full object-cover" 
+          style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}
+        />
       ) : type === "text" ? (
         isEditing ? (
           <textarea
