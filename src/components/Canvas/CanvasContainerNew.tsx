@@ -355,10 +355,12 @@ export default function CanvasContainerNew() {
           contrast={selectedFrame.contrast}
           saturation={selectedFrame.saturation}
           blur={selectedFrame.blur}
+          imageFit={selectedFrame.imageStyle as "fill" | "contain" | "cover" | "crop"}
           onBrightnessChange={(val) => handleFrameUpdate(selectedFrameId, { brightness: val })}
           onContrastChange={(val) => handleFrameUpdate(selectedFrameId, { contrast: val })}
           onSaturationChange={(val) => handleFrameUpdate(selectedFrameId, { saturation: val })}
           onBlurChange={(val) => handleFrameUpdate(selectedFrameId, { blur: val })}
+          onImageFitChange={(val) => handleFrameUpdate(selectedFrameId, { imageStyle: val })}
           onClose={() => setShowImagePanel(false)}
         />
       )}
@@ -451,14 +453,12 @@ export default function CanvasContainerNew() {
         onToolChange={setActiveTool}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
-        onShowGenerate={() => setShowGeneratePanel(!showGeneratePanel)}
-        onShowImage={() => setShowImagePanel(!showImagePanel)}
-        onShowText={() => setShowTextPanel(!showTextPanel)}
-        onShowColors={() => setShowShapePanel(!showShapePanel)}
-        onAlign={handleAlign}
-        onArrange={handleArrange}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
+        onShapeSelect={(shapeType) => {
+          console.log(`Selected shape: ${shapeType}`);
+          toast.success(`${shapeType} tool selected`);
+        }}
       />
 
       <ShareDialog

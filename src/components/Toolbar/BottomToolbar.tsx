@@ -1,26 +1,20 @@
 import { 
   MousePointer2, PenTool, Square, Type, Image as ImageIcon, Plus,
-  Sparkles, Palette, FileText, 
-  AlignLeft, AlignCenter, AlignRight,
   Copy, Trash2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import ShapeSelector from "./ShapeSelector";
 
 interface BottomToolbarProps {
   activeTool?: string;
   onToolChange?: (tool: string) => void;
   onImageUpload: () => void;
   onAddFrame: () => void;
-  onShowGenerate?: () => void;
-  onShowImage?: () => void;
-  onShowText?: () => void;
-  onShowColors?: () => void;
-  onAlign?: (type: string) => void;
-  onArrange?: (type: string) => void;
   onDuplicate?: () => void;
   onDelete?: () => void;
+  onShapeSelect?: (shapeType: string) => void;
 }
 
 export default function BottomToolbar({ 
@@ -28,14 +22,9 @@ export default function BottomToolbar({
   onToolChange,
   onImageUpload, 
   onAddFrame,
-  onShowGenerate,
-  onShowImage,
-  onShowText,
-  onShowColors,
-  onAlign,
-  onArrange,
   onDuplicate,
-  onDelete
+  onDelete,
+  onShapeSelect
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
@@ -70,19 +59,23 @@ export default function BottomToolbar({
             <TooltipContent side="top">Pen</TooltipContent>
           </Tooltip>
 
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant={activeTool === "shape" ? "default" : "ghost"} 
-                size="icon" 
-                className="h-8 w-8 rounded-full"
-                onClick={() => onToolChange?.("shape")}
-              >
-                <Square className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Shape</TooltipContent>
-          </Tooltip>
+          <ShapeSelector onShapeSelect={(shapeType) => {
+            onToolChange?.("shape");
+            onShapeSelect?.(shapeType);
+          }}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant={activeTool === "shape" ? "default" : "ghost"} 
+                  size="icon" 
+                  className="h-8 w-8 rounded-full"
+                >
+                  <Square className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Shape</TooltipContent>
+            </Tooltip>
+          </ShapeSelector>
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -98,18 +91,6 @@ export default function BottomToolbar({
             <TooltipContent side="top">Text</TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          {/* Panel Toggles */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onShowGenerate}>
-                <Sparkles className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Generate</TooltipContent>
-          </Tooltip>
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onImageUpload}>
@@ -117,54 +98,6 @@ export default function BottomToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Image</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onShowText}>
-                <FileText className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Text</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onShowColors}>
-                <Palette className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Colors</TooltipContent>
-          </Tooltip>
-
-          <Separator orientation="vertical" className="h-6 mx-1" />
-
-          {/* Alignment Tools */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => onAlign?.("left")}>
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Align Left</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => onAlign?.("center")}>
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Align Center</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => onAlign?.("right")}>
-                <AlignRight className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Align Right</TooltipContent>
           </Tooltip>
 
           <Separator orientation="vertical" className="h-6 mx-1" />
