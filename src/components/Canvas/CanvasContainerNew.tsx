@@ -426,11 +426,113 @@ export default function CanvasContainerNew({
   };
 
   const handleAlign = (type: string) => {
-    toast.info(`Align ${type} - coming soon!`);
+    if (!selectedFrameId || selectedElementIds.length === 0) return;
+    
+    const frame = frames.find(f => f.id === selectedFrameId);
+    if (!frame || !frame.elements) return;
+
+    const updatedElements = frame.elements.map(el => {
+      if (!selectedElementIds.includes(el.id)) return el;
+
+      switch (type) {
+        case "left":
+          return { ...el, x: 0 };
+        case "center":
+          return { ...el, x: Math.max(0, (frame.width - el.width) / 2) };
+        case "right":
+          return { ...el, x: Math.max(0, frame.width - el.width) };
+        case "top":
+          return { ...el, y: 0 };
+        case "middle":
+          return { ...el, y: Math.max(0, (frame.height - el.height) / 2) };
+        case "bottom":
+          return { ...el, y: Math.max(0, frame.height - el.height) };
+        default:
+          return el;
+      }
+    });
+
+    const updatedFrames = frames.map(f =>
+      f.id === selectedFrameId ? { ...f, elements: updatedElements } : f
+    );
+
+    setFrames(updatedFrames);
   };
 
   const handleArrange = (type: string) => {
     toast.info(`Arrange ${type} - coming soon!`);
+  };
+
+  const handleDistribute = (type: string) => {
+    if (!selectedFrameId || selectedElementIds.length < 2) return;
+    
+    const frame = frames.find(f => f.id === selectedFrameId);
+    if (!frame || !frame.elements) return;
+
+    const selectedElements = frame.elements.filter(el => selectedElementIds.includes(el.id));
+    
+    if (type === "horizontal") {
+      // Sort by x position
+      const sorted = [...selectedElements].sort((a, b) => a.x - b.x);
+      const totalWidth = sorted.reduce((sum, el) => sum + el.width, 0);
+      const availableSpace = frame.width - totalWidth;
+      const spacing = availableSpace / (sorted.length + 1);
+      
+      let currentX = spacing;
+      const updatedElements = frame.elements.map(el => {
+        const index = sorted.findIndex(s => s.id === el.id);
+        if (index === -1) return el;
+        
+        const newEl = { ...el, x: currentX };
+        currentX += el.width + spacing;
+        return newEl;
+      });
+      
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements: updatedElements } : f
+      ));
+      toast.success("Distributed horizontally!");
+    } else if (type === "vertical") {
+      // Sort by y position
+      const sorted = [...selectedElements].sort((a, b) => a.y - b.y);
+      const totalHeight = sorted.reduce((sum, el) => sum + el.height, 0);
+      const availableSpace = frame.height - totalHeight;
+      const spacing = availableSpace / (sorted.length + 1);
+      
+      let currentY = spacing;
+      const updatedElements = frame.elements.map(el => {
+        const index = sorted.findIndex(s => s.id === el.id);
+        if (index === -1) return el;
+        
+        const newEl = { ...el, y: currentY };
+        currentY += el.height + spacing;
+        return newEl;
+      });
+      
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements: updatedElements } : f
+      ));
+      toast.success("Distributed vertically!");
+    } else if (type === "tidy") {
+      // Tidy up: stack elements with equal spacing
+      const sorted = [...selectedElements].sort((a, b) => a.y - b.y || a.x - b.x);
+      const spacing = 20;
+      
+      let currentY = spacing;
+      const updatedElements = frame.elements.map(el => {
+        const index = sorted.findIndex(s => s.id === el.id);
+        if (index === -1) return el;
+        
+        const newEl = { ...el, x: spacing, y: currentY };
+        currentY += el.height + spacing;
+        return newEl;
+      });
+      
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements: updatedElements } : f
+      ));
+      toast.success("Tidied up!");
+    }
   };
 
   const handleShapeSelect = (shapeType: string) => {
@@ -863,6 +965,7 @@ export default function CanvasContainerNew({
           }}
           onAlign={handleAlign}
           onArrange={handleArrange}
+          onDistribute={handleDistribute}
           flexDirection={selectedFrame?.flexDirection}
           justifyContent={selectedFrame?.justifyContent}
           alignItems={selectedFrame?.alignItems}
