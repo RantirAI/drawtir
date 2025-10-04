@@ -4,10 +4,21 @@ interface DrawingLayerProps {
   isActive: boolean;
   color: string;
   strokeWidth: number;
-  onPathComplete?: (path: string) => void;
+  frameId?: string;
+  frameX?: number;
+  frameY?: number;
+  onPathComplete?: (pathData: string, color: string, strokeWidth: number) => void;
 }
 
-export default function DrawingLayer({ isActive, color, strokeWidth, onPathComplete }: DrawingLayerProps) {
+export default function DrawingLayer({ 
+  isActive, 
+  color, 
+  strokeWidth, 
+  frameId,
+  frameX = 0,
+  frameY = 0,
+  onPathComplete 
+}: DrawingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [paths, setPaths] = useState<string[]>([]);
@@ -70,7 +81,9 @@ export default function DrawingLayer({ isActive, color, strokeWidth, onPathCompl
   const stopDrawing = () => {
     if (isDrawing && currentPath) {
       setPaths(prev => [...prev, currentPath]);
-      onPathComplete?.(currentPath);
+      if (onPathComplete) {
+        onPathComplete(currentPath, color, strokeWidth);
+      }
       setCurrentPath("");
     }
     setIsDrawing(false);

@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { 
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
-  ArrowUp, ArrowDown, Palette
+  ArrowUp, ArrowDown, Square, Type, Image, Pen, Box
 } from "lucide-react";
 
 const presetColors = [
@@ -26,18 +26,32 @@ const presetColors = [
 ];
 
 interface ShapeSettingsPanelProps {
+  elementType?: "frame" | "shape" | "text" | "image" | "drawing" | null;
+  elementName?: string;
   backgroundColor?: string;
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
   width?: number;
   height?: number;
+  x?: number;
+  y?: number;
+  rotation?: number;
+  opacity?: number;
+  cornerRadius?: number;
+  imageFit?: "fill" | "contain" | "cover" | "crop";
   onBackgroundColorChange?: (color: string) => void;
   onFillChange?: (color: string) => void;
   onStrokeChange?: (color: string) => void;
   onStrokeWidthChange?: (width: number) => void;
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
+  onXChange?: (x: number) => void;
+  onYChange?: (y: number) => void;
+  onRotationChange?: (rotation: number) => void;
+  onOpacityChange?: (opacity: number) => void;
+  onCornerRadiusChange?: (radius: number) => void;
+  onImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
   flexDirection?: "row" | "column";
@@ -51,19 +65,44 @@ interface ShapeSettingsPanelProps {
   onClose?: () => void;
 }
 
+const getElementIcon = (type?: "frame" | "shape" | "text" | "image" | "drawing" | null) => {
+  switch (type) {
+    case "frame": return Box;
+    case "shape": return Square;
+    case "text": return Type;
+    case "image": return Image;
+    case "drawing": return Pen;
+    default: return Square;
+  }
+};
+
 export default function ShapeSettingsPanel({
+  elementType,
+  elementName = "Nothing selected",
   backgroundColor = "#000000",
   fill = "#000000",
   stroke = "#000000",
   strokeWidth = 2,
   width = 100,
   height = 100,
+  x = 0,
+  y = 0,
+  rotation = 0,
+  opacity = 100,
+  cornerRadius = 0,
+  imageFit = "cover",
   onBackgroundColorChange,
   onFillChange,
   onStrokeChange,
   onStrokeWidthChange,
   onWidthChange,
   onHeightChange,
+  onXChange,
+  onYChange,
+  onRotationChange,
+  onOpacityChange,
+  onCornerRadiusChange,
+  onImageFitChange,
   onAlign,
   onArrange,
   flexDirection = "row",
@@ -76,166 +115,110 @@ export default function ShapeSettingsPanel({
   onGapChange,
   onClose,
 }: ShapeSettingsPanelProps) {
+  const ElementIcon = getElementIcon(elementType);
+  
   return (
     <DraggablePanel
-      title="Shape Settings"
+      title=""
       defaultPosition={{ x: 50, y: 500 }}
       onClose={onClose}
       className="w-72"
     >
-      <Accordion type="multiple" defaultValue={["appearance", "align", "layout"]} className="w-full">
-        {/* Appearance Section */}
-        <AccordionItem value="appearance">
-          <AccordionTrigger className="text-xs font-medium py-2">Appearance</AccordionTrigger>
-          <AccordionContent className="space-y-3 pb-3">
-            {/* Color Controls - Horizontal Layout */}
-            <div className="flex items-center gap-2">
-              {onBackgroundColorChange && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-7 w-7 rounded border-2 border-border hover:border-primary transition-colors flex-shrink-0"
-                      style={{ backgroundColor }}
-                    >
-                      <span className="sr-only">Background</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-64 p-3">
-                    <Label className="text-xs mb-2 block">Background</Label>
+      {/* Header with element type */}
+      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
+        <ElementIcon className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium">{elementName}</span>
+        {elementType && (
+          <span className="ml-auto text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+            {elementType}
+          </span>
+        )}
+      </div>
+
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance"]} className="w-full">
+        {/* Position Section */}
+        {(onXChange || onYChange || onRotationChange) && (
+          <AccordionItem value="position">
+            <AccordionTrigger className="text-xs font-medium py-2">Position</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-3">
+              <div className="grid grid-cols-3 gap-2">
+                {onXChange && (
+                  <div>
+                    <Label className="text-xs mb-1 block">X</Label>
                     <Input
-                      type="color"
-                      value={backgroundColor}
-                      onChange={(e) => onBackgroundColorChange(e.target.value)}
-                      className="h-8 w-full mb-2"
-                    />
-                    <Input
-                      type="text"
-                      value={backgroundColor}
-                      onChange={(e) => {
-                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                          onBackgroundColorChange(e.target.value);
-                        }
-                      }}
-                      placeholder="#000000"
+                      type="number"
+                      value={Math.round(x)}
+                      onChange={(e) => onXChange(Number(e.target.value))}
                       className="h-7 text-xs"
                     />
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {onFillChange && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-7 w-7 rounded border-2 border-border hover:border-primary transition-colors flex-shrink-0"
-                      style={{ backgroundColor: fill }}
-                    >
-                      <span className="sr-only">Fill</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-64 p-3">
-                    <Label className="text-xs mb-2 block">Fill</Label>
+                  </div>
+                )}
+                {onYChange && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Y</Label>
                     <Input
-                      type="color"
-                      value={fill}
-                      onChange={(e) => onFillChange(e.target.value)}
-                      className="h-8 w-full mb-2"
-                    />
-                    <Input
-                      type="text"
-                      value={fill}
-                      onChange={(e) => {
-                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                          onFillChange(e.target.value);
-                        }
-                      }}
-                      placeholder="#000000"
+                      type="number"
+                      value={Math.round(y)}
+                      onChange={(e) => onYChange(Number(e.target.value))}
                       className="h-7 text-xs"
                     />
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              {onStrokeChange && (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-7 w-7 rounded border-2 border-border hover:border-primary transition-colors flex-shrink-0"
-                      style={{ backgroundColor: stroke }}
-                    >
-                      <span className="sr-only">Stroke</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-64 p-3">
-                    <Label className="text-xs mb-2 block">Stroke</Label>
+                  </div>
+                )}
+                {onRotationChange && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Rotate</Label>
                     <Input
-                      type="color"
-                      value={stroke}
-                      onChange={(e) => onStrokeChange(e.target.value)}
-                      className="h-8 w-full mb-2"
+                      type="number"
+                      value={Math.round(rotation)}
+                      onChange={(e) => onRotationChange(Number(e.target.value))}
+                      className="h-7 text-xs"
                     />
-                    <Input
-                      type="text"
-                      value={stroke}
-                      onChange={(e) => {
-                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
-                          onStrokeChange(e.target.value);
-                        }
-                      }}
-                      placeholder="#000000"
-                      className="h-7 text-xs mb-2"
-                    />
-                    {onStrokeWidthChange && (
-                      <>
-                        <Label className="text-xs mb-1 block">Width: {strokeWidth}px</Label>
-                        <Slider
-                          value={[strokeWidth]}
-                          onValueChange={([v]) => onStrokeWidthChange(v)}
-                          min={0}
-                          max={10}
-                          step={1}
-                        />
-                      </>
-                    )}
-                  </PopoverContent>
-                </Popover>
-              )}
-
-              <span className="text-xs text-muted-foreground flex-1">Colors</span>
-            </div>
-
-            {/* Presets */}
-            <div>
-              <Label className="text-xs mb-2 block">Presets</Label>
-              <div className="grid grid-cols-8 gap-1">
-                {presetColors.map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => {
-                      if (onFillChange) onFillChange(color);
-                      if (onBackgroundColorChange) onBackgroundColorChange(color);
-                    }}
-                    className="w-6 h-6 rounded border border-border hover:border-primary transition-colors"
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
+                  </div>
+                )}
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
+              
+              {/* Alignment tools */}
+              {onAlign && (
+                <div className="mt-2">
+                  <Label className="text-xs mb-1 block">Align</Label>
+                  <div className="grid grid-cols-6 gap-1">
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("left")}>
+                      <AlignLeft className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("center")}>
+                      <AlignCenter className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("right")}>
+                      <AlignRight className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("top")}>
+                      <AlignStartVertical className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("middle")}>
+                      <AlignCenterVertical className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-full" onClick={() => onAlign("bottom")}>
+                      <AlignEndVertical className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
-        {/* Dimensions Section */}
+        {/* Layout/Dimensions Section */}
         {(onWidthChange || onHeightChange) && (
-          <AccordionItem value="dimensions">
-            <AccordionTrigger className="text-xs font-medium py-2">Dimensions</AccordionTrigger>
+          <AccordionItem value="layout">
+            <AccordionTrigger className="text-xs font-medium py-2">Layout</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
               <div className="grid grid-cols-2 gap-2">
                 {onWidthChange && (
                   <div>
-                    <Label className="text-xs mb-1 block">Width</Label>
+                    <Label className="text-xs mb-1 block">W</Label>
                     <Input
                       type="number"
-                      value={Math.round(width || 100)}
+                      value={Math.round(width)}
                       onChange={(e) => onWidthChange(Number(e.target.value))}
                       className="h-7 text-xs"
                     />
@@ -243,101 +226,248 @@ export default function ShapeSettingsPanel({
                 )}
                 {onHeightChange && (
                   <div>
-                    <Label className="text-xs mb-1 block">Height</Label>
+                    <Label className="text-xs mb-1 block">H</Label>
                     <Input
                       type="number"
-                      value={Math.round(height || 100)}
+                      value={Math.round(height)}
                       onChange={(e) => onHeightChange(Number(e.target.value))}
                       className="h-7 text-xs"
                     />
                   </div>
                 )}
               </div>
-            </AccordionContent>
-          </AccordionItem>
-        )}
-
-        {/* Alignment Tools */}
-        {onAlign && (
-          <AccordionItem value="align">
-            <AccordionTrigger className="text-xs font-medium py-2">Align</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
-              <div className="grid grid-cols-3 gap-1">
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("left")}>
-                  <AlignLeft className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("center")}>
-                  <AlignCenter className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("right")}>
-                  <AlignRight className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("top")}>
-                  <AlignStartVertical className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("middle")}>
-                  <AlignCenterVertical className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-7 w-full" onClick={() => onAlign("bottom")}>
-                  <AlignEndVertical className="h-3 w-3" />
-                </Button>
-              </div>
-
-              {onArrange && (
+              
+              {/* Flex Layout for Frames */}
+              {elementType === "frame" && onFlexDirectionChange && (
                 <>
-                  <Label className="text-xs mt-2 block">Arrange</Label>
-                  <div className="grid grid-cols-2 gap-1">
-                    <Button variant="outline" size="sm" className="h-6 text-[10px]" onClick={() => onArrange("forward")}>
-                      <ArrowUp className="h-3 w-3 mr-1" />
-                      Forward
+                  <div className="grid grid-cols-2 gap-1 mt-2">
+                    <Button 
+                      variant={flexDirection === "row" ? "default" : "outline"} 
+                      size="sm" 
+                      className="h-6 text-[10px]"
+                      onClick={() => onFlexDirectionChange("row")}
+                    >
+                      Row
                     </Button>
-                    <Button variant="outline" size="sm" className="h-6 text-[10px]" onClick={() => onArrange("backward")}>
-                      <ArrowDown className="h-3 w-3 mr-1" />
-                      Backward
+                    <Button 
+                      variant={flexDirection === "column" ? "default" : "outline"} 
+                      size="sm" 
+                      className="h-6 text-[10px]"
+                      onClick={() => onFlexDirectionChange("column")}
+                    >
+                      Column
                     </Button>
                   </div>
+                  
+                  {onGapChange && (
+                    <div className="mt-2">
+                      <Label className="text-xs mb-1 block">Gap: {gap}px</Label>
+                      <Slider
+                        value={[gap]}
+                        onValueChange={([v]) => onGapChange(v)}
+                        min={0}
+                        max={50}
+                        step={2}
+                      />
+                    </div>
+                  )}
                 </>
               )}
             </AccordionContent>
           </AccordionItem>
         )}
 
-        {/* Flex Layout */}
-        {onFlexDirectionChange && (
-          <AccordionItem value="layout">
-            <AccordionTrigger className="text-xs font-medium py-2">Layout</AccordionTrigger>
+        {/* Appearance Section */}
+        <AccordionItem value="appearance">
+          <AccordionTrigger className="text-xs font-medium py-2">Appearance</AccordionTrigger>
+          <AccordionContent className="space-y-3 pb-3">
+            {/* Opacity */}
+            {onOpacityChange && (
+              <div>
+                <Label className="text-xs mb-1 block">Opacity: {opacity}%</Label>
+                <Slider
+                  value={[opacity]}
+                  onValueChange={([v]) => onOpacityChange(v)}
+                  min={0}
+                  max={100}
+                  step={1}
+                />
+              </div>
+            )}
+            
+            {/* Corner Radius */}
+            {onCornerRadiusChange && (
+              <div>
+                <Label className="text-xs mb-1 block">Corner: {cornerRadius}px</Label>
+                <Slider
+                  value={[cornerRadius]}
+                  onValueChange={([v]) => onCornerRadiusChange(v)}
+                  min={0}
+                  max={50}
+                  step={1}
+                />
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+
+        {/* Fill Section */}
+        {(onFillChange || onBackgroundColorChange) && (
+          <AccordionItem value="fill">
+            <AccordionTrigger className="text-xs font-medium py-2">Fill</AccordionTrigger>
             <AccordionContent className="space-y-2 pb-3">
-              <div className="grid grid-cols-2 gap-1">
-                <Button 
-                  variant={flexDirection === "row" ? "default" : "outline"} 
-                  size="sm" 
-                  className="h-6 text-[10px]"
-                  onClick={() => onFlexDirectionChange("row")}
-                >
-                  Row
-                </Button>
-                <Button 
-                  variant={flexDirection === "column" ? "default" : "outline"} 
-                  size="sm" 
-                  className="h-6 text-[10px]"
-                  onClick={() => onFlexDirectionChange("column")}
-                >
-                  Column
-                </Button>
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors"
+                      style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
+                    >
+                      <span className="sr-only">Color</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" className="w-64 p-3">
+                    <Label className="text-xs mb-2 block">Color</Label>
+                    <Input
+                      type="color"
+                      value={onBackgroundColorChange ? backgroundColor : fill}
+                      onChange={(e) => {
+                        if (onBackgroundColorChange) onBackgroundColorChange(e.target.value);
+                        if (onFillChange) onFillChange(e.target.value);
+                      }}
+                      className="h-8 w-full mb-2"
+                    />
+                    <Input
+                      type="text"
+                      value={onBackgroundColorChange ? backgroundColor : fill}
+                      onChange={(e) => {
+                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                          if (onBackgroundColorChange) onBackgroundColorChange(e.target.value);
+                          if (onFillChange) onFillChange(e.target.value);
+                        }
+                      }}
+                      placeholder="#000000"
+                      className="h-7 text-xs"
+                    />
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground flex-1">
+                  {onBackgroundColorChange ? backgroundColor : fill}
+                </span>
               </div>
               
-              {onGapChange && (
-                <div className="mt-2">
-                  <Label className="text-xs mb-1 block">Gap: {gap}px</Label>
-                  <Slider
-                    value={[gap]}
-                    onValueChange={([v]) => onGapChange(v)}
-                    min={0}
-                    max={50}
-                    step={2}
-                  />
+              {/* Presets */}
+              <div>
+                <Label className="text-xs mb-2 block">Presets</Label>
+                <div className="grid grid-cols-8 gap-1">
+                  {presetColors.map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => {
+                        if (onFillChange) onFillChange(color);
+                        if (onBackgroundColorChange) onBackgroundColorChange(color);
+                      }}
+                      className="w-6 h-6 rounded border border-border hover:border-primary transition-colors"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
                 </div>
-              )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Stroke Section */}
+        {(onStrokeChange || elementType === "drawing") && (
+          <AccordionItem value="stroke">
+            <AccordionTrigger className="text-xs font-medium py-2">Stroke</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-3">
+              <div className="flex items-center gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors"
+                      style={{ backgroundColor: stroke }}
+                    >
+                      <span className="sr-only">Stroke</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" className="w-64 p-3">
+                    <Label className="text-xs mb-2 block">Stroke Color</Label>
+                    <Input
+                      type="color"
+                      value={stroke}
+                      onChange={(e) => onStrokeChange?.(e.target.value)}
+                      className="h-8 w-full mb-2"
+                    />
+                    <Input
+                      type="text"
+                      value={stroke}
+                      onChange={(e) => {
+                        if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                          onStrokeChange?.(e.target.value);
+                        }
+                      }}
+                      placeholder="#000000"
+                      className="h-7 text-xs mb-2"
+                    />
+                    {onStrokeWidthChange && (
+                      <>
+                        <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
+                        <Slider
+                          value={[strokeWidth]}
+                          onValueChange={([v]) => onStrokeWidthChange(v)}
+                          min={1}
+                          max={20}
+                          step={1}
+                        />
+                      </>
+                    )}
+                  </PopoverContent>
+                </Popover>
+                <span className="text-xs text-muted-foreground flex-1">{stroke}</span>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Image Fit (for image elements) */}
+        {elementType === "image" && onImageFitChange && (
+          <AccordionItem value="image-fit">
+            <AccordionTrigger className="text-xs font-medium py-2">Image Fit</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-3">
+              <div className="grid grid-cols-2 gap-1">
+                {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
+                  <Button
+                    key={fit}
+                    variant={imageFit === fit ? "default" : "outline"}
+                    size="sm"
+                    className="h-7 text-[10px] capitalize"
+                    onClick={() => onImageFitChange(fit)}
+                  >
+                    {fit}
+                  </Button>
+                ))}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Arrange (Layer Order) */}
+        {onArrange && (
+          <AccordionItem value="arrange">
+            <AccordionTrigger className="text-xs font-medium py-2">Arrange</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-3">
+              <div className="grid grid-cols-2 gap-1">
+                <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => onArrange("forward")}>
+                  <ArrowUp className="h-3 w-3 mr-1" />
+                  Forward
+                </Button>
+                <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => onArrange("backward")}>
+                  <ArrowDown className="h-3 w-3 mr-1" />
+                  Backward
+                </Button>
+              </div>
             </AccordionContent>
           </AccordionItem>
         )}

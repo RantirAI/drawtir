@@ -10,6 +10,8 @@ interface ResizableElementProps {
   src?: string;
   text?: string;
   shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+  pathData?: string; // For pen drawings
+  strokeWidth?: number;
   fill?: string;
   stroke?: string;
   isSelected: boolean;
@@ -29,6 +31,8 @@ export default function ResizableElement({
   shapeType = "rectangle",
   fill = "#000000",
   stroke = "#000000",
+  pathData,
+  strokeWidth = 2,
   isSelected,
   onUpdate,
   onSelect,
@@ -103,6 +107,29 @@ export default function ResizableElement({
   };
 
   const renderShape = () => {
+    // Drawing (pen tool paths)
+    if (pathData) {
+      return (
+        <svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="none"
+          style={{ overflow: 'visible' }}
+        >
+          <path
+            d={pathData}
+            fill="none"
+            stroke={stroke}
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    }
+
+    // Shapes
     switch (shapeType) {
       case "circle":
       case "ellipse":

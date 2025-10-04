@@ -1,5 +1,6 @@
 import { Menu, Share2, Download, Save, FileDown, Undo, Redo } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -102,6 +103,8 @@ export default function EditorTopBar({
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShare}>
           <Share2 className="h-3 w-3" />
         </Button>
+        
+        <ThemeToggle />
       </div>
     </div>
   );

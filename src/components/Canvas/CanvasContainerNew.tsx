@@ -30,6 +30,8 @@ interface Element {
   shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   fill?: string;
   stroke?: string;
+  strokeWidth?: number;
+  pathData?: string;
   frameId: string;
 }
 
@@ -100,14 +102,13 @@ export default function CanvasContainerNew() {
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const [activeTool, setActiveTool] = useState<string>("select");
+  const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
   const [penColor, setPenColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
 
   const [showImagePanel, setShowImagePanel] = useState(false);
-  const [showTextPanel, setShowTextPanel] = useState(false);
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
-  const [showShapePanel, setShowShapePanel] = useState(false);
+  const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
 
   const [description, setDescription] = useState("");
@@ -362,6 +363,8 @@ export default function CanvasContainerNew() {
       return f;
     }));
     setSelectedElementId(newElement.id);
+    setShowShapeSettings(true);
+    setActiveTool("select");
     toast.success(`${shapeType} added!`);
   };
 
@@ -401,6 +404,8 @@ export default function CanvasContainerNew() {
       return f;
     }));
     setSelectedElementId(newElement.id);
+    setShowShapeSettings(true);
+    setActiveTool("select");
     toast.success("Text added!");
   };
 
@@ -523,55 +528,35 @@ export default function CanvasContainerNew() {
         />
       )}
 
-      {showTextPanel && selectedFrame && (
-        <DraggablePanel title="Text Settings" defaultPosition={{ x: window.innerWidth - 250, y: 150 }} onClose={() => setShowTextPanel(false)} className="w-48">
-          <div className="space-y-3">
-            <div>
-              <Label className="text-xs mb-1 block">Top Caption</Label>
-              <Input
-                value={selectedFrame.topCaption}
-                onChange={(e) => handleFrameUpdate(selectedFrameId, { topCaption: e.target.value })}
-                className="h-8 text-xs"
-              />
-            </div>
-            <div>
-              <Label className="text-xs mb-1 block">Bottom Caption</Label>
-              <Input
-                value={selectedFrame.bottomCaption}
-                onChange={(e) => handleFrameUpdate(selectedFrameId, { bottomCaption: e.target.value })}
-                className="h-8 text-xs"
-              />
-            </div>
-          </div>
-        </DraggablePanel>
-      )}
-
-      {showShapePanel && selectedElement && (
+      {/* Unified Shape Settings Panel */}
+      {showShapeSettings && (selectedElement || selectedFrame) && (
         <ShapeSettingsPanel
+          elementType={selectedElementId ? selectedElement?.type : "frame"}
+          elementName={selectedElementId ? `${selectedElement?.type}` : selectedFrame?.name}
           backgroundColor={selectedFrame?.backgroundColor}
-          fill={selectedElement.fill}
-          stroke={selectedElement.stroke}
-          strokeWidth={strokeWidth}
-          width={selectedElement.width}
-          height={selectedElement.height}
+          fill={selectedElement?.fill || penColor}
+          stroke={selectedElement?.stroke || penColor}
+          strokeWidth={selectedElement?.strokeWidth || strokeWidth}
+          width={selectedElement?.width || selectedFrame?.width}
+          height={selectedElement?.height || selectedFrame?.height}
+          x={selectedElement?.x}
+          y={selectedElement?.y}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
-          onFillChange={(color) => handleElementUpdate(selectedElementId!, { fill: color })}
-          onStrokeChange={(color) => handleElementUpdate(selectedElementId!, { stroke: color })}
-          onStrokeWidthChange={setStrokeWidth}
-          onWidthChange={(w) => handleElementUpdate(selectedElementId!, { width: w })}
-          onHeightChange={(h) => handleElementUpdate(selectedElementId!, { height: h })}
+          onFillChange={(color) => selectedElementId ? handleElementUpdate(selectedElementId, { fill: color }) : setPenColor(color)}
+          onStrokeChange={(color) => selectedElementId ? handleElementUpdate(selectedElementId, { stroke: color }) : setPenColor(color)}
+          onStrokeWidthChange={(w) => selectedElementId ? handleElementUpdate(selectedElementId, { strokeWidth: w }) : setStrokeWidth(w)}
+          onWidthChange={(w) => selectedElementId ? handleElementUpdate(selectedElementId, { width: w }) : handleFrameUpdate(selectedFrameId, { width: w })}
+          onHeightChange={(h) => selectedElementId ? handleElementUpdate(selectedElementId, { height: h }) : handleFrameUpdate(selectedFrameId, { height: h })}
+          onXChange={(x) => selectedElementId && handleElementUpdate(selectedElementId, { x })}
+          onYChange={(y) => selectedElementId && handleElementUpdate(selectedElementId, { y })}
           onAlign={handleAlign}
           onArrange={handleArrange}
           flexDirection={selectedFrame?.flexDirection}
-          justifyContent={selectedFrame?.justifyContent}
-          alignItems={selectedFrame?.alignItems}
-          gap={selectedFrame?.gap}
           onFlexDirectionChange={(dir) => handleFrameUpdate(selectedFrameId, { flexDirection: dir })}
-          onJustifyContentChange={(val) => handleFrameUpdate(selectedFrameId, { justifyContent: val })}
-          onAlignItemsChange={(val) => handleFrameUpdate(selectedFrameId, { alignItems: val })}
           onGapChange={(val) => handleFrameUpdate(selectedFrameId, { gap: val })}
+          gap={selectedFrame?.gap}
           onClose={() => {
-            setShowShapePanel(false);
+            setShowShapeSettings(false);
             setSelectedElementId(null);
           }}
         />
@@ -586,8 +571,6 @@ export default function CanvasContainerNew() {
           onClick={() => {
             setShowGeneratePanel(!showGeneratePanel);
             setShowImagePanel(false);
-            setShowTextPanel(false);
-            setShowShapePanel(false);
           }}
         >
           <Sparkles className="h-4 w-4" />
@@ -599,51 +582,50 @@ export default function CanvasContainerNew() {
           onClick={() => {
             setShowImagePanel(!showImagePanel);
             setShowGeneratePanel(false);
-            setShowTextPanel(false);
-            setShowShapePanel(false);
           }}
         >
           <ImageIcon className="h-4 w-4" />
-        </Button>
-        <Button
-          variant={showTextPanel ? "default" : "outline"}
-          size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
-          onClick={() => {
-            if (!showTextPanel) {
-              handleAddText();
-            }
-            setShowTextPanel(!showTextPanel);
-            setShowGeneratePanel(false);
-            setShowImagePanel(false);
-            setShowShapePanel(false);
-          }}
-        >
-          <Type className="h-4 w-4" />
-        </Button>
-        <Button
-          variant={showShapePanel ? "default" : "outline"}
-          size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
-          onClick={() => {
-            setShowShapePanel(!showShapePanel);
-            setShowGeneratePanel(false);
-            setShowImagePanel(false);
-            setShowTextPanel(false);
-          }}
-        >
-          <Palette className="h-4 w-4" />
         </Button>
       </div>
 
       <BottomToolbar
         activeTool={activeTool}
-        onToolChange={setActiveTool}
+        onToolChange={(tool) => {
+          setActiveTool(tool as typeof activeTool);
+          if (tool === "text") {
+            handleAddText();
+          }
+        }}
+        onShapeSelect={handleShapeSelect}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
-        onShapeSelect={handleShapeSelect}
+      />
+      
+      <DrawingLayer
+        isActive={activeTool === "pen"}
+        color={penColor}
+        strokeWidth={strokeWidth}
+        frameId={selectedFrameId}
+        onPathComplete={(pathData, color, strokeW) => {
+          if (!selectedFrameId) return;
+          const newElement: Element = {
+            id: `element-${Date.now()}`,
+            type: "shape",
+            x: 50,
+            y: 50,
+            width: 200,
+            height: 200,
+            pathData,
+            stroke: color,
+            strokeWidth: strokeW,
+            frameId: selectedFrameId,
+          };
+          setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
+          setSelectedElementId(newElement.id);
+          setShowShapeSettings(true);
+        }}
       />
 
       <ShareDialog
