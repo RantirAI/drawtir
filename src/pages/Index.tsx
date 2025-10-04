@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import CanvasContainer from "@/components/Canvas/CanvasContainer";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -36,11 +35,7 @@ const Index = () => {
     return null;
   }
 
-  return (
-    <ThemeProvider defaultTheme="dark" storageKey="poster-theme">
-      <CanvasContainer user={user} />
-    </ThemeProvider>
-  );
+  return <CanvasContainer user={user} />;
 };
 
 export default Index;
