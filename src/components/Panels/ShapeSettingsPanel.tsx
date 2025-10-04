@@ -30,10 +30,14 @@ interface ShapeSettingsPanelProps {
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
+  width?: number;
+  height?: number;
   onBackgroundColorChange?: (color: string) => void;
   onFillChange?: (color: string) => void;
   onStrokeChange?: (color: string) => void;
   onStrokeWidthChange?: (width: number) => void;
+  onWidthChange?: (width: number) => void;
+  onHeightChange?: (height: number) => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
   flexDirection?: "row" | "column";
@@ -52,10 +56,14 @@ export default function ShapeSettingsPanel({
   fill = "#000000",
   stroke = "#000000",
   strokeWidth = 2,
+  width = 100,
+  height = 100,
   onBackgroundColorChange,
   onFillChange,
   onStrokeChange,
   onStrokeWidthChange,
+  onWidthChange,
+  onHeightChange,
   onAlign,
   onArrange,
   flexDirection = "row",
@@ -215,6 +223,39 @@ export default function ShapeSettingsPanel({
             </div>
           </AccordionContent>
         </AccordionItem>
+
+        {/* Dimensions Section */}
+        {(onWidthChange || onHeightChange) && (
+          <AccordionItem value="dimensions">
+            <AccordionTrigger className="text-xs font-medium py-2">Dimensions</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-3">
+              <div className="grid grid-cols-2 gap-2">
+                {onWidthChange && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Width</Label>
+                    <Input
+                      type="number"
+                      value={Math.round(width || 100)}
+                      onChange={(e) => onWidthChange(Number(e.target.value))}
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                )}
+                {onHeightChange && (
+                  <div>
+                    <Label className="text-xs mb-1 block">Height</Label>
+                    <Input
+                      type="number"
+                      value={Math.round(height || 100)}
+                      onChange={(e) => onHeightChange(Number(e.target.value))}
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Alignment Tools */}
         {onAlign && (

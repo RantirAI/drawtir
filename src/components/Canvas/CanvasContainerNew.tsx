@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import ResizableFrame from "./ResizableFrame";
@@ -11,11 +11,27 @@ import CanvasBackground from "./CanvasBackground";
 import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
+import ResizableElement from "./ResizableElement";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Image as ImageIcon, Type, Palette } from "lucide-react";
+
+interface Element {
+  id: string;
+  type: "image" | "shape" | "text";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  src?: string;
+  text?: string;
+  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+  fill?: string;
+  stroke?: string;
+  frameId: string;
+}
 
 interface Frame {
   id: string;
@@ -44,10 +60,13 @@ interface Frame {
   justifyContent: string;
   alignItems: string;
   gap: number;
+  elements?: Element[];
 }
 
 export default function CanvasContainerNew() {
   const [projectTitle, setProjectTitle] = useState("Untitled Poster");
+  const [history, setHistory] = useState<Frame[][]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const [frames, setFrames] = useState<Frame[]>([
     {
       id: "frame-1",
@@ -76,9 +95,11 @@ export default function CanvasContainerNew() {
       justifyContent: "start",
       alignItems: "start",
       gap: 0,
+      elements: [],
     },
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [activeTool, setActiveTool] = useState<string>("select");
   const [penColor, setPenColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
@@ -96,6 +117,52 @@ export default function CanvasContainerNew() {
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const selectedFrame = frames.find((f) => f.id === selectedFrameId);
+  const selectedElement = selectedFrame?.elements?.find((e) => e.id === selectedElementId);
+
+  // Save to history when frames change
+  useEffect(() => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(JSON.parse(JSON.stringify(frames)));
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [frames]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [historyIndex, history]);
+
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setFrames(JSON.parse(JSON.stringify(history[historyIndex - 1])));
+      toast.success("Undone");
+    } else {
+      toast.info("Nothing to undo");
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setFrames(JSON.parse(JSON.stringify(history[historyIndex + 1])));
+      toast.success("Redone");
+    } else {
+      toast.info("Nothing to redo");
+    }
+  };
 
   const getFilterStyle = () => {
     if (!selectedFrame) return {};
@@ -132,6 +199,7 @@ export default function CanvasContainerNew() {
       justifyContent: "start",
       alignItems: "start",
       gap: 0,
+      elements: [],
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
@@ -271,6 +339,71 @@ export default function CanvasContainerNew() {
     toast.info(`Arrange ${type} - coming soon!`);
   };
 
+  const handleShapeSelect = (shapeType: string) => {
+    if (!selectedFrameId) return;
+    
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "shape",
+      x: 50,
+      y: 50,
+      width: shapeType === "line" || shapeType === "arrow" ? 150 : 100,
+      height: shapeType === "line" || shapeType === "arrow" ? 2 : 100,
+      shapeType: shapeType as any,
+      fill: penColor,
+      stroke: penColor,
+      frameId: selectedFrameId,
+    };
+
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementId(newElement.id);
+    toast.success(`${shapeType} added!`);
+  };
+
+  const handleElementUpdate = (elementId: string, updates: Partial<Element>) => {
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return {
+          ...f,
+          elements: (f.elements || []).map(e => 
+            e.id === elementId ? { ...e, ...updates } : e
+          ),
+        };
+      }
+      return f;
+    }));
+  };
+
+  const handleAddText = () => {
+    if (!selectedFrameId) return;
+    
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "text",
+      x: 50,
+      y: 50,
+      width: 200,
+      height: 50,
+      text: "Double click to edit",
+      frameId: selectedFrameId,
+      fill: penColor,
+    };
+
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementId(newElement.id);
+    toast.success("Text added!");
+  };
+
   return (
     <div className="w-full h-screen relative overflow-hidden">
       <CanvasBackground />
@@ -282,6 +415,10 @@ export default function CanvasContainerNew() {
         onDownload={downloadPoster}
         onExport={downloadPoster}
         onShare={() => setShowShareDialog(true)}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={historyIndex > 0}
+        canRedo={historyIndex < history.length - 1}
         isSaving={isSaving}
       />
 
@@ -317,7 +454,28 @@ export default function CanvasContainerNew() {
               isSelected={frame.id === selectedFrameId}
               onUpdate={handleFrameUpdate}
               onSelect={() => setSelectedFrameId(frame.id)}
-            />
+            >
+              {/* Elements inside frame */}
+              {(frame.elements || []).map((element) => (
+                <ResizableElement
+                  key={element.id}
+                  id={element.id}
+                  type={element.type}
+                  x={element.x}
+                  y={element.y}
+                  width={element.width}
+                  height={element.height}
+                  src={element.src}
+                  text={element.text}
+                  shapeType={element.shapeType}
+                  fill={element.fill}
+                  stroke={element.stroke}
+                  isSelected={element.id === selectedElementId}
+                  onUpdate={handleElementUpdate}
+                  onSelect={() => setSelectedElementId(element.id)}
+                />
+              ))}
+            </ResizableFrame>
           </div>
         ))}
 
@@ -388,27 +546,34 @@ export default function CanvasContainerNew() {
         </DraggablePanel>
       )}
 
-      {showShapePanel && selectedFrame && (
+      {showShapePanel && selectedElement && (
         <ShapeSettingsPanel
-          backgroundColor={selectedFrame.backgroundColor}
-          fill={penColor}
-          stroke={penColor}
+          backgroundColor={selectedFrame?.backgroundColor}
+          fill={selectedElement.fill}
+          stroke={selectedElement.stroke}
           strokeWidth={strokeWidth}
+          width={selectedElement.width}
+          height={selectedElement.height}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
-          onFillChange={setPenColor}
-          onStrokeChange={setPenColor}
+          onFillChange={(color) => handleElementUpdate(selectedElementId!, { fill: color })}
+          onStrokeChange={(color) => handleElementUpdate(selectedElementId!, { stroke: color })}
           onStrokeWidthChange={setStrokeWidth}
+          onWidthChange={(w) => handleElementUpdate(selectedElementId!, { width: w })}
+          onHeightChange={(h) => handleElementUpdate(selectedElementId!, { height: h })}
           onAlign={handleAlign}
           onArrange={handleArrange}
-          flexDirection={selectedFrame.flexDirection}
-          justifyContent={selectedFrame.justifyContent}
-          alignItems={selectedFrame.alignItems}
-          gap={selectedFrame.gap}
+          flexDirection={selectedFrame?.flexDirection}
+          justifyContent={selectedFrame?.justifyContent}
+          alignItems={selectedFrame?.alignItems}
+          gap={selectedFrame?.gap}
           onFlexDirectionChange={(dir) => handleFrameUpdate(selectedFrameId, { flexDirection: dir })}
           onJustifyContentChange={(val) => handleFrameUpdate(selectedFrameId, { justifyContent: val })}
           onAlignItemsChange={(val) => handleFrameUpdate(selectedFrameId, { alignItems: val })}
           onGapChange={(val) => handleFrameUpdate(selectedFrameId, { gap: val })}
-          onClose={() => setShowShapePanel(false)}
+          onClose={() => {
+            setShowShapePanel(false);
+            setSelectedElementId(null);
+          }}
         />
       )}
 
@@ -417,32 +582,55 @@ export default function CanvasContainerNew() {
         <Button
           variant={showGeneratePanel ? "default" : "outline"}
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
-          onClick={() => setShowGeneratePanel(!showGeneratePanel)}
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          onClick={() => {
+            setShowGeneratePanel(!showGeneratePanel);
+            setShowImagePanel(false);
+            setShowTextPanel(false);
+            setShowShapePanel(false);
+          }}
         >
           <Sparkles className="h-4 w-4" />
         </Button>
         <Button
           variant={showImagePanel ? "default" : "outline"}
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
-          onClick={() => setShowImagePanel(!showImagePanel)}
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          onClick={() => {
+            setShowImagePanel(!showImagePanel);
+            setShowGeneratePanel(false);
+            setShowTextPanel(false);
+            setShowShapePanel(false);
+          }}
         >
           <ImageIcon className="h-4 w-4" />
         </Button>
         <Button
           variant={showTextPanel ? "default" : "outline"}
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
-          onClick={() => setShowTextPanel(!showTextPanel)}
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          onClick={() => {
+            if (!showTextPanel) {
+              handleAddText();
+            }
+            setShowTextPanel(!showTextPanel);
+            setShowGeneratePanel(false);
+            setShowImagePanel(false);
+            setShowShapePanel(false);
+          }}
         >
           <Type className="h-4 w-4" />
         </Button>
         <Button
           variant={showShapePanel ? "default" : "outline"}
           size="icon"
-          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl"
-          onClick={() => setShowShapePanel(!showShapePanel)}
+          className="h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform"
+          onClick={() => {
+            setShowShapePanel(!showShapePanel);
+            setShowGeneratePanel(false);
+            setShowImagePanel(false);
+            setShowTextPanel(false);
+          }}
         >
           <Palette className="h-4 w-4" />
         </Button>
@@ -455,10 +643,7 @@ export default function CanvasContainerNew() {
         onAddFrame={handleAddFrame}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
-        onShapeSelect={(shapeType) => {
-          console.log(`Selected shape: ${shapeType}`);
-          toast.success(`${shapeType} tool selected`);
-        }}
+        onShapeSelect={handleShapeSelect}
       />
 
       <ShareDialog

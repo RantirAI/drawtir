@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 
 interface ResizableElementProps {
   id: string;
-  type: "image" | "shape";
+  type: "image" | "shape" | "text";
   x: number;
   y: number;
   width: number;
   height: number;
   src?: string;
-  shapeType?: "rectangle" | "circle" | "line" | "arrow";
+  text?: string;
+  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   fill?: string;
   stroke?: string;
   isSelected: boolean;
@@ -24,6 +25,7 @@ export default function ResizableElement({
   width,
   height,
   src,
+  text,
   shapeType = "rectangle",
   fill = "#000000",
   stroke = "#000000",
@@ -103,6 +105,7 @@ export default function ResizableElement({
   const renderShape = () => {
     switch (shapeType) {
       case "circle":
+      case "ellipse":
         return (
           <div
             className="w-full h-full rounded-full"
@@ -112,18 +115,40 @@ export default function ResizableElement({
       case "line":
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <line x1="0" y1="0" x2={width} y2={height} stroke={stroke} strokeWidth="2" />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth="2" />
           </svg>
         );
       case "arrow":
         return (
           <svg width={width} height={height} className="w-full h-full">
             <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+              <marker id={`arrowhead-${id}`} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
                 <polygon points="0 0, 10 3.5, 0 7" fill={stroke} />
               </marker>
             </defs>
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth="2" markerEnd="url(#arrowhead)" />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth="2" markerEnd={`url(#arrowhead-${id})`} />
+          </svg>
+        );
+      case "polygon":
+        const hexPoints = `${width / 2},0 ${width},${height / 4} ${width},${height * 3 / 4} ${width / 2},${height} 0,${height * 3 / 4} 0,${height / 4}`;
+        return (
+          <svg width={width} height={height} className="w-full h-full">
+            <polygon points={hexPoints} fill={fill} stroke={stroke} strokeWidth="2" />
+          </svg>
+        );
+      case "star":
+        const cx = width / 2;
+        const cy = height / 2;
+        const outerRadius = Math.min(width, height) / 2;
+        const innerRadius = outerRadius * 0.4;
+        const starPoints = Array.from({ length: 10 }, (_, i) => {
+          const angle = (Math.PI / 5) * i - Math.PI / 2;
+          const radius = i % 2 === 0 ? outerRadius : innerRadius;
+          return `${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`;
+        }).join(' ');
+        return (
+          <svg width={width} height={height} className="w-full h-full">
+            <polygon points={starPoints} fill={fill} stroke={stroke} strokeWidth="2" />
           </svg>
         );
       default:
@@ -144,16 +169,29 @@ export default function ResizableElement({
     >
       {type === "image" && src ? (
         <img src={src} alt="Element" className="w-full h-full object-cover rounded" />
+      ) : type === "text" ? (
+        <div 
+          className="w-full h-full flex items-center justify-center text-center px-2"
+          style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
+        >
+          {text || "Text"}
+        </div>
       ) : (
         renderShape()
       )}
 
       {isSelected && (
         <>
-          <div className="absolute -top-1 -left-1 w-2 h-2 bg-primary rounded-full cursor-nw-resize" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-          <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full cursor-ne-resize" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-          <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-primary rounded-full cursor-sw-resize" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-          <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-primary rounded-full cursor-se-resize" onMouseDown={(e) => handleResizeStart(e, "se")} />
+          {/* Dimension label */}
+          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded whitespace-nowrap pointer-events-none">
+            {Math.round(width)} × {Math.round(height)}
+          </div>
+          
+          {/* Resize handles */}
+          <div className="absolute -top-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-nw-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "nw")} />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-ne-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "ne")} />
+          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-primary rounded-full cursor-sw-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "sw")} />
+          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-primary rounded-full cursor-se-resize border-2 border-background" onMouseDown={(e) => handleResizeStart(e, "se")} />
         </>
       )}
     </div>

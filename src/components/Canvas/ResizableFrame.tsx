@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, ReactNode } from "react";
 import PosterPreview from "./PosterPreview";
 
 interface ResizableFrameProps {
@@ -23,6 +23,7 @@ interface ResizableFrameProps {
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string }>) => void;
   isSelected: boolean;
   onSelect: () => void;
+  children?: ReactNode;
 }
 
 export default function ResizableFrame({
@@ -47,6 +48,7 @@ export default function ResizableFrame({
   onUpdate,
   isSelected,
   onSelect,
+  children,
 }: ResizableFrameProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<string | null>(null);
@@ -119,6 +121,7 @@ export default function ResizableFrame({
         width: `${width}px`,
         height: `${height}px`,
         cursor: isDragging ? "grabbing" : "grab",
+        overflow: "hidden",
       }}
       onMouseDown={handleMouseDown}
     >
@@ -137,6 +140,13 @@ export default function ResizableFrame({
         linkPosition={linkPosition}
         gradientIntensity={gradientIntensity}
       />
+      
+      {/* Elements inside frame */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="relative w-full h-full pointer-events-auto">
+          {children}
+        </div>
+      </div>
       
       {isSelected && (
         <>

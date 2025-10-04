@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +19,10 @@ interface EditorTopBarProps {
   onDownload?: () => void;
   onExport?: () => void;
   onShare?: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
   isSaving?: boolean;
 }
 
@@ -29,6 +33,10 @@ export default function EditorTopBar({
   onDownload,
   onExport, 
   onShare,
+  onUndo,
+  onRedo,
+  canUndo = false,
+  canRedo = false,
   isSaving 
 }: EditorTopBarProps) {
   const navigate = useNavigate();
@@ -48,7 +56,7 @@ export default function EditorTopBar({
               <Menu className="h-3 w-3" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-40">
+          <DropdownMenuContent align="start" className="w-48">
             <DropdownMenuItem onClick={() => navigate("/")}>
               Home
             </DropdownMenuItem>
@@ -57,6 +65,17 @@ export default function EditorTopBar({
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>
               Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={onUndo} disabled={!canUndo}>
+              <Undo className="h-3 w-3 mr-2" />
+              Undo
+              <span className="ml-auto text-xs text-muted-foreground">Ctrl+Z</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onRedo} disabled={!canRedo}>
+              <Redo className="h-3 w-3 mr-2" />
+              Redo
+              <span className="ml-auto text-xs text-muted-foreground">Ctrl+Y</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onExport}>
