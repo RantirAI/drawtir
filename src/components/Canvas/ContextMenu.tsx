@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -8,7 +9,7 @@ import {
 import { Copy, Trash2, Sparkles, RefreshCw, Layers, Box } from "lucide-react";
 
 interface CanvasContextMenuProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onDelete?: () => void;
   onDuplicate?: () => void;
   onGenerate?: () => void;
