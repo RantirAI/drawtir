@@ -611,6 +611,7 @@ export default function CanvasContainerNew({
     toast.success("Wrapped in new frame!");
   };
 
+  // Main canvas container component
   return (
     <div className="w-full h-screen relative overflow-hidden">
       <CanvasBackground />
