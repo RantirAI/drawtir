@@ -10,7 +10,13 @@ import Editor from "./pages/Editor";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

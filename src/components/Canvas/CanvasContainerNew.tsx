@@ -21,8 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, Image as ImageIcon, Layers } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 
-// Using types from @/types/elements
-
 export default function CanvasContainerNew() {
   const [projectTitle, setProjectTitle] = useState("Untitled Poster");
   const [history, setHistory] = useState<Frame[][]>([]);
