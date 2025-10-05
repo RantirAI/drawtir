@@ -28,7 +28,7 @@ export default function BottomToolbar({
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
         <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
           {/* Basic Tools */}
           <Tooltip>
