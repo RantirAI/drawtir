@@ -52,7 +52,7 @@ export default function CanvasContainerNew({
       y: 100,
       width: 400,
       height: 600,
-      backgroundColor: "#000000",
+      backgroundColor: "#ffffff",
       image: null,
       topCaption: "",
       bottomCaption: "",
@@ -68,9 +68,9 @@ export default function CanvasContainerNew({
       linkText: "",
       linkPosition: "top-right",
       gradientIntensity: 80,
-      flexDirection: "row",
-      justifyContent: "start",
-      alignItems: "start",
+      flexDirection: undefined,
+      justifyContent: undefined,
+      alignItems: undefined,
       gap: 0,
       elements: [],
       cornerRadius: 0,
@@ -193,7 +193,7 @@ export default function CanvasContainerNew({
       y: 150 + frames.length * 50,
       width: 400,
       height: 600,
-      backgroundColor: "#000000",
+      backgroundColor: "#ffffff",
       image: null,
       topCaption: "",
       bottomCaption: "",
@@ -209,9 +209,9 @@ export default function CanvasContainerNew({
       linkText: "",
       linkPosition: "top-right",
       gradientIntensity: 80,
-      flexDirection: "row",
-      justifyContent: "start",
-      alignItems: "start",
+      flexDirection: undefined,
+      justifyContent: undefined,
+      alignItems: undefined,
       gap: 0,
       elements: [],
       cornerRadius: 0,
@@ -801,6 +801,11 @@ export default function CanvasContainerNew({
                 linkText={frame.linkText}
                 linkPosition={frame.linkPosition}
                 gradientIntensity={frame.gradientIntensity}
+                cornerRadius={frame.cornerRadius || 0}
+                flexDirection={frame.flexDirection}
+                justifyContent={frame.justifyContent}
+                alignItems={frame.alignItems}
+                gap={frame.gap}
                 isSelected={frame.id === selectedFrameId}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
@@ -833,6 +838,7 @@ export default function CanvasContainerNew({
                       strokeWidth={element.strokeWidth}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
+                      useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}

@@ -220,7 +220,12 @@ export default function ShapeSettingsPanel({
                   variant={flexDirection === "row" ? "default" : "outline"}
                   size="icon"
                   className="h-8 w-full"
-                  onClick={() => onFlexDirectionChange?.("row")}
+                  onClick={() => {
+                    onFlexDirectionChange?.("row");
+                    // Enable auto layout by also setting defaults if not set
+                    if (!justifyContent) onJustifyContentChange?.("start");
+                    if (!alignItems) onAlignItemsChange?.("start");
+                  }}
                   title="Horizontal"
                 >
                   <Columns className="h-4 w-4" />
@@ -229,7 +234,12 @@ export default function ShapeSettingsPanel({
                   variant={flexDirection === "column" ? "default" : "outline"}
                   size="icon"
                   className="h-8 w-full"
-                  onClick={() => onFlexDirectionChange?.("column")}
+                  onClick={() => {
+                    onFlexDirectionChange?.("column");
+                    // Enable auto layout by also setting defaults if not set
+                    if (!justifyContent) onJustifyContentChange?.("start");
+                    if (!alignItems) onAlignItemsChange?.("start");
+                  }}
                   title="Vertical"
                 >
                   <Rows className="h-4 w-4" />
@@ -238,16 +248,20 @@ export default function ShapeSettingsPanel({
                   variant="outline"
                   size="icon"
                   className="h-8 w-full"
-                  title="Wrap (coming soon)"
-                  disabled
+                  title="Disable auto layout"
+                  onClick={() => {
+                    onFlexDirectionChange?.(undefined as any);
+                    onJustifyContentChange?.(undefined as any);
+                    onAlignItemsChange?.(undefined as any);
+                  }}
                 >
-                  <AlignHorizontalSpaceAround className="h-4 w-4" />
+                  <AlignHorizontalSpaceAround className="h-4 w-4 opacity-50" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
                   className="h-8 w-full"
-                  title="Space between (coming soon)"
+                  title="Coming soon"
                   disabled
                 >
                   <AlignVerticalSpaceAround className="h-4 w-4" />
@@ -337,65 +351,27 @@ export default function ShapeSettingsPanel({
                 </div>
               </div>
 
-              {/* Gap */}
+              {/* Gap - Slider with Input */}
               <div>
-                <Label className="text-xs mb-1 flex items-center gap-1">
-                  <span>Gap</span>
-                </Label>
-                <Input
-                  type="number"
-                  value={Math.round(gap || 0)}
-                  onChange={(e) => onGapChange?.(Number(e.target.value))}
-                  className="h-7 text-xs"
-                  placeholder="0"
+                <div className="flex items-center justify-between mb-1">
+                  <Label className="text-xs">Gap</Label>
+                  <Input
+                    type="number"
+                    value={Math.round(gap || 0)}
+                    onChange={(e) => onGapChange?.(Number(e.target.value))}
+                    className="h-6 w-16 text-xs text-center"
+                    min="0"
+                    max="100"
+                  />
+                </div>
+                <Slider
+                  value={[gap || 0]}
+                  onValueChange={([v]) => onGapChange?.(v)}
+                  min={0}
+                  max={100}
+                  step={1}
                 />
               </div>
-
-              {/* Distribute tools - Only for frames */}
-              {onDistribute && (
-                <div>
-                  <Label className="text-xs mb-1 block">Distribute</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full h-7 text-xs justify-start">
-                        Distribute...
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent side="right" align="start" className="w-56 p-2">
-                      <div className="space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("tidy")}
-                        >
-                          <span className="flex-1 text-left">Tidy up</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("horizontal")}
-                        >
-                          <AlignHorizontalDistributeCenter className="h-3 w-3 mr-2" />
-                          <span className="flex-1 text-left">Distribute horizontal spacing</span>
-                          <span className="text-[10px] text-muted-foreground">Alt+Shift+H</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("vertical")}
-                        >
-                          <AlignVerticalDistributeCenter className="h-3 w-3 mr-2" />
-                          <span className="flex-1 text-left">Distribute vertical spacing</span>
-                          <span className="text-[10px] text-muted-foreground">Alt+Shift+V</span>
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              )}
             </AccordionContent>
           </AccordionItem>
         )}
