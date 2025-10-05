@@ -17,6 +17,12 @@ interface ResizableElementProps {
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
+  // Text properties
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  textAlign?: "left" | "center" | "right";
+  color?: string;
   useFlexLayout?: boolean;
   isSelected: boolean;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
@@ -42,6 +48,11 @@ export default function ResizableElement({
   opacity = 100,
   cornerRadius = 0,
   blendMode = "normal",
+  fontSize = 16,
+  fontFamily = "Inter",
+  fontWeight = "400",
+  textAlign = "center",
+  color,
   useFlexLayout = false,
   isSelected,
   onUpdate,
@@ -264,13 +275,26 @@ export default function ResizableElement({
             onChange={(e) => setEditText(e.target.value)}
             onBlur={handleTextBlur}
             onKeyDown={handleTextKeyDown}
-            className="w-full h-full resize-none bg-transparent border-none outline-none text-center px-2 flex items-center justify-center"
-            style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
+            className="w-full h-full resize-none bg-transparent border-none outline-none px-2"
+            style={{ 
+              color: color || fill, 
+              fontSize: `${fontSize}px`, 
+              fontFamily: fontFamily,
+              fontWeight: fontWeight,
+              textAlign: textAlign
+            }}
           />
         ) : (
           <div 
-            className="w-full h-full flex items-center justify-center text-center px-2 pointer-events-none"
-            style={{ color: fill, fontSize: '16px', fontWeight: 'bold' }}
+            className="w-full h-full flex items-center px-2 pointer-events-none"
+            style={{ 
+              color: color || fill, 
+              fontSize: `${fontSize}px`,
+              fontFamily: fontFamily,
+              fontWeight: fontWeight,
+              textAlign: textAlign,
+              justifyContent: textAlign === "left" ? "flex-start" : textAlign === "right" ? "flex-end" : "center"
+            }}
           >
             {text || "Double click to edit"}
           </div>

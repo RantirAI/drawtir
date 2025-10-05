@@ -624,6 +624,11 @@ export default function CanvasContainerNew({
       height: 50,
       text: "Double click to edit",
       fill: penColor,
+      fontSize: 16,
+      fontFamily: "Inter",
+      fontWeight: "400",
+      textAlign: "center",
+      color: penColor,
       opacity: 100,
       blendMode: "normal",
     };
@@ -856,6 +861,11 @@ export default function CanvasContainerNew({
                       strokeWidth={element.strokeWidth}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
+                      fontSize={element.fontSize}
+                      fontFamily={element.fontFamily}
+                      fontWeight={element.fontWeight}
+                      textAlign={element.textAlign}
+                      color={element.color}
                       useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
