@@ -68,14 +68,17 @@ export default function ResizableElement({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
 
   useEffect(() => {
+    const snapToGrid = (value: number, gridSize: number = 10) => {
+      return Math.round(value / gridSize) * gridSize;
+    };
+
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
         const dx = e.clientX - dragStart.x;
         const dy = e.clientY - dragStart.y;
-        onUpdate(id, {
-          x: dragStart.elementX + dx,
-          y: dragStart.elementY + dy,
-        });
+        const newX = snapToGrid(dragStart.elementX + dx);
+        const newY = snapToGrid(dragStart.elementY + dy);
+        onUpdate(id, { x: newX, y: newY });
       } else if (isResizing) {
         const dx = e.clientX - resizeStart.x;
         const dy = e.clientY - resizeStart.y;
@@ -85,15 +88,15 @@ export default function ResizableElement({
         let newX = x;
         let newY = y;
 
-        if (resizeStart.corner.includes("e")) newWidth = Math.max(20, resizeStart.width + dx);
+        if (resizeStart.corner.includes("e")) newWidth = Math.max(20, snapToGrid(resizeStart.width + dx));
         if (resizeStart.corner.includes("w")) {
-          newWidth = Math.max(20, resizeStart.width - dx);
-          newX = x + dx;
+          newWidth = Math.max(20, snapToGrid(resizeStart.width - dx));
+          newX = snapToGrid(x + dx);
         }
-        if (resizeStart.corner.includes("s")) newHeight = Math.max(20, resizeStart.height + dy);
+        if (resizeStart.corner.includes("s")) newHeight = Math.max(20, snapToGrid(resizeStart.height + dy));
         if (resizeStart.corner.includes("n")) {
-          newHeight = Math.max(20, resizeStart.height - dy);
-          newY = y + dy;
+          newHeight = Math.max(20, snapToGrid(resizeStart.height - dy));
+          newY = snapToGrid(y + dy);
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });

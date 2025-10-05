@@ -9,6 +9,7 @@ import LayersPanel from "../Panels/LayersPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
+import GridOverlay from "./GridOverlay";
 import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
@@ -876,6 +877,7 @@ export default function CanvasContainerNew({
   return (
     <div className="w-full h-screen relative overflow-hidden">
       <CanvasBackground />
+      <GridOverlay zoom={zoom} panOffset={panOffset} />
 
       <EditorTopBar
         projectName={projectTitle}
@@ -1068,6 +1070,7 @@ export default function CanvasContainerNew({
           fontWeight={selectedElement?.fontWeight}
           textAlign={selectedElement?.textAlign}
           fontSize={selectedElement?.fontSize}
+          color={selectedElement?.color}
           imageFit={selectedElement?.imageFit}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
           onFillChange={(color) => {
@@ -1143,6 +1146,7 @@ export default function CanvasContainerNew({
           onFontWeightChange={(weight) => selectedElement && handleElementUpdate(selectedElement.id, { fontWeight: weight })}
           onTextAlignChange={(align) => selectedElement && handleElementUpdate(selectedElement.id, { textAlign: align })}
           onFontSizeChange={(size) => selectedElement && handleElementUpdate(selectedElement.id, { fontSize: size })}
+          onColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { color })}
           onImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { imageFit: fit })}
           onClose={() => {
             setShowShapeSettings(false);

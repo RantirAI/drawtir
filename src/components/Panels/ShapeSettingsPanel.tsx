@@ -93,6 +93,7 @@ interface ShapeSettingsPanelProps {
   fontWeight?: string;
   textAlign?: "left" | "center" | "right";
   fontSize?: number;
+  color?: string;
   onBackgroundColorChange?: (color: string) => void;
   onFillChange?: (color: string) => void;
   onStrokeChange?: (color: string) => void;
@@ -110,6 +111,7 @@ interface ShapeSettingsPanelProps {
   onFontWeightChange?: (weight: string) => void;
   onTextAlignChange?: (align: "left" | "center" | "right") => void;
   onFontSizeChange?: (size: number) => void;
+  onColorChange?: (color: string) => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
   onDistribute?: (type: string) => void;
@@ -156,6 +158,7 @@ export default function ShapeSettingsPanel({
   fontWeight = "400",
   textAlign = "left",
   fontSize = 16,
+  color,
   onBackgroundColorChange,
   onFillChange,
   onStrokeChange,
@@ -173,6 +176,7 @@ export default function ShapeSettingsPanel({
   onFontWeightChange,
   onTextAlignChange,
   onFontSizeChange,
+  onColorChange,
   onAlign,
   onArrange,
   onDistribute,
@@ -577,6 +581,37 @@ export default function ShapeSettingsPanel({
                     >
                       <AlignRight className="h-3 w-3" />
                     </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Text Color */}
+              {onColorChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Text Color</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: color || fill }}
+                        >
+                          <span className="sr-only">Text Color</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right" className="w-80 p-3">
+                        <ColorPicker
+                          color={color || fill}
+                          onChange={onColorChange}
+                          opacity={opacity}
+                          onOpacityChange={onOpacityChange}
+                          showOpacity={false}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {color || fill}
+                    </span>
                   </div>
                 </div>
               )}

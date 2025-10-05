@@ -70,17 +70,6 @@ export default function EditorTopBar({
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onUndo} disabled={!canUndo}>
-              <Undo className="h-3 w-3 mr-2" />
-              Undo
-              <span className="ml-auto text-xs text-muted-foreground">Ctrl+Z</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onRedo} disabled={!canRedo}>
-              <Redo className="h-3 w-3 mr-2" />
-              Redo
-              <span className="ml-auto text-xs text-muted-foreground">Ctrl+Y</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onExport}>
               <FileDown className="h-3 w-3 mr-2" />
               Export
@@ -93,6 +82,28 @@ export default function EditorTopBar({
         </DropdownMenu>
         
         <EditableTitle value={projectName} onChange={onProjectNameChange || (() => {})} />
+
+        {/* Undo/Redo buttons */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6" 
+          onClick={onUndo} 
+          disabled={!canUndo}
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo className="h-3 w-3" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6" 
+          onClick={onRedo} 
+          disabled={!canRedo}
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo className="h-3 w-3" />
+        </Button>
 
         {onSave && !hideCloudFeatures && (
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
