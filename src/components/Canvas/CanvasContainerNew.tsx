@@ -84,7 +84,17 @@ export default function CanvasContainerNew({
   const [penColor, setPenColor] = useState("#3b82f6");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [zoom, setZoom] = useState(1);
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  // Calculate initial pan offset to center the first frame
+  const calculateCenterOffset = () => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const firstFrame = frames[0];
+    // Center the frame in the viewport
+    const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
+    const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
+    return { x: centerX, y: centerY };
+  };
+  const [panOffset, setPanOffset] = useState(calculateCenterOffset());
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 

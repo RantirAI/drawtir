@@ -193,7 +193,7 @@ export default function ShapeSettingsPanel({
   return (
     <DraggablePanel
       title="Style"
-      defaultPosition={{ x: 50, y: 500 }}
+      defaultPosition={{ x: 50, y: 150 }}
       onClose={onClose}
       className="w-64"
     >
