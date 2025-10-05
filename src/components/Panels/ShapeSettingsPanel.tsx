@@ -139,7 +139,7 @@ export default function ShapeSettingsPanel({
   elementType,
   elementName = "Nothing selected",
   shapeType,
-  backgroundColor = "#000000",
+  backgroundColor = "#ffffff",
   fill = "#000000",
   stroke = "#000000",
   strokeWidth = 2,
@@ -635,120 +635,6 @@ export default function ShapeSettingsPanel({
                   </div>
                 )}
               </div>
-              
-              {/* Frame Content Alignment */}
-              {elementType === "frame" && (onJustifyContentChange || onAlignItemsChange) && (
-                <>
-                  <div className="mt-3">
-                    <Label className="text-xs mb-2 block">Content Alignment</Label>
-                    
-                    {/* Direction */}
-                    {onFlexDirectionChange && (
-                      <div className="grid grid-cols-2 gap-1 mb-2">
-                        <Button 
-                          variant={flexDirection === "row" ? "default" : "outline"} 
-                          size="sm" 
-                          className="h-6 text-[10px]"
-                          onClick={() => onFlexDirectionChange("row")}
-                        >
-                          Row
-                        </Button>
-                        <Button 
-                          variant={flexDirection === "column" ? "default" : "outline"} 
-                          size="sm" 
-                          className="h-6 text-[10px]"
-                          onClick={() => onFlexDirectionChange("column")}
-                        >
-                          Column
-                        </Button>
-                      </div>
-                    )}
-
-                    {/* Justify (Main Axis) */}
-                    {onJustifyContentChange && (
-                      <div className="mb-2">
-                        <Label className="text-[10px] mb-1 block text-muted-foreground">
-                          {flexDirection === "row" ? "Horizontal" : "Vertical"}
-                        </Label>
-                        <div className="grid grid-cols-3 gap-1">
-                          <Button
-                            variant={justifyContent === "start" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onJustifyContentChange("start")}
-                          >
-                            Start
-                          </Button>
-                          <Button
-                            variant={justifyContent === "center" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onJustifyContentChange("center")}
-                          >
-                            Center
-                          </Button>
-                          <Button
-                            variant={justifyContent === "end" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onJustifyContentChange("end")}
-                          >
-                            End
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Align (Cross Axis) */}
-                    {onAlignItemsChange && (
-                      <div>
-                        <Label className="text-[10px] mb-1 block text-muted-foreground">
-                          {flexDirection === "row" ? "Vertical" : "Horizontal"}
-                        </Label>
-                        <div className="grid grid-cols-3 gap-1">
-                          <Button
-                            variant={alignItems === "start" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onAlignItemsChange("start")}
-                          >
-                            Start
-                          </Button>
-                          <Button
-                            variant={alignItems === "center" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onAlignItemsChange("center")}
-                          >
-                            Center
-                          </Button>
-                          <Button
-                            variant={alignItems === "end" ? "default" : "outline"}
-                            size="sm"
-                            className="h-6 text-[10px]"
-                            onClick={() => onAlignItemsChange("end")}
-                          >
-                            End
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {onGapChange && (
-                    <div className="mt-2">
-                      <Label className="text-xs mb-1 block">Gap: {gap}px</Label>
-                      <Slider
-                        value={[gap]}
-                        onValueChange={([v]) => onGapChange(v)}
-                        min={0}
-                        max={50}
-                        step={2}
-                      />
-                    </div>
-                  )}
-                </>
-              )}
             </AccordionContent>
           </AccordionItem>
         )}

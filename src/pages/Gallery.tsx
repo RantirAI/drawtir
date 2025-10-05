@@ -75,14 +75,11 @@ export default function Gallery() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
-      <main className="container mx-auto px-4 py-8">
-        <div className="bg-card rounded-xl shadow-sm border p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Projects</h1>
-            <p className="text-sm text-muted-foreground">View and manage your saved projects</p>
-          </div>
+      <main className="container mx-auto px-4 py-4">
+        <div className="max-w-6xl mx-auto rounded-xl p-4" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
+          <h1 className="text-lg font-semibold mb-4">Projects</h1>
 
           <div>
           {isLoading ? (
@@ -90,17 +87,19 @@ export default function Gallery() {
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : projects.length === 0 ? (
-            <div className="text-center py-12">
-              <FolderOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">No projects yet</p>
-              <Button onClick={() => navigate("/")}>Create Your First Project</Button>
+            <div className="text-center py-8">
+              <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-sm text-muted-foreground mb-3">No projects yet</p>
+              <Button onClick={() => navigate("/")} size="sm" className="h-7 text-xs">
+                Create your first project
+              </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {projects.map((project) => (
                 <Card 
                   key={project.id} 
-                  className="overflow-hidden border shadow-sm group cursor-pointer transition-all hover:shadow-md"
+                  className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
                   onClick={() => openProject(project.id)}
                 >
                   <div className="aspect-[4/3] relative overflow-hidden bg-muted">
@@ -108,23 +107,22 @@ export default function Gallery() {
                       <img
                         src={project.thumbnail_url}
                         alt={project.project_name}
-                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <FolderOpen className="w-12 h-12 text-muted-foreground/50" />
+                        <FolderOpen className="w-8 h-8 text-muted-foreground/50" />
                       </div>
                     )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <Button
                         onClick={(e) => {
                           e.stopPropagation();
                           openProject(project.id);
                         }}
                         size="sm"
-                        className="bg-white/90 hover:bg-white text-foreground"
+                        className="bg-white/90 hover:bg-white text-foreground h-6 text-xs"
                       >
-                        <Edit className="w-4 h-4 mr-1" />
                         Open
                       </Button>
                       <Button
@@ -132,18 +130,18 @@ export default function Gallery() {
                         disabled={deletingId === project.id}
                         size="sm"
                         variant="destructive"
-                        className="bg-white/90 hover:bg-red-500 text-red-600 hover:text-white"
+                        className="bg-white/90 hover:bg-red-500 text-red-600 hover:text-white h-6"
                       >
                         {deletingId === project.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-3 h-3 animate-spin" />
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3 h-3" />
                         )}
                       </Button>
                     </div>
                   </div>
-                  <div className="p-3 bg-card">
-                    <h3 className="font-medium text-sm text-foreground truncate mb-1">
+                  <div className="p-2 bg-card">
+                    <h3 className="font-medium text-sm text-foreground truncate mb-0.5">
                       {project.project_name}
                     </h3>
                     <p className="text-xs text-muted-foreground">

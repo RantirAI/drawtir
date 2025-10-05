@@ -1,77 +1,92 @@
-import { Link, useLocation } from "react-router-dom";
-import { Home, FolderOpen, Settings, User } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
+import { Link, useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
+import { ThemeToggle } from "../ThemeToggle";
+import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 export default function HorizontalNav() {
-  const location = useLocation();
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully");
-    navigate("/auth");
-  };
-
-  const navItems = [
-    { path: "/", label: "Editor", icon: Home },
-    { path: "/gallery", label: "Projects", icon: FolderOpen },
-    { path: "/settings", label: "Settings", icon: Settings },
-  ];
-
-  const isActive = (path: string) => {
-    if (path === "/") {
-      return location.pathname === "/" || location.search.includes("project=");
+    try {
+      await supabase.auth.signOut();
+      toast.success("Signed out successfully");
+      navigate("/auth");
+    } catch (error: any) {
+      toast.error("Error signing out: " + error.message);
     }
-    return location.pathname === path;
   };
 
   return (
-    <header className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex h-14 items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">D</span>
+    <nav className="bg-background">
+      <div className="container mx-auto px-4 py-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            {/* Drawtir Logo */}
+            <Link to="/" className="flex items-center">
+              <svg 
+                width="67" 
+                height="14.5" 
+                viewBox="0 0 134 29" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="opacity-90"
+              >
+                <path 
+                  d="M0 25.3158V16.8596C0 14.4035 3.41632 14.4035 4.63643 14.7719C7.30206 15.7896 7.9826 19.0609 8.13875 21.6454C8.39888 18.8079 9.7967 16.8476 10.615 16.1228C12.5561 14.4035 15.8208 14.4444 17.6916 14.4035C15.7395 14.4035 12.5672 13.7045 11.3471 12.807C8.53743 10.7404 8.15241 7.58209 8.15761 5.46496C8.01196 8.69057 6.97258 10.927 6.36842 11.6491C4.58861 14.0105 1.91462 13.9158 0.611804 13.6144C0.229751 13.526 0 13.1693 0 12.7771V3C0 2.44772 0.447715 2 0.999999 2H10.615C19.107 2.29474 21.718 9.73684 21.962 13.4211C22.5477 22.2632 16.2275 26.3158 11.9571 26.3158H1C0.447715 26.3158 0 25.8681 0 25.3158Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M122.816 26V9.67999H127.52V13.52H127.616V26H122.816ZM127.616 17.488L127.2 13.616C127.584 12.2293 128.214 11.1733 129.088 10.448C129.963 9.72265 131.051 9.35999 132.352 9.35999C132.758 9.35999 133.056 9.40265 133.248 9.48799V13.968C133.142 13.9253 132.992 13.904 132.8 13.904C132.608 13.8827 132.374 13.872 132.096 13.872C130.56 13.872 129.43 14.1493 128.704 14.704C127.979 15.2373 127.616 16.1653 127.616 17.488Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M115.151 26V9.68001H119.951V26H115.151ZM114.991 7.50401V2.32001H120.111V7.50401H114.991Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M110.543 26.352C108.452 26.352 106.895 25.8507 105.871 24.848C104.868 23.824 104.367 22.2773 104.367 20.208V6.03199L109.167 4.23999V20.368C109.167 21.0933 109.369 21.6373 109.775 22C110.18 22.3627 110.809 22.544 111.663 22.544C111.983 22.544 112.281 22.512 112.559 22.448C112.836 22.384 113.113 22.3093 113.391 22.224V25.872C113.113 26.0213 112.719 26.1387 112.207 26.224C111.716 26.3093 111.161 26.352 110.543 26.352ZM101.327 13.328V9.67999H113.391V13.328H101.327Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M81.0258 26L76.0338 9.67999H81.0898L83.5858 21.072H83.4578L86.5938 9.67999H91.0737L94.2418 21.072H94.1138L96.5778 9.67999H101.506L96.5138 26H91.9058L88.7058 14.64H88.8338L85.6338 26H81.0258Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M71.6157 26C71.4877 25.5307 71.3917 25.0293 71.3277 24.496C71.2851 23.9627 71.2637 23.344 71.2637 22.64H71.1357V14.928C71.1357 14.2667 70.9117 13.7547 70.4637 13.392C70.0371 13.008 69.3971 12.816 68.5437 12.816C67.7331 12.816 67.0824 12.9547 66.5917 13.232C66.1224 13.5093 65.8131 13.9147 65.6637 14.448H61.0877C61.3011 12.976 62.0584 11.76 63.3597 10.8C64.6611 9.83999 66.4424 9.35999 68.7037 9.35999C71.0504 9.35999 72.8424 9.88265 74.0797 10.928C75.3171 11.9733 75.9357 13.4773 75.9357 15.44V22.64C75.9357 23.1733 75.9677 23.7173 76.0317 24.272C76.1171 24.8053 76.2451 25.3813 76.4157 26H71.6157ZM65.9197 26.32C64.2984 26.32 63.0077 25.9147 62.0477 25.104C61.0877 24.272 60.6077 23.1733 60.6077 21.808C60.6077 20.2933 61.1731 19.0773 62.3037 18.16C63.4557 17.2213 65.0557 16.6133 67.1037 16.336L71.8717 15.664V18.448L67.9037 19.056C67.0504 19.184 66.4211 19.4187 66.0157 19.76C65.6104 20.1013 65.4077 20.5707 65.4077 21.168C65.4077 21.7013 65.5997 22.1067 65.9837 22.384C66.3677 22.6613 66.8797 22.8 67.5197 22.8C68.5224 22.8 69.3757 22.5333 70.0797 22C70.7837 21.4453 71.1357 20.8053 71.1357 20.08L71.5837 22.64C71.1144 23.856 70.3997 24.7733 69.4397 25.392C68.4797 26.0107 67.3064 26.32 65.9197 26.32Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M50.1475 26V9.67999H54.8515V13.52H54.9475V26H50.1475ZM54.9475 17.488L54.5315 13.616C54.9155 12.2293 55.5449 11.1733 56.4195 10.448C57.2942 9.72265 58.3822 9.35999 59.6835 9.35999C60.0889 9.35999 60.3875 9.40265 60.5795 9.48799V13.968C60.4729 13.9253 60.3235 13.904 60.1315 13.904C59.9395 13.8827 59.7049 13.872 59.4275 13.872C57.8915 13.872 56.7609 14.1493 56.0355 14.704C55.3102 15.2373 54.9475 16.1653 54.9475 17.488Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+                <path 
+                  d="M29.608 26V22.16H35.432C37.096 22.16 38.504 21.8293 39.656 21.168C40.8293 20.4853 41.7146 19.5573 42.312 18.384C42.9306 17.2107 43.24 15.8667 43.24 14.352C43.24 12.8587 42.9413 11.5467 42.344 10.416C41.7466 9.28533 40.8613 8.39999 39.688 7.75999C38.536 7.11999 37.1173 6.79999 35.432 6.79999H29.704V2.95999H35.432C38.0133 2.95999 40.264 3.42932 42.184 4.36799C44.104 5.28532 45.5866 6.60799 46.632 8.33599C47.6986 10.0427 48.232 12.0693 48.232 14.416C48.232 16.7627 47.6986 18.8107 46.632 20.56C45.5653 22.288 44.072 23.632 42.152 24.592C40.2533 25.5307 38.024 26 35.464 26H29.608ZM26.6 26V2.95999H31.528V26H26.6Z" 
+                  fill={isDark ? "#ffffff" : "#141526"}
+                />
+              </svg>
+            </Link>
+            
+            <div className="flex items-center gap-3">
+              <Link to="/gallery" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Projects
+              </Link>
+              <Link to="/settings" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Settings
+              </Link>
             </div>
-            <span className="font-semibold text-lg">Drawtir</span>
-          </Link>
-
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.path);
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
-                    active
-                      ? "bg-muted text-foreground"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
-                >
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Actions */}
+          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign Out">
-              <User className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={handleSignOut}>
+              Sign Out
             </Button>
           </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
