@@ -9,15 +9,15 @@ export default function PageFooter() {
   ];
 
   return (
-    <footer className="border-t mt-auto py-6">
+    <footer className="border-t mt-auto py-3">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground text-center md:text-left">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-2">
+          <p className="text-xs text-muted-foreground text-center md:text-left">
             © Designtir is made by Rantir, Inc. (DBA Hexigon AI, INC.)
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs">
             {links.map((link, index) => (
-              <span key={link.url} className="flex items-center gap-x-4">
+              <span key={link.url} className="flex items-center gap-x-3">
                 <a
                   href={link.url}
                   target="_blank"

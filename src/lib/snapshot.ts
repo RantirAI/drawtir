@@ -86,7 +86,7 @@ export function generateThumbnail(
     const offsetX = (width - contentWidth * scale) / 2 - bounds.minX * scale;
     const offsetY = (height - contentHeight * scale) / 2 - bounds.minY * scale;
 
-    // Draw simplified frame representations
+    // Draw frames with elements
     frames.forEach((frame) => {
       const x = frame.x * scale + offsetX;
       const y = frame.y * scale + offsetY;
@@ -101,6 +101,93 @@ export function generateThumbnail(
       ctx.strokeStyle = "#cccccc";
       ctx.lineWidth = 1;
       ctx.strokeRect(x, y, w, h);
+
+      // Draw elements inside frame
+      if (frame.elements && frame.elements.length > 0) {
+        frame.elements.forEach((element) => {
+          const elemX = x + (element.x || 0) * scale;
+          const elemY = y + (element.y || 0) * scale;
+          const elemW = (element.width || 50) * scale;
+          const elemH = (element.height || 50) * scale;
+
+          if (element.type === "text" && element.text) {
+            // Draw text
+            ctx.save();
+            ctx.fillStyle = element.fill || "#ffffff";
+            ctx.font = `${Math.max(8, (element.fontSize || 16) * scale)}px Inter`;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            
+            // Wrap text if needed
+            const words = element.text.split(" ");
+            let line = "";
+            let lineY = elemY;
+            const lineHeight = (element.fontSize || 16) * scale * 1.2;
+            
+            words.forEach((word) => {
+              const testLine = line + word + " ";
+              const metrics = ctx.measureText(testLine);
+              
+              if (metrics.width > elemW && line) {
+                ctx.fillText(line, elemX, lineY);
+                line = word + " ";
+                lineY += lineHeight;
+              } else {
+                line = testLine;
+              }
+            });
+            ctx.fillText(line, elemX, lineY);
+            ctx.restore();
+          } else if (element.type === "shape") {
+            // Draw shapes
+            ctx.save();
+            ctx.fillStyle = element.fill || "#3b82f6";
+            
+            if (element.shapeType === "rectangle" || !element.shapeType) {
+              ctx.fillRect(elemX, elemY, elemW, elemH);
+            } else if (element.shapeType === "ellipse") {
+              ctx.beginPath();
+              ctx.ellipse(
+                elemX + elemW / 2,
+                elemY + elemH / 2,
+                elemW / 2,
+                elemH / 2,
+                0,
+                0,
+                2 * Math.PI
+              );
+              ctx.fill();
+            }
+            
+            ctx.restore();
+          } else if (element.type === "drawing" && element.pathData) {
+            // Draw simplified version of drawing
+            ctx.save();
+            ctx.strokeStyle = element.stroke || "#000000";
+            ctx.lineWidth = (element.strokeWidth || 2) * scale;
+            ctx.beginPath();
+            
+            const pathCommands = element.pathData.split(/([ML])/);
+            pathCommands.forEach((cmd, i) => {
+              if (cmd === "M" || cmd === "L") {
+                const coords = pathCommands[i + 1]?.trim().split(" ");
+                if (coords && coords.length >= 2) {
+                  const px = elemX + parseFloat(coords[0]) * scale;
+                  const py = elemY + parseFloat(coords[1]) * scale;
+                  if (cmd === "M") {
+                    ctx.moveTo(px, py);
+                  } else {
+                    ctx.lineTo(px, py);
+                  }
+                }
+              }
+            });
+            
+            ctx.stroke();
+            ctx.restore();
+          }
+        });
+      }
     });
 
     resolve(canvas.toDataURL("image/png"));
