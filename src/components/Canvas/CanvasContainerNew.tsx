@@ -507,7 +507,58 @@ export default function CanvasContainerNew({
   };
 
   const handleArrange = (type: string) => {
-    toast.info(`Arrange ${type} - coming soon!`);
+    if (!selectedFrameId || selectedElementIds.length === 0) return;
+    
+    const frame = frames.find(f => f.id === selectedFrameId);
+    if (!frame || !frame.elements || frame.elements.length === 0) return;
+
+    const elements = [...frame.elements];
+    const selectedIndices = selectedElementIds
+      .map(id => elements.findIndex(el => el.id === id))
+      .filter(idx => idx !== -1)
+      .sort((a, b) => a - b);
+
+    if (selectedIndices.length === 0) return;
+
+    if (type === "forward") {
+      // Move elements forward (higher z-index, later in array)
+      // Start from the end to avoid index conflicts
+      for (let i = selectedIndices.length - 1; i >= 0; i--) {
+        const currentIdx = selectedIndices[i];
+        const nextIdx = currentIdx + 1;
+        
+        // Don't move if already at the end or next element is also selected
+        if (nextIdx >= elements.length || selectedIndices.includes(nextIdx)) {
+          continue;
+        }
+        
+        // Swap with next element
+        [elements[currentIdx], elements[nextIdx]] = [elements[nextIdx], elements[currentIdx]];
+      }
+      toast.success("Moved forward");
+    } else if (type === "backward") {
+      // Move elements backward (lower z-index, earlier in array)
+      // Start from the beginning
+      for (let i = 0; i < selectedIndices.length; i++) {
+        const currentIdx = selectedIndices[i];
+        const prevIdx = currentIdx - 1;
+        
+        // Don't move if already at the beginning or previous element is also selected
+        if (prevIdx < 0 || selectedIndices.includes(prevIdx)) {
+          continue;
+        }
+        
+        // Swap with previous element
+        [elements[currentIdx], elements[prevIdx]] = [elements[prevIdx], elements[currentIdx]];
+      }
+      toast.success("Moved backward");
+    }
+
+    const updatedFrames = frames.map(f =>
+      f.id === selectedFrameId ? { ...f, elements } : f
+    );
+
+    setFrames(updatedFrames);
   };
 
   const handleDistribute = (type: string) => {
