@@ -117,12 +117,14 @@ export default function ResizableElement({
   }, [isDragging, isResizing, dragStart, resizeStart, id, onUpdate, x, y]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      e.stopPropagation();
-      onSelect(e);
-      setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
+    // Don't start dragging if clicking on resize handles
+    if ((e.target as HTMLElement).hasAttribute('data-resize-handle')) {
+      return;
     }
+    e.stopPropagation();
+    onSelect(e);
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -311,10 +313,10 @@ export default function ResizableElement({
           </div>
           
           {/* Resize handles in blue */}
-          <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-          <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-          <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
+          <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
+          <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
+          <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
+          <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border-2 border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
         </>
       )}
     </div>
