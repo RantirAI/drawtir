@@ -540,8 +540,16 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === selectedFrameId);
     if (!frame) return;
 
-    const defaultWidth = shapeType === "line" || shapeType === "arrow" ? Math.max(150, Math.floor(frame.width * 0.5)) : Math.floor(frame.width * 0.25);
-    const defaultHeight = shapeType === "line" || shapeType === "arrow" ? 2 : Math.floor(frame.height * 0.25);
+    const defaultWidth = shapeType === "line" || shapeType === "arrow" 
+      ? Math.max(150, Math.floor(frame.width * 0.5)) 
+      : shapeType === "rectangle"
+        ? 120
+        : Math.floor(frame.width * 0.25);
+    const defaultHeight = shapeType === "line" || shapeType === "arrow" 
+      ? 2 
+      : shapeType === "rectangle"
+        ? 120
+        : Math.floor(frame.height * 0.25);
 
     const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
     const y = Math.max(0, Math.floor((frame.height - (shapeType === "line" || shapeType === "arrow" ? Math.max(2, defaultHeight) : defaultHeight)) / 2));
@@ -793,11 +801,6 @@ export default function CanvasContainerNew({
                 linkText={frame.linkText}
                 linkPosition={frame.linkPosition}
                 gradientIntensity={frame.gradientIntensity}
-                cornerRadius={frame.cornerRadius || 0}
-                flexDirection={frame.flexDirection}
-                justifyContent={frame.justifyContent}
-                alignItems={frame.alignItems}
-                gap={frame.gap}
                 isSelected={frame.id === selectedFrameId}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
@@ -830,8 +833,6 @@ export default function CanvasContainerNew({
                       strokeWidth={element.strokeWidth}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
-                      blendMode={element.blendMode}
-                      useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}

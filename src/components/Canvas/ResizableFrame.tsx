@@ -21,10 +21,6 @@ interface ResizableFrameProps {
   linkPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   gradientIntensity: number;
   cornerRadius?: number;
-  flexDirection?: "row" | "column";
-  justifyContent?: string;
-  alignItems?: string;
-  gap?: number;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -51,10 +47,6 @@ export default function ResizableFrame({
   linkPosition,
   gradientIntensity,
   cornerRadius = 0,
-  flexDirection = "row",
-  justifyContent = "start",
-  alignItems = "start",
-  gap = 0,
   onUpdate,
   isSelected,
   onSelect,
@@ -154,15 +146,7 @@ export default function ResizableFrame({
       
       {/* Elements inside frame */}
       <div className="absolute inset-0 pointer-events-none">
-        <div 
-          className="relative w-full h-full pointer-events-auto flex"
-          style={{
-            flexDirection: flexDirection,
-            justifyContent: justifyContent,
-            alignItems: alignItems,
-            gap: `${gap}px`,
-          }}
-        >
+        <div className="relative w-full h-full pointer-events-auto">
           {children}
         </div>
       </div>
