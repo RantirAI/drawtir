@@ -95,6 +95,63 @@ export default function CanvasContainerNew({
     const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
     const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
     return { x: centerX, y: centerY };
+  };
+  const [panOffset, setPanOffset] = useState(calculateCenterOffset());
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+
+  const [showImagePanel, setShowImagePanel] = useState(false);
+  const [showGeneratePanel, setShowGeneratePanel] = useState(false);
+  const [showShapeSettings, setShowShapeSettings] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showLayersPanel, setShowLayersPanel] = useState(false);
+
+  const [description, setDescription] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const selectedFrame = frames.find((f) => f.id === selectedFrameId);
+  const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
+  const selectedElement = selectedElements.length === 1 ? selectedElements[0] : null;
+
+  // Undo/Redo handlers
+  const handleUndo = () => {
+    if (historyIndex > 0) {
+      setIsUndoRedoing(true);
+      setHistoryIndex(historyIndex - 1);
+      setFrames(JSON.parse(JSON.stringify(history[historyIndex - 1])));
+      toast.success("Undone");
+    } else {
+      toast.info("Nothing to undo");
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyIndex < history.length - 1) {
+      setIsUndoRedoing(true);
+      setHistoryIndex(historyIndex + 1);
+      setFrames(JSON.parse(JSON.stringify(history[historyIndex + 1])));
+      toast.success("Redone");
+    } else {
+      toast.info("Nothing to redo");
+    }
+  };
+
+  // Save to history when frames change (but not during undo/redo)
+  useEffect(() => {
+    if (isUndoRedoing) {
+      setIsUndoRedoing(false);
+      return;
+    }
+    
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(JSON.parse(JSON.stringify(frames)));
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [frames]);
+
   // Keyboard shortcuts and zoom controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -149,61 +206,7 @@ export default function CanvasContainerNew({
       window.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('wheel', handleWheel);
     };
-  }, [historyIndex, history, selectedElementIds, handleUndo, handleRedo]);
-  const [panOffset, setPanOffset] = useState(calculateCenterOffset());
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-
-  const [showImagePanel, setShowImagePanel] = useState(false);
-  const [showGeneratePanel, setShowGeneratePanel] = useState(false);
-  const [showShapeSettings, setShowShapeSettings] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [showLayersPanel, setShowLayersPanel] = useState(false);
-
-  const [description, setDescription] = useState("");
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const imageInputRef = useRef<HTMLInputElement>(null);
-
-  const selectedFrame = frames.find((f) => f.id === selectedFrameId);
-  const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
-  const selectedElement = selectedElements.length === 1 ? selectedElements[0] : null;
-
-  // Save to history when frames change (but not during undo/redo)
-  useEffect(() => {
-    if (isUndoRedoing) {
-      setIsUndoRedoing(false);
-      return;
-    }
-    
-    const newHistory = history.slice(0, historyIndex + 1);
-    newHistory.push(JSON.parse(JSON.stringify(frames)));
-    setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
-  }, [frames]);
-
-  const handleUndo = () => {
-    if (historyIndex > 0) {
-      setIsUndoRedoing(true);
-      setHistoryIndex(historyIndex - 1);
-      setFrames(JSON.parse(JSON.stringify(history[historyIndex - 1])));
-      toast.success("Undone");
-    } else {
-      toast.info("Nothing to undo");
-    }
-  };
-
-  const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
-      setIsUndoRedoing(true);
-      setHistoryIndex(historyIndex + 1);
-      setFrames(JSON.parse(JSON.stringify(history[historyIndex + 1])));
-      toast.success("Redone");
-    } else {
-      toast.info("Nothing to redo");
-    }
-  };
+  }, [historyIndex, history, selectedElementIds]);
 
   const getFilterStyle = () => {
     if (!selectedFrame) return {};
