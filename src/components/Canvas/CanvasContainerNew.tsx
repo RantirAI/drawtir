@@ -81,7 +81,7 @@ export default function CanvasContainerNew({
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
-  const [penColor, setPenColor] = useState("#000000");
+  const [penColor, setPenColor] = useState("#3b82f6");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [zoom, setZoom] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
@@ -580,7 +580,7 @@ export default function CanvasContainerNew({
 
     console.log("🔷 Created new shape element:", newElement);
 
-    setFrames(frames.map(f => {
+    setFrames(prevFrames => prevFrames.map(f => {
       if (f.id === selectedFrameId) {
         const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
         console.log("✅ Updated frame with new element. Total elements:", updatedFrame.elements?.length);
