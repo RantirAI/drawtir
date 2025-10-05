@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Download, Trash2, Loader2, Edit, FolderOpen } from "lucide-react";
+import { Trash2, Loader2, Edit, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "@/components/Sidebar";
-import type { SavedProject } from "@/types/snapshot";
+import HorizontalNav from "@/components/Navigation/HorizontalNav";
 
 interface Project {
   id: string;
@@ -76,17 +75,16 @@ export default function Gallery() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <header className="border-b bg-card px-8 py-4">
-          <div className="max-w-7xl">
-            <h1 className="text-2xl font-semibold text-foreground mb-1">Your Projects</h1>
+    <div className="min-h-screen bg-background">
+      <HorizontalNav />
+      <main className="container mx-auto px-4 py-8">
+        <div className="bg-card rounded-xl shadow-sm border p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">Projects</h1>
             <p className="text-sm text-muted-foreground">View and manage your saved projects</p>
           </div>
-        </header>
 
-        <div className="max-w-7xl mx-auto p-8">
+          <div>
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -156,6 +154,7 @@ export default function Gallery() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </main>
     </div>
