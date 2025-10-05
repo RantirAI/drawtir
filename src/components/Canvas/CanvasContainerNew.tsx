@@ -371,6 +371,43 @@ export default function CanvasContainerNew({
     }
   }, []);
 
+  // Load project from URL on mount
+  useEffect(() => {
+    const loadProjectFromUrl = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const projectIdFromUrl = params.get('project');
+      
+      if (projectIdFromUrl && !isEmbedded) {
+        try {
+          const { data, error } = await supabase
+            .from('posters')
+            .select('canvas_data')
+            .eq('id', projectIdFromUrl)
+            .single();
+          
+          if (error) throw error;
+          
+          if (data?.canvas_data) {
+            const snapshot = data.canvas_data as any as CanvasSnapshot;
+            if (validateSnapshot(snapshot)) {
+              setProjectTitle(snapshot.metadata.title);
+              setFrames(snapshot.frames);
+              setZoom(snapshot.canvas.zoom);
+              setPanOffset(snapshot.canvas.panOffset);
+              setProjectId(projectIdFromUrl);
+              console.log("✅ Loaded project from URL:", projectIdFromUrl);
+            }
+          }
+        } catch (error) {
+          console.error("Error loading project:", error);
+          toast.error("Failed to load project");
+        }
+      }
+    };
+    
+    loadProjectFromUrl();
+  }, [isEmbedded]);
+
   const downloadPoster = () => {
     if (!selectedFrame) {
       toast.error("No frame selected");
