@@ -536,9 +536,17 @@ export default function CanvasContainerNew({
   };
 
   const handleShapeSelect = (shapeType: string) => {
-    if (!selectedFrameId) return;
+    console.log("🔷 handleShapeSelect called with:", shapeType);
+    if (!selectedFrameId) {
+      console.log("❌ No selectedFrameId");
+      return;
+    }
     const frame = frames.find(f => f.id === selectedFrameId);
-    if (!frame) return;
+    if (!frame) {
+      console.log("❌ Frame not found");
+      return;
+    }
+    console.log("✅ Frame found:", frame.id);
 
     const defaultWidth = shapeType === "line" || shapeType === "arrow" 
       ? Math.max(150, Math.floor(frame.width * 0.5)) 
@@ -570,15 +578,21 @@ export default function CanvasContainerNew({
       blendMode: "normal",
     };
 
+    console.log("🔷 Created new shape element:", newElement);
+
     setFrames(frames.map(f => {
       if (f.id === selectedFrameId) {
-        return { ...f, elements: [...(f.elements || []), newElement] };
+        const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
+        console.log("✅ Updated frame with new element. Total elements:", updatedFrame.elements?.length);
+        return updatedFrame;
       }
       return f;
     }));
     setSelectedElementIds([newElement.id]);
+    console.log("✅ Selected new element:", newElement.id);
     setShowShapeSettings(true);
     setActiveTool("select");
+    console.log(`✅ ${shapeType} shape added successfully!`);
     toast.success(`${shapeType} added!`);
   };
 
@@ -815,7 +829,9 @@ export default function CanvasContainerNew({
                 }}
               >
                 {/* Elements inside frame */}
-                {(frame.elements || []).map((element) => (
+                {(frame.elements || []).map((element) => {
+                  console.log("🔷 Rendering element:", element.id, "type:", element.type, "shapeType:", element.shapeType);
+                  return (
                   <CanvasContextMenu
                     key={element.id}
                     onDelete={() => handleElementDelete(element.id)}
@@ -846,7 +862,7 @@ export default function CanvasContainerNew({
                       onDuplicate={() => handleElementDuplicate(element.id)}
                     />
                   </CanvasContextMenu>
-                ))}
+                )})}
               </ResizableFrame>
             </CanvasContextMenu>
           </div>

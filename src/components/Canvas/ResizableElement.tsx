@@ -147,6 +147,7 @@ export default function ResizableElement({
   };
 
   const renderShape = () => {
+    console.log("🔷 renderShape called - shapeType:", shapeType, "fill:", fill, "stroke:", stroke);
     // Drawing (pen tool paths)
     if (pathData) {
       return (
