@@ -69,7 +69,7 @@ export default function DraggablePanel({
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "auto",
         minWidth: "200px",
-        background: "hsl(var(--glass-bg))",
+        background: "var(--glass-bg)",
         borderColor: "hsl(var(--glass-border))",
         boxShadow: "var(--glass-shadow)",
       }}
