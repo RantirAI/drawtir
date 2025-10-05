@@ -16,7 +16,7 @@ export default function Documentation() {
           {/* Sidebar */}
           <aside className="w-48 shrink-0">
             <ScrollArea className="h-[calc(100vh-8rem)]">
-              <div className="rounded-xl p-3 space-y-1" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
+              <div className="space-y-1">
                 <h2 className="text-xs font-semibold mb-2 px-2 text-muted-foreground uppercase tracking-wide">Documentation</h2>
                 
                 <Button
