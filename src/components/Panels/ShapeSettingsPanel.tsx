@@ -26,7 +26,8 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box, RotateCcw,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter
+  AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
+  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows
 } from "lucide-react";
 import { useState } from "react";
 
@@ -208,8 +209,199 @@ export default function ShapeSettingsPanel({
       </div>
 
       <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type"]} className="w-full">
-        {/* Position Section */}
-        {(onXChange || onYChange || onRotationChange) && (
+        {/* Auto Layout Section - Only for Frames */}
+        {elementType === "frame" && (
+          <AccordionItem value="layout">
+            <AccordionTrigger className="text-xs font-medium py-2">Auto layout</AccordionTrigger>
+            <AccordionContent className="space-y-3 pb-3">
+              {/* Direction buttons */}
+              <div className="grid grid-cols-4 gap-1">
+                <Button
+                  variant={flexDirection === "row" ? "default" : "outline"}
+                  size="icon"
+                  className="h-8 w-full"
+                  onClick={() => onFlexDirectionChange?.("row")}
+                  title="Horizontal"
+                >
+                  <Columns className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={flexDirection === "column" ? "default" : "outline"}
+                  size="icon"
+                  className="h-8 w-full"
+                  onClick={() => onFlexDirectionChange?.("column")}
+                  title="Vertical"
+                >
+                  <Rows className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-full"
+                  title="Wrap (coming soon)"
+                  disabled
+                >
+                  <AlignHorizontalSpaceAround className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-full"
+                  title="Space between (coming soon)"
+                  disabled
+                >
+                  <AlignVerticalSpaceAround className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Width and Height */}
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs mb-1 block">W</Label>
+                  <Input
+                    type="number"
+                    value={Math.round(width || 0)}
+                    onChange={(e) => onWidthChange?.(Number(e.target.value))}
+                    className="h-7 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs mb-1 block">H</Label>
+                  <Input
+                    type="number"
+                    value={Math.round(height || 0)}
+                    onChange={(e) => onHeightChange?.(Number(e.target.value))}
+                    className="h-7 text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Alignment icons */}
+              <div>
+                <Label className="text-xs mb-1 block">Align content</Label>
+                <div className="grid grid-cols-6 gap-1">
+                  <Button
+                    variant={justifyContent === "start" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onJustifyContentChange?.("start")}
+                    title="Align Start"
+                  >
+                    <AlignStartHorizontal className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={justifyContent === "center" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onJustifyContentChange?.("center")}
+                    title="Align Center"
+                  >
+                    <AlignCenterHorizontal className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={justifyContent === "end" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onJustifyContentChange?.("end")}
+                    title="Align End"
+                  >
+                    <AlignEndHorizontal className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={alignItems === "start" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onAlignItemsChange?.("start")}
+                    title="Align Top"
+                  >
+                    <AlignStartVertical className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={alignItems === "center" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onAlignItemsChange?.("center")}
+                    title="Align Middle"
+                  >
+                    <AlignCenterVertical className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant={alignItems === "end" ? "default" : "outline"}
+                    size="icon"
+                    className="h-7 w-full"
+                    onClick={() => onAlignItemsChange?.("end")}
+                    title="Align Bottom"
+                  >
+                    <AlignEndVertical className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Gap */}
+              <div>
+                <Label className="text-xs mb-1 flex items-center gap-1">
+                  <span>Gap</span>
+                </Label>
+                <Input
+                  type="number"
+                  value={Math.round(gap || 0)}
+                  onChange={(e) => onGapChange?.(Number(e.target.value))}
+                  className="h-7 text-xs"
+                  placeholder="0"
+                />
+              </div>
+
+              {/* Distribute tools - Only for frames */}
+              {onDistribute && (
+                <div>
+                  <Label className="text-xs mb-1 block">Distribute</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="w-full h-7 text-xs justify-start">
+                        Distribute...
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent side="right" align="start" className="w-56 p-2">
+                      <div className="space-y-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-8 text-xs"
+                          onClick={() => onDistribute("tidy")}
+                        >
+                          <span className="flex-1 text-left">Tidy up</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-8 text-xs"
+                          onClick={() => onDistribute("horizontal")}
+                        >
+                          <AlignHorizontalDistributeCenter className="h-3 w-3 mr-2" />
+                          <span className="flex-1 text-left">Distribute horizontal spacing</span>
+                          <span className="text-[10px] text-muted-foreground">Alt+Shift+H</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start h-8 text-xs"
+                          onClick={() => onDistribute("vertical")}
+                        >
+                          <AlignVerticalDistributeCenter className="h-3 w-3 mr-2" />
+                          <span className="flex-1 text-left">Distribute vertical spacing</span>
+                          <span className="text-[10px] text-muted-foreground">Alt+Shift+V</span>
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Position Section - For Elements */}
+        {elementType !== "frame" && (onXChange || onYChange || onRotationChange) && (
           <AccordionItem value="position">
             <AccordionTrigger className="text-xs font-medium py-2">Position</AccordionTrigger>
             <AccordionContent className="space-y-3 pb-3">
@@ -253,118 +445,66 @@ export default function ShapeSettingsPanel({
                 )}
               </div>
               
-              {/* Alignment tools - Only for child elements */}
-              {onAlign && elementType !== "frame" && (
+              {/* Alignment tools - 6 buttons in one row */}
+              {onAlign && (
                 <div>
-                  <Label className="text-xs mb-1 block">Align</Label>
-                  <div className="space-y-1">
-                    {/* Horizontal Alignment Row */}
-                    <div className="grid grid-cols-3 gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("left")}
-                        title="Align Left"
-                      >
-                        <AlignStartHorizontal className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("center")}
-                        title="Align Center Horizontal"
-                      >
-                        <AlignCenterHorizontal className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("right")}
-                        title="Align Right"
-                      >
-                        <AlignEndHorizontal className="h-3 w-3" />
-                      </Button>
-                    </div>
-                    {/* Vertical Alignment Row */}
-                    <div className="grid grid-cols-3 gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("top")}
-                        title="Align Top"
-                      >
-                        <AlignStartVertical className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("middle")}
-                        title="Align Center Vertical"
-                      >
-                        <AlignCenterVertical className="h-3 w-3" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="h-7 text-[10px]" 
-                        onClick={() => onAlign("bottom")}
-                        title="Align Bottom"
-                      >
-                        <AlignEndVertical className="h-3 w-3" />
-                      </Button>
-                    </div>
+                  <Label className="text-xs mb-1 block">Align to frame</Label>
+                  <div className="grid grid-cols-6 gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("left")}
+                      title="Align Left"
+                    >
+                      <AlignStartHorizontal className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("center")}
+                      title="Align Center Horizontal"
+                    >
+                      <AlignCenterHorizontal className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("right")}
+                      title="Align Right"
+                    >
+                      <AlignEndHorizontal className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("top")}
+                      title="Align Top"
+                    >
+                      <AlignStartVertical className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("middle")}
+                      title="Align Center Vertical"
+                    >
+                      <AlignCenterVertical className="h-3 w-3" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-7 w-full" 
+                      onClick={() => onAlign("bottom")}
+                      title="Align Bottom"
+                    >
+                      <AlignEndVertical className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
-              )}
-              
-              {/* Distribute tools - Only for child elements */}
-              {onDistribute && elementType !== "frame" && (
-                <div>
-                  <Label className="text-xs mb-1 block">Distribute</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full h-7 text-xs justify-start">
-                        Distribute...
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent side="right" align="start" className="w-56 p-2">
-                      <div className="space-y-1">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("tidy")}
-                        >
-                          <span className="flex-1 text-left">Tidy up</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("horizontal")}
-                        >
-                          <AlignHorizontalDistributeCenter className="h-3 w-3 mr-2" />
-                          <span className="flex-1 text-left">Distribute horizontal spacing</span>
-                          <span className="text-[10px] text-muted-foreground">Alt+Shift+H</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-full justify-start h-8 text-xs"
-                          onClick={() => onDistribute("vertical")}
-                        >
-                          <AlignVerticalDistributeCenter className="h-3 w-3 mr-2" />
-                          <span className="flex-1 text-left">Distribute vertical spacing</span>
-                          <span className="text-[10px] text-muted-foreground">Alt+Shift+V</span>
-                        </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
                 </div>
               )}
             </AccordionContent>

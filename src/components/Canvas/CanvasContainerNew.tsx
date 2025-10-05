@@ -794,9 +794,17 @@ export default function CanvasContainerNew({
                 linkPosition={frame.linkPosition}
                 gradientIntensity={frame.gradientIntensity}
                 cornerRadius={frame.cornerRadius || 0}
+                flexDirection={frame.flexDirection}
+                justifyContent={frame.justifyContent}
+                alignItems={frame.alignItems}
+                gap={frame.gap}
                 isSelected={frame.id === selectedFrameId}
                 onUpdate={handleFrameUpdate}
-                onSelect={() => setSelectedFrameId(frame.id)}
+                onSelect={() => {
+                  setSelectedFrameId(frame.id);
+                  setSelectedElementIds([]);
+                  setShowShapeSettings(true);
+                }}
               >
                 {/* Elements inside frame */}
                 {(frame.elements || []).map((element) => (
@@ -823,6 +831,7 @@ export default function CanvasContainerNew({
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
                       blendMode={element.blendMode}
+                      useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}

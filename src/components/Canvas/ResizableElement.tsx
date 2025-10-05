@@ -17,6 +17,7 @@ interface ResizableElementProps {
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
+  useFlexLayout?: boolean; // Whether parent uses flexbox layout
   isSelected: boolean;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
   onSelect: (e?: React.MouseEvent) => void;
@@ -41,6 +42,7 @@ export default function ResizableElement({
   opacity = 100,
   cornerRadius = 0,
   blendMode = "normal",
+  useFlexLayout = false,
   isSelected,
   onUpdate,
   onSelect,
@@ -234,14 +236,15 @@ export default function ResizableElement({
 
   return (
     <div
-      className={`absolute cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} cursor-move ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
       style={{ 
-        left: x, 
-        top: y, 
+        left: useFlexLayout ? undefined : x, 
+        top: useFlexLayout ? undefined : y, 
         width, 
         height,
         opacity: opacity / 100,
-        mixBlendMode: (blendMode || 'normal') as any
+        mixBlendMode: (blendMode || 'normal') as any,
+        flexShrink: useFlexLayout ? 0 : undefined,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
