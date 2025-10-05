@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
+import PageFooter from "@/components/Footer/PageFooter";
 
 interface Project {
   id: string;
@@ -75,7 +76,7 @@ export default function Gallery() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-4">
         <div className="max-w-6xl mx-auto rounded-xl p-4" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
@@ -155,6 +156,7 @@ export default function Gallery() {
           </div>
         </div>
       </main>
+      <PageFooter />
     </div>
   );
 }

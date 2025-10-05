@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Sidebar from "@/components/Sidebar";
 import { removeBackground } from "@/lib/backgroundRemoval";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import PageFooter from "@/components/Footer/PageFooter";
 
 interface Poster {
   id: string;
@@ -1145,6 +1146,7 @@ export default function Editor() {
             </div>
           </Card>
         </div>
+        <PageFooter />
       </main>
     </div>
   );

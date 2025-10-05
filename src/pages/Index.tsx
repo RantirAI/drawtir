@@ -6,6 +6,7 @@ import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 import { Loader2 } from "lucide-react";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { validateSnapshot } from "@/lib/snapshot";
+import PageFooter from "@/components/Footer/PageFooter";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -73,7 +74,14 @@ const Index = () => {
     );
   }
 
-  return <CanvasContainerNew initialSnapshot={snapshot || undefined} />;
+  return (
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 overflow-hidden">
+        <CanvasContainerNew initialSnapshot={snapshot || undefined} />
+      </div>
+      <PageFooter />
+    </div>
+  );
 };
 
 export default Index;

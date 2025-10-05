@@ -1,8 +1,9 @@
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
+import PageFooter from "@/components/Footer/PageFooter";
 
 export default function Settings() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-4">
         <div className="max-w-2xl mx-auto rounded-xl p-4" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
@@ -12,6 +13,7 @@ export default function Settings() {
           </div>
         </div>
       </main>
+      <PageFooter />
     </div>
   );
 }

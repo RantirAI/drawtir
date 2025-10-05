@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Square, Type, Image, Pen, Box, Code, Layers } from "lucide-react";
+import PageFooter from "@/components/Footer/PageFooter";
 
 export default function Documentation() {
   const [activeSection, setActiveSection] = useState("getting-started");
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-4">
         <div className="flex gap-4">
@@ -462,6 +463,7 @@ const editor = new DrawtirSDK({
           </div>
         </div>
       </main>
+      <PageFooter />
     </div>
   );
 }
