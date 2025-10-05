@@ -139,6 +139,16 @@ export default function CanvasContainerNew({
           handleElementsDelete();
         }
       }
+      // Arrange forward: Cmd/Ctrl + ]
+      if ((e.ctrlKey || e.metaKey) && e.key === ']') {
+        e.preventDefault();
+        handleArrange('forward');
+      }
+      // Arrange backward: Cmd/Ctrl + [
+      if ((e.ctrlKey || e.metaKey) && e.key === '[') {
+        e.preventDefault();
+        handleArrange('backward');
+      }
       if (e.key === ' ') {
         setIsPanning(true);
       }
@@ -756,6 +766,19 @@ export default function CanvasContainerNew({
     setShowShapeSettings(true);
   };
 
+  const handleElementReorder = (frameId: string, fromIndex: number, toIndex: number) => {
+    setFrames(frames.map(f => {
+      if (f.id === frameId && f.elements) {
+        const newElements = [...f.elements];
+        const [movedElement] = newElements.splice(fromIndex, 1);
+        newElements.splice(toIndex, 0, movedElement);
+        return { ...f, elements: newElements };
+      }
+      return f;
+    }));
+    toast.success("Layer reordered");
+  };
+
   const handleElementsDelete = () => {
     if (selectedElementIds.length === 0) return;
     
@@ -1140,6 +1163,7 @@ export default function CanvasContainerNew({
             setSelectedElementIds([]);
           }}
           onElementDelete={handleElementDelete}
+          onElementReorder={handleElementReorder}
           onClose={() => setShowLayersPanel(false)}
         />
       )}

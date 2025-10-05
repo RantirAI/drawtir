@@ -36,6 +36,9 @@ export interface Element {
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
+  
+  // Nesting support
+  children?: Element[];
 }
 
 export interface Frame {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen } from "lucide-react";
+import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DraggablePanel from "./DraggablePanel";
@@ -12,6 +12,7 @@ interface LayersPanelProps {
   onElementSelect: (elementId: string, multiSelect?: boolean) => void;
   onFrameSelect: (frameId: string) => void;
   onElementDelete: (elementId: string) => void;
+  onElementReorder?: (frameId: string, fromIndex: number, toIndex: number) => void;
   onClose: () => void;
 }
 
@@ -34,9 +35,12 @@ export default function LayersPanel({
   onElementSelect,
   onFrameSelect,
   onElementDelete,
+  onElementReorder,
   onClose,
 }: LayersPanelProps) {
   const [collapsedFrames, setCollapsedFrames] = useState<Set<string>>(new Set());
+  const [draggedElement, setDraggedElement] = useState<{ frameId: string; index: number } | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const toggleFrameCollapse = (frameId: string) => {
     const newCollapsed = new Set(collapsedFrames);
@@ -91,22 +95,54 @@ export default function LayersPanel({
                 {/* Elements inside frame */}
                 {!isCollapsed && frameElements.length > 0 && (
                   <div className="ml-4 space-y-0.5">
-                    {frameElements.map((element) => {
+                    {frameElements.map((element, index) => {
                       const Icon = getElementIcon(element.type, element.shapeType);
                       const isSelected = selectedElementIds.includes(element.id);
+                      const isDragOver = dragOverIndex === index;
                       
                       return (
                         <div
                           key={element.id}
+                          draggable={onElementReorder !== undefined}
+                          onDragStart={(e) => {
+                            if (!onElementReorder) return;
+                            setDraggedElement({ frameId: frame.id, index });
+                            e.dataTransfer.effectAllowed = "move";
+                          }}
+                          onDragOver={(e) => {
+                            if (!onElementReorder || !draggedElement) return;
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = "move";
+                            setDragOverIndex(index);
+                          }}
+                          onDragLeave={() => {
+                            setDragOverIndex(null);
+                          }}
+                          onDrop={(e) => {
+                            if (!onElementReorder || !draggedElement) return;
+                            e.preventDefault();
+                            if (draggedElement.frameId === frame.id && draggedElement.index !== index) {
+                              onElementReorder(frame.id, draggedElement.index, index);
+                            }
+                            setDraggedElement(null);
+                            setDragOverIndex(null);
+                          }}
+                          onDragEnd={() => {
+                            setDraggedElement(null);
+                            setDragOverIndex(null);
+                          }}
                           className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors group ${
                             isSelected ? "bg-blue-500/20 border border-blue-500" : "bg-secondary/30 hover:bg-secondary"
-                          }`}
+                          } ${isDragOver ? "border-t-2 border-blue-500" : ""}`}
                           onClick={(e) => {
                             e.stopPropagation();
                             onElementSelect(element.id, e.shiftKey || e.ctrlKey || e.metaKey);
                           }}
                         >
                           <div className="flex items-center gap-2 min-w-0 flex-1">
+                            {onElementReorder && (
+                              <GripVertical className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 cursor-grab active:cursor-grabbing" />
+                            )}
                             <Icon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-xs truncate">
                               {element.type === "text"
