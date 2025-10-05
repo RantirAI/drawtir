@@ -69,6 +69,11 @@ export default function BottomToolbar({
                   variant={activeTool === "shape" ? "default" : "ghost"} 
                   size="icon" 
                   className="h-8 w-8 rounded-full"
+                  onClick={() => {
+                    onToolChange?.("shape");
+                    // Quick add: insert a default rectangle on click
+                    onShapeSelect?.("rectangle");
+                  }}
                 >
                   <Square className="h-4 w-4" />
                 </Button>

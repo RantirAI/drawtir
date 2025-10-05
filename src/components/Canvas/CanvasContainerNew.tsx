@@ -537,11 +537,13 @@ export default function CanvasContainerNew({
 
   const handleShapeSelect = (shapeType: string) => {
     console.log("🔷 handleShapeSelect called with:", shapeType);
-    if (!selectedFrameId) {
-      console.log("❌ No selectedFrameId");
+    const targetFrameId = selectedFrameId || frames[0]?.id;
+    if (!targetFrameId) {
+      console.log("❌ No frame available");
+      toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === selectedFrameId);
+    const frame = frames.find(f => f.id === targetFrameId);
     if (!frame) {
       console.log("❌ Frame not found");
       return;
@@ -581,7 +583,7 @@ export default function CanvasContainerNew({
     console.log("🔷 Created new shape element:", newElement);
 
     setFrames(prevFrames => prevFrames.map(f => {
-      if (f.id === selectedFrameId) {
+      if (f.id === targetFrameId) {
         const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
         console.log("✅ Updated frame with new element. Total elements:", updatedFrame.elements?.length);
         return updatedFrame;
