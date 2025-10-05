@@ -74,6 +74,9 @@ export default function HorizontalNav() {
               <Link to="/gallery" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Projects
               </Link>
+              <Link to="/documentation" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Docs
+              </Link>
               <Link to="/settings" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Settings
               </Link>

@@ -195,31 +195,31 @@ export default function ShapeSettingsPanel({
       title="Style"
       defaultPosition={{ x: 50, y: 500 }}
       onClose={onClose}
-      className="w-72"
+      className="w-64"
     >
       {/* Header with element type */}
-      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border">
-        <ElementIcon className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{elementName}</span>
+      <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-border">
+        <ElementIcon className="h-3 w-3 text-muted-foreground" />
+        <span className="text-[11px] font-medium">{elementName}</span>
         {elementType && (
-          <span className="ml-auto text-xs px-2 py-0.5 bg-muted rounded-full text-muted-foreground">
+          <span className="ml-auto text-[10px] px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
             {elementType}
           </span>
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type"]} className="w-full">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type"]} className="w-full space-y-0">
         {/* Auto Layout Section - Only for Frames */}
         {elementType === "frame" && (
-          <AccordionItem value="layout">
-            <AccordionTrigger className="text-xs font-medium py-2">Auto layout</AccordionTrigger>
-            <AccordionContent className="space-y-3 pb-3">
+          <AccordionItem value="layout" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Auto layout</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-2">
               {/* Direction buttons */}
               <div className="grid grid-cols-4 gap-1">
                 <Button
                   variant={flexDirection === "row" ? "default" : "outline"}
                   size="icon"
-                  className="h-8 w-full"
+                  className="h-6 w-full p-1"
                   onClick={() => {
                     onFlexDirectionChange?.("row");
                     // Enable auto layout by also setting defaults if not set
@@ -228,12 +228,12 @@ export default function ShapeSettingsPanel({
                   }}
                   title="Horizontal"
                 >
-                  <Columns className="h-4 w-4" />
+                  <Columns className="h-3 w-3" />
                 </Button>
                 <Button
                   variant={flexDirection === "column" ? "default" : "outline"}
                   size="icon"
-                  className="h-8 w-full"
+                  className="h-6 w-full p-1"
                   onClick={() => {
                     onFlexDirectionChange?.("column");
                     // Enable auto layout by also setting defaults if not set
@@ -242,12 +242,12 @@ export default function ShapeSettingsPanel({
                   }}
                   title="Vertical"
                 >
-                  <Rows className="h-4 w-4" />
+                  <Rows className="h-3 w-3" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-full"
+                  className="h-6 w-full p-1"
                   title="Disable auto layout"
                   onClick={() => {
                     onFlexDirectionChange?.(undefined as any);
@@ -255,49 +255,49 @@ export default function ShapeSettingsPanel({
                     onAlignItemsChange?.(undefined as any);
                   }}
                 >
-                  <AlignHorizontalSpaceAround className="h-4 w-4 opacity-50" />
+                  <AlignHorizontalSpaceAround className="h-3 w-3 opacity-50" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-8 w-full"
+                  className="h-6 w-full p-1"
                   title="Coming soon"
                   disabled
                 >
-                  <AlignVerticalSpaceAround className="h-4 w-4" />
+                  <AlignVerticalSpaceAround className="h-3 w-3" />
                 </Button>
               </div>
 
               {/* Width and Height */}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-1.5">
                 <div>
-                  <Label className="text-xs mb-1 block">W</Label>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">W</Label>
                   <Input
                     type="number"
                     value={Math.round(width || 0)}
                     onChange={(e) => onWidthChange?.(Number(e.target.value))}
-                    className="h-7 text-xs"
+                    className="h-6 text-[11px] px-1.5"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs mb-1 block">H</Label>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">H</Label>
                   <Input
                     type="number"
                     value={Math.round(height || 0)}
                     onChange={(e) => onHeightChange?.(Number(e.target.value))}
-                    className="h-7 text-xs"
+                    className="h-6 text-[11px] px-1.5"
                   />
                 </div>
               </div>
 
               {/* Alignment icons */}
               <div>
-                <Label className="text-xs mb-1 block">Align content</Label>
-                <div className="grid grid-cols-6 gap-1">
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align content</Label>
+                <div className="grid grid-cols-6 gap-0.5">
                   <Button
                     variant={justifyContent === "start" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onJustifyContentChange?.("start")}
                     title="Align Start"
                   >
@@ -306,7 +306,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={justifyContent === "center" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onJustifyContentChange?.("center")}
                     title="Align Center"
                   >
@@ -315,7 +315,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={justifyContent === "end" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onJustifyContentChange?.("end")}
                     title="Align End"
                   >
@@ -324,7 +324,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "start" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onAlignItemsChange?.("start")}
                     title="Align Top"
                   >
@@ -333,7 +333,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "center" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onAlignItemsChange?.("center")}
                     title="Align Middle"
                   >
@@ -342,7 +342,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "end" ? "default" : "outline"}
                     size="icon"
-                    className="h-7 w-full"
+                    className="h-6 w-full p-1"
                     onClick={() => onAlignItemsChange?.("end")}
                     title="Align Bottom"
                   >
@@ -353,13 +353,13 @@ export default function ShapeSettingsPanel({
 
               {/* Gap - Slider with Input */}
               <div>
-                <div className="flex items-center justify-between mb-1">
-                  <Label className="text-xs">Gap</Label>
+                <div className="flex items-center justify-between mb-0.5">
+                  <Label className="text-[10px] text-muted-foreground">Gap</Label>
                   <Input
                     type="number"
                     value={Math.round(gap || 0)}
                     onChange={(e) => onGapChange?.(Number(e.target.value))}
-                    className="h-6 w-16 text-xs text-center"
+                    className="h-5 w-14 text-[11px] text-center px-1"
                     min="0"
                     max="100"
                   />
@@ -370,6 +370,7 @@ export default function ShapeSettingsPanel({
                   min={0}
                   max={100}
                   step={1}
+                  className="mt-1"
                 />
               </div>
             </AccordionContent>
@@ -378,44 +379,44 @@ export default function ShapeSettingsPanel({
 
         {/* Position Section - For Elements */}
         {elementType !== "frame" && (onXChange || onYChange || onRotationChange) && (
-          <AccordionItem value="position">
-            <AccordionTrigger className="text-xs font-medium py-2">Position</AccordionTrigger>
-            <AccordionContent className="space-y-3 pb-3">
-              <div className="grid grid-cols-3 gap-2">
+          <AccordionItem value="position" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Position</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {onXChange && (
                   <div>
-                    <Label className="text-xs mb-1 block">X</Label>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">X</Label>
                     <Input
                       type="number"
                       value={Math.round(x)}
                       onChange={(e) => onXChange(Number(e.target.value))}
-                      className="h-7 text-xs"
+                      className="h-6 text-[11px] px-1.5"
                     />
                   </div>
                 )}
                 {onYChange && (
                   <div>
-                    <Label className="text-xs mb-1 block">Y</Label>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Y</Label>
                     <Input
                       type="number"
                       value={Math.round(y)}
                       onChange={(e) => onYChange(Number(e.target.value))}
-                      className="h-7 text-xs"
+                      className="h-6 text-[11px] px-1.5"
                     />
                   </div>
                 )}
                 {onRotationChange && (
                   <div>
-                    <Label className="text-xs mb-1 flex items-center gap-1">
-                      <RotateCcw className="h-3 w-3" />
-                      <span>Rotate</span>
+                    <Label className="text-[10px] mb-0.5 flex items-center gap-0.5 text-muted-foreground">
+                      <RotateCcw className="h-2.5 w-2.5" />
+                      <span>°</span>
                     </Label>
                     <Input
                       type="number"
                       value={Math.round(rotation)}
                       onChange={(e) => onRotationChange(Number(e.target.value))}
-                      className="h-7 text-xs"
-                      placeholder="0°"
+                      className="h-6 text-[11px] px-1.5"
+                      placeholder="0"
                     />
                   </div>
                 )}
@@ -424,12 +425,12 @@ export default function ShapeSettingsPanel({
               {/* Alignment tools - 6 buttons in one row */}
               {onAlign && (
                 <div>
-                  <Label className="text-xs mb-1 block">Align to frame</Label>
-                  <div className="grid grid-cols-6 gap-1">
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align to frame</Label>
+                  <div className="grid grid-cols-6 gap-0.5">
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("left")}
                       title="Align Left"
                     >
@@ -438,7 +439,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("center")}
                       title="Align Center Horizontal"
                     >
@@ -447,7 +448,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("right")}
                       title="Align Right"
                     >
@@ -456,7 +457,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("top")}
                       title="Align Top"
                     >
@@ -465,7 +466,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("middle")}
                       title="Align Center Vertical"
                     >
@@ -474,7 +475,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-7 w-full" 
+                      className="h-6 w-full p-1" 
                       onClick={() => onAlign("bottom")}
                       title="Align Bottom"
                     >
@@ -489,20 +490,20 @@ export default function ShapeSettingsPanel({
 
         {/* Type Section - For Text Elements */}
         {elementType === "text" && (
-          <AccordionItem value="type">
-            <AccordionTrigger className="text-xs font-medium py-2">Type</AccordionTrigger>
-            <AccordionContent className="space-y-3 pb-3">
+          <AccordionItem value="type" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Type</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-2">
               {/* Font Family */}
               {onFontFamilyChange && (
                 <div>
-                  <Label className="text-xs mb-1 block">Font</Label>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Font</Label>
                   <Select value={fontFamily} onValueChange={onFontFamilyChange}>
-                    <SelectTrigger className="h-7 text-xs">
+                    <SelectTrigger className="h-6 text-[11px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="max-h-64">
                       {GOOGLE_FONTS.map((font) => (
-                        <SelectItem key={font.value} value={font.value} className="text-xs">
+                        <SelectItem key={font.value} value={font.value} className="text-[11px]">
                           <span style={{ fontFamily: font.value }}>{font.label}</span>
                         </SelectItem>
                       ))}
@@ -514,13 +515,14 @@ export default function ShapeSettingsPanel({
               {/* Font Size */}
               {onFontSizeChange && (
                 <div>
-                  <Label className="text-xs mb-1 block">Size: {fontSize}px</Label>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Size: {fontSize}px</Label>
                   <Slider
                     value={[fontSize]}
                     onValueChange={([v]) => onFontSizeChange(v)}
                     min={8}
                     max={200}
                     step={1}
+                    className="mt-1"
                   />
                 </div>
               )}
@@ -528,19 +530,19 @@ export default function ShapeSettingsPanel({
               {/* Font Weight */}
               {onFontWeightChange && (
                 <div>
-                  <Label className="text-xs mb-1 block">Weight</Label>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Weight</Label>
                   <Select value={fontWeight} onValueChange={onFontWeightChange}>
-                    <SelectTrigger className="h-7 text-xs">
+                    <SelectTrigger className="h-6 text-[11px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="300">Light</SelectItem>
-                      <SelectItem value="400">Regular</SelectItem>
-                      <SelectItem value="500">Medium</SelectItem>
-                      <SelectItem value="600">Semi Bold</SelectItem>
-                      <SelectItem value="700">Bold</SelectItem>
-                      <SelectItem value="800">Extra Bold</SelectItem>
-                      <SelectItem value="900">Black</SelectItem>
+                      <SelectItem value="300" className="text-[11px]">Light</SelectItem>
+                      <SelectItem value="400" className="text-[11px]">Regular</SelectItem>
+                      <SelectItem value="500" className="text-[11px]">Medium</SelectItem>
+                      <SelectItem value="600" className="text-[11px]">Semi Bold</SelectItem>
+                      <SelectItem value="700" className="text-[11px]">Bold</SelectItem>
+                      <SelectItem value="800" className="text-[11px]">Extra Bold</SelectItem>
+                      <SelectItem value="900" className="text-[11px]">Black</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -549,12 +551,12 @@ export default function ShapeSettingsPanel({
               {/* Text Alignment */}
               {onTextAlignChange && (
                 <div>
-                  <Label className="text-xs mb-1 block">Align</Label>
-                  <div className="grid grid-cols-3 gap-1">
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align</Label>
+                  <div className="grid grid-cols-3 gap-0.5">
                     <Button
                       variant={textAlign === "left" ? "default" : "outline"}
                       size="icon"
-                      className="h-7 w-full"
+                      className="h-6 w-full p-1"
                       onClick={() => onTextAlignChange("left")}
                     >
                       <AlignLeft className="h-3 w-3" />
@@ -562,7 +564,7 @@ export default function ShapeSettingsPanel({
                     <Button
                       variant={textAlign === "center" ? "default" : "outline"}
                       size="icon"
-                      className="h-7 w-full"
+                      className="h-6 w-full p-1"
                       onClick={() => onTextAlignChange("center")}
                     >
                       <AlignCenter className="h-3 w-3" />
@@ -570,7 +572,7 @@ export default function ShapeSettingsPanel({
                     <Button
                       variant={textAlign === "right" ? "default" : "outline"}
                       size="icon"
-                      className="h-7 w-full"
+                      className="h-6 w-full p-1"
                       onClick={() => onTextAlignChange("right")}
                     >
                       <AlignRight className="h-3 w-3" />
@@ -616,19 +618,20 @@ export default function ShapeSettingsPanel({
         )}
 
         {/* Appearance Section */}
-        <AccordionItem value="appearance">
-          <AccordionTrigger className="text-xs font-medium py-2">Appearance</AccordionTrigger>
-          <AccordionContent className="space-y-3 pb-3">
+        <AccordionItem value="appearance" className="border-b-0">
+          <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Appearance</AccordionTrigger>
+          <AccordionContent className="space-y-2 pb-2">
             {/* Opacity */}
             {onOpacityChange && (
               <div>
-                <Label className="text-xs mb-1 block">Opacity: {opacity}%</Label>
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Opacity: {opacity}%</Label>
                 <Slider
                   value={[opacity]}
                   onValueChange={([v]) => onOpacityChange(v)}
                   min={0}
                   max={100}
                   step={1}
+                  className="mt-1"
                 />
               </div>
             )}
@@ -636,24 +639,24 @@ export default function ShapeSettingsPanel({
             {/* Blend Mode */}
             {onBlendModeChange && (
               <div>
-                <Label className="text-xs mb-1 block">Blend Mode</Label>
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Blend Mode</Label>
                 <Select value={blendMode} onValueChange={onBlendModeChange}>
-                  <SelectTrigger className="h-7 text-xs">
+                  <SelectTrigger className="h-6 text-[11px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="normal">Pass Through</SelectItem>
-                    <SelectItem value="multiply">Multiply</SelectItem>
-                    <SelectItem value="screen">Screen</SelectItem>
-                    <SelectItem value="overlay">Overlay</SelectItem>
-                    <SelectItem value="darken">Darken</SelectItem>
-                    <SelectItem value="lighten">Lighten</SelectItem>
-                    <SelectItem value="color-dodge">Color Dodge</SelectItem>
-                    <SelectItem value="color-burn">Color Burn</SelectItem>
-                    <SelectItem value="hard-light">Hard Light</SelectItem>
-                    <SelectItem value="soft-light">Soft Light</SelectItem>
-                    <SelectItem value="difference">Difference</SelectItem>
-                    <SelectItem value="exclusion">Exclusion</SelectItem>
+                    <SelectItem value="normal" className="text-[11px]">Pass Through</SelectItem>
+                    <SelectItem value="multiply" className="text-[11px]">Multiply</SelectItem>
+                    <SelectItem value="screen" className="text-[11px]">Screen</SelectItem>
+                    <SelectItem value="overlay" className="text-[11px]">Overlay</SelectItem>
+                    <SelectItem value="darken" className="text-[11px]">Darken</SelectItem>
+                    <SelectItem value="lighten" className="text-[11px]">Lighten</SelectItem>
+                    <SelectItem value="color-dodge" className="text-[11px]">Color Dodge</SelectItem>
+                    <SelectItem value="color-burn" className="text-[11px]">Color Burn</SelectItem>
+                    <SelectItem value="hard-light" className="text-[11px]">Hard Light</SelectItem>
+                    <SelectItem value="soft-light" className="text-[11px]">Soft Light</SelectItem>
+                    <SelectItem value="difference" className="text-[11px]">Difference</SelectItem>
+                    <SelectItem value="exclusion" className="text-[11px]">Exclusion</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -662,13 +665,14 @@ export default function ShapeSettingsPanel({
             {/* Corner Radius - only for rectangles and frames */}
             {onCornerRadiusChange && (elementType === "frame" || (elementType === "shape" && (shapeType === "rectangle" || !shapeType))) && (
               <div>
-                <Label className="text-xs mb-1 block">Corner: {cornerRadius}px</Label>
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Corner: {cornerRadius}px</Label>
                 <Slider
                   value={[cornerRadius]}
                   onValueChange={([v]) => onCornerRadiusChange(v)}
                   min={0}
                   max={100}
                   step={1}
+                  className="mt-1"
                 />
               </div>
             )}
@@ -677,14 +681,14 @@ export default function ShapeSettingsPanel({
 
         {/* Fill Section */}
         {(onFillChange || onBackgroundColorChange) && (
-          <AccordionItem value="fill">
-            <AccordionTrigger className="text-xs font-medium py-2">Fill</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
-              <div className="flex items-center gap-2">
+          <AccordionItem value="fill" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Fill</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-2">
+              <div className="flex items-center gap-1.5">
                 <Popover open={fillModalOpen} onOpenChange={setFillModalOpen}>
                   <PopoverTrigger asChild>
                     <button
-                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                      className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
                       style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
                     >
                       <span className="sr-only">Fill Color</span>
@@ -703,7 +707,7 @@ export default function ShapeSettingsPanel({
                     />
                   </PopoverContent>
                 </Popover>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-[10px] text-muted-foreground font-mono">
                   {onBackgroundColorChange ? backgroundColor : fill}
                 </span>
               </div>
@@ -713,14 +717,14 @@ export default function ShapeSettingsPanel({
 
         {/* Stroke Section - for shapes and drawings */}
         {(onStrokeChange && (elementType === "shape" || elementType === "drawing")) && (
-          <AccordionItem value="stroke">
-            <AccordionTrigger className="text-xs font-medium py-2">Stroke</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
-              <div className="flex items-start gap-2">
+          <AccordionItem value="stroke" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Stroke</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-2">
+              <div className="flex items-start gap-1.5">
                 <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
                   <PopoverTrigger asChild>
                     <button
-                      className="h-8 w-8 rounded border-2 border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                      className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
                       style={{ backgroundColor: stroke }}
                     >
                       <span className="sr-only">Stroke Color</span>
@@ -737,13 +741,14 @@ export default function ShapeSettingsPanel({
                 
                 {onStrokeWidthChange && (
                   <div className="flex-1">
-                    <Label className="text-xs mb-1 block">Weight: {strokeWidth}px</Label>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Weight: {strokeWidth}px</Label>
                     <Slider
                       value={[strokeWidth]}
                       onValueChange={([v]) => onStrokeWidthChange(v)}
                       min={0}
                       max={20}
                       step={1}
+                      className="mt-1"
                     />
                   </div>
                 )}
@@ -754,16 +759,16 @@ export default function ShapeSettingsPanel({
 
         {/* Image Fit (for image elements) */}
         {elementType === "image" && onImageFitChange && (
-          <AccordionItem value="image-fit">
-            <AccordionTrigger className="text-xs font-medium py-2">Image Fit</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
-              <div className="grid grid-cols-2 gap-1">
+          <AccordionItem value="image-fit" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Image Fit</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-2">
+              <div className="grid grid-cols-2 gap-0.5">
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
                     key={fit}
                     variant={imageFit === fit ? "default" : "outline"}
                     size="sm"
-                    className="h-7 text-[10px] capitalize"
+                    className="h-6 text-[10px] capitalize px-1"
                     onClick={() => onImageFitChange(fit)}
                   >
                     {fit}
@@ -776,15 +781,15 @@ export default function ShapeSettingsPanel({
 
         {/* Arrange (Layer Order) */}
         {onArrange && (
-          <AccordionItem value="arrange">
-            <AccordionTrigger className="text-xs font-medium py-2">Arrange</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
-              <div className="grid grid-cols-2 gap-1">
-                <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => onArrange("forward")}>
+          <AccordionItem value="arrange" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Arrange</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-2">
+              <div className="grid grid-cols-2 gap-0.5">
+                <Button variant="outline" size="sm" className="h-6 text-[10px] px-1" onClick={() => onArrange("forward")}>
                   <ArrowUp className="h-3 w-3 mr-1" />
                   Forward
                 </Button>
-                <Button variant="outline" size="sm" className="h-7 text-[10px]" onClick={() => onArrange("backward")}>
+                <Button variant="outline" size="sm" className="h-6 text-[10px] px-1" onClick={() => onArrange("backward")}>
                   <ArrowDown className="h-3 w-3 mr-1" />
                   Backward
                 </Button>

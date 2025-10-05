@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Gallery from "./pages/Gallery";
 import Editor from "./pages/Editor";
+import Documentation from "./pages/Documentation";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/editor/:id" element={<Editor />} />
+          <Route path="/documentation" element={<Documentation />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
