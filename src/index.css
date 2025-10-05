@@ -54,6 +54,11 @@ All colors MUST be HSL.
     
     --page-bg: 240 5% 96%;
     --page-container: 0 0% 100%;
+    
+    /* Glassmorphic tokens for light mode */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 240 5.9% 90% / 0.3;
+    --glass-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.12);
   }
 
   .dark {
@@ -96,6 +101,11 @@ All colors MUST be HSL.
     
     --page-bg: 240 6% 8%;
     --page-container: 240 5% 11%;
+    
+    /* Glassmorphic tokens for dark mode */
+    --glass-bg: 240 5% 11% / 0.6;
+    --glass-border: 240 5.9% 90% / 0.15;
+    --glass-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.37);
   }
 }
 

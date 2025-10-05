@@ -63,12 +63,15 @@ export default function DraggablePanel({
   return (
     <Card
       ref={panelRef}
-      className={`fixed bg-card/90 backdrop-blur-xl border shadow-2xl ${className}`}
+      className={`fixed backdrop-blur-2xl border ${className}`}
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,
         cursor: isDragging ? "grabbing" : "auto",
         minWidth: "200px",
+        background: "hsl(var(--glass-bg))",
+        borderColor: "hsl(var(--glass-border))",
+        boxShadow: "var(--glass-shadow)",
       }}
     >
       <div
