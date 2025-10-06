@@ -79,7 +79,6 @@ const Index = () => {
       <div className="flex-1 overflow-hidden">
         <CanvasContainerNew initialSnapshot={snapshot || undefined} />
       </div>
-      <PageFooter />
     </div>
   );
 };
