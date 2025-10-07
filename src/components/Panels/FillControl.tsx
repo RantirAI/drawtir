@@ -27,6 +27,7 @@ import {
   Trash2,
   RotateCw
 } from "lucide-react";
+import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 
 type FillType = "solid" | "image" | "gradient" | "pattern" | "video";
 
@@ -119,8 +120,39 @@ export default function FillControl({
     onGradientStopsChange?.(newStops.sort((a, b) => a.position - b.position));
   };
 
+  // Generate preview style
+  const getPreviewStyle = (): React.CSSProperties => {
+    if (fillType === "solid") {
+      return { backgroundColor: fill };
+    } else if (fillType === "image" && fillImage) {
+      const fitStyles = getFitStyle(fillImageFit);
+      return {
+        backgroundImage: `url(${fillImage})`,
+        backgroundSize: fitStyles.backgroundSize,
+        backgroundPosition: fitStyles.backgroundPosition,
+        backgroundRepeat: fitStyles.backgroundRepeat,
+      };
+    } else if (fillType === "gradient") {
+      return { background: generateGradientCSS(gradientType, gradientAngle, gradientStops) };
+    } else if (fillType === "pattern") {
+      return { backgroundColor: fill, backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,.1) 10px, rgba(0,0,0,.1) 20px)' };
+    } else if (fillType === "video") {
+      return { backgroundColor: "#000", backgroundImage: 'linear-gradient(45deg, #333 25%, transparent 25%), linear-gradient(-45deg, #333 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #333 75%), linear-gradient(-45deg, transparent 75%, #333 75%)', backgroundSize: '20px 20px', backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px' };
+    }
+    return { backgroundColor: fill };
+  };
+
   return (
     <div className="space-y-2">
+      {/* Preview and Label */}
+      <div className="flex items-center gap-2 mb-1">
+        <div 
+          className="h-8 w-8 rounded border-2 border-border shrink-0 shadow-sm"
+          style={getPreviewStyle()}
+        />
+        <Label className="text-[10px] text-muted-foreground font-medium">Fill Style</Label>
+      </div>
+
       {/* Fill Type Tabs */}
       <Tabs value={fillType} onValueChange={(v) => onFillTypeChange?.(v as FillType)}>
         <TabsList className="grid grid-cols-5 w-full h-8 bg-muted/50">

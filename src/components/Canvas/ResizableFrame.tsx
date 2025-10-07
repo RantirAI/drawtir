@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, ReactNode } from "react";
 import PosterPreview from "./PosterPreview";
+import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 
 interface ResizableFrameProps {
   id: string;
@@ -8,6 +9,14 @@ interface ResizableFrameProps {
   width: number;
   height: number;
   backgroundColor: string;
+  backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
+  backgroundImage?: string;
+  backgroundImageFit?: "fill" | "contain" | "cover" | "crop";
+  gradientType?: "linear" | "radial";
+  gradientAngle?: number;
+  gradientStops?: Array<{color: string, position: number}>;
+  patternFrameId?: string;
+  videoUrl?: string;
   image: string | null;
   topCaption: string;
   bottomCaption: string;
@@ -38,6 +47,14 @@ export default function ResizableFrame({
   width,
   height,
   backgroundColor,
+  backgroundType = "solid",
+  backgroundImage,
+  backgroundImageFit = "cover",
+  gradientType = "linear",
+  gradientAngle = 0,
+  gradientStops = [{ color: "#000000", position: 0 }, { color: "#ffffff", position: 100 }],
+  patternFrameId,
+  videoUrl,
   image,
   topCaption,
   bottomCaption,
@@ -121,6 +138,32 @@ export default function ResizableFrame({
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
+  const generateBackgroundStyle = () => {
+    const baseStyle: React.CSSProperties = {};
+    
+    if (backgroundType === "solid") {
+      baseStyle.backgroundColor = backgroundColor;
+    } else if (backgroundType === "image" && backgroundImage) {
+      const fitStyles = getFitStyle(backgroundImageFit);
+      baseStyle.backgroundImage = `url(${backgroundImage})`;
+      baseStyle.backgroundSize = fitStyles.backgroundSize;
+      baseStyle.backgroundPosition = fitStyles.backgroundPosition;
+      baseStyle.backgroundRepeat = fitStyles.backgroundRepeat;
+    } else if (backgroundType === "gradient") {
+      baseStyle.background = generateGradientCSS(gradientType, gradientAngle, gradientStops);
+    } else if (backgroundType === "pattern" && patternFrameId) {
+      baseStyle.backgroundColor = backgroundColor;
+    } else if (backgroundType === "video" && videoUrl) {
+      baseStyle.backgroundColor = "#000000";
+    } else {
+      baseStyle.backgroundColor = backgroundColor;
+    }
+    
+    return baseStyle;
+  };
+
+  const backgroundStyle = generateBackgroundStyle();
+
   return (
     <div
       ref={frameRef}
@@ -133,24 +176,42 @@ export default function ResizableFrame({
         cursor: isDragging ? "grabbing" : "grab",
         overflow: "hidden",
         borderRadius: `${cornerRadius}px`,
+        ...backgroundStyle,
       }}
       onMouseDown={handleMouseDown}
     >
-      <PosterPreview
-        image={image}
-        topCaption={topCaption}
-        bottomCaption={bottomCaption}
-        backgroundColor={backgroundColor}
-        textColor={textColor}
-        textAlign={textAlign}
-        textSize={textSize}
-        textOpacity={textOpacity}
-        imageStyle={imageStyle}
-        filterStyle={filterStyle}
-        linkText={linkText}
-        linkPosition={linkPosition}
-        gradientIntensity={gradientIntensity}
-      />
+      {/* Video background for frames */}
+      {backgroundType === "video" && videoUrl && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ borderRadius: `${cornerRadius}px` }}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+      )}
+
+      {/* Legacy poster preview (only if image is set) */}
+      {image && (
+        <PosterPreview
+          image={image}
+          topCaption={topCaption}
+          bottomCaption={bottomCaption}
+          backgroundColor={backgroundColor}
+          textColor={textColor}
+          textAlign={textAlign}
+          textSize={textSize}
+          textOpacity={textOpacity}
+          imageStyle={imageStyle}
+          filterStyle={filterStyle}
+          linkText={linkText}
+          linkPosition={linkPosition}
+          gradientIntensity={gradientIntensity}
+        />
+      )}
       
       {/* Elements inside frame */}
       <div className="absolute inset-0 pointer-events-none">

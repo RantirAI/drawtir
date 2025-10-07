@@ -942,6 +942,14 @@ export default function CanvasContainerNew({
                 width={frame.width}
                 height={frame.height}
                 backgroundColor={frame.backgroundColor}
+                backgroundType={frame.backgroundType}
+                backgroundImage={frame.backgroundImage}
+                backgroundImageFit={frame.backgroundImageFit}
+                gradientType={frame.gradientType}
+                gradientAngle={frame.gradientAngle}
+                gradientStops={frame.gradientStops}
+                patternFrameId={frame.patternFrameId}
+                videoUrl={frame.videoUrl}
                 image={frame.image}
                 topCaption={frame.topCaption}
                 bottomCaption={frame.bottomCaption}
@@ -977,7 +985,7 @@ export default function CanvasContainerNew({
                     onDuplicate={() => handleElementDuplicate(element.id)}
                     onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
                   >
-                    <ResizableElement
+                     <ResizableElement
                       id={element.id}
                       type={element.type === "drawing" ? "shape" : element.type}
                       x={element.x}
@@ -1002,6 +1010,14 @@ export default function CanvasContainerNew({
                       fontWeight={element.fontWeight}
                       textAlign={element.textAlign}
                       color={element.color}
+                      fillType={element.fillType}
+                      fillImage={element.fillImage}
+                      fillImageFit={element.fillImageFit}
+                      gradientType={element.gradientType}
+                      gradientAngle={element.gradientAngle}
+                      gradientStops={element.gradientStops}
+                      patternFrameId={element.patternFrameId}
+                      videoUrl={element.videoUrl}
                       useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}

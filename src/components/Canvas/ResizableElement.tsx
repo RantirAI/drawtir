@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 
 interface ResizableElementProps {
   id: string;
@@ -28,6 +29,15 @@ interface ResizableElementProps {
   fontWeight?: string;
   textAlign?: "left" | "center" | "right";
   color?: string;
+  // Fill properties
+  fillType?: "solid" | "image" | "gradient" | "pattern" | "video";
+  fillImage?: string;
+  fillImageFit?: "fill" | "contain" | "cover" | "crop";
+  gradientType?: "linear" | "radial";
+  gradientAngle?: number;
+  gradientStops?: Array<{color: string, position: number}>;
+  patternFrameId?: string;
+  videoUrl?: string;
   useFlexLayout?: boolean;
   isSelected: boolean;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
@@ -62,6 +72,14 @@ export default function ResizableElement({
   fontWeight = "400",
   textAlign = "center",
   color,
+  fillType = "solid",
+  fillImage,
+  fillImageFit = "cover",
+  gradientType = "linear",
+  gradientAngle = 0,
+  gradientStops = [{ color: "#000000", position: 0 }, { color: "#ffffff", position: 100 }],
+  patternFrameId,
+  videoUrl,
   useFlexLayout = false,
   isSelected,
   onUpdate,
@@ -171,8 +189,34 @@ export default function ResizableElement({
     setResizeStart({ x: e.clientX, y: e.clientY, width, height, corner });
   };
 
+  const generateFillStyle = () => {
+    const baseStyle: React.CSSProperties = {};
+    
+    if (fillType === "solid") {
+      baseStyle.backgroundColor = fill;
+    } else if (fillType === "image" && fillImage) {
+      const fitStyles = getFitStyle(fillImageFit);
+      baseStyle.backgroundImage = `url(${fillImage})`;
+      baseStyle.backgroundSize = fitStyles.backgroundSize;
+      baseStyle.backgroundPosition = fitStyles.backgroundPosition;
+      baseStyle.backgroundRepeat = fitStyles.backgroundRepeat;
+    } else if (fillType === "gradient") {
+      baseStyle.background = generateGradientCSS(gradientType, gradientAngle, gradientStops);
+    } else if (fillType === "pattern" && patternFrameId) {
+      // Pattern will be rendered as a note for now
+      baseStyle.backgroundColor = fill;
+    } else if (fillType === "video" && videoUrl) {
+      // Video background handled separately
+      baseStyle.backgroundColor = "#000000";
+    } else {
+      baseStyle.backgroundColor = fill;
+    }
+    
+    return baseStyle;
+  };
+
   const renderShape = () => {
-    console.log("🔷 renderShape called - shapeType:", shapeType, "fill:", fill, "stroke:", stroke);
+    console.log("🔷 renderShape called - shapeType:", shapeType, "fillType:", fillType);
     // Drawing (pen tool paths)
     if (pathData) {
       return (
@@ -196,16 +240,32 @@ export default function ResizableElement({
     }
 
     const borderRadiusStyle = cornerRadius ? `${cornerRadius}px` : '0';
+    const fillStyle = generateFillStyle();
+
+    // Video background for shapes
+    const videoElement = fillType === "video" && videoUrl ? (
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ borderRadius: borderRadiusStyle }}
+      >
+        <source src={videoUrl} type="video/mp4" />
+      </video>
+    ) : null;
 
     // Shapes
     switch (shapeType) {
       case "circle":
       case "ellipse":
         return (
-          <div
-            className="w-full h-full rounded-full"
-            style={{ backgroundColor: fill, border: `${strokeWidth}px solid ${stroke}` }}
-          />
+          <div className="w-full h-full rounded-full relative" style={{ border: `${strokeWidth}px solid ${stroke}` }}>
+            <div className="w-full h-full rounded-full overflow-hidden" style={fillStyle}>
+              {videoElement}
+            </div>
+          </div>
         );
       case "line":
         return (
@@ -228,7 +288,36 @@ export default function ResizableElement({
         const hexPoints = `${width / 2},0 ${width},${height / 4} ${width},${height * 3 / 4} ${width / 2},${height} 0,${height * 3 / 4} 0,${height / 4}`;
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <polygon points={hexPoints} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+            <defs>
+              <pattern id={`fill-pattern-${id}`} width="100%" height="100%">
+                {fillType === "image" && fillImage ? (
+                  <image href={fillImage} width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+                ) : fillType === "gradient" ? (
+                  <rect width="100%" height="100%" fill={`url(#gradient-${id})`} />
+                ) : null}
+              </pattern>
+              {fillType === "gradient" && (
+                gradientType === "linear" ? (
+                  <linearGradient id={`gradient-${id}`} gradientTransform={`rotate(${gradientAngle})`}>
+                    {gradientStops.map((stop, i) => (
+                      <stop key={i} offset={`${stop.position}%`} stopColor={stop.color} />
+                    ))}
+                  </linearGradient>
+                ) : (
+                  <radialGradient id={`gradient-${id}`}>
+                    {gradientStops.map((stop, i) => (
+                      <stop key={i} offset={`${stop.position}%`} stopColor={stop.color} />
+                    ))}
+                  </radialGradient>
+                )
+              )}
+            </defs>
+            <polygon 
+              points={hexPoints} 
+              fill={fillType === "solid" ? fill : `url(#fill-pattern-${id})`} 
+              stroke={stroke} 
+              strokeWidth={strokeWidth} 
+            />
           </svg>
         );
       case "star":
@@ -243,19 +332,45 @@ export default function ResizableElement({
         }).join(' ');
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <polygon points={starPoints} fill={fill} stroke={stroke} strokeWidth={strokeWidth} />
+            <defs>
+              <pattern id={`fill-pattern-${id}`} width="100%" height="100%">
+                {fillType === "image" && fillImage ? (
+                  <image href={fillImage} width="100%" height="100%" preserveAspectRatio="xMidYMid slice" />
+                ) : fillType === "gradient" ? (
+                  <rect width="100%" height="100%" fill={`url(#gradient-${id})`} />
+                ) : null}
+              </pattern>
+              {fillType === "gradient" && (
+                gradientType === "linear" ? (
+                  <linearGradient id={`gradient-${id}`} gradientTransform={`rotate(${gradientAngle})`}>
+                    {gradientStops.map((stop, i) => (
+                      <stop key={i} offset={`${stop.position}%`} stopColor={stop.color} />
+                    ))}
+                  </linearGradient>
+                ) : (
+                  <radialGradient id={`gradient-${id}`}>
+                    {gradientStops.map((stop, i) => (
+                      <stop key={i} offset={`${stop.position}%`} stopColor={stop.color} />
+                    ))}
+                  </radialGradient>
+                )
+              )}
+            </defs>
+            <polygon 
+              points={starPoints} 
+              fill={fillType === "solid" ? fill : `url(#fill-pattern-${id})`} 
+              stroke={stroke} 
+              strokeWidth={strokeWidth} 
+            />
           </svg>
         );
       default:
         return (
-          <div
-            className="w-full h-full"
-            style={{ 
-              backgroundColor: fill, 
-              border: `${strokeWidth}px solid ${stroke}`,
-              borderRadius: borderRadiusStyle
-            }}
-          />
+          <div className="w-full h-full relative" style={{ border: `${strokeWidth}px solid ${stroke}`, borderRadius: borderRadiusStyle }}>
+            <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: borderRadiusStyle }}>
+              {videoElement}
+            </div>
+          </div>
         );
     }
   };
@@ -303,14 +418,22 @@ export default function ResizableElement({
           />
         ) : (
           <div 
-            className="w-full h-full flex items-center px-2 pointer-events-none"
+            className="w-full h-full flex items-center px-2 pointer-events-none relative"
             style={{ 
-              color: color || fill, 
               fontSize: `${fontSize}px`,
               fontFamily: fontFamily,
               fontWeight: fontWeight,
               textAlign: textAlign,
-              justifyContent: textAlign === "left" ? "flex-start" : textAlign === "right" ? "flex-end" : "center"
+              justifyContent: textAlign === "left" ? "flex-start" : textAlign === "right" ? "flex-end" : "center",
+              ...(fillType && fillType !== "solid" ? {
+                background: fillType === "image" && fillImage ? `url(${fillImage})` : 
+                           fillType === "gradient" ? generateGradientCSS(gradientType, gradientAngle, gradientStops) : 
+                           color || fill,
+                backgroundClip: "text",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                ...(fillType === "image" && fillImage ? getFitStyle(fillImageFit) : {})
+              } : { color: color || fill })
             }}
           >
             {text || "Double click to edit"}
