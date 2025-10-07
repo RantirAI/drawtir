@@ -223,7 +223,7 @@ export default function ShapeSettingsPanel({
                 <Button
                   variant={flexDirection === "row" ? "default" : "outline"}
                   size="icon"
-                  className="h-6 w-full p-1"
+                  className="h-7 w-full p-1 rounded"
                   onClick={() => {
                     onFlexDirectionChange?.("row");
                     // Enable auto layout by also setting defaults if not set
@@ -237,7 +237,7 @@ export default function ShapeSettingsPanel({
                 <Button
                   variant={flexDirection === "column" ? "default" : "outline"}
                   size="icon"
-                  className="h-6 w-full p-1"
+                  className="h-7 w-full p-1 rounded"
                   onClick={() => {
                     onFlexDirectionChange?.("column");
                     // Enable auto layout by also setting defaults if not set
@@ -251,7 +251,7 @@ export default function ShapeSettingsPanel({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-6 w-full p-1"
+                  className="h-7 w-full p-1 rounded"
                   title="Disable auto layout"
                   onClick={() => {
                     onFlexDirectionChange?.(undefined as any);
@@ -264,7 +264,7 @@ export default function ShapeSettingsPanel({
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-6 w-full p-1"
+                  className="h-7 w-full p-1 rounded"
                   title="Coming soon"
                   disabled
                 >
@@ -276,21 +276,21 @@ export default function ShapeSettingsPanel({
               <div className="grid grid-cols-2 gap-1.5">
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">W</Label>
-                  <Input
-                    type="number"
-                    value={Math.round(width || 0)}
-                    onChange={(e) => onWidthChange?.(Number(e.target.value))}
-                    className="h-6 text-[11px] px-1.5"
-                  />
+                    <Input
+                      type="number"
+                      value={Math.round(width || 0)}
+                      onChange={(e) => onWidthChange?.(Number(e.target.value))}
+                      className="h-7 text-[11px] px-1.5 rounded"
+                    />
                 </div>
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">H</Label>
-                  <Input
-                    type="number"
-                    value={Math.round(height || 0)}
-                    onChange={(e) => onHeightChange?.(Number(e.target.value))}
-                    className="h-6 text-[11px] px-1.5"
-                  />
+                    <Input
+                      type="number"
+                      value={Math.round(height || 0)}
+                      onChange={(e) => onHeightChange?.(Number(e.target.value))}
+                      className="h-7 text-[11px] px-1.5 rounded"
+                    />
                 </div>
               </div>
 
@@ -301,7 +301,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={justifyContent === "start" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onJustifyContentChange?.("start")}
                     title="Align Start"
                   >
@@ -310,7 +310,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={justifyContent === "center" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onJustifyContentChange?.("center")}
                     title="Align Center"
                   >
@@ -319,7 +319,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={justifyContent === "end" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onJustifyContentChange?.("end")}
                     title="Align End"
                   >
@@ -328,7 +328,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "start" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onAlignItemsChange?.("start")}
                     title="Align Top"
                   >
@@ -337,7 +337,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "center" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onAlignItemsChange?.("center")}
                     title="Align Middle"
                   >
@@ -346,7 +346,7 @@ export default function ShapeSettingsPanel({
                   <Button
                     variant={alignItems === "end" ? "default" : "outline"}
                     size="icon"
-                    className="h-6 w-full p-1"
+                    className="h-7 w-full p-1 rounded"
                     onClick={() => onAlignItemsChange?.("end")}
                     title="Align Bottom"
                   >
@@ -359,14 +359,14 @@ export default function ShapeSettingsPanel({
               <div>
                 <div className="flex items-center justify-between mb-0.5">
                   <Label className="text-[10px] text-muted-foreground">Gap</Label>
-                  <Input
-                    type="number"
-                    value={Math.round(gap || 0)}
-                    onChange={(e) => onGapChange?.(Number(e.target.value))}
-                    className="h-5 w-14 text-[11px] text-center px-1"
-                    min="0"
-                    max="100"
-                  />
+                    <Input
+                      type="number"
+                      value={Math.round(gap || 0)}
+                      onChange={(e) => onGapChange?.(Number(e.target.value))}
+                      className="h-7 w-14 text-[11px] text-center px-1 rounded"
+                      min="0"
+                      max="100"
+                    />
                 </div>
                 <Slider
                   value={[gap || 0]}
@@ -394,7 +394,7 @@ export default function ShapeSettingsPanel({
                       type="number"
                       value={Math.round(x)}
                       onChange={(e) => onXChange(Number(e.target.value))}
-                      className="h-6 text-[11px] px-1.5"
+                      className="h-7 text-[11px] px-1.5 rounded"
                     />
                   </div>
                 )}
@@ -405,7 +405,7 @@ export default function ShapeSettingsPanel({
                       type="number"
                       value={Math.round(y)}
                       onChange={(e) => onYChange(Number(e.target.value))}
-                      className="h-6 text-[11px] px-1.5"
+                      className="h-7 text-[11px] px-1.5 rounded"
                     />
                   </div>
                 )}
@@ -419,7 +419,7 @@ export default function ShapeSettingsPanel({
                       type="number"
                       value={Math.round(rotation)}
                       onChange={(e) => onRotationChange(Number(e.target.value))}
-                      className="h-6 text-[11px] px-1.5"
+                      className="h-7 text-[11px] px-1.5 rounded"
                       placeholder="0"
                     />
                   </div>
@@ -434,7 +434,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("left")}
                       title="Align Left"
                     >
@@ -443,7 +443,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("center")}
                       title="Align Center Horizontal"
                     >
@@ -452,7 +452,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("right")}
                       title="Align Right"
                     >
@@ -461,7 +461,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("top")}
                       title="Align Top"
                     >
@@ -470,7 +470,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("middle")}
                       title="Align Center Vertical"
                     >
@@ -479,7 +479,7 @@ export default function ShapeSettingsPanel({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-6 w-full p-1" 
+                      className="h-7 w-full p-1 rounded" 
                       onClick={() => onAlign("bottom")}
                       title="Align Bottom"
                     >
@@ -502,7 +502,7 @@ export default function ShapeSettingsPanel({
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">Font</Label>
                   <Select value={fontFamily} onValueChange={onFontFamilyChange}>
-                    <SelectTrigger className="h-6 text-[11px]">
+                    <SelectTrigger className="h-7 text-[11px] rounded">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="max-h-64">
@@ -536,7 +536,7 @@ export default function ShapeSettingsPanel({
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">Weight</Label>
                   <Select value={fontWeight} onValueChange={onFontWeightChange}>
-                    <SelectTrigger className="h-6 text-[11px]">
+                    <SelectTrigger className="h-7 text-[11px] rounded">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -560,7 +560,7 @@ export default function ShapeSettingsPanel({
                     <Button
                       variant={textAlign === "left" ? "default" : "outline"}
                       size="icon"
-                      className="h-6 w-full p-1"
+                      className="h-7 w-full p-1 rounded"
                       onClick={() => onTextAlignChange("left")}
                     >
                       <AlignLeft className="h-3 w-3" />
@@ -568,7 +568,7 @@ export default function ShapeSettingsPanel({
                     <Button
                       variant={textAlign === "center" ? "default" : "outline"}
                       size="icon"
-                      className="h-6 w-full p-1"
+                      className="h-7 w-full p-1 rounded"
                       onClick={() => onTextAlignChange("center")}
                     >
                       <AlignCenter className="h-3 w-3" />
@@ -576,7 +576,7 @@ export default function ShapeSettingsPanel({
                     <Button
                       variant={textAlign === "right" ? "default" : "outline"}
                       size="icon"
-                      className="h-6 w-full p-1"
+                      className="h-7 w-full p-1 rounded"
                       onClick={() => onTextAlignChange("right")}
                     >
                       <AlignRight className="h-3 w-3" />
@@ -632,7 +632,7 @@ export default function ShapeSettingsPanel({
                       type="number"
                       value={Math.round(width)}
                       onChange={(e) => onWidthChange(Number(e.target.value))}
-                      className="h-7 text-xs"
+                      className="h-7 text-xs rounded"
                     />
                   </div>
                 )}
@@ -643,7 +643,7 @@ export default function ShapeSettingsPanel({
                       type="number"
                       value={Math.round(height)}
                       onChange={(e) => onHeightChange(Number(e.target.value))}
-                      className="h-7 text-xs"
+                      className="h-7 text-xs rounded"
                     />
                   </div>
                 )}
@@ -676,7 +676,7 @@ export default function ShapeSettingsPanel({
               <div>
                 <Label className="text-[10px] mb-0.5 block text-muted-foreground">Blend Mode</Label>
                 <Select value={blendMode} onValueChange={onBlendModeChange}>
-                  <SelectTrigger className="h-6 text-[11px]">
+                  <SelectTrigger className="h-7 text-[11px] rounded">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -803,7 +803,7 @@ export default function ShapeSettingsPanel({
                     key={fit}
                     variant={imageFit === fit ? "default" : "outline"}
                     size="sm"
-                    className="h-6 text-[10px] capitalize px-1"
+                    className="h-7 text-[10px] capitalize px-1 rounded"
                     onClick={() => onImageFitChange(fit)}
                   >
                     {fit}
@@ -820,11 +820,11 @@ export default function ShapeSettingsPanel({
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Arrange</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-2">
               <div className="grid grid-cols-2 gap-0.5">
-                <Button variant="outline" size="sm" className="h-6 text-[10px] px-1" onClick={() => onArrange("forward")}>
+                <Button variant="outline" size="sm" className="h-7 text-[10px] px-1 rounded" onClick={() => onArrange("forward")}>
                   <ArrowUp className="h-3 w-3 mr-1" />
                   Forward
                 </Button>
-                <Button variant="outline" size="sm" className="h-6 text-[10px] px-1" onClick={() => onArrange("backward")}>
+                <Button variant="outline" size="sm" className="h-7 text-[10px] px-1 rounded" onClick={() => onArrange("backward")}>
                   <ArrowDown className="h-3 w-3 mr-1" />
                   Backward
                 </Button>

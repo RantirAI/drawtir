@@ -564,7 +564,7 @@ export default function PosterGenerator() {
                         <div>
                           <Label className="text-xs font-medium mb-2 block">Image Fit</Label>
                           <Select value={imageStyle} onValueChange={(v: ImageStyle) => setImageStyle(v)}>
-                            <SelectTrigger className="h-8 text-xs">
+                            <SelectTrigger className="h-7 text-xs rounded">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -966,7 +966,7 @@ export default function PosterGenerator() {
                           <div>
                             <Label className="text-xs text-muted-foreground mb-2 block">Alignment</Label>
                             <Select value={textAlign} onValueChange={(v: any) => setTextAlign(v)}>
-                              <SelectTrigger className="h-8 text-xs">
+                              <SelectTrigger className="h-7 text-xs rounded">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -1030,14 +1030,14 @@ export default function PosterGenerator() {
                               value={linkUrl}
                               onChange={(e) => setLinkUrl(e.target.value)}
                               placeholder="https://..."
-                              className="w-full h-8 px-3 text-xs rounded-md border bg-background"
+                              className="w-full h-7 px-3 text-xs rounded border bg-background"
                             />
                           </div>
 
                           <div>
                             <Label className="text-xs text-muted-foreground mb-2 block">Badge Position</Label>
                             <Select value={linkPosition} onValueChange={(v: any) => setLinkPosition(v)}>
-                              <SelectTrigger className="h-8 text-xs">
+                              <SelectTrigger className="h-7 text-xs rounded">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
