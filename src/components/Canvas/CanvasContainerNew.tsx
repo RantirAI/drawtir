@@ -905,12 +905,12 @@ export default function CanvasContainerNew({
       <div 
         className="w-full h-full"
         onMouseDown={(e) => {
-          if (isPanning && e.button === 0) {
+          if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
           }
         }}
         onMouseMove={(e) => {
-          if (isPanning && e.buttons === 1) {
+          if (isPanning && e.buttons === 1 && activeTool !== 'pen') {
             setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
           }
         }}
@@ -918,7 +918,7 @@ export default function CanvasContainerNew({
           transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
           transformOrigin: 'center',
           transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-          cursor: isPanning ? 'grab' : 'default'
+          cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
         }}
       >
         {frames.map((frame) => (
