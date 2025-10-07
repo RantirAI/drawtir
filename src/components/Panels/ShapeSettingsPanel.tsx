@@ -1,5 +1,6 @@
 import DraggablePanel from "./DraggablePanel";
 import ColorPicker from "./ColorPicker";
+import FillControl from "./FillControl";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,16 @@ interface ShapeSettingsPanelProps {
   elementName?: string;
   shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   backgroundColor?: string;
+  backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
+  fillType?: "solid" | "image" | "gradient" | "pattern" | "video";
   fill?: string;
+  fillImage?: string;
+  fillImageFit?: "fill" | "contain" | "cover" | "crop";
+  gradientType?: "linear" | "radial";
+  gradientAngle?: number;
+  gradientStops?: Array<{color: string, position: number}>;
+  patternFrameId?: string;
+  videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
   width?: number;
@@ -99,7 +109,16 @@ interface ShapeSettingsPanelProps {
   fontSize?: number;
   color?: string;
   onBackgroundColorChange?: (color: string) => void;
+  onBackgroundTypeChange?: (type: "solid" | "image" | "gradient" | "pattern" | "video") => void;
+  onFillTypeChange?: (type: "solid" | "image" | "gradient" | "pattern" | "video") => void;
   onFillChange?: (color: string) => void;
+  onFillImageChange?: (url: string) => void;
+  onFillImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
+  onGradientTypeChange?: (type: "linear" | "radial") => void;
+  onGradientAngleChange?: (angle: number) => void;
+  onGradientStopsChange?: (stops: Array<{color: string, position: number}>) => void;
+  onPatternFrameIdChange?: (frameId: string) => void;
+  onVideoUrlChange?: (url: string) => void;
   onStrokeChange?: (color: string) => void;
   onStrokeWidthChange?: (width: number) => void;
   onWidthChange?: (width: number) => void;
@@ -131,6 +150,7 @@ interface ShapeSettingsPanelProps {
   onJustifyContentChange?: (justify: string) => void;
   onAlignItemsChange?: (align: string) => void;
   onGapChange?: (gap: number) => void;
+  availableFrames?: Array<{id: string, name: string}>;
   onClose?: () => void;
 }
 
@@ -150,7 +170,19 @@ export default function ShapeSettingsPanel({
   elementName = "Nothing selected",
   shapeType,
   backgroundColor = "#ffffff",
+  backgroundType = "solid",
+  fillType = "solid",
   fill = "#000000",
+  fillImage,
+  fillImageFit = "cover",
+  gradientType = "linear",
+  gradientAngle = 0,
+  gradientStops = [
+    { color: "#000000", position: 0 },
+    { color: "#ffffff", position: 100 }
+  ],
+  patternFrameId,
+  videoUrl,
   stroke = "#000000",
   strokeWidth = 2,
   width = 100,
@@ -172,7 +204,16 @@ export default function ShapeSettingsPanel({
   fontSize = 16,
   color,
   onBackgroundColorChange,
+  onBackgroundTypeChange,
+  onFillTypeChange,
   onFillChange,
+  onFillImageChange,
+  onFillImageFitChange,
+  onGradientTypeChange,
+  onGradientAngleChange,
+  onGradientStopsChange,
+  onPatternFrameIdChange,
+  onVideoUrlChange,
   onStrokeChange,
   onStrokeWidthChange,
   onWidthChange,
@@ -204,6 +245,7 @@ export default function ShapeSettingsPanel({
   onJustifyContentChange,
   onAlignItemsChange,
   onGapChange,
+  availableFrames = [],
   onClose,
 }: ShapeSettingsPanelProps) {
   const ElementIcon = getElementIcon(elementType);
@@ -735,33 +777,42 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="fill" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Fill</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-2">
-              <div className="flex items-center gap-1.5">
-                <Popover open={fillModalOpen} onOpenChange={setFillModalOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: onBackgroundColorChange ? backgroundColor : fill }}
-                    >
-                      <span className="sr-only">Fill Color</span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent side="right" className="w-80 p-3">
-                    <ColorPicker
-                      color={onBackgroundColorChange ? backgroundColor : fill}
-                      onChange={(color) => {
-                        if (onBackgroundColorChange) onBackgroundColorChange(color);
-                        if (onFillChange) onFillChange(color);
-                      }}
-                      opacity={opacity}
-                      onOpacityChange={onOpacityChange}
-                      showOpacity={!!onOpacityChange}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  {onBackgroundColorChange ? backgroundColor : fill}
-                </span>
-              </div>
+              <FillControl
+                fillType={elementType === "frame" ? backgroundType : fillType}
+                fill={elementType === "frame" ? backgroundColor : fill}
+                fillImage={fillImage}
+                fillImageFit={fillImageFit}
+                gradientType={gradientType}
+                gradientAngle={gradientAngle}
+                gradientStops={gradientStops}
+                patternFrameId={patternFrameId}
+                videoUrl={videoUrl}
+                opacity={opacity}
+                onFillTypeChange={(type) => {
+                  if (elementType === "frame") {
+                    onBackgroundTypeChange?.(type);
+                  } else {
+                    onFillTypeChange?.(type);
+                  }
+                }}
+                onFillChange={(color) => {
+                  if (onBackgroundColorChange && elementType === "frame") {
+                    onBackgroundColorChange(color);
+                  }
+                  if (onFillChange) {
+                    onFillChange(color);
+                  }
+                }}
+                onFillImageChange={onFillImageChange}
+                onFillImageFitChange={onFillImageFitChange}
+                onGradientTypeChange={onGradientTypeChange}
+                onGradientAngleChange={onGradientAngleChange}
+                onGradientStopsChange={onGradientStopsChange}
+                onPatternFrameIdChange={onPatternFrameIdChange}
+                onVideoUrlChange={onVideoUrlChange}
+                onOpacityChange={onOpacityChange}
+                availableFrames={availableFrames}
+              />
             </AccordionContent>
           </AccordionItem>
         )}

@@ -14,6 +14,14 @@ export interface Element {
   // Shape properties
   shapeType?: ShapeType;
   fill?: string;
+  fillType?: "solid" | "image" | "gradient" | "pattern" | "video";
+  fillImage?: string;
+  fillImageFit?: "fill" | "contain" | "cover" | "crop";
+  gradientType?: "linear" | "radial";
+  gradientAngle?: number;
+  gradientStops?: Array<{color: string, position: number}>;
+  patternFrameId?: string;
+  videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
   
@@ -54,7 +62,14 @@ export interface Frame {
   height: number;
   rotation?: number;
   backgroundColor: string;
+  backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
   backgroundImage?: string;
+  backgroundImageFit?: "fill" | "contain" | "cover" | "crop";
+  gradientType?: "linear" | "radial";
+  gradientAngle?: number;
+  gradientStops?: Array<{color: string, position: number}>;
+  patternFrameId?: string;
+  videoUrl?: string;
   image?: string | null;
   topCaption?: string;
   bottomCaption?: string;

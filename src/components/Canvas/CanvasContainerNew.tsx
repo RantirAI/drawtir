@@ -1053,7 +1053,16 @@ export default function CanvasContainerNew({
           }
           shapeType={selectedElement?.shapeType}
           backgroundColor={selectedFrame?.backgroundColor}
+          backgroundType={selectedFrame?.backgroundType}
+          fillType={selectedElement?.fillType}
           fill={selectedElement?.fill || penColor}
+          fillImage={selectedElement?.fillImage}
+          fillImageFit={selectedElement?.fillImageFit}
+          gradientType={selectedElement?.gradientType}
+          gradientAngle={selectedElement?.gradientAngle}
+          gradientStops={selectedElement?.gradientStops}
+          patternFrameId={selectedElement?.patternFrameId}
+          videoUrl={selectedElement?.videoUrl}
           stroke={selectedElement?.stroke || penColor}
           strokeWidth={selectedElement?.strokeWidth || strokeWidth}
           width={selectedElement?.width || selectedFrame?.width}
@@ -1074,6 +1083,8 @@ export default function CanvasContainerNew({
           saturation={selectedElement?.saturation}
           blur={selectedElement?.blur}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
+          onBackgroundTypeChange={(type) => handleFrameUpdate(selectedFrameId, { backgroundType: type })}
+          onFillTypeChange={(type) => selectedElement && handleElementUpdate(selectedElement.id, { fillType: type })}
           onFillChange={(color) => {
             if (selectedElementIds.length > 0) {
               selectedElementIds.forEach(id => handleElementUpdate(id, { fill: color }));
@@ -1153,6 +1164,14 @@ export default function CanvasContainerNew({
           onContrastChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { contrast: val })}
           onSaturationChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { saturation: val })}
           onBlurChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { blur: val })}
+          onFillImageChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { fillImage: url })}
+          onFillImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { fillImageFit: fit })}
+          onGradientTypeChange={(type) => selectedElement && handleElementUpdate(selectedElement.id, { gradientType: type })}
+          onGradientAngleChange={(angle) => selectedElement && handleElementUpdate(selectedElement.id, { gradientAngle: angle })}
+          onGradientStopsChange={(stops) => selectedElement && handleElementUpdate(selectedElement.id, { gradientStops: stops })}
+          onPatternFrameIdChange={(frameId) => selectedElement && handleElementUpdate(selectedElement.id, { patternFrameId: frameId })}
+          onVideoUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { videoUrl: url })}
+          availableFrames={frames.map(f => ({ id: f.id, name: f.name }))}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);
