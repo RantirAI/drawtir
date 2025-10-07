@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
-import PropertyPanel from "../Panels/PropertyPanel";
 import LayersPanel from "../Panels/LayersPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
@@ -19,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Image as ImageIcon, Layers, SlidersHorizontal } from "lucide-react";
+import { Sparkles, Layers, SlidersHorizontal } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -99,7 +98,6 @@ export default function CanvasContainerNew({
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
-  const [showImagePanel, setShowImagePanel] = useState(false);
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -1040,22 +1038,6 @@ export default function CanvasContainerNew({
         </DraggablePanel>
       )}
 
-      {showImagePanel && selectedFrame && (
-        <PropertyPanel
-          brightness={selectedFrame.brightness}
-          contrast={selectedFrame.contrast}
-          saturation={selectedFrame.saturation}
-          blur={selectedFrame.blur}
-          imageFit={selectedFrame.imageStyle as "fill" | "contain" | "cover" | "crop"}
-          onBrightnessChange={(val) => handleFrameUpdate(selectedFrameId, { brightness: val })}
-          onContrastChange={(val) => handleFrameUpdate(selectedFrameId, { contrast: val })}
-          onSaturationChange={(val) => handleFrameUpdate(selectedFrameId, { saturation: val })}
-          onBlurChange={(val) => handleFrameUpdate(selectedFrameId, { blur: val })}
-          onImageFitChange={(val) => handleFrameUpdate(selectedFrameId, { imageStyle: val })}
-          onClose={() => setShowImagePanel(false)}
-        />
-      )}
-
       {/* Unified Shape Settings Panel */}
       {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
@@ -1203,25 +1185,9 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
             showGeneratePanel ? 'ring-2 ring-blue-500' : ''
           }`}
-          onClick={() => {
-            setShowGeneratePanel(!showGeneratePanel);
-            setShowImagePanel(false);
-          }}
+          onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
           <Sparkles className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
-            showImagePanel ? 'ring-2 ring-blue-500' : ''
-          }`}
-          onClick={() => {
-            setShowImagePanel(!showImagePanel);
-            setShowGeneratePanel(false);
-          }}
-        >
-          <ImageIcon className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
