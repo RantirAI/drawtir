@@ -9,7 +9,6 @@ import LayersPanel from "../Panels/LayersPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
-import GridOverlay from "./GridOverlay";
 import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
@@ -886,7 +885,6 @@ export default function CanvasContainerNew({
   return (
     <div className="w-full h-screen relative overflow-hidden">
       <CanvasBackground />
-      <GridOverlay zoom={zoom} panOffset={panOffset} />
 
       <EditorTopBar
         projectName={projectTitle}
