@@ -278,6 +278,10 @@ export default function CanvasContainerNew({
           height: 200,
           imageUrl,
           imageFit: "cover",
+          brightness: 100,
+          contrast: 100,
+          saturation: 100,
+          blur: 0,
           opacity: 100,
           cornerRadius: 0,
         };
@@ -991,6 +995,10 @@ export default function CanvasContainerNew({
                       strokeWidth={element.strokeWidth}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
+                      brightness={element.brightness}
+                      contrast={element.contrast}
+                      saturation={element.saturation}
+                      blur={element.blur}
                       fontSize={element.fontSize}
                       fontFamily={element.fontFamily}
                       fontWeight={element.fontWeight}
@@ -1079,6 +1087,10 @@ export default function CanvasContainerNew({
           fontSize={selectedElement?.fontSize}
           color={selectedElement?.color}
           imageFit={selectedElement?.imageFit}
+          brightness={selectedElement?.brightness}
+          contrast={selectedElement?.contrast}
+          saturation={selectedElement?.saturation}
+          blur={selectedElement?.blur}
           onBackgroundColorChange={(color) => handleFrameUpdate(selectedFrameId, { backgroundColor: color })}
           onFillChange={(color) => {
             if (selectedElementIds.length > 0) {
@@ -1155,6 +1167,10 @@ export default function CanvasContainerNew({
           onFontSizeChange={(size) => selectedElement && handleElementUpdate(selectedElement.id, { fontSize: size })}
           onColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { color })}
           onImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { imageFit: fit })}
+          onBrightnessChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { brightness: val })}
+          onContrastChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { contrast: val })}
+          onSaturationChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { saturation: val })}
+          onBlurChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { blur: val })}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);

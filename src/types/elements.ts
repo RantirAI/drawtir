@@ -28,6 +28,10 @@ export interface Element {
   // Image properties
   imageUrl?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  blur?: number;
   
   // Drawing properties (pen tool)
   pathData?: string;

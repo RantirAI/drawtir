@@ -17,6 +17,11 @@ interface ResizableElementProps {
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
+  // Image properties
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  blur?: number;
   // Text properties
   fontSize?: number;
   fontFamily?: string;
@@ -48,6 +53,10 @@ export default function ResizableElement({
   opacity = 100,
   cornerRadius = 0,
   blendMode = "normal",
+  brightness = 100,
+  contrast = 100,
+  saturation = 100,
+  blur = 0,
   fontSize = 16,
   fontFamily = "Inter",
   fontWeight = "400",
@@ -270,7 +279,10 @@ export default function ResizableElement({
           src={src} 
           alt="Element" 
           className="w-full h-full object-cover" 
-          style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}
+          style={{ 
+            borderRadius: cornerRadius ? `${cornerRadius}px` : '0',
+            filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
+          }}
         />
       ) : type === "text" ? (
         isEditing ? (

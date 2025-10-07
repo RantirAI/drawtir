@@ -89,6 +89,10 @@ interface ShapeSettingsPanelProps {
   cornerRadius?: number;
   blendMode?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
+  brightness?: number;
+  contrast?: number;
+  saturation?: number;
+  blur?: number;
   fontFamily?: string;
   fontWeight?: string;
   textAlign?: "left" | "center" | "right";
@@ -107,6 +111,10 @@ interface ShapeSettingsPanelProps {
   onCornerRadiusChange?: (radius: number) => void;
   onBlendModeChange?: (mode: string) => void;
   onImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
+  onBrightnessChange?: (brightness: number) => void;
+  onContrastChange?: (contrast: number) => void;
+  onSaturationChange?: (saturation: number) => void;
+  onBlurChange?: (blur: number) => void;
   onFontFamilyChange?: (font: string) => void;
   onFontWeightChange?: (weight: string) => void;
   onTextAlignChange?: (align: "left" | "center" | "right") => void;
@@ -154,6 +162,10 @@ export default function ShapeSettingsPanel({
   cornerRadius = 0,
   blendMode = "normal",
   imageFit = "cover",
+  brightness = 100,
+  contrast = 100,
+  saturation = 100,
+  blur = 0,
   fontFamily = "Inter",
   fontWeight = "400",
   textAlign = "left",
@@ -172,6 +184,10 @@ export default function ShapeSettingsPanel({
   onCornerRadiusChange,
   onBlendModeChange,
   onImageFitChange,
+  onBrightnessChange,
+  onContrastChange,
+  onSaturationChange,
+  onBlurChange,
   onFontFamilyChange,
   onFontWeightChange,
   onTextAlignChange,
@@ -212,7 +228,7 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type"]} className="w-full space-y-0">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters"]} className="w-full space-y-0">
         {/* Auto Layout Section - Only for Frames */}
         {elementType === "frame" && (
           <AccordionItem value="layout" className="border-b-0">
@@ -810,6 +826,67 @@ export default function ShapeSettingsPanel({
                   </Button>
                 ))}
               </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
+        {/* Image Filters (for image elements) */}
+        {elementType === "image" && (onBrightnessChange || onContrastChange || onSaturationChange || onBlurChange) && (
+          <AccordionItem value="image-filters" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Filters</AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-2">
+              {onBrightnessChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Brightness: {brightness}%</Label>
+                  <Slider
+                    value={[brightness]}
+                    onValueChange={([v]) => onBrightnessChange(v)}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+              {onContrastChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Contrast: {contrast}%</Label>
+                  <Slider
+                    value={[contrast]}
+                    onValueChange={([v]) => onContrastChange(v)}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+              {onSaturationChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Saturation: {saturation}%</Label>
+                  <Slider
+                    value={[saturation]}
+                    onValueChange={([v]) => onSaturationChange(v)}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="mt-1"
+                  />
+                </div>
+              )}
+              {onBlurChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Blur: {blur}px</Label>
+                  <Slider
+                    value={[blur]}
+                    onValueChange={([v]) => onBlurChange(v)}
+                    min={0}
+                    max={20}
+                    step={1}
+                    className="mt-1"
+                  />
+                </div>
+              )}
             </AccordionContent>
           </AccordionItem>
         )}
