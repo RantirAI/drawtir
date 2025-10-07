@@ -270,12 +270,12 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters"]} className="w-full space-y-0">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters"]} className="w-full space-y-0 [&>div]:space-y-0">
         {/* Auto Layout Section - Only for Frames */}
         {elementType === "frame" && (
           <AccordionItem value="layout" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Auto layout</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-2">
+            <AccordionContent className="space-y-1 pb-1.5">
               {/* Direction buttons */}
               <div className="grid grid-cols-4 gap-1">
                 <Button
@@ -443,7 +443,7 @@ export default function ShapeSettingsPanel({
         {elementType !== "frame" && (onXChange || onYChange || onRotationChange) && (
           <AccordionItem value="position" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Position</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-2">
+            <AccordionContent className="space-y-1.5 pb-1.5">
               <div className="grid grid-cols-3 gap-1.5">
                 {onXChange && (
                   <div>
@@ -554,7 +554,7 @@ export default function ShapeSettingsPanel({
         {elementType === "text" && (
           <AccordionItem value="type" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Type</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-2">
+            <AccordionContent className="space-y-1.5 pb-1.5">
               {/* Font Family */}
               {onFontFamilyChange && (
                 <div>
@@ -681,7 +681,7 @@ export default function ShapeSettingsPanel({
         {(onWidthChange || onHeightChange) && (
           <AccordionItem value="layout">
             <AccordionTrigger className="text-xs font-medium py-2">Layout</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-3">
+            <AccordionContent className="space-y-1.5 pb-1.5">
               <div className="grid grid-cols-2 gap-2">
                 {onWidthChange && (
                   <div>
@@ -713,7 +713,7 @@ export default function ShapeSettingsPanel({
         {/* Appearance Section */}
         <AccordionItem value="appearance" className="border-b-0">
           <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Appearance</AccordionTrigger>
-          <AccordionContent className="space-y-2 pb-2">
+          <AccordionContent className="space-y-1.5 pb-1.5">
             {/* Opacity */}
             {onOpacityChange && (
               <div>
@@ -885,7 +885,7 @@ export default function ShapeSettingsPanel({
         {elementType === "image" && (onBrightnessChange || onContrastChange || onSaturationChange || onBlurChange) && (
           <AccordionItem value="image-filters" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Filters</AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-2">
+            <AccordionContent className="space-y-1.5 pb-1.5">
               {onBrightnessChange && (
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">Brightness: {brightness}%</Label>

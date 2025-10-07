@@ -93,7 +93,7 @@ export default function DraggablePanel({
           )}
         </div>
       </div>
-      {!isMinimized && <div className="p-3">{children}</div>}
+      {!isMinimized && <div className="p-2">{children}</div>}
     </Card>
   );
 }

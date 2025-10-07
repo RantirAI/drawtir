@@ -212,13 +212,13 @@ export default function FillControl({
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-0.5">
+              <div className="grid grid-cols-4 gap-0.5">
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
                     key={fit}
                     variant={fillImageFit === fit ? "default" : "outline"}
                     size="sm"
-                    className="h-7 text-[10px] capitalize px-1 rounded"
+                    className="h-6 text-[9px] capitalize px-0.5 rounded"
                     onClick={() => onFillImageFitChange?.(fit)}
                   >
                     {fit}

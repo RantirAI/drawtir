@@ -105,6 +105,20 @@ export default function DrawingLayer({
     setIsDrawing(false);
   };
 
+  useEffect(() => {
+    // Add global mouse up handler to complete drawing even if mouse leaves canvas
+    const handleGlobalMouseUp = () => {
+      if (isDrawing) {
+        stopDrawing();
+      }
+    };
+
+    if (isActive && isDrawing) {
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      return () => window.removeEventListener('mouseup', handleGlobalMouseUp);
+    }
+  }, [isActive, isDrawing]);
+
   return (
     <canvas
       ref={canvasRef}
@@ -114,7 +128,6 @@ export default function DrawingLayer({
       onMouseDown={startDrawing}
       onMouseMove={draw}
       onMouseUp={stopDrawing}
-      onMouseLeave={stopDrawing}
       style={{ 
         left: frameX,
         top: frameY,
