@@ -25,6 +25,7 @@ export interface Element {
   stroke?: string;
   strokeWidth?: number;
   strokeOpacity?: number;
+  strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
   
   // Text properties

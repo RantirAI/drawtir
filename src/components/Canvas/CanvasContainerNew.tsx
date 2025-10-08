@@ -1001,6 +1001,7 @@ export default function CanvasContainerNew({
                       pathData={element.pathData}
                       strokeWidth={element.strokeWidth}
                       strokeOpacity={element.strokeOpacity}
+                      strokePosition={element.strokePosition}
                       fillOpacity={element.fillOpacity}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
@@ -1085,6 +1086,7 @@ export default function CanvasContainerNew({
           stroke={selectedElement?.stroke || penColor}
           strokeWidth={selectedElement?.strokeWidth || strokeWidth}
           strokeOpacity={selectedElement?.strokeOpacity || 100}
+          strokePosition={selectedElement?.strokePosition || "center"}
           fillOpacity={selectedElement?.fillOpacity || selectedFrame?.fillOpacity || 100}
           width={selectedElement?.width || selectedFrame?.width}
           height={selectedElement?.height || selectedFrame?.height}
@@ -1130,6 +1132,11 @@ export default function CanvasContainerNew({
           onStrokeOpacityChange={(o) => {
             if (selectedElementIds.length > 0) {
               selectedElementIds.forEach(id => handleElementUpdate(id, { strokeOpacity: o }));
+            }
+          }}
+          onStrokePositionChange={(pos) => {
+            if (selectedElementIds.length > 0) {
+              selectedElementIds.forEach(id => handleElementUpdate(id, { strokePosition: pos }));
             }
           }}
           onFillOpacityChange={(o) => {

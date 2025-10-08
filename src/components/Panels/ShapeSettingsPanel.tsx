@@ -91,6 +91,7 @@ interface ShapeSettingsPanelProps {
   stroke?: string;
   strokeWidth?: number;
   strokeOpacity?: number;
+  strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
   width?: number;
   height?: number;
@@ -124,6 +125,7 @@ interface ShapeSettingsPanelProps {
   onStrokeChange?: (color: string) => void;
   onStrokeWidthChange?: (width: number) => void;
   onStrokeOpacityChange?: (opacity: number) => void;
+  onStrokePositionChange?: (position: "center" | "inside" | "outside") => void;
   onFillOpacityChange?: (opacity: number) => void;
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
@@ -190,6 +192,7 @@ export default function ShapeSettingsPanel({
   stroke = "#000000",
   strokeWidth = 2,
   strokeOpacity = 100,
+  strokePosition = "center",
   fillOpacity = 100,
   width = 100,
   height = 100,
@@ -223,6 +226,7 @@ export default function ShapeSettingsPanel({
   onStrokeChange,
   onStrokeWidthChange,
   onStrokeOpacityChange,
+  onStrokePositionChange,
   onFillOpacityChange,
   onWidthChange,
   onHeightChange,
@@ -851,6 +855,26 @@ export default function ShapeSettingsPanel({
                   </PopoverContent>
                 </Popover>
                 
+                {/* Stroke Position */}
+                {onStrokePositionChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Position</Label>
+                    <div className="grid grid-cols-3 gap-0.5">
+                      {(["center", "inside", "outside"] as const).map((pos) => (
+                        <Button
+                          key={pos}
+                          variant={strokePosition === pos ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-[10px] capitalize rounded"
+                          onClick={() => onStrokePositionChange(pos)}
+                        >
+                          {pos}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {onStrokeWidthChange && (
                   <div className="flex-1">
                     <Label className="text-[10px] mb-0.5 block text-muted-foreground">Weight: {strokeWidth}px</Label>

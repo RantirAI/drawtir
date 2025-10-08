@@ -16,6 +16,7 @@ interface ResizableElementProps {
   fill?: string;
   stroke?: string;
   strokeOpacity?: number;
+  strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
   opacity?: number;
   cornerRadius?: number;
@@ -63,6 +64,7 @@ export default function ResizableElement({
   pathData,
   strokeWidth = 2,
   strokeOpacity = 100,
+  strokePosition = "center",
   fillOpacity = 100,
   opacity = 100,
   cornerRadius = 0,
@@ -109,6 +111,26 @@ export default function ResizableElement({
 
   const strokeWithOpacity = hexToRgba(stroke, strokeOpacity);
   const fillWithOpacity = fillType === "solid" ? hexToRgba(fill, fillOpacity) : fill;
+
+  // Calculate adjusted corner radius based on stroke position
+  const getAdjustedCornerRadius = (baseRadius: number): { outer: number; inner: number } => {
+    if (strokePosition === "inside") {
+      return {
+        outer: baseRadius,
+        inner: Math.max(0, baseRadius - strokeWidth)
+      };
+    } else if (strokePosition === "outside") {
+      return {
+        outer: baseRadius + strokeWidth,
+        inner: baseRadius
+      };
+    } else { // center
+      return {
+        outer: baseRadius + (strokeWidth / 2),
+        inner: Math.max(0, baseRadius - (strokeWidth / 2))
+      };
+    }
+  };
 
   useEffect(() => {
     const snapToGrid = (value: number, gridSize: number = 10) => {
@@ -233,6 +255,8 @@ export default function ResizableElement({
 
   const renderShape = () => {
     console.log("🔷 renderShape called - shapeType:", shapeType, "fillType:", fillType);
+    const { outer: outerRadius, inner: innerRadius } = getAdjustedCornerRadius(cornerRadius);
+    
     // Drawing (pen tool paths)
     if (pathData) {
       return (
@@ -255,7 +279,8 @@ export default function ResizableElement({
       );
     }
 
-    const borderRadiusStyle = cornerRadius ? `${cornerRadius}px` : '0';
+    const borderRadiusStyle = outerRadius ? `${outerRadius}px` : '0';
+    const fillBorderRadiusStyle = innerRadius ? `${innerRadius}px` : '0';
     const fillStyle = generateFillStyle();
 
     // Video background for shapes
@@ -276,13 +301,39 @@ export default function ResizableElement({
     switch (shapeType) {
       case "circle":
       case "ellipse":
-        return (
-          <div className="w-full h-full rounded-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}` }}>
-            <div className="w-full h-full rounded-full overflow-hidden" style={fillStyle}>
+        // For circles/ellipses, use separate containers for stroke positioning
+        if (strokePosition === "inside") {
+          return (
+            <div className="w-full h-full rounded-full relative overflow-hidden" style={fillStyle}>
               {videoElement}
+              <div 
+                className="absolute inset-0 rounded-full pointer-events-none" 
+                style={{ 
+                  boxShadow: `inset 0 0 0 ${strokeWidth}px ${strokeWithOpacity}`
+                }}
+              />
             </div>
-          </div>
-        );
+          );
+        } else if (strokePosition === "outside") {
+          return (
+            <div className="absolute rounded-full" style={{
+              inset: `-${strokeWidth}px`,
+              border: `${strokeWidth}px solid ${strokeWithOpacity}`
+            }}>
+              <div className="w-full h-full rounded-full overflow-hidden" style={fillStyle}>
+                {videoElement}
+              </div>
+            </div>
+          );
+        } else { // center
+          return (
+            <div className="w-full h-full rounded-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}` }}>
+              <div className="w-full h-full rounded-full overflow-hidden" style={fillStyle}>
+                {videoElement}
+              </div>
+            </div>
+          );
+        }
       case "line":
         return (
           <svg width={width} height={height} className="w-full h-full">
@@ -381,13 +432,49 @@ export default function ResizableElement({
           </svg>
         );
       default:
-        return (
-          <div className="w-full h-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}`, borderRadius: borderRadiusStyle }}>
-            <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: borderRadiusStyle }}>
-              {videoElement}
+        // Rectangle with stroke positioning
+        if (strokePosition === "inside") {
+          return (
+            <div 
+              className="w-full h-full relative overflow-hidden" 
+              style={{ borderRadius: fillBorderRadiusStyle }}
+            >
+              <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: fillBorderRadiusStyle }}>
+                {videoElement}
+              </div>
+              <div 
+                className="absolute inset-0 pointer-events-none" 
+                style={{ 
+                  borderRadius: fillBorderRadiusStyle,
+                  boxShadow: `inset 0 0 0 ${strokeWidth}px ${strokeWithOpacity}`
+                }}
+              />
             </div>
-          </div>
-        );
+          );
+        } else if (strokePosition === "outside") {
+          return (
+            <div 
+              className="absolute" 
+              style={{ 
+                inset: `-${strokeWidth}px`,
+                border: `${strokeWidth}px solid ${strokeWithOpacity}`, 
+                borderRadius: borderRadiusStyle 
+              }}
+            >
+              <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: fillBorderRadiusStyle }}>
+                {videoElement}
+              </div>
+            </div>
+          );
+        } else { // center
+          return (
+            <div className="w-full h-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}`, borderRadius: borderRadiusStyle }}>
+              <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: fillBorderRadiusStyle }}>
+                {videoElement}
+              </div>
+            </div>
+          );
+        }
     }
   };
 
