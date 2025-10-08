@@ -118,7 +118,8 @@ export default function FillControl({
   const handleUpdateGradientStop = (index: number, updates: Partial<GradientStop>) => {
     const newStops = [...gradientStops];
     newStops[index] = { ...newStops[index], ...updates };
-    onGradientStopsChange?.(newStops.sort((a, b) => a.position - b.position));
+    // Do not sort on color/opacity updates to keep index stable; sorting is handled when adding/moving stops
+    onGradientStopsChange?.(newStops);
   };
 
   // Generate preview style
