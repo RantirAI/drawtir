@@ -923,13 +923,13 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="image-fit" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Image Fit</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-2">
-              <div className="grid grid-cols-2 gap-0.5">
+              <div className="grid grid-cols-4 gap-0.5">
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
                     key={fit}
                     variant={imageFit === fit ? "default" : "outline"}
                     size="sm"
-                    className="h-7 text-[10px] capitalize px-1 rounded"
+                    className="h-6 text-[9px] capitalize px-0.5 rounded"
                     onClick={() => onImageFitChange(fit)}
                   >
                     {fit}
