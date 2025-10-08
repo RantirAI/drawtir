@@ -73,10 +73,8 @@ export default function Editor() {
   const [textAlign, setTextAlign] = useState<"left" | "center" | "right">("center");
 
   useEffect(() => {
-    if (id && id !== 'new') {
+    if (id) {
       fetchPoster();
-    } else if (id === 'new') {
-      setIsLoading(false);
     }
   }, [id]);
 

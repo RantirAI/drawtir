@@ -30,12 +30,7 @@ const Index = () => {
           <div className="flex gap-3 items-center">
             <ThemeToggle />
             <Link to="/auth">
-              <Button variant="ghost" size="sm" className="font-geist">
-                Sign In
-              </Button>
-            </Link>
-            <Link to="/editor/new">
-              <Button size="sm" className="font-geist">
+              <Button variant="outline" size="sm" className="font-geist">
                 Get Started
               </Button>
             </Link>
@@ -56,18 +51,31 @@ const Index = () => {
               Generate stunning layouts instantly and customize them with powerful edits.
             </p>
             
-            {/* CTA Buttons */}
-            <div className="flex gap-4 justify-center items-center mb-16">
-              <Link to="/editor/new">
-                <Button size="lg" className="font-geist">
-                  Start Creating
-                </Button>
-              </Link>
-              <Link to="/gallery">
-                <Button variant="outline" size="lg" className="font-geist">
-                  Browse Templates
-                </Button>
-              </Link>
+            {/* Search/Input Section */}
+            <div className="max-w-2xl mx-auto mb-16">
+              <div className="border border-border rounded-xl p-6 bg-card shadow-sm">
+                <input
+                  type="text"
+                  placeholder="Create something beautiful..."
+                  className="w-full bg-transparent text-lg outline-none mb-4 font-geist placeholder:text-muted-foreground"
+                />
+                <div className="flex gap-3 items-center justify-between">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="font-geist text-xs">
+                      ✨ Prompt Builder
+                    </Button>
+                    <Button variant="outline" size="sm" className="font-geist text-xs">
+                      📎 Attach
+                    </Button>
+                    <Button variant="outline" size="sm" className="font-geist text-xs">
+                      📋
+                    </Button>
+                  </div>
+                  <Button size="sm" className="font-geist">
+                    ↑
+                  </Button>
+                </div>
+              </div>
             </div>
 
             {/* Feature Cards */}
@@ -95,38 +103,6 @@ const Index = () => {
                   Every generated design comes with clean, production-ready code.
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Browser Mockup with Embedded Designer */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="border border-border rounded-xl overflow-hidden shadow-lg bg-card">
-            {/* Browser Chrome */}
-            <div className="border-b border-border bg-muted/30 px-4 py-3 flex items-center gap-3">
-              {/* Window Controls */}
-              <div className="flex gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400"></div>
-              </div>
-              
-              {/* Address Bar */}
-              <div className="flex-1 flex items-center gap-2 ml-4">
-                <div className="flex-1 bg-background border border-border rounded-lg px-4 py-1.5 text-sm text-muted-foreground font-geist flex items-center gap-2">
-                  <span className="text-xs">🔒</span>
-                  <span>drawtir.app/editor</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Iframe Content */}
-            <div className="relative w-full bg-background" style={{ height: '600px' }}>
-              <iframe
-                src="/editor/new"
-                className="w-full h-full border-0"
-                title="Drawtir Designer Preview"
-              />
             </div>
           </div>
         </div>
