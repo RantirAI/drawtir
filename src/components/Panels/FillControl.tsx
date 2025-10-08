@@ -314,11 +314,18 @@ export default function FillControl({
             <div className="space-y-1">
               {gradientStops.map((stop, index) => (
                 <div key={index} className="flex items-center gap-1">
-                  <button
-                    className="h-5 w-5 rounded border border-border hover:border-primary transition-colors shrink-0"
-                    style={{ backgroundColor: stop.color }}
-                    onClick={() => setSelectedStopIndex(index)}
-                  />
+                  <label className="cursor-pointer shrink-0">
+                    <div
+                      className="h-5 w-5 rounded border border-border hover:border-primary transition-colors"
+                      style={{ backgroundColor: stop.color }}
+                    />
+                    <input
+                      type="color"
+                      value={stop.color}
+                      onChange={(e) => handleUpdateGradientStop(index, { color: e.target.value })}
+                      className="sr-only"
+                    />
+                  </label>
                   <Slider
                     value={[stop.position]}
                     onValueChange={([v]) => handleUpdateGradientStop(index, { position: v })}
