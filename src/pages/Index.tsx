@@ -129,12 +129,13 @@ const Index = () => {
             </div>
             
             {/* Iframe Content */}
-            <div className="relative w-full" style={{ height: '600px' }}>
-              <iframe
-                src="/editor/new"
-                className="w-full h-full border-0"
-                title="Drawtir Designer"
-              />
+            <div className="relative w-full bg-background" style={{ height: '600px' }}>
+              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                <div className="text-center">
+                  <p className="text-lg font-geist mb-2">Interactive Designer Preview</p>
+                  <p className="text-sm">Click "Get Started" to try the full editor</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
