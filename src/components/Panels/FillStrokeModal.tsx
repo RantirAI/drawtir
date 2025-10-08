@@ -111,31 +111,43 @@ export default function FillStrokeModal({ open, onOpenChange, currentValue, onCh
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <Label className="text-xs mb-1 block">Start Color</Label>
-                <Input
-                  type="color"
-                  value={gradientColor1}
-                  onChange={(e) => setGradientColor1(e.target.value)}
-                  className="h-10 w-full"
+            <div>
+              <Label className="text-xs mb-2 block">Click on color stops to edit</Label>
+              <div className="relative">
+                <div 
+                  className="h-16 rounded border-2 border-border"
+                  style={{ background: `linear-gradient(${gradientAngle}deg, ${gradientColor1} 0%, ${gradientColor2} 100%)` }}
                 />
-              </div>
-              <div>
-                <Label className="text-xs mb-1 block">End Color</Label>
-                <Input
-                  type="color"
-                  value={gradientColor2}
-                  onChange={(e) => setGradientColor2(e.target.value)}
-                  className="h-10 w-full"
-                />
+                
+                {/* Color Stop 1 */}
+                <div className="absolute left-2 top-1/2 -translate-y-1/2">
+                  <label className="cursor-pointer group">
+                    <div className="w-8 h-8 rounded-full border-2 border-white shadow-lg transition-transform group-hover:scale-110"
+                         style={{ backgroundColor: gradientColor1 }} />
+                    <input
+                      type="color"
+                      value={gradientColor1}
+                      onChange={(e) => setGradientColor1(e.target.value)}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+                
+                {/* Color Stop 2 */}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <label className="cursor-pointer group">
+                    <div className="w-8 h-8 rounded-full border-2 border-white shadow-lg transition-transform group-hover:scale-110"
+                         style={{ backgroundColor: gradientColor2 }} />
+                    <input
+                      type="color"
+                      value={gradientColor2}
+                      onChange={(e) => setGradientColor2(e.target.value)}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
               </div>
             </div>
-
-            <div 
-              className="h-16 rounded border-2 border-border"
-              style={{ background: `linear-gradient(${gradientAngle}deg, ${gradientColor1} 0%, ${gradientColor2} 100%)` }}
-            />
 
             <Button onClick={applyGradient} className="w-full h-8 text-xs">
               Apply Gradient
