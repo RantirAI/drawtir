@@ -211,17 +211,17 @@ export default function ColorPicker({
             }
           }}
           placeholder="#000000"
-          className="h-7 text-xs font-mono flex-1"
+          className="h-7 text-xs font-mono w-20"
         />
         {showOpacity && onOpacityChange && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-1">
             <Input
               type="number"
               value={opacity}
               onChange={(e) => onOpacityChange(Number(e.target.value))}
               min={0}
               max={100}
-              className="h-7 text-xs w-12 text-right"
+              className="h-7 text-xs w-14 text-right"
             />
             <span className="text-xs text-muted-foreground">%</span>
           </div>

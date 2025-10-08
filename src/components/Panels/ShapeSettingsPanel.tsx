@@ -822,7 +822,7 @@ export default function ShapeSettingsPanel({
           <AccordionItem value="stroke" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Stroke</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-2">
-              <div className="flex items-start gap-1.5">
+              <div className="space-y-2">
                 <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
                   <PopoverTrigger asChild>
                     <button
@@ -836,7 +836,9 @@ export default function ShapeSettingsPanel({
                     <ColorPicker
                       color={stroke}
                       onChange={(color) => onStrokeChange?.(color)}
-                      showOpacity={false}
+                      opacity={opacity}
+                      onOpacityChange={onOpacityChange}
+                      showOpacity={true}
                     />
                   </PopoverContent>
                 </Popover>
