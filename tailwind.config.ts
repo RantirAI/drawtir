@@ -16,7 +16,6 @@ export default {
       fontFamily: {
         sans: ["Instrument Sans", "Inter", "system-ui", "sans-serif"],
         inter: ["Inter", "sans-serif"],
-        geist: ["Geist", "sans-serif"],
         roboto: ["Roboto", "sans-serif"],
         "open-sans": ["Open Sans", "sans-serif"],
         montserrat: ["Montserrat", "sans-serif"],
