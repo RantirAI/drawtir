@@ -27,7 +27,7 @@ import {
   Trash2,
   RotateCw
 } from "lucide-react";
-import { generateGradientCSS, getFitStyle } from "@/lib/utils";
+import { generateGradientCSS, getFitStyle, cn } from "@/lib/utils";
 
 type FillType = "solid" | "image" | "gradient" | "pattern" | "video";
 
@@ -211,9 +211,12 @@ export default function FillControl({
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
                     key={fit}
-                    variant={fillImageFit === fit ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
-                    className="h-6 text-[9px] capitalize px-0.5 rounded"
+                    className={cn(
+                      "h-6 text-[9px] capitalize px-0.5 rounded",
+                      fillImageFit === fit && "border-primary text-primary"
+                    )}
                     onClick={() => onFillImageFitChange?.(fit)}
                   >
                     {fit}
@@ -256,17 +259,23 @@ export default function FillControl({
             <Label className="text-[10px] mb-0.5 block text-muted-foreground">Type</Label>
             <div className="grid grid-cols-2 gap-0.5">
               <Button
-                variant={gradientType === "linear" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                className="h-7 text-[10px] rounded"
+                className={cn(
+                  "h-7 text-[10px] rounded",
+                  gradientType === "linear" && "border-primary text-primary"
+                )}
                 onClick={() => onGradientTypeChange?.("linear")}
               >
                 Linear
               </Button>
               <Button
-                variant={gradientType === "radial" ? "default" : "outline"}
+                variant="outline"
                 size="sm"
-                className="h-7 text-[10px] rounded"
+                className={cn(
+                  "h-7 text-[10px] rounded",
+                  gradientType === "radial" && "border-primary text-primary"
+                )}
                 onClick={() => onGradientTypeChange?.("radial")}
               >
                 Radial

@@ -32,6 +32,7 @@ import {
   AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows
 } from "lucide-react";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 const GOOGLE_FONTS = [
   { value: "Inter", label: "Inter" },
@@ -298,9 +299,12 @@ export default function ShapeSettingsPanel({
               {/* Direction buttons */}
               <div className="grid grid-cols-4 gap-1">
                 <Button
-                  variant={flexDirection === "row" ? "default" : "outline"}
+                  variant="outline"
                   size="icon"
-                  className="h-7 w-full p-1 rounded"
+                  className={cn(
+                    "h-7 w-full p-1 rounded",
+                    flexDirection === "row" && "border-primary text-primary"
+                  )}
                   onClick={() => {
                     onFlexDirectionChange?.("row");
                     // Enable auto layout by also setting defaults if not set
@@ -312,9 +316,12 @@ export default function ShapeSettingsPanel({
                   <Columns className="h-3 w-3" />
                 </Button>
                 <Button
-                  variant={flexDirection === "column" ? "default" : "outline"}
+                  variant="outline"
                   size="icon"
-                  className="h-7 w-full p-1 rounded"
+                  className={cn(
+                    "h-7 w-full p-1 rounded",
+                    flexDirection === "column" && "border-primary text-primary"
+                  )}
                   onClick={() => {
                     onFlexDirectionChange?.("column");
                     // Enable auto layout by also setting defaults if not set
@@ -376,54 +383,72 @@ export default function ShapeSettingsPanel({
                 <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align content</Label>
                 <div className="grid grid-cols-6 gap-0.5">
                   <Button
-                    variant={justifyContent === "start" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      justifyContent === "start" && "border-primary text-primary"
+                    )}
                     onClick={() => onJustifyContentChange?.("start")}
                     title="Align Start"
                   >
                     <AlignStartHorizontal className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant={justifyContent === "center" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      justifyContent === "center" && "border-primary text-primary"
+                    )}
                     onClick={() => onJustifyContentChange?.("center")}
                     title="Align Center"
                   >
                     <AlignCenterHorizontal className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant={justifyContent === "end" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      justifyContent === "end" && "border-primary text-primary"
+                    )}
                     onClick={() => onJustifyContentChange?.("end")}
                     title="Align End"
                   >
                     <AlignEndHorizontal className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant={alignItems === "start" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      alignItems === "start" && "border-primary text-primary"
+                    )}
                     onClick={() => onAlignItemsChange?.("start")}
                     title="Align Top"
                   >
                     <AlignStartVertical className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant={alignItems === "center" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      alignItems === "center" && "border-primary text-primary"
+                    )}
                     onClick={() => onAlignItemsChange?.("center")}
                     title="Align Middle"
                   >
                     <AlignCenterVertical className="h-3 w-3" />
                   </Button>
                   <Button
-                    variant={alignItems === "end" ? "default" : "outline"}
+                    variant="outline"
                     size="icon"
-                    className="h-7 w-full p-1 rounded"
+                    className={cn(
+                      "h-7 w-full p-1 rounded",
+                      alignItems === "end" && "border-primary text-primary"
+                    )}
                     onClick={() => onAlignItemsChange?.("end")}
                     title="Align Bottom"
                   >
@@ -635,25 +660,34 @@ export default function ShapeSettingsPanel({
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align</Label>
                   <div className="grid grid-cols-3 gap-0.5">
                     <Button
-                      variant={textAlign === "left" ? "default" : "outline"}
+                      variant="outline"
                       size="icon"
-                      className="h-7 w-full p-1 rounded"
+                      className={cn(
+                        "h-7 w-full p-1 rounded",
+                        textAlign === "left" && "border-primary text-primary"
+                      )}
                       onClick={() => onTextAlignChange("left")}
                     >
                       <AlignLeft className="h-3 w-3" />
                     </Button>
                     <Button
-                      variant={textAlign === "center" ? "default" : "outline"}
+                      variant="outline"
                       size="icon"
-                      className="h-7 w-full p-1 rounded"
+                      className={cn(
+                        "h-7 w-full p-1 rounded",
+                        textAlign === "center" && "border-primary text-primary"
+                      )}
                       onClick={() => onTextAlignChange("center")}
                     >
                       <AlignCenter className="h-3 w-3" />
                     </Button>
                     <Button
-                      variant={textAlign === "right" ? "default" : "outline"}
+                      variant="outline"
                       size="icon"
-                      className="h-7 w-full p-1 rounded"
+                      className={cn(
+                        "h-7 w-full p-1 rounded",
+                        textAlign === "right" && "border-primary text-primary"
+                      )}
                       onClick={() => onTextAlignChange("right")}
                     >
                       <AlignRight className="h-3 w-3" />
@@ -927,9 +961,12 @@ export default function ShapeSettingsPanel({
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
                     key={fit}
-                    variant={imageFit === fit ? "default" : "outline"}
+                    variant="outline"
                     size="sm"
-                    className="h-6 text-[9px] capitalize px-0.5 rounded"
+                    className={cn(
+                      "h-6 text-[9px] capitalize px-0.5 rounded",
+                      imageFit === fit && "border-primary text-primary"
+                    )}
                     onClick={() => onImageFitChange(fit)}
                   >
                     {fit}
