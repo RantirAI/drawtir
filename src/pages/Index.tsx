@@ -107,6 +107,38 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Browser Mockup with Embedded Designer */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="border border-border rounded-xl overflow-hidden shadow-lg bg-card">
+            {/* Browser Chrome */}
+            <div className="border-b border-border bg-muted/30 px-4 py-3 flex items-center gap-3">
+              {/* Window Controls */}
+              <div className="flex gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-400"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
+                <div className="w-3 h-3 rounded-full bg-green-400"></div>
+              </div>
+              
+              {/* Address Bar */}
+              <div className="flex-1 flex items-center gap-2 ml-4">
+                <div className="flex-1 bg-background border border-border rounded-lg px-4 py-1.5 text-sm text-muted-foreground font-geist flex items-center gap-2">
+                  <span className="text-xs">🔒</span>
+                  <span>drawtir.app/editor</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Iframe Content */}
+            <div className="relative w-full" style={{ height: '600px' }}>
+              <iframe
+                src="/editor/new"
+                className="w-full h-full border-0"
+                title="Drawtir Designer"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Stats Section */}
         <div className="border-t border-dashed border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
