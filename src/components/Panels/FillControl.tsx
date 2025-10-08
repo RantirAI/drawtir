@@ -88,7 +88,7 @@ export default function FillControl({
   availableFrames = [],
 }: FillControlProps) {
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [selectedStopIndex, setSelectedStopIndex] = useState(0);
+  const [selectedStopIndex, setSelectedStopIndex] = useState<number | null>(null);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -314,18 +314,25 @@ export default function FillControl({
             <div className="space-y-1">
               {gradientStops.map((stop, index) => (
                 <div key={index} className="flex items-center gap-1">
-                  <label className="cursor-pointer shrink-0">
-                    <div
-                      className="h-5 w-5 rounded border border-border hover:border-primary transition-colors"
-                      style={{ backgroundColor: stop.color }}
-                    />
-                    <input
-                      type="color"
-                      value={stop.color}
-                      onChange={(e) => handleUpdateGradientStop(index, { color: e.target.value })}
-                      className="sr-only"
-                    />
-                  </label>
+                  <Popover open={selectedStopIndex === index} onOpenChange={(open) => setSelectedStopIndex(open ? index : null)}>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="h-5 w-5 rounded border border-border hover:border-primary transition-colors shrink-0"
+                        style={{ backgroundColor: stop.color }}
+                      >
+                        <span className="sr-only">Edit color stop {index + 1}</span>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent side="right" className="w-80 p-3">
+                      <ColorPicker
+                        color={stop.color}
+                        onChange={(color) => handleUpdateGradientStop(index, { color })}
+                        opacity={stop.opacity || 100}
+                        onOpacityChange={(opacity) => handleUpdateGradientStop(index, { opacity })}
+                        showOpacity={true}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <Slider
                     value={[stop.position]}
                     onValueChange={([v]) => handleUpdateGradientStop(index, { position: v })}
