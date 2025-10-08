@@ -8,6 +8,16 @@ export function cn(...inputs: ClassValue[]) {
 interface GradientStop {
   color: string;
   position: number;
+  opacity?: number;
+}
+
+// Helper function to convert hex to rgba
+function hexToRgba(hex: string, opacity: number = 100): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const alpha = opacity / 100;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export function generateGradientCSS(
@@ -16,7 +26,12 @@ export function generateGradientCSS(
   stops: GradientStop[]
 ): string {
   const sortedStops = [...stops].sort((a, b) => a.position - b.position);
-  const colorStops = sortedStops.map(stop => `${stop.color} ${stop.position}%`).join(", ");
+  const colorStops = sortedStops.map(stop => {
+    const color = stop.opacity !== undefined && stop.opacity < 100
+      ? hexToRgba(stop.color, stop.opacity)
+      : stop.color;
+    return `${color} ${stop.position}%`;
+  }).join(", ");
   
   if (type === "linear") {
     return `linear-gradient(${angle}deg, ${colorStops})`;

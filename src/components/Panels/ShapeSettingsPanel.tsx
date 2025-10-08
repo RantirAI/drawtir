@@ -85,7 +85,7 @@ interface ShapeSettingsPanelProps {
   fillImageFit?: "fill" | "contain" | "cover" | "crop";
   gradientType?: "linear" | "radial";
   gradientAngle?: number;
-  gradientStops?: Array<{color: string, position: number}>;
+  gradientStops?: Array<{color: string, position: number, opacity?: number}>;
   patternFrameId?: string;
   videoUrl?: string;
   stroke?: string;
@@ -116,7 +116,7 @@ interface ShapeSettingsPanelProps {
   onFillImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
   onGradientTypeChange?: (type: "linear" | "radial") => void;
   onGradientAngleChange?: (angle: number) => void;
-  onGradientStopsChange?: (stops: Array<{color: string, position: number}>) => void;
+  onGradientStopsChange?: (stops: Array<{color: string, position: number, opacity?: number}>) => void;
   onPatternFrameIdChange?: (frameId: string) => void;
   onVideoUrlChange?: (url: string) => void;
   onStrokeChange?: (color: string) => void;

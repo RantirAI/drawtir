@@ -34,6 +34,7 @@ type FillType = "solid" | "image" | "gradient" | "pattern" | "video";
 interface GradientStop {
   color: string;
   position: number;
+  opacity?: number;
 }
 
 interface FillControlProps {
@@ -68,8 +69,8 @@ export default function FillControl({
   gradientType = "linear",
   gradientAngle = 0,
   gradientStops = [
-    { color: "#000000", position: 0 },
-    { color: "#ffffff", position: 100 }
+    { color: "#000000", position: 0, opacity: 100 },
+    { color: "#ffffff", position: 100, opacity: 100 }
   ],
   patternFrameId,
   videoUrl,
@@ -102,7 +103,7 @@ export default function FillControl({
   };
 
   const handleAddGradientStop = () => {
-    const newStops = [...gradientStops, { color: "#808080", position: 50 }];
+    const newStops = [...gradientStops, { color: "#808080", position: 50, opacity: 100 }];
     onGradientStopsChange?.(newStops.sort((a, b) => a.position - b.position));
   };
 
@@ -344,14 +345,16 @@ export default function FillControl({
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="w-full h-7 text-[10px] mt-2 rounded">
-                  Edit Stop {selectedStopIndex + 1} Color
+                  Edit Stop {selectedStopIndex + 1} Color & Opacity
                 </Button>
               </PopoverTrigger>
               <PopoverContent side="right" className="w-80 p-3">
                 <ColorPicker
                   color={gradientStops[selectedStopIndex]?.color || "#000000"}
                   onChange={(color) => handleUpdateGradientStop(selectedStopIndex, { color })}
-                  showOpacity={false}
+                  opacity={gradientStops[selectedStopIndex]?.opacity ?? 100}
+                  onOpacityChange={(opacity) => handleUpdateGradientStop(selectedStopIndex, { opacity })}
+                  showOpacity={true}
                 />
               </PopoverContent>
             </Popover>

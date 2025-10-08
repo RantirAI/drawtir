@@ -19,7 +19,7 @@ export interface Element {
   fillImageFit?: "fill" | "contain" | "cover" | "crop";
   gradientType?: "linear" | "radial";
   gradientAngle?: number;
-  gradientStops?: Array<{color: string, position: number}>;
+  gradientStops?: Array<{color: string, position: number, opacity?: number}>;
   patternFrameId?: string;
   videoUrl?: string;
   stroke?: string;
@@ -67,7 +67,7 @@ export interface Frame {
   backgroundImageFit?: "fill" | "contain" | "cover" | "crop";
   gradientType?: "linear" | "radial";
   gradientAngle?: number;
-  gradientStops?: Array<{color: string, position: number}>;
+  gradientStops?: Array<{color: string, position: number, opacity?: number}>;
   patternFrameId?: string;
   videoUrl?: string;
   image?: string | null;
