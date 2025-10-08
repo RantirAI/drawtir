@@ -1035,6 +1035,38 @@ export default function CanvasContainerNew({
             </CanvasContextMenu>
           </div>
         ))}
+        {/* Pen drawing overlay inside transformed canvas */}
+        {selectedFrame && (
+          <DrawingLayer
+            isActive={activeTool === "pen"}
+            color={penColor}
+            strokeWidth={strokeWidth}
+            frameId={selectedFrameId}
+            frameX={selectedFrame.x}
+            frameY={selectedFrame.y}
+            frameWidth={selectedFrame.width}
+            frameHeight={selectedFrame.height}
+            onPathComplete={(pathData, color, strokeW, bounds) => {
+              if (!selectedFrameId) return;
+              const newElement: Element = {
+                id: `element-${Date.now()}`,
+                type: "drawing",
+                x: bounds.x,
+                y: bounds.y,
+                width: bounds.width,
+                height: bounds.height,
+                pathData,
+                stroke: color,
+                strokeWidth: strokeW,
+                opacity: 100,
+                blendMode: "normal",
+              };
+              setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
+              setSelectedElementIds([newElement.id]);
+              setShowShapeSettings(true);
+            }}
+          />
+        )}
       </div>
 
       {/* Panels */}
@@ -1317,37 +1349,6 @@ export default function CanvasContainerNew({
         onDelete={handleDelete}
       />
       
-      {selectedFrame && (
-        <DrawingLayer
-          isActive={activeTool === "pen"}
-          color={penColor}
-          strokeWidth={strokeWidth}
-          frameId={selectedFrameId}
-          frameX={selectedFrame.x}
-          frameY={selectedFrame.y}
-          frameWidth={selectedFrame.width}
-          frameHeight={selectedFrame.height}
-          onPathComplete={(pathData, color, strokeW, bounds) => {
-            if (!selectedFrameId) return;
-            const newElement: Element = {
-              id: `element-${Date.now()}`,
-              type: "drawing",
-              x: bounds.x,
-              y: bounds.y,
-              width: bounds.width,
-              height: bounds.height,
-              pathData,
-              stroke: color,
-              strokeWidth: strokeW,
-              opacity: 100,
-              blendMode: "normal",
-            };
-            setFrames(frames.map(f => f.id === selectedFrameId ? { ...f, elements: [...(f.elements || []), newElement] } : f));
-            setSelectedElementIds([newElement.id]);
-            setShowShapeSettings(true);
-          }}
-        />
-      )}
 
       <ShareDialog
         open={showShareDialog}

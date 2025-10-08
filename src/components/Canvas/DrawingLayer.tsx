@@ -124,8 +124,11 @@ export default function DrawingLayer({
       ref={canvasRef}
       width={frameWidth}
       height={frameHeight}
-      className={`absolute pointer-events-${isActive ? 'auto' : 'none'} z-20`}
-      onMouseDown={startDrawing}
+      className={`absolute pointer-events-${isActive ? 'auto' : 'none'} z-50`}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        startDrawing(e);
+      }}
       onMouseMove={draw}
       onMouseUp={stopDrawing}
       style={{ 
