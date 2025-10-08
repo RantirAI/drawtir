@@ -319,6 +319,7 @@ export default function FillControl({
                       <button
                         className="h-5 w-5 rounded border border-border hover:border-primary transition-colors shrink-0"
                         style={{ backgroundColor: stop.color }}
+                        onClick={() => setSelectedStopIndex(index)}
                       >
                         <span className="sr-only">Edit color stop {index + 1}</span>
                       </button>
@@ -355,23 +356,6 @@ export default function FillControl({
                 </div>
               ))}
             </div>
-            {/* Color picker for selected stop */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full h-7 text-[10px] mt-2 rounded">
-                  Edit Stop {selectedStopIndex + 1} Color & Opacity
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent side="right" className="w-80 p-3">
-                <ColorPicker
-                  color={gradientStops[selectedStopIndex]?.color || "#000000"}
-                  onChange={(color) => handleUpdateGradientStop(selectedStopIndex, { color })}
-                  opacity={gradientStops[selectedStopIndex]?.opacity ?? 100}
-                  onOpacityChange={(opacity) => handleUpdateGradientStop(selectedStopIndex, { opacity })}
-                  showOpacity={true}
-                />
-              </PopoverContent>
-            </Popover>
           </div>
         </TabsContent>
 
