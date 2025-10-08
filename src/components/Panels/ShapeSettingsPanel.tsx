@@ -34,6 +34,8 @@ import {
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+// Utility functions for ShapeSettingsPanel
+
 const GOOGLE_FONTS = [
   { value: "Inter", label: "Inter" },
   { value: "Roboto", label: "Roboto" },
