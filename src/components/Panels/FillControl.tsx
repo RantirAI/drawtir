@@ -205,13 +205,6 @@ export default function FillControl({
         <TabsContent value="image" className="space-y-2 mt-2">
           {fillImage ? (
             <div className="space-y-2">
-              <div className="relative h-20 w-full rounded border border-border overflow-hidden">
-                <img 
-                  src={fillImage} 
-                  alt="Fill" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
               <div className="grid grid-cols-4 gap-0.5">
                 {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
                   <Button
