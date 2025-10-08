@@ -30,7 +30,12 @@ const Index = () => {
           <div className="flex gap-3 items-center">
             <ThemeToggle />
             <Link to="/auth">
-              <Button variant="outline" size="sm" className="font-geist">
+              <Button variant="ghost" size="sm" className="font-geist">
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/editor/new">
+              <Button size="sm" className="font-geist">
                 Get Started
               </Button>
             </Link>
@@ -51,31 +56,18 @@ const Index = () => {
               Generate stunning layouts instantly and customize them with powerful edits.
             </p>
             
-            {/* Search/Input Section */}
-            <div className="max-w-2xl mx-auto mb-16">
-              <div className="border border-border rounded-xl p-6 bg-card shadow-sm">
-                <input
-                  type="text"
-                  placeholder="Create something beautiful..."
-                  className="w-full bg-transparent text-lg outline-none mb-4 font-geist placeholder:text-muted-foreground"
-                />
-                <div className="flex gap-3 items-center justify-between">
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="font-geist text-xs">
-                      ✨ Prompt Builder
-                    </Button>
-                    <Button variant="outline" size="sm" className="font-geist text-xs">
-                      📎 Attach
-                    </Button>
-                    <Button variant="outline" size="sm" className="font-geist text-xs">
-                      📋
-                    </Button>
-                  </div>
-                  <Button size="sm" className="font-geist">
-                    ↑
-                  </Button>
-                </div>
-              </div>
+            {/* CTA Buttons */}
+            <div className="flex gap-4 justify-center items-center mb-16">
+              <Link to="/editor/new">
+                <Button size="lg" className="font-geist">
+                  Start Creating
+                </Button>
+              </Link>
+              <Link to="/gallery">
+                <Button variant="outline" size="lg" className="font-geist">
+                  Browse Templates
+                </Button>
+              </Link>
             </div>
 
             {/* Feature Cards */}
@@ -130,12 +122,11 @@ const Index = () => {
             
             {/* Iframe Content */}
             <div className="relative w-full bg-background" style={{ height: '600px' }}>
-              <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                <div className="text-center">
-                  <p className="text-lg font-geist mb-2">Interactive Designer Preview</p>
-                  <p className="text-sm">Click "Get Started" to try the full editor</p>
-                </div>
-              </div>
+              <iframe
+                src="/editor/new"
+                className="w-full h-full border-0"
+                title="Drawtir Designer Preview"
+              />
             </div>
           </div>
         </div>
