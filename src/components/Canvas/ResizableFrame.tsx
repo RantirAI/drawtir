@@ -30,6 +30,7 @@ interface ResizableFrameProps {
   linkPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   gradientIntensity: number;
   cornerRadius?: number;
+  fillOpacity?: number;
   flexDirection?: "row" | "column";
   justifyContent?: string;
   alignItems?: string;
@@ -68,6 +69,7 @@ export default function ResizableFrame({
   linkPosition,
   gradientIntensity,
   cornerRadius = 0,
+  fillOpacity = 100,
   flexDirection = "row",
   justifyContent = "start",
   alignItems = "start",
@@ -139,10 +141,18 @@ export default function ResizableFrame({
   };
 
   const generateBackgroundStyle = () => {
+    const hexToRgba = (hex: string, opacity: number): string => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const alpha = opacity / 100;
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
     const baseStyle: React.CSSProperties = {};
     
     if (backgroundType === "solid") {
-      baseStyle.backgroundColor = backgroundColor;
+      baseStyle.backgroundColor = hexToRgba(backgroundColor, fillOpacity);
     } else if (backgroundType === "image" && backgroundImage) {
       const fitStyles = getFitStyle(backgroundImageFit);
       baseStyle.backgroundImage = `url(${backgroundImage})`;

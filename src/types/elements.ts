@@ -24,6 +24,8 @@ export interface Element {
   videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
+  strokeOpacity?: number;
+  fillOpacity?: number;
   
   // Text properties
   text?: string;
@@ -91,6 +93,7 @@ export interface Frame {
   gap?: number;
   elements?: Element[];
   opacity?: number;
+  fillOpacity?: number;
   cornerRadius?: number;
   blendMode?: string;
 }

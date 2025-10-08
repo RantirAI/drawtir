@@ -963,6 +963,7 @@ export default function CanvasContainerNew({
                 linkPosition={frame.linkPosition}
                 gradientIntensity={frame.gradientIntensity}
                 cornerRadius={frame.cornerRadius || 0}
+                fillOpacity={frame.fillOpacity || 100}
                 flexDirection={frame.flexDirection}
                 justifyContent={frame.justifyContent}
                 alignItems={frame.alignItems}
@@ -999,6 +1000,8 @@ export default function CanvasContainerNew({
                       stroke={element.stroke}
                       pathData={element.pathData}
                       strokeWidth={element.strokeWidth}
+                      strokeOpacity={element.strokeOpacity}
+                      fillOpacity={element.fillOpacity}
                       opacity={element.opacity}
                       cornerRadius={element.cornerRadius}
                       brightness={element.brightness}
@@ -1081,6 +1084,8 @@ export default function CanvasContainerNew({
           videoUrl={selectedElement?.videoUrl}
           stroke={selectedElement?.stroke || penColor}
           strokeWidth={selectedElement?.strokeWidth || strokeWidth}
+          strokeOpacity={selectedElement?.strokeOpacity || 100}
+          fillOpacity={selectedElement?.fillOpacity || selectedFrame?.fillOpacity || 100}
           width={selectedElement?.width || selectedFrame?.width}
           height={selectedElement?.height || selectedFrame?.height}
           x={selectedElement?.x}
@@ -1120,6 +1125,18 @@ export default function CanvasContainerNew({
               selectedElementIds.forEach(id => handleElementUpdate(id, { strokeWidth: w }));
             } else {
               setStrokeWidth(w);
+            }
+          }}
+          onStrokeOpacityChange={(o) => {
+            if (selectedElementIds.length > 0) {
+              selectedElementIds.forEach(id => handleElementUpdate(id, { strokeOpacity: o }));
+            }
+          }}
+          onFillOpacityChange={(o) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { fillOpacity: o });
+            } else {
+              handleFrameUpdate(selectedFrameId, { fillOpacity: o });
             }
           }}
           onWidthChange={(w) => {

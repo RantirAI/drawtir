@@ -90,6 +90,8 @@ interface ShapeSettingsPanelProps {
   videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
+  strokeOpacity?: number;
+  fillOpacity?: number;
   width?: number;
   height?: number;
   x?: number;
@@ -121,6 +123,8 @@ interface ShapeSettingsPanelProps {
   onVideoUrlChange?: (url: string) => void;
   onStrokeChange?: (color: string) => void;
   onStrokeWidthChange?: (width: number) => void;
+  onStrokeOpacityChange?: (opacity: number) => void;
+  onFillOpacityChange?: (opacity: number) => void;
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
   onXChange?: (x: number) => void;
@@ -185,6 +189,8 @@ export default function ShapeSettingsPanel({
   videoUrl,
   stroke = "#000000",
   strokeWidth = 2,
+  strokeOpacity = 100,
+  fillOpacity = 100,
   width = 100,
   height = 100,
   x = 0,
@@ -216,6 +222,8 @@ export default function ShapeSettingsPanel({
   onVideoUrlChange,
   onStrokeChange,
   onStrokeWidthChange,
+  onStrokeOpacityChange,
+  onFillOpacityChange,
   onWidthChange,
   onHeightChange,
   onXChange,
@@ -810,7 +818,7 @@ export default function ShapeSettingsPanel({
                 onGradientStopsChange={onGradientStopsChange}
                 onPatternFrameIdChange={onPatternFrameIdChange}
                 onVideoUrlChange={onVideoUrlChange}
-                onOpacityChange={onOpacityChange}
+                onOpacityChange={onFillOpacityChange}
                 availableFrames={availableFrames}
               />
             </AccordionContent>
@@ -836,8 +844,8 @@ export default function ShapeSettingsPanel({
                     <ColorPicker
                       color={stroke}
                       onChange={(color) => onStrokeChange?.(color)}
-                      opacity={opacity}
-                      onOpacityChange={onOpacityChange}
+                      opacity={strokeOpacity}
+                      onOpacityChange={onStrokeOpacityChange}
                       showOpacity={true}
                     />
                   </PopoverContent>

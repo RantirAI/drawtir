@@ -15,6 +15,8 @@ interface ResizableElementProps {
   strokeWidth?: number;
   fill?: string;
   stroke?: string;
+  strokeOpacity?: number;
+  fillOpacity?: number;
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
@@ -60,6 +62,8 @@ export default function ResizableElement({
   stroke = "#000000",
   pathData,
   strokeWidth = 2,
+  strokeOpacity = 100,
+  fillOpacity = 100,
   opacity = 100,
   cornerRadius = 0,
   blendMode = "normal",
@@ -93,6 +97,18 @@ export default function ResizableElement({
   const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
+
+  // Helper function to convert hex to rgba with opacity
+  const hexToRgba = (hex: string, opacity: number): string => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const alpha = opacity / 100;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
+  const strokeWithOpacity = hexToRgba(stroke, strokeOpacity);
+  const fillWithOpacity = fillType === "solid" ? hexToRgba(fill, fillOpacity) : fill;
 
   useEffect(() => {
     const snapToGrid = (value: number, gridSize: number = 10) => {
@@ -193,7 +209,7 @@ export default function ResizableElement({
     const baseStyle: React.CSSProperties = {};
     
     if (fillType === "solid") {
-      baseStyle.backgroundColor = fill;
+      baseStyle.backgroundColor = hexToRgba(fill, fillOpacity);
     } else if (fillType === "image" && fillImage) {
       const fitStyles = getFitStyle(fillImageFit);
       baseStyle.backgroundImage = `url(${fillImage})`;
@@ -230,7 +246,7 @@ export default function ResizableElement({
           <path
             d={pathData}
             fill="none"
-            stroke={stroke}
+            stroke={strokeWithOpacity}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -261,7 +277,7 @@ export default function ResizableElement({
       case "circle":
       case "ellipse":
         return (
-          <div className="w-full h-full rounded-full relative" style={{ border: `${strokeWidth}px solid ${stroke}` }}>
+          <div className="w-full h-full rounded-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}` }}>
             <div className="w-full h-full rounded-full overflow-hidden" style={fillStyle}>
               {videoElement}
             </div>
@@ -270,7 +286,7 @@ export default function ResizableElement({
       case "line":
         return (
           <svg width={width} height={height} className="w-full h-full">
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth={strokeWidth} />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={strokeWithOpacity} strokeWidth={strokeWidth} />
           </svg>
         );
       case "arrow":
@@ -278,10 +294,10 @@ export default function ResizableElement({
           <svg width={width} height={height} className="w-full h-full">
             <defs>
               <marker id={`arrowhead-${id}`} markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill={stroke} />
+                <polygon points="0 0, 10 3.5, 0 7" fill={strokeWithOpacity} />
               </marker>
             </defs>
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={stroke} strokeWidth={strokeWidth} markerEnd={`url(#arrowhead-${id})`} />
+            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={strokeWithOpacity} strokeWidth={strokeWidth} markerEnd={`url(#arrowhead-${id})`} />
           </svg>
         );
       case "polygon":
@@ -314,8 +330,8 @@ export default function ResizableElement({
             </defs>
             <polygon 
               points={hexPoints} 
-              fill={fillType === "solid" ? fill : `url(#fill-pattern-${id})`} 
-              stroke={stroke} 
+              fill={fillType === "solid" ? fillWithOpacity : `url(#fill-pattern-${id})`} 
+              stroke={strokeWithOpacity} 
               strokeWidth={strokeWidth} 
             />
           </svg>
@@ -358,15 +374,15 @@ export default function ResizableElement({
             </defs>
             <polygon 
               points={starPoints} 
-              fill={fillType === "solid" ? fill : `url(#fill-pattern-${id})`} 
-              stroke={stroke} 
+              fill={fillType === "solid" ? fillWithOpacity : `url(#fill-pattern-${id})`} 
+              stroke={strokeWithOpacity} 
               strokeWidth={strokeWidth} 
             />
           </svg>
         );
       default:
         return (
-          <div className="w-full h-full relative" style={{ border: `${strokeWidth}px solid ${stroke}`, borderRadius: borderRadiusStyle }}>
+          <div className="w-full h-full relative" style={{ border: `${strokeWidth}px solid ${strokeWithOpacity}`, borderRadius: borderRadiusStyle }}>
             <div className="w-full h-full overflow-hidden" style={{ ...fillStyle, borderRadius: borderRadiusStyle }}>
               {videoElement}
             </div>
