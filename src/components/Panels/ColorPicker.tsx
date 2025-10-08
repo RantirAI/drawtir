@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Pipette } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ColorPickerProps {
@@ -98,11 +99,11 @@ export default function ColorPicker({
   }, [isDragging]);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {/* 2D Color Picker */}
       <div
         ref={pickerRef}
-        className="relative w-full h-48 rounded-lg cursor-crosshair overflow-hidden"
+        className="relative w-full h-32 rounded cursor-crosshair overflow-hidden"
         style={{
           background: `linear-gradient(to bottom, 
             hsl(${hue}, 100%, 100%) 0%, 
@@ -126,7 +127,7 @@ export default function ColorPicker({
         
         {/* Selector */}
         <div
-          className="absolute w-4 h-4 border-2 border-white rounded-full shadow-lg pointer-events-none"
+          className="absolute w-3 h-3 border-2 border-white rounded-full shadow-lg pointer-events-none"
           style={{
             left: `${saturation}%`,
             top: `${100 - lightness}%`,
@@ -136,73 +137,93 @@ export default function ColorPicker({
       </div>
 
       {/* Hue Slider */}
-      <div className="space-y-1">
+      <div
+        className="relative w-full h-3 rounded cursor-pointer"
+        style={{
+          background: "linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)",
+        }}
+        onClick={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const newHue = Math.round(x * 360);
+          setHue(newHue);
+          onChange(hslToHex(newHue, saturation, lightness));
+        }}
+      >
         <div
-          className="relative w-full h-3 rounded-full cursor-pointer"
+          className="absolute w-3 h-3 border-2 border-white rounded-full shadow-lg pointer-events-none"
           style={{
-            background: "linear-gradient(to right, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)",
+            left: `${(hue / 360) * 100}%`,
+            top: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      </div>
+
+      {/* Opacity Slider */}
+      {showOpacity && onOpacityChange && (
+        <div 
+          className="relative w-full h-3 rounded cursor-pointer overflow-hidden"
+          style={{
+            backgroundImage: `
+              linear-gradient(45deg, #ccc 25%, transparent 25%), 
+              linear-gradient(-45deg, #ccc 25%, transparent 25%), 
+              linear-gradient(45deg, transparent 75%, #ccc 75%), 
+              linear-gradient(-45deg, transparent 75%, #ccc 75%)
+            `,
+            backgroundSize: '8px 8px',
+            backgroundPosition: '0 0, 0 4px, 4px -4px, -4px 0px'
           }}
           onClick={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = (e.clientX - rect.left) / rect.width;
-            const newHue = Math.round(x * 360);
-            setHue(newHue);
-            onChange(hslToHex(newHue, saturation, lightness));
+            const newOpacity = Math.round(x * 100);
+            onOpacityChange(newOpacity);
           }}
         >
-          <div
-            className="absolute w-4 h-4 border-2 border-white rounded-full shadow-lg pointer-events-none"
+          <div 
+            className="absolute inset-0"
             style={{
-              left: `${(hue / 360) * 100}%`,
+              background: `linear-gradient(to right, transparent, ${color})`
+            }}
+          />
+          <div
+            className="absolute w-3 h-3 border-2 border-white rounded-full shadow-lg pointer-events-none bg-background"
+            style={{
+              left: `${opacity}%`,
               top: "50%",
               transform: "translate(-50%, -50%)",
             }}
           />
         </div>
-      </div>
-
-      {/* Opacity Slider */}
-      {showOpacity && onOpacityChange && (
-        <div className="space-y-1">
-          <Label className="text-xs">Opacity: {opacity}%</Label>
-          <Slider
-            value={[opacity]}
-            onValueChange={([v]) => onOpacityChange(v)}
-            min={0}
-            max={100}
-            step={1}
-          />
-        </div>
       )}
 
-      {/* Hex Input */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <Label className="text-xs mb-1 block">Hex</Label>
-          <Input
-            type="text"
-            value={color.toUpperCase()}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (/^#[0-9A-F]{6}$/i.test(value)) {
-                onChange(value);
-              }
-            }}
-            placeholder="#000000"
-            className="h-8 text-xs font-mono"
-          />
-        </div>
-        {showOpacity && (
-          <div className="w-20">
-            <Label className="text-xs mb-1 block">%</Label>
+      {/* Hex and Opacity Input Row */}
+      <div className="flex items-center gap-1.5 pt-1">
+        <Pipette className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <Input
+          type="text"
+          value={color.toUpperCase()}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (/^#[0-9A-F]{6}$/i.test(value)) {
+              onChange(value);
+            }
+          }}
+          placeholder="#000000"
+          className="h-7 text-xs font-mono flex-1"
+        />
+        {showOpacity && onOpacityChange && (
+          <div className="flex items-center gap-1">
             <Input
               type="number"
               value={opacity}
-              onChange={(e) => onOpacityChange?.(Number(e.target.value))}
+              onChange={(e) => onOpacityChange(Number(e.target.value))}
               min={0}
               max={100}
-              className="h-8 text-xs"
+              className="h-7 text-xs w-12 text-right"
             />
+            <span className="text-xs text-muted-foreground">%</span>
           </div>
         )}
       </div>
