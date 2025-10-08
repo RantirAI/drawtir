@@ -3,6 +3,7 @@ import ColorPicker from "./ColorPicker";
 import FillControl from "./FillControl";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { InputWithUnit } from "@/components/ui/input-with-unit";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -90,16 +91,19 @@ interface ShapeSettingsPanelProps {
   videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
+  strokeWidthUnit?: "px" | "rem" | "%" | "em";
   strokeOpacity?: number;
   strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
   width?: number;
   height?: number;
+  sizeUnit?: "px" | "rem" | "%" | "em";
   x?: number;
   y?: number;
   rotation?: number;
   opacity?: number;
   cornerRadius?: number;
+  cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
   brightness?: number;
@@ -191,16 +195,19 @@ export default function ShapeSettingsPanel({
   videoUrl,
   stroke = "#000000",
   strokeWidth = 2,
+  strokeWidthUnit = "px",
   strokeOpacity = 100,
   strokePosition = "center",
   fillOpacity = 100,
   width = 100,
   height = 100,
+  sizeUnit = "px",
   x = 0,
   y = 0,
   rotation = 0,
   opacity = 100,
   cornerRadius = 0,
+  cornerRadiusUnit = "px",
   blendMode = "normal",
   imageFit = "cover",
   brightness = 100,
@@ -698,22 +705,22 @@ export default function ShapeSettingsPanel({
                 {onWidthChange && (
                   <div>
                     <Label className="text-xs mb-1 block">W</Label>
-                    <Input
-                      type="number"
+                    <InputWithUnit
                       value={Math.round(width)}
-                      onChange={(e) => onWidthChange(Number(e.target.value))}
-                      className="h-7 text-xs rounded"
+                      onChange={onWidthChange}
+                      unit={sizeUnit || "px"}
+                      showUnitSelector={true}
                     />
                   </div>
                 )}
                 {onHeightChange && (
                   <div>
                     <Label className="text-xs mb-1 block">H</Label>
-                    <Input
-                      type="number"
+                    <InputWithUnit
                       value={Math.round(height)}
-                      onChange={(e) => onHeightChange(Number(e.target.value))}
-                      className="h-7 text-xs rounded"
+                      onChange={onHeightChange}
+                      unit={sizeUnit || "px"}
+                      showUnitSelector={true}
                     />
                   </div>
                 )}
@@ -770,7 +777,16 @@ export default function ShapeSettingsPanel({
             {/* Corner Radius - only for rectangles and frames */}
             {onCornerRadiusChange && (elementType === "frame" || (elementType === "shape" && (shapeType === "rectangle" || !shapeType))) && (
               <div>
-                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Corner: {cornerRadius}px</Label>
+                <div className="flex items-center justify-between mb-0.5">
+                  <Label className="text-[10px] text-muted-foreground">Corner</Label>
+                  <InputWithUnit
+                    value={cornerRadius}
+                    onChange={onCornerRadiusChange}
+                    unit={cornerRadiusUnit || "px"}
+                    showUnitSelector={true}
+                    className="w-24"
+                  />
+                </div>
                 <Slider
                   value={[cornerRadius]}
                   onValueChange={([v]) => onCornerRadiusChange(v)}
@@ -877,7 +893,16 @@ export default function ShapeSettingsPanel({
 
                 {onStrokeWidthChange && (
                   <div className="flex-1">
-                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Weight: {strokeWidth}px</Label>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <Label className="text-[10px] text-muted-foreground">Weight</Label>
+                      <InputWithUnit
+                        value={strokeWidth}
+                        onChange={onStrokeWidthChange}
+                        unit={strokeWidthUnit || "px"}
+                        showUnitSelector={true}
+                        className="w-24"
+                      />
+                    </div>
                     <Slider
                       value={[strokeWidth]}
                       onValueChange={([v]) => onStrokeWidthChange(v)}

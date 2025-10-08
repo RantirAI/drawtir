@@ -9,6 +9,7 @@ export interface Element {
   y: number;
   width: number;
   height: number;
+  sizeUnit?: "px" | "rem" | "%" | "em";
   rotation?: number;
   
   // Shape properties
@@ -24,6 +25,7 @@ export interface Element {
   videoUrl?: string;
   stroke?: string;
   strokeWidth?: number;
+  strokeWidthUnit?: "px" | "rem" | "%" | "em";
   strokeOpacity?: number;
   strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
@@ -50,6 +52,7 @@ export interface Element {
   // Common properties
   opacity?: number;
   cornerRadius?: number;
+  cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
   
   // Nesting support
@@ -63,6 +66,7 @@ export interface Frame {
   y: number;
   width: number;
   height: number;
+  sizeUnit?: "px" | "rem" | "%" | "em";
   rotation?: number;
   backgroundColor: string;
   backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
@@ -96,5 +100,6 @@ export interface Frame {
   opacity?: number;
   fillOpacity?: number;
   cornerRadius?: number;
+  cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
 }
