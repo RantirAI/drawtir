@@ -12,6 +12,8 @@ interface ResizableFrameProps {
   backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
   backgroundImage?: string;
   backgroundImageFit?: "fill" | "contain" | "cover" | "crop";
+  backgroundPositionX?: number;
+  backgroundPositionY?: number;
   gradientType?: "linear" | "radial";
   gradientAngle?: number;
   gradientStops?: Array<{color: string, position: number}>;
@@ -35,7 +37,7 @@ interface ResizableFrameProps {
   justifyContent?: string;
   alignItems?: string;
   gap?: number;
-  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number }>) => void;
+  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
   children?: ReactNode;
