@@ -358,27 +358,6 @@ export default function ShapeSettingsPanel({
                 </Button>
               </div>
 
-              {/* Width and Height */}
-              <div className="grid grid-cols-2 gap-1.5">
-                <div>
-                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">W</Label>
-                    <Input
-                      type="number"
-                      value={Math.round(width || 0)}
-                      onChange={(e) => onWidthChange?.(Number(e.target.value))}
-                      className="h-7 text-[11px] px-1.5 rounded"
-                    />
-                </div>
-                <div>
-                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">H</Label>
-                    <Input
-                      type="number"
-                      value={Math.round(height || 0)}
-                      onChange={(e) => onHeightChange?.(Number(e.target.value))}
-                      className="h-7 text-[11px] px-1.5 rounded"
-                    />
-                </div>
-              </div>
 
               {/* Alignment icons */}
               <div>
