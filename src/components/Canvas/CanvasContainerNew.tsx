@@ -1009,6 +1009,7 @@ export default function CanvasContainerNew({
                       contrast={element.contrast}
                       saturation={element.saturation}
                       blur={element.blur}
+                      imageFit={element.imageFit}
                       fontSize={element.fontSize}
                       fontFamily={element.fontFamily}
                       fontWeight={element.fontWeight}

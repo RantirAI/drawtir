@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { generateGradientCSS, getFitStyle } from "@/lib/utils";
+import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
 
 interface ResizableElementProps {
   id: string;
@@ -26,6 +26,7 @@ interface ResizableElementProps {
   contrast?: number;
   saturation?: number;
   blur?: number;
+  imageFit?: "fill" | "contain" | "cover" | "crop";
   // Text properties
   fontSize?: number;
   fontFamily?: string;
@@ -73,6 +74,7 @@ export default function ResizableElement({
   contrast = 100,
   saturation = 100,
   blur = 0,
+  imageFit = "cover",
   fontSize = 16,
   fontFamily = "Inter",
   fontWeight = "400",
@@ -493,15 +495,22 @@ export default function ResizableElement({
       onDoubleClick={handleDoubleClick}
     >
       {type === "image" && src ? (
-        <img 
-          src={src} 
-          alt="Element" 
-          className="w-full h-full object-cover" 
-          style={{ 
-            borderRadius: cornerRadius ? `${cornerRadius}px` : '0',
-            filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`
-          }}
-        />
+        <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
+          <img 
+            src={src} 
+            alt="Element" 
+            className="w-full h-full"
+            style={{ 
+              objectFit: getObjectFitStyle(imageFit || "cover") as any,
+              objectPosition: "center",
+              filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`,
+              opacity: imageFit === "crop" ? 0.7 : 1
+            }}
+          />
+          {imageFit === "crop" && (
+            <div className="absolute inset-0 border-2 border-dashed border-blue-500 pointer-events-none" />
+          )}
+        </div>
       ) : type === "text" ? (
         isEditing ? (
           <textarea

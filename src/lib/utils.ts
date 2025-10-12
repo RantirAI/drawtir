@@ -48,25 +48,25 @@ export function getFitStyle(fit: "fill" | "contain" | "cover" | "crop"): {
   switch (fit) {
     case "fill":
       return {
-        backgroundSize: "100% 100%",
+        backgroundSize: "100% 100%", // Stretch to fill
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       };
     case "contain":
       return {
-        backgroundSize: "contain",
+        backgroundSize: "contain", // Fit inside, maintain aspect ratio
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       };
     case "cover":
       return {
-        backgroundSize: "cover",
+        backgroundSize: "cover", // Cover entire area, maintain aspect ratio
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       };
     case "crop":
       return {
-        backgroundSize: "100%",
+        backgroundSize: "auto 100%", // Crop mode: fit height, allow horizontal overflow
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       };
@@ -76,5 +76,20 @@ export function getFitStyle(fit: "fill" | "contain" | "cover" | "crop"): {
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat"
       };
+  }
+}
+
+export function getObjectFitStyle(fit: "fill" | "contain" | "cover" | "crop"): string {
+  switch (fit) {
+    case "fill":
+      return "fill"; // Stretch to fill
+    case "contain":
+      return "contain"; // Fit inside, maintain aspect ratio
+    case "cover":
+      return "cover"; // Cover entire area, maintain aspect ratio
+    case "crop":
+      return "none"; // Show at original size (will be clipped)
+    default:
+      return "cover";
   }
 }
