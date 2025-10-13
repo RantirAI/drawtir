@@ -86,6 +86,9 @@ export function generateThumbnail(
     const offsetX = (width - contentWidth * scale) / 2 - bounds.minX * scale;
     const offsetY = (height - contentHeight * scale) / 2 - bounds.minY * scale;
 
+    // Track loaded images
+    const imagePromises: Promise<void>[] = [];
+
     // Draw frames with elements
     frames.forEach((frame) => {
       const x = frame.x * scale + offsetX;
@@ -93,9 +96,25 @@ export function generateThumbnail(
       const w = frame.width * scale;
       const h = frame.height * scale;
 
-      // Draw frame background
-      ctx.fillStyle = frame.backgroundColor || "#f0f0f0";
-      ctx.fillRect(x, y, w, h);
+      // Draw frame background (solid or image)
+      if (frame.backgroundType === "image" && frame.backgroundImage) {
+        const bgImg = new Image();
+        bgImg.crossOrigin = "anonymous";
+        const promise = new Promise<void>((resolve) => {
+          bgImg.onload = () => {
+            ctx.save();
+            ctx.drawImage(bgImg, x, y, w, h);
+            ctx.restore();
+            resolve();
+          };
+          bgImg.onerror = () => resolve();
+        });
+        bgImg.src = frame.backgroundImage;
+        imagePromises.push(promise);
+      } else {
+        ctx.fillStyle = frame.backgroundColor || "#f0f0f0";
+        ctx.fillRect(x, y, w, h);
+      }
 
       // Draw frame border
       ctx.strokeStyle = "#cccccc";
@@ -185,11 +204,30 @@ export function generateThumbnail(
             
             ctx.stroke();
             ctx.restore();
+          } else if (element.type === "image" && element.imageUrl) {
+            // Draw image elements
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            const promise = new Promise<void>((resolve) => {
+              img.onload = () => {
+                ctx.save();
+                ctx.globalAlpha = element.opacity !== undefined ? element.opacity / 100 : 1;
+                ctx.drawImage(img, elemX, elemY, elemW, elemH);
+                ctx.restore();
+                resolve();
+              };
+              img.onerror = () => resolve();
+            });
+            img.src = element.imageUrl;
+            imagePromises.push(promise);
           }
         });
       }
     });
 
-    resolve(canvas.toDataURL("image/png"));
+    // Wait for all images to load before resolving
+    Promise.all(imagePromises).then(() => {
+      resolve(canvas.toDataURL("image/png"));
+    });
   });
 }
