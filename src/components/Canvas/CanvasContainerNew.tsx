@@ -547,6 +547,16 @@ export default function CanvasContainerNew({
           setFrames(newFrames);
           toast.success("Frame moved backward");
         }
+      } else if (type === "toFront") {
+        const frame = newFrames.splice(currentIndex, 1)[0];
+        newFrames.push(frame);
+        setFrames(newFrames);
+        toast.success("Frame moved to front");
+      } else if (type === "toBack") {
+        const frame = newFrames.splice(currentIndex, 1)[0];
+        newFrames.unshift(frame);
+        setFrames(newFrames);
+        toast.success("Frame moved to back");
       }
       return;
     }
@@ -597,6 +607,20 @@ export default function CanvasContainerNew({
         [elements[currentIdx], elements[prevIdx]] = [elements[prevIdx], elements[currentIdx]];
       }
       toast.success("Moved backward");
+    } else if (type === "toFront") {
+      // Move all selected elements to the end (front)
+      const selectedElements = selectedIndices.map(idx => elements[idx]);
+      const remainingElements = elements.filter((_, idx) => !selectedIndices.includes(idx));
+      elements.length = 0;
+      elements.push(...remainingElements, ...selectedElements);
+      toast.success("Brought to front");
+    } else if (type === "toBack") {
+      // Move all selected elements to the beginning (back)
+      const selectedElements = selectedIndices.map(idx => elements[idx]);
+      const remainingElements = elements.filter((_, idx) => !selectedIndices.includes(idx));
+      elements.length = 0;
+      elements.push(...selectedElements, ...remainingElements);
+      toast.success("Sent to back");
     }
 
     const updatedFrames = frames.map(f =>
@@ -958,6 +982,15 @@ export default function CanvasContainerNew({
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
               onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
+              onBringToFront={() => frame.id === selectedFrameId && handleArrange('toFront')}
+              onSendToBack={() => frame.id === selectedFrameId && handleArrange('toBack')}
+              onBringForward={() => frame.id === selectedFrameId && handleArrange('forward')}
+              onSendBackward={() => frame.id === selectedFrameId && handleArrange('backward')}
+              onEditFill={() => {
+                if (frame.id === selectedFrameId) {
+                  setShowShapeSettings(true);
+                }
+              }}
             >
                 <ResizableFrame
                 id={frame.id}
@@ -1011,6 +1044,30 @@ export default function CanvasContainerNew({
                     onDelete={() => handleElementDelete(element.id)}
                     onDuplicate={() => handleElementDuplicate(element.id)}
                     onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
+                    onBringToFront={() => {
+                      setSelectedElementIds([element.id]);
+                      handleArrange('toFront');
+                    }}
+                    onSendToBack={() => {
+                      setSelectedElementIds([element.id]);
+                      handleArrange('toBack');
+                    }}
+                    onBringForward={() => {
+                      setSelectedElementIds([element.id]);
+                      handleArrange('forward');
+                    }}
+                    onSendBackward={() => {
+                      setSelectedElementIds([element.id]);
+                      handleArrange('backward');
+                    }}
+                    onEditFill={() => {
+                      setSelectedElementIds([element.id]);
+                      setShowShapeSettings(true);
+                    }}
+                    onEditStroke={() => {
+                      setSelectedElementIds([element.id]);
+                      setShowShapeSettings(true);
+                    }}
                   >
                      <ResizableElement
                       id={element.id}
