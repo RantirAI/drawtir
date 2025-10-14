@@ -183,7 +183,7 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "ring-2 ring-blue-500" : ""}`}
+      className={`absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,

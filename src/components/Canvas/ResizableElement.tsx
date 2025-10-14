@@ -482,7 +482,7 @@ export default function ResizableElement({
 
   return (
     <div
-      className={`${useFlexLayout ? 'relative' : 'absolute'} cursor-move ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} cursor-move ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-blue-500' : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
