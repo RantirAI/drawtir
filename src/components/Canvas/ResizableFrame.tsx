@@ -139,10 +139,6 @@ export default function ResizableFrame({
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
     e.stopPropagation();
     onSelect();
@@ -201,7 +197,6 @@ export default function ResizableFrame({
         ...backgroundStyle,
       }}
       onMouseDown={handleMouseDown}
-      onContextMenu={handleContextMenu}
     >
       {/* Video background for frames */}
       {backgroundType === "video" && videoUrl && (

@@ -94,7 +94,8 @@ export default function ResizableElement({
   onSelect,
   onDelete,
   onDuplicate,
-}: ResizableElementProps) {
+  ...rest
+}: ResizableElementProps & React.HTMLAttributes<HTMLDivElement>) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -195,10 +196,6 @@ export default function ResizableElement({
     onSelect(e);
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
-  };
-
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.stopPropagation();
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -486,6 +483,7 @@ export default function ResizableElement({
 
   return (
     <div
+      {...rest}
       className={`${useFlexLayout ? 'relative' : 'absolute'} cursor-move ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
@@ -497,7 +495,6 @@ export default function ResizableElement({
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
-      onContextMenu={handleContextMenu}
     >
       {type === "image" && src ? (
         <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>

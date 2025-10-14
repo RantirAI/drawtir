@@ -42,7 +42,7 @@ export default function CanvasContextMenu({
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        {children}
+        <div className="relative">{children}</div>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-48">
         {onGenerate && (
