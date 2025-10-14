@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
 import PageFooter from "@/components/Footer/PageFooter";
+import { generateThumbnail, validateSnapshot } from "@/lib/snapshot";
+import type { CanvasSnapshot } from "@/types/snapshot";
 
 interface Project {
   id: string;
@@ -42,7 +44,22 @@ export default function Gallery() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProjects(data || []);
+      const rows = data || [];
+
+      // Generate client-side thumbnails for projects missing one
+      const enhanced = await Promise.all(
+        rows.map(async (p) => {
+          try {
+            if (!p.thumbnail_url && p.canvas_data?.frames) {
+              const thumb = await generateThumbnail(p.canvas_data.frames);
+              return { ...p, thumbnail_url: thumb } as Project;
+            }
+          } catch {}
+          return p as Project;
+        })
+      );
+
+      setProjects(enhanced);
     } catch (error) {
       console.error('Error fetching projects:', error);
       toast.error("Failed to load projects");
