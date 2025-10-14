@@ -132,11 +132,15 @@ export default function ResizableFrame({
   }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest(".resize-handle")) return;
+    if ((e.target as HTMLElement).closest(".resize-handle") || e.button === 2) return;
     e.stopPropagation();
     onSelect();
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
@@ -197,6 +201,7 @@ export default function ResizableFrame({
         ...backgroundStyle,
       }}
       onMouseDown={handleMouseDown}
+      onContextMenu={handleContextMenu}
     >
       {/* Video background for frames */}
       {backgroundType === "video" && videoUrl && (

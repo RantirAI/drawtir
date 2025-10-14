@@ -187,14 +187,18 @@ export default function ResizableElement({
   }, [isDragging, isResizing, dragStart, resizeStart, id, onUpdate, x, y]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Don't start dragging if clicking on resize handles
-    if ((e.target as HTMLElement).hasAttribute('data-resize-handle')) {
+    // Don't start dragging if clicking on resize handles or right-click
+    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || e.button === 2) {
       return;
     }
     e.stopPropagation();
     onSelect(e);
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
+  };
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -493,6 +497,7 @@ export default function ResizableElement({
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
+      onContextMenu={handleContextMenu}
     >
       {type === "image" && src ? (
         <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
