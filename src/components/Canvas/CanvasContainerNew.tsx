@@ -147,7 +147,7 @@ export default function CanvasContainerNew({
     newHistory.push(JSON.parse(JSON.stringify(frames)));
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
-  }, [frames, isUndoRedoing, history, historyIndex]);
+  }, [frames]);
 
   // Keyboard shortcuts and zoom controls
   useEffect(() => {
@@ -527,10 +527,14 @@ export default function CanvasContainerNew({
     setFrames(updatedFrames);
   };
 
-  const handleArrange = (type: string) => {
+  const handleArrange = (type: string, elementIdsParam?: string[], frameIdParam?: string) => {
+    // Resolve targets
+    const targetFrameId = frameIdParam || selectedFrameId;
+    const targetElementIds = (elementIdsParam && elementIdsParam.length > 0) ? elementIdsParam : selectedElementIds;
+
     // Handle frame arrangement if no elements are selected
-    if (selectedElementIds.length === 0 && selectedFrameId) {
-      const currentIndex = frames.findIndex(f => f.id === selectedFrameId);
+    if ((!targetElementIds || targetElementIds.length === 0) && targetFrameId) {
+      const currentIndex = frames.findIndex(f => f.id === targetFrameId);
       if (currentIndex === -1) return;
 
       const newFrames = [...frames];
@@ -562,13 +566,13 @@ export default function CanvasContainerNew({
     }
 
     // Handle element arrangement
-    if (!selectedFrameId || selectedElementIds.length === 0) return;
+    if (!targetFrameId || !targetElementIds || targetElementIds.length === 0) return;
     
-    const frame = frames.find(f => f.id === selectedFrameId);
+    const frame = frames.find(f => f.id === targetFrameId);
     if (!frame || !frame.elements || frame.elements.length === 0) return;
 
     const elements = [...frame.elements];
-    const selectedIndices = selectedElementIds
+    const selectedIndices = targetElementIds
       .map(id => elements.findIndex(el => el.id === id))
       .filter(idx => idx !== -1)
       .sort((a, b) => a - b);
@@ -593,7 +597,7 @@ export default function CanvasContainerNew({
       
       // Update state
       setFrames(frames.map(f =>
-        f.id === selectedFrameId ? { ...f, elements } : f
+        f.id === targetFrameId ? { ...f, elements } : f
       ));
       toast.success("Moved forward");
     } else if (type === "backward") {
@@ -614,7 +618,7 @@ export default function CanvasContainerNew({
       
       // Update state
       setFrames(frames.map(f =>
-        f.id === selectedFrameId ? { ...f, elements } : f
+        f.id === targetFrameId ? { ...f, elements } : f
       ));
       toast.success("Moved backward");
     } else if (type === "toFront") {
@@ -625,7 +629,7 @@ export default function CanvasContainerNew({
       
       // Update state
       setFrames(frames.map(f =>
-        f.id === selectedFrameId ? { ...f, elements: newElements } : f
+        f.id === targetFrameId ? { ...f, elements: newElements } : f
       ));
       toast.success("Brought to front");
     } else if (type === "toBack") {
@@ -636,7 +640,7 @@ export default function CanvasContainerNew({
       
       // Update state
       setFrames(frames.map(f =>
-        f.id === selectedFrameId ? { ...f, elements: newElements } : f
+        f.id === targetFrameId ? { ...f, elements: newElements } : f
       ));
       toast.success("Sent to back");
     }
@@ -994,10 +998,10 @@ export default function CanvasContainerNew({
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
               onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
-              onBringToFront={() => frame.id === selectedFrameId && handleArrange('toFront')}
-              onSendToBack={() => frame.id === selectedFrameId && handleArrange('toBack')}
-              onBringForward={() => frame.id === selectedFrameId && handleArrange('forward')}
-              onSendBackward={() => frame.id === selectedFrameId && handleArrange('backward')}
+              onBringToFront={() => handleArrange('toFront', [], frame.id)}
+              onSendToBack={() => handleArrange('toBack', [], frame.id)}
+              onBringForward={() => handleArrange('forward', [], frame.id)}
+              onSendBackward={() => handleArrange('backward', [], frame.id)}
               onEditFill={() => {
                 if (frame.id === selectedFrameId) {
                   setShowShapeSettings(true);
@@ -1056,22 +1060,10 @@ export default function CanvasContainerNew({
                     onDelete={() => handleElementDelete(element.id)}
                     onDuplicate={() => handleElementDuplicate(element.id)}
                     onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
-                    onBringToFront={() => {
-                      setSelectedElementIds([element.id]);
-                      handleArrange('toFront');
-                    }}
-                    onSendToBack={() => {
-                      setSelectedElementIds([element.id]);
-                      handleArrange('toBack');
-                    }}
-                    onBringForward={() => {
-                      setSelectedElementIds([element.id]);
-                      handleArrange('forward');
-                    }}
-                    onSendBackward={() => {
-                      setSelectedElementIds([element.id]);
-                      handleArrange('backward');
-                    }}
+                    onBringToFront={() => handleArrange('toFront', [element.id], frame.id)}
+                    onSendToBack={() => handleArrange('toBack', [element.id], frame.id)}
+                    onBringForward={() => handleArrange('forward', [element.id], frame.id)}
+                    onSendBackward={() => handleArrange('backward', [element.id], frame.id)}
                     onEditFill={() => {
                       setSelectedElementIds([element.id]);
                       setShowShapeSettings(true);
