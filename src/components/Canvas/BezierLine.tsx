@@ -159,7 +159,7 @@ export default function BezierLine({
 
   return (
     <div
-      className={`absolute cursor-move ${isSelected ? 'ring-1 ring-blue-500' : ''}`}
+      className={`absolute cursor-move ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
       style={{
         left: x,
         top: y,

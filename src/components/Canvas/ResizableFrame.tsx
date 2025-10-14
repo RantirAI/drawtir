@@ -183,7 +183,7 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
+      className={`absolute ${isSelected ? "outline outline-[0.5px] outline-blue-500" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -254,19 +254,19 @@ export default function ResizableFrame({
           </div>
           
           <div
-            className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border-2 border-white"
+            className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
           />
           <div
-            className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border-2 border-white"
+            className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "ne")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border-2 border-white"
+            className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "sw")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border-2 border-white"
+            className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "se")}
           />
         </>
