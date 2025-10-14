@@ -147,7 +147,7 @@ export default function CanvasContainerNew({
     newHistory.push(JSON.parse(JSON.stringify(frames)));
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
-  }, [frames]);
+  }, [frames, isUndoRedoing, history, historyIndex]);
 
   // Keyboard shortcuts and zoom controls
   useEffect(() => {
@@ -590,6 +590,11 @@ export default function CanvasContainerNew({
         // Swap with next element
         [elements[currentIdx], elements[nextIdx]] = [elements[nextIdx], elements[currentIdx]];
       }
+      
+      // Update state
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements } : f
+      ));
       toast.success("Moved forward");
     } else if (type === "backward") {
       // Move elements backward (lower z-index, earlier in array)
@@ -606,28 +611,35 @@ export default function CanvasContainerNew({
         // Swap with previous element
         [elements[currentIdx], elements[prevIdx]] = [elements[prevIdx], elements[currentIdx]];
       }
+      
+      // Update state
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements } : f
+      ));
       toast.success("Moved backward");
     } else if (type === "toFront") {
       // Move all selected elements to the end (front)
       const selectedElements = selectedIndices.map(idx => elements[idx]);
       const remainingElements = elements.filter((_, idx) => !selectedIndices.includes(idx));
-      elements.length = 0;
-      elements.push(...remainingElements, ...selectedElements);
+      const newElements = [...remainingElements, ...selectedElements];
+      
+      // Update state
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements: newElements } : f
+      ));
       toast.success("Brought to front");
     } else if (type === "toBack") {
       // Move all selected elements to the beginning (back)
       const selectedElements = selectedIndices.map(idx => elements[idx]);
       const remainingElements = elements.filter((_, idx) => !selectedIndices.includes(idx));
-      elements.length = 0;
-      elements.push(...selectedElements, ...remainingElements);
+      const newElements = [...selectedElements, ...remainingElements];
+      
+      // Update state
+      setFrames(frames.map(f =>
+        f.id === selectedFrameId ? { ...f, elements: newElements } : f
+      ));
       toast.success("Sent to back");
     }
-
-    const updatedFrames = frames.map(f =>
-      f.id === selectedFrameId ? { ...f, elements } : f
-    );
-
-    setFrames(updatedFrames);
   };
 
   const handleDistribute = (type: string) => {
