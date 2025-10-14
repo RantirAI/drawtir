@@ -33,6 +33,8 @@ interface ResizableFrameProps {
   gradientIntensity: number;
   cornerRadius?: number;
   fillOpacity?: number;
+  opacity?: number;
+  blendMode?: string;
   flexDirection?: "row" | "column";
   justifyContent?: string;
   alignItems?: string;
@@ -72,6 +74,8 @@ export default function ResizableFrame({
   gradientIntensity,
   cornerRadius = 0,
   fillOpacity = 100,
+  opacity = 100,
+  blendMode = "normal",
   flexDirection = "row",
   justifyContent = "start",
   alignItems = "start",
@@ -188,6 +192,8 @@ export default function ResizableFrame({
         cursor: isDragging ? "grabbing" : "grab",
         overflow: "hidden",
         borderRadius: `${cornerRadius}px`,
+        opacity: opacity / 100,
+        mixBlendMode: (blendMode || 'normal') as any,
         ...backgroundStyle,
       }}
       onMouseDown={handleMouseDown}

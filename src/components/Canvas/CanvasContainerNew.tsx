@@ -528,6 +528,30 @@ export default function CanvasContainerNew({
   };
 
   const handleArrange = (type: string) => {
+    // Handle frame arrangement if no elements are selected
+    if (selectedElementIds.length === 0 && selectedFrameId) {
+      const currentIndex = frames.findIndex(f => f.id === selectedFrameId);
+      if (currentIndex === -1) return;
+
+      const newFrames = [...frames];
+      
+      if (type === "forward") {
+        if (currentIndex < frames.length - 1) {
+          [newFrames[currentIndex], newFrames[currentIndex + 1]] = [newFrames[currentIndex + 1], newFrames[currentIndex]];
+          setFrames(newFrames);
+          toast.success("Frame moved forward");
+        }
+      } else if (type === "backward") {
+        if (currentIndex > 0) {
+          [newFrames[currentIndex], newFrames[currentIndex - 1]] = [newFrames[currentIndex - 1], newFrames[currentIndex]];
+          setFrames(newFrames);
+          toast.success("Frame moved backward");
+        }
+      }
+      return;
+    }
+
+    // Handle element arrangement
     if (!selectedFrameId || selectedElementIds.length === 0) return;
     
     const frame = frames.find(f => f.id === selectedFrameId);
@@ -935,10 +959,12 @@ export default function CanvasContainerNew({
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
               onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
             >
-              <ResizableFrame
+                <ResizableFrame
                 id={frame.id}
                 x={frame.x}
                 y={frame.y}
+                opacity={frame.opacity}
+                blendMode={frame.blendMode}
                 width={frame.width}
                 height={frame.height}
                 backgroundColor={frame.backgroundColor}
