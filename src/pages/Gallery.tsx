@@ -50,9 +50,12 @@ export default function Gallery() {
       const enhanced = await Promise.all(
         rows.map(async (p) => {
           try {
-            if (!p.thumbnail_url && p.canvas_data?.frames) {
-              const thumb = await generateThumbnail(p.canvas_data.frames);
-              return { ...p, thumbnail_url: thumb } as Project;
+            if (!p.thumbnail_url && p.canvas_data) {
+              const snapshot = p.canvas_data as unknown as CanvasSnapshot;
+              if (snapshot?.frames && Array.isArray(snapshot.frames)) {
+                const thumb = await generateThumbnail(snapshot.frames);
+                return { ...p, thumbnail_url: thumb } as Project;
+              }
             }
           } catch {}
           return p as Project;
