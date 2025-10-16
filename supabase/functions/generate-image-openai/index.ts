@@ -26,12 +26,11 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-image-1",
+        model: "dall-e-3",
         prompt,
         n,
         size,
-        quality: "high",
-        output_format: "png",
+        quality: "hd",
       }),
     });
 

@@ -35,7 +35,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
   const [description, setDescription] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [selectedPreference, setSelectedPreference] = useState<string>("freeform");
+  const [selectedPreferences, setSelectedPreferences] = useState<string[]>(["freeform"]);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,9 +80,28 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
     setIsGenerating(true);
 
     try {
+      const hasImageGen = selectedPreferences.includes("generate-image");
+      const hasReplicate = selectedPreferences.includes("replicate");
+      const hasAutoLayout = selectedPreferences.includes("auto-layout");
+      const hasMultiFrame = selectedPreferences.includes("multiple-frames");
+      
+      // Check for unsupported features
+      if (selectedPreferences.includes("import-website")) {
+        toast.info("Website import coming soon!");
+      }
+      if (selectedPreferences.includes("import-figma")) {
+        toast.info("Figma import coming soon!");
+      }
+      if (selectedPreferences.includes("generate-video")) {
+        toast.info("Video generation coming soon!");
+      }
+      if (selectedPreferences.includes("notes")) {
+        toast.info("Notes feature coming soon!");
+      }
+      
       let response;
       
-      if (selectedPreference === "generate-image") {
+      if (hasImageGen) {
         // Call OpenAI image generation
         response = await supabase.functions.invoke("generate-image-openai", {
           body: { 
@@ -91,32 +110,16 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
             size: "1024x1024"
           },
         });
-      } else if (selectedPreference === "import-website") {
-        toast.info("Website import coming soon!");
-        setIsGenerating(false);
-        return;
-      } else if (selectedPreference === "import-figma") {
-        toast.info("Figma import coming soon!");
-        setIsGenerating(false);
-        return;
-      } else if (selectedPreference === "generate-video") {
-        toast.info("Video generation coming soon!");
-        setIsGenerating(false);
-        return;
-      } else if (selectedPreference === "notes") {
-        toast.info("Notes feature coming soon!");
-        setIsGenerating(false);
-        return;
       } else {
         // Call AI poster generation for canvas design
-        const analysisType = selectedPreference === "replicate" ? "replicate" : "create";
+        const analysisType = hasReplicate ? "replicate" : "create";
         response = await supabase.functions.invoke("generate-ai-poster", {
           body: {
             prompt: description,
             imageBase64: uploadedImages[0] || null,
             analysisType,
-            layoutType: selectedPreference === "auto-layout" ? "auto" : undefined,
-            multiFrame: selectedPreference === "multiple-frames",
+            layoutType: hasAutoLayout ? "auto" : undefined,
+            multiFrame: hasMultiFrame,
           },
         });
       }
@@ -282,13 +285,19 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
               {generationPreferences.map((pref) => (
                 <Badge
                   key={pref.value}
-                  variant={selectedPreference === pref.value ? "default" : "secondary"}
+                  variant={selectedPreferences.includes(pref.value) ? "default" : "secondary"}
                   className={`cursor-pointer text-xs py-1.5 px-3 transition-colors rounded-md ${
-                    selectedPreference === pref.value
+                    selectedPreferences.includes(pref.value)
                       ? "bg-primary text-primary-foreground hover:bg-primary/90"
                       : "bg-background/50 text-foreground hover:bg-background/70 border border-border"
                   }`}
-                  onClick={() => setSelectedPreference(pref.value)}
+                  onClick={() => {
+                    setSelectedPreferences(prev => 
+                      prev.includes(pref.value)
+                        ? prev.filter(p => p !== pref.value)
+                        : [...prev, pref.value]
+                    );
+                  }}
                 >
                   {pref.label}
                 </Badge>
