@@ -494,6 +494,7 @@ export default function CanvasContainerNew({
           .update(posterData)
           .eq("id", projectId);
         if (error) throw error;
+        toast.success("Project saved!");
       } else {
         const { data, error } = await supabase
           .from("posters")
@@ -507,6 +508,7 @@ export default function CanvasContainerNew({
           const url = new URL(window.location.href);
           url.searchParams.set('project', data.id);
           window.history.replaceState({}, '', url);
+          toast.success("Project created and saved!");
         }
       }
     } catch (error: any) {
