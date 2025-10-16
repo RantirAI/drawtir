@@ -47,70 +47,64 @@ serve(async (req) => {
           },
           {
             type: 'text',
-            text: `Analyze this poster design in EXTREME DETAIL. Your goal is to replicate it EXACTLY as shown.
+            text: `Analyze this poster design in EXTREME DETAIL and provide precise specifications to replicate it as closely as possible.
 
-CRITICAL: CAPTURE EVERY SINGLE ELEMENT
-- Don't skip ANY text, no matter how small (labels, captions, buttons, dates, prices, etc.)
-- Don't skip ANY shapes or decorative elements
-- Don't skip ANY images or placeholders
-- Every single visual element must be in the output
-
-MEASUREMENT REQUIREMENTS:
-1. POSITIONS: Measure x, y coordinates from top-left (0,0) of the poster
-2. DIMENSIONS: Measure exact width and height in pixels
-3. SPACING: Analyze gaps between elements (vertical and horizontal spacing)
-4. PADDING: Measure internal spacing within grouped elements
-5. ALIGNMENT: Note if elements are left-aligned, centered, or right-aligned
-6. GROUPING: Identify which elements belong together visually
+CRITICAL ANALYSIS REQUIREMENTS:
+1. Measure EXACT positions of all elements (x, y coordinates relative to poster edges)
+2. Measure EXACT dimensions (width, height in pixels)
+3. Extract EXACT colors using hex codes (use color picker precision)
+4. Identify EXACT font sizes, weights, and text alignment
+5. Analyze spacing, padding, and margins between elements
+6. Note layering order (z-index) of overlapping elements
+7. Identify ALL visual elements including subtle background shapes
 
 SHAPE SPECIFICATIONS:
-- Circles: width MUST equal height, borderRadius = "50%"
-- Rounded rectangles: borderRadius = "8px", "12px", "16px", or "24px"
-- Sharp rectangles: borderRadius = "0"
-- Ellipses: width ≠ height, borderRadius = "50%"
+- For circles: width MUST equal height, borderRadius MUST be "50%"
+- For rounded rectangles: measure corner radius precisely (e.g., "12px", "16px", "24px")
+- For sharp rectangles: borderRadius is "0"
+- For ellipses: width differs from height, borderRadius is "50%"
 
 TEXT SPECIFICATIONS:
-- Extract EXACT text content (including line breaks, punctuation)
-- Measure font size precisely
-- Identify font weight: "normal" (400), "600", "bold" (700)
-- Note text color in hex
-- Note text alignment: "left", "center", or "right"
-- Measure line height and spacing
+- Extract exact text content including line breaks
+- Measure font size in pixels
+- Identify font weight: "normal", "bold", "600", etc.
+- Note text color in hex format
+- Identify text alignment if visible
 
 COLOR EXTRACTION:
-- Background: precise hex color
-- Each element: precise hex color
-- Opacity if elements are semi-transparent
+- Background color in exact hex format
+- All element colors in exact hex format
+- If gradients exist, note the gradient colors and direction
 
-LAYOUT ANALYSIS:
-- Top-to-bottom order: list elements in the order they appear
-- Vertical spacing between sections
-- Horizontal spacing and margins
-- Container boundaries (if sections are grouped)
+POSITIONING:
+- Use the poster frame as reference (0,0 is top-left)
+- Measure from top-left corner of each element
+- Account for element centering and alignment
 
-Return JSON with this EXACT structure (include ALL elements you see):
+Return a JSON object with this EXACT structure:
 {
-  "title": "Design title",
+  "title": "Descriptive title of the design",
   "backgroundColor": "#hexcolor",
   "elements": [
     {
       "type": "text|shape|image",
-      "content": "exact text content",
-      "x": number,
-      "y": number,
-      "width": number,
-      "height": number,
-      "color": "#hexcolor",
-      "fontSize": number,
-      "fontWeight": "normal|600|bold",
-      "textAlign": "left|center|right",
-      "borderRadius": "0|8px|12px|16px|24px|50%",
-      "shape": "rectangle|circle|ellipse"
+      "content": "exact text or description",
+      "x": precise_x_position,
+      "y": precise_y_position,
+      "width": exact_width,
+      "height": exact_height,
+      "color": "#exacthexcolor",
+      "fontSize": exact_size,
+      "fontWeight": "normal|bold|600|700",
+      "borderRadius": "0|12px|16px|50%",
+      "shape": "rectangle|circle|ellipse" (only for shapes)
     }
-  ]
+  ],
+  "style": "detailed description of visual style",
+  "mood": "mood and feeling of the design"
 }
 
-CRITICAL: List EVERY element you see. Missing elements = failure.`
+BE PRECISE. The goal is pixel-perfect replication.`
           }
         ]
       });
