@@ -133,33 +133,68 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
         if (response.data.images && response.data.images.length > 0) {
           const imageUrl = response.data.images[0].url;
           
+          // Show loading message
           setMessages((prev) => [
             ...prev,
             {
               role: "assistant",
-              content: `Image generated successfully! You can now use this in your poster design.`,
-              thinking: false,
+              content: `Image generated! Loading onto canvas...`,
+              thinking: true,
             },
           ]);
           
-          // Create a design with the generated image
-          const design = {
-            elements: [
-              {
-                id: `generated-image-${Date.now()}`,
-                type: "image",
-                content: imageUrl,
-                x: 100,
-                y: 100,
-                width: 400,
-                height: 400,
-                rotation: 0,
-              }
-            ]
-          };
-          
-          onGenerate(design);
-          toast.success("Generated image added to canvas!");
+          try {
+            // Fetch the image and convert to data URL
+            const imageResponse = await fetch(imageUrl);
+            const blob = await imageResponse.blob();
+            const dataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result as string);
+              reader.readAsDataURL(blob);
+            });
+            
+            // Update message
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1] = {
+                role: "assistant",
+                content: `Image generated successfully! Added to canvas.`,
+                thinking: false,
+              };
+              return newMessages;
+            });
+            
+            // Create a design with the generated image as data URL
+            const design = {
+              elements: [
+                {
+                  id: `generated-image-${Date.now()}`,
+                  type: "image",
+                  content: dataUrl,
+                  x: 100,
+                  y: 100,
+                  width: 400,
+                  height: 400,
+                  rotation: 0,
+                }
+              ]
+            };
+            
+            onGenerate(design);
+            toast.success("Generated image added to canvas!");
+          } catch (error) {
+            console.error("Error loading image:", error);
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1] = {
+                role: "assistant",
+                content: `Failed to load generated image. Please try again.`,
+                thinking: false,
+              };
+              return newMessages;
+            });
+            toast.error("Failed to load generated image");
+          }
         }
       } else {
         // Stream the response for poster generation
