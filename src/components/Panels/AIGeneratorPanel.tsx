@@ -225,7 +225,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 className="min-h-[100px] text-sm resize-none border-0 bg-transparent pb-12 focus-visible:ring-0"
               />
               {/* Actions inside textarea */}
-              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2">
+              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-1.5">
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -237,7 +237,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 <Button
                   variant="outline"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-shrink-0 h-7 px-2 text-xs"
+                  className="flex-shrink-0"
                 >
                   <Upload className="w-3 h-3 mr-1" />
                   Upload Image
@@ -245,7 +245,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 <Button
                   onClick={handleGenerate}
                   disabled={isGenerating || (!description.trim() && uploadedImages.length === 0)}
-                  className="flex-shrink-0 ml-auto h-7 px-3 text-xs"
+                  className="flex-shrink-0 ml-auto"
                 >
                   <Sparkles className="w-3 h-3 mr-1" />
                   {isGenerating ? "Generating..." : "Generate"}
