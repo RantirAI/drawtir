@@ -287,7 +287,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                   className={`cursor-pointer text-xs py-1.5 px-3 transition-colors ${
                     selectedPreference === pref.value
                       ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                      : "bg-muted text-muted-foreground hover:bg-muted/80"
                   }`}
                   onClick={() => setSelectedPreference(pref.value)}
                 >
