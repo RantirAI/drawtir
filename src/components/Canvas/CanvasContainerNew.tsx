@@ -920,6 +920,49 @@ export default function CanvasContainerNew({
     toast.success(`${shapeType} added!`);
   };
 
+  const handleIconSelect = (iconName: string, iconFamily: string) => {
+    const targetFrameId = selectedFrameId || frames[0]?.id;
+    if (!targetFrameId) {
+      toast.error("Please add a frame first");
+      return;
+    }
+    const frame = frames.find(f => f.id === targetFrameId);
+    if (!frame) return;
+
+    const defaultSize = 80;
+    const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
+    const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
+
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "icon",
+      x,
+      y,
+      width: defaultSize,
+      height: defaultSize,
+      shapeType: "icon" as any,
+      iconName,
+      iconFamily,
+      fill: penColor,
+      stroke: "transparent",
+      strokeWidth: 0,
+      opacity: 100,
+      cornerRadius: 0,
+      blendMode: "normal",
+    };
+
+    setFrames(prevFrames => prevFrames.map(f => {
+      if (f.id === targetFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementIds([newElement.id]);
+    setShowShapeSettings(true);
+    setActiveTool("select");
+    toast.success(`Icon added!`);
+  };
+
   const handleElementUpdate = (elementId: string, updates: Partial<Element>) => {
     setFrames(frames.map(f => {
       if (f.id === selectedFrameId) {
@@ -1247,9 +1290,11 @@ export default function CanvasContainerNew({
                       gradientType={element.gradientType}
                       gradientAngle={element.gradientAngle}
                       gradientStops={element.gradientStops}
-                      patternFrameId={element.patternFrameId}
-                      videoUrl={element.videoUrl}
-                      useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
+                       patternFrameId={element.patternFrameId}
+                       videoUrl={element.videoUrl}
+                       iconName={element.iconName}
+                       iconFamily={element.iconFamily}
+                       useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
@@ -1712,6 +1757,7 @@ export default function CanvasContainerNew({
           }
         }}
         onShapeSelect={handleShapeSelect}
+        onIconSelect={handleIconSelect}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
         onDuplicate={handleDuplicate}

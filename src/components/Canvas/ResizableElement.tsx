@@ -10,7 +10,7 @@ interface ResizableElementProps {
   height: number;
   src?: string;
   text?: string;
-  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "icon";
   pathData?: string; // For pen drawings
   strokeWidth?: number;
   fill?: string;
@@ -21,6 +21,9 @@ interface ResizableElementProps {
   opacity?: number;
   cornerRadius?: number;
   blendMode?: string;
+  // Icon properties
+  iconName?: string;
+  iconFamily?: string;
   // Image properties
   brightness?: number;
   contrast?: number;
@@ -70,6 +73,8 @@ export default function ResizableElement({
   opacity = 100,
   cornerRadius = 0,
   blendMode = "normal",
+  iconName,
+  iconFamily,
   brightness = 100,
   contrast = 100,
   saturation = 100,
@@ -433,6 +438,55 @@ export default function ResizableElement({
               strokeWidth={strokeWidth} 
             />
           </svg>
+        );
+      case "icon":
+        // Dynamically render icon
+        const renderIcon = () => {
+          if (!iconName || !iconFamily) return null;
+          
+          try {
+            if (iconFamily === "lucide") {
+              const iconModule = require("lucide-react");
+              const IconComponent = iconModule[iconName.split('-').map((w: string) => 
+                w.charAt(0).toUpperCase() + w.slice(1)).join('')];
+              if (IconComponent) {
+                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
+              }
+            } else if (iconFamily === "fa") {
+              const iconModule = require("react-icons/fa");
+              const IconComponent = iconModule[iconName];
+              if (IconComponent) {
+                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
+              }
+            } else if (iconFamily === "md") {
+              const iconModule = require("react-icons/md");
+              const IconComponent = iconModule[iconName];
+              if (IconComponent) {
+                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
+              }
+            } else if (iconFamily === "hi") {
+              const iconModule = require("react-icons/hi");
+              const IconComponent = iconModule[iconName];
+              if (IconComponent) {
+                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
+              }
+            } else if (iconFamily === "ai") {
+              const iconModule = require("react-icons/ai");
+              const IconComponent = iconModule[iconName];
+              if (IconComponent) {
+                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
+              }
+            }
+          } catch (error) {
+            console.error("Error loading icon:", error);
+          }
+          return null;
+        };
+
+        return (
+          <div className="w-full h-full flex items-center justify-center">
+            {renderIcon()}
+          </div>
         );
       default:
         // Rectangle with stroke positioning
