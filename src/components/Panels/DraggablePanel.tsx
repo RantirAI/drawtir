@@ -75,7 +75,7 @@ export default function DraggablePanel({
       }}
     >
       <div
-        className="flex items-center justify-between p-2 border-b cursor-grab active:cursor-grabbing"
+        className="flex items-center justify-between p-2 border-b border-border/40 dark:border-border/25 cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-1.5">
