@@ -23,8 +23,12 @@ const generationPreferences = [
   { label: "Freeform Creation", value: "freeform" },
   { label: "Generate Image", value: "generate-image" },
   { label: "Replicate", value: "replicate" },
+  { label: "Import a Website", value: "import-website" },
   { label: "Auto Layout", value: "auto-layout" },
+  { label: "Import Figma", value: "import-figma" },
   { label: "Multiple Frames", value: "multiple-frames" },
+  { label: "Generate a Video", value: "generate-video" },
+  { label: "Notes", value: "notes" },
 ];
 
 export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPanelProps) {
@@ -87,6 +91,22 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
             size: "1024x1024"
           },
         });
+      } else if (selectedPreference === "import-website") {
+        toast.info("Website import coming soon!");
+        setIsGenerating(false);
+        return;
+      } else if (selectedPreference === "import-figma") {
+        toast.info("Figma import coming soon!");
+        setIsGenerating(false);
+        return;
+      } else if (selectedPreference === "generate-video") {
+        toast.info("Video generation coming soon!");
+        setIsGenerating(false);
+        return;
+      } else if (selectedPreference === "notes") {
+        toast.info("Notes feature coming soon!");
+        setIsGenerating(false);
+        return;
       } else {
         // Call AI poster generation for canvas design
         const analysisType = selectedPreference === "replicate" ? "replicate" : "create";
@@ -95,6 +115,8 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
             prompt: description,
             imageBase64: uploadedImages[0] || null,
             analysisType,
+            layoutType: selectedPreference === "auto-layout" ? "auto" : undefined,
+            multiFrame: selectedPreference === "multiple-frames",
           },
         });
       }
@@ -261,8 +283,12 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
               {generationPreferences.map((pref) => (
                 <Badge
                   key={pref.value}
-                  variant={selectedPreference === pref.value ? "default" : "outline"}
-                  className="cursor-pointer text-xs py-1 px-2"
+                  variant={selectedPreference === pref.value ? "default" : "secondary"}
+                  className={`cursor-pointer text-xs py-1.5 px-3 transition-colors ${
+                    selectedPreference === pref.value
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  }`}
                   onClick={() => setSelectedPreference(pref.value)}
                 >
                   {pref.label}
