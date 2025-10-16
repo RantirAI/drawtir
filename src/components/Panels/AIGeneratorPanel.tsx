@@ -217,12 +217,43 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
         <div className="space-y-3 mb-3">
           <div>
             <label className="text-xs font-medium mb-1.5 block">Description</label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ask Drawtir to create..."
-              className="min-h-[80px] text-sm resize-none"
-            />
+            <div className="relative border border-border rounded-lg bg-background">
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Ask Drawtir to create..."
+                className="min-h-[100px] text-sm resize-none border-0 bg-transparent pb-12 focus-visible:ring-0"
+              />
+              {/* Actions inside textarea */}
+              <div className="absolute bottom-2 left-2 right-2 flex items-center gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-shrink-0"
+                >
+                  <Upload className="w-3 h-3 mr-1" />
+                  Upload Image
+                </Button>
+                <Button
+                  onClick={handleGenerate}
+                  disabled={isGenerating || (!description.trim() && uploadedImages.length === 0)}
+                  size="sm"
+                  className="flex-shrink-0 ml-auto"
+                >
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  {isGenerating ? "Generating..." : "Generate"}
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Uploaded Images Preview */}
@@ -245,36 +276,6 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
               ))}
             </div>
           )}
-
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex-1"
-            >
-              <Upload className="w-3 h-3 mr-1" />
-              Upload Image
-            </Button>
-            <Button
-              onClick={handleGenerate}
-              disabled={isGenerating || (!description.trim() && uploadedImages.length === 0)}
-              size="sm"
-              className="flex-1"
-            >
-              <Sparkles className="w-3 h-3 mr-1" />
-              {isGenerating ? "Generating..." : "Generate"}
-            </Button>
-          </div>
 
           {/* Generation Preferences */}
           <div>
