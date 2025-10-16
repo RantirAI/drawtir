@@ -236,9 +236,8 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 />
                 <Button
                   variant="outline"
-                  size="sm"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex-shrink-0"
+                  className="flex-shrink-0 h-7 px-2 text-xs"
                 >
                   <Upload className="w-3 h-3 mr-1" />
                   Upload Image
@@ -246,8 +245,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 <Button
                   onClick={handleGenerate}
                   disabled={isGenerating || (!description.trim() && uploadedImages.length === 0)}
-                  size="sm"
-                  className="flex-shrink-0 ml-auto"
+                  className="flex-shrink-0 ml-auto h-7 px-3 text-xs"
                 >
                   <Sparkles className="w-3 h-3 mr-1" />
                   {isGenerating ? "Generating..." : "Generate"}
