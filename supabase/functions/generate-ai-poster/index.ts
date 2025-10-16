@@ -19,11 +19,21 @@ serve(async (req) => {
       throw new Error('ANTHROPIC_API_KEY is not configured');
     }
 
+    // Detect media type from base64 string
+    const getMediaType = (base64: string): string => {
+      if (base64.startsWith('data:image/png')) return 'image/png';
+      if (base64.startsWith('data:image/jpeg') || base64.startsWith('data:image/jpg')) return 'image/jpeg';
+      if (base64.startsWith('data:image/webp')) return 'image/webp';
+      if (base64.startsWith('data:image/gif')) return 'image/gif';
+      return 'image/jpeg'; // default fallback
+    };
+
     // Build messages based on input type
     const messages: any[] = [];
     
     if (analysisType === 'replicate' && imageBase64) {
       // Replicate an existing design
+      const mediaType = getMediaType(imageBase64);
       messages.push({
         role: 'user',
         content: [
@@ -31,7 +41,7 @@ serve(async (req) => {
             type: 'image',
             source: {
               type: 'base64',
-              media_type: 'image/jpeg',
+              media_type: mediaType,
               data: imageBase64.split(',')[1] || imageBase64,
             },
           },
@@ -70,6 +80,7 @@ Return a JSON object with this structure:
       });
     } else if (analysisType === 'create' && imageBase64) {
       // Create poster using uploaded image
+      const mediaType = getMediaType(imageBase64);
       messages.push({
         role: 'user',
         content: [
@@ -77,7 +88,7 @@ Return a JSON object with this structure:
             type: 'image',
             source: {
               type: 'base64',
-              media_type: 'image/jpeg',
+              media_type: mediaType,
               data: imageBase64.split(',')[1] || imageBase64,
             },
           },
