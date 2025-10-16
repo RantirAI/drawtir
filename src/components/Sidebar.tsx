@@ -1,4 +1,4 @@
-import { Home, Image, Settings, LogOut } from "lucide-react";
+import { Home, Image, Settings, LogOut, Sparkles } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,6 +12,10 @@ export default function Sidebar() {
     to: "/",
     icon: Home,
     label: "Create"
+  }, {
+    to: "/ai-generator",
+    icon: Sparkles,
+    label: "AI Generator"
   }, {
     to: "/gallery",
     icon: Image,

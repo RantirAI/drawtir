@@ -1,1 +1,7 @@
 project_id = "fpmlrhpmtmaurrnhsmca"
+
+[functions.generate-poster-caption]
+verify_jwt = false
+
+[functions.generate-ai-poster]
+verify_jwt = false
