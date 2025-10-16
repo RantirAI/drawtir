@@ -251,6 +251,9 @@ Return a JSON object with this structure:
     const stream = new ReadableStream({
       async start(controller) {
         try {
+          let elementCount = 0;
+          let lastProgressSent = '';
+          
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -270,7 +273,51 @@ Return a JSON object with this structure:
                     const text = parsed.delta?.text || '';
                     fullContent += text;
                     
-                    // Send progress update
+                    // Try to detect what's being generated
+                    let progressMessage = '';
+                    
+                    // Detect title
+                    if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
+                      const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
+                      if (titleMatch) {
+                        progressMessage = `Setting up design: "${titleMatch[1]}"`;
+                      }
+                    }
+                    
+                    // Detect background color
+                    if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
+                      progressMessage = 'Setting background color...';
+                    }
+                    
+                    // Detect elements being created
+                    const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|image)"/g);
+                    if (elementMatches && elementMatches.length > elementCount) {
+                      elementCount = elementMatches.length;
+                      
+                      // Try to get element description
+                      const lastElementMatch = fullContent.match(/"type"\s*:\s*"([^"]+)"[^}]*"content"\s*:\s*"([^"]+)"/g);
+                      if (lastElementMatch && lastElementMatch[elementCount - 1]) {
+                        const typeMatch = lastElementMatch[elementCount - 1].match(/"type"\s*:\s*"([^"]+)"/);
+                        const contentMatch = lastElementMatch[elementCount - 1].match(/"content"\s*:\s*"([^"]+)"/);
+                        
+                        if (typeMatch && contentMatch) {
+                          const type = typeMatch[1];
+                          const content = contentMatch[1];
+                          progressMessage = `Adding ${type}: ${content}`;
+                        }
+                      }
+                    }
+                    
+                    // Send progress update if we have a message
+                    if (progressMessage && progressMessage !== lastProgressSent) {
+                      lastProgressSent = progressMessage;
+                      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                        type: 'status', 
+                        message: progressMessage 
+                      })}\n\n`));
+                    }
+                    
+                    // Also send raw text for debugging
                     controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
                       type: 'progress', 
                       text 

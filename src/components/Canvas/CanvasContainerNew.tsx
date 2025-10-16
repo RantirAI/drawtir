@@ -380,11 +380,15 @@ export default function CanvasContainerNew({
               try {
                 const data = JSON.parse(line.slice(6));
                 
-                if (data.type === 'progress') {
-                  // Update progress text
-                  setGenerationProgress(prev => prev + data.text);
+                if (data.type === 'status') {
+                  // Show friendly status message
+                  setGenerationProgress(data.message);
+                  console.log('Status:', data.message);
+                } else if (data.type === 'progress') {
+                  // Log raw progress for debugging
                   console.log('Generating:', data.text);
                 } else if (data.type === 'complete') {
+                  setGenerationProgress('Finalizing design...');
                   designSpec = data.designSpec;
                 }
               } catch (e) {
