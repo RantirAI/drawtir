@@ -1677,7 +1677,7 @@ export default function CanvasContainerNew({
       </div>
       
       {/* Zoom Controls */}
-      <div className="fixed left-4 bottom-12 flex flex-row items-center gap-1 z-40 bg-card/80 backdrop-blur-xl rounded-full px-2 py-1 border shadow-sm">
+      <div className="fixed left-4 bottom-12 flex flex-row items-center gap-1 z-40 bg-card/80 backdrop-blur-xl rounded-full px-2 py-1 border border-border/40 dark:border-border/25 shadow-sm">
         <button
           onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
           className="text-xs font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
@@ -1691,7 +1691,7 @@ export default function CanvasContainerNew({
         >
           -
         </button>
-        <div className="w-px h-3 bg-border mx-1" />
+        <div className="w-px h-3 bg-border/40 dark:bg-border/25 mx-1" />
         <button
           onClick={() => {
             setZoom(1);
