@@ -1214,7 +1214,7 @@ export default function CanvasContainerNew({
                   >
                      <ResizableElement
                       id={element.id}
-                      type={element.type === "drawing" ? "shape" : element.type}
+                      type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type}
                       x={element.x}
                       y={element.y}
                       width={element.width}
@@ -1462,7 +1462,7 @@ export default function CanvasContainerNew({
       {/* Unified Shape Settings Panel */}
       {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
-          elementType={selectedElement ? selectedElement.type : "frame"}
+          elementType={selectedElement ? (selectedElement.type === "icon" ? "shape" : selectedElement.type) : "frame"}
           elementName={
             selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType

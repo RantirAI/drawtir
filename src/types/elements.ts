@@ -1,6 +1,6 @@
-export type ElementType = "frame" | "shape" | "text" | "image" | "drawing";
+export type ElementType = "frame" | "shape" | "text" | "image" | "drawing" | "icon";
 export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
-export type ToolType = "select" | "pen" | "shape" | "text" | "image";
+export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 
 export interface Element {
   id: string;
@@ -48,6 +48,12 @@ export interface Element {
   
   // Drawing properties (pen tool)
   pathData?: string;
+  
+  // Icon properties
+  iconName?: string;
+  iconFamily?: string; // fa, md, hi, ai, bs, etc.
+  iconColor?: string;
+  iconSize?: number;
   
   // Common properties
   opacity?: number;

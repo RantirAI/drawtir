@@ -1,11 +1,12 @@
 import { 
   MousePointer2, PenTool, Square, Type, Image as ImageIcon, Plus,
-  Copy, Trash2
+  Copy, Trash2, Smile
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ShapeSelector from "./ShapeSelector";
+import IconSelector from "./IconSelector";
 
 interface BottomToolbarProps {
   activeTool?: string;
@@ -15,6 +16,7 @@ interface BottomToolbarProps {
   onDuplicate?: () => void;
   onDelete?: () => void;
   onShapeSelect?: (shapeType: string) => void;
+  onIconSelect?: (iconName: string, iconFamily: string) => void;
 }
 
 export default function BottomToolbar({ 
@@ -24,7 +26,8 @@ export default function BottomToolbar({
   onAddFrame,
   onDuplicate,
   onDelete,
-  onShapeSelect
+  onShapeSelect,
+  onIconSelect
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
@@ -104,6 +107,28 @@ export default function BottomToolbar({
             </TooltipTrigger>
             <TooltipContent side="top">Image</TooltipContent>
           </Tooltip>
+
+          <IconSelector onIconSelect={(iconName, iconFamily) => {
+            onToolChange?.("icon");
+            onIconSelect?.(iconName, iconFamily);
+          }}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  variant={activeTool === "icon" ? "default" : "ghost"} 
+                  size="icon" 
+                  className="h-8 w-8 rounded-full"
+                  onClick={() => {
+                    onToolChange?.("icon");
+                    onIconSelect?.("heart", "lucide");
+                  }}
+                >
+                  <Smile className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Icon</TooltipContent>
+            </Tooltip>
+          </IconSelector>
 
           <Separator orientation="vertical" className="h-6 mx-1" />
 
