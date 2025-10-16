@@ -54,6 +54,11 @@ serve(async (req) => {
 - Visual elements (shapes, images, their positions and sizes)
 - Style and mood
 
+IMPORTANT: For shapes, set borderRadius correctly:
+- Circles: use borderRadius of 50% or 9999px (width and height should be equal)
+- Rectangles: use borderRadius of 0
+- Rounded rectangles: use borderRadius between 8-24px
+
 Return a JSON object with this structure:
 {
   "title": "Poster title",
@@ -69,6 +74,7 @@ Return a JSON object with this structure:
       "color": "#hexcolor",
       "fontSize": size,
       "fontWeight": "normal|bold",
+      "borderRadius": "0|8px|16px|50%" (for shapes - use 50% for circles!),
       "shape": "rectangle|circle|triangle" (if type is shape)
     }
   ],
@@ -102,6 +108,11 @@ Analyze the image and design a poster with:
 - Color scheme that matches the image
 - Professional layout
 
+IMPORTANT: For shapes, set borderRadius correctly:
+- Circles: use borderRadius of "50%" or "9999px" (width and height MUST be equal for circles!)
+- Rectangles: use borderRadius of "0"
+- Rounded rectangles: use borderRadius between "8px" and "24px"
+
 Return a JSON object with this structure:
 {
   "title": "Poster title",
@@ -125,6 +136,17 @@ Return a JSON object with this structure:
       "color": "#hexcolor",
       "fontSize": size,
       "fontWeight": "normal|bold"
+    },
+    {
+      "type": "shape",
+      "content": "description",
+      "x": position,
+      "y": position,
+      "width": size,
+      "height": size (must equal width for circles!),
+      "color": "#hexcolor",
+      "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
+      "shape": "rectangle|circle"
     }
   ],
   "style": "description",
@@ -141,6 +163,11 @@ Return a JSON object with this structure:
 
 Design a complete poster with layout, colors, text, and visual elements.
 
+IMPORTANT: For shapes, set borderRadius correctly:
+- Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
+- Rectangles: use borderRadius of "0"
+- Rounded rectangles: use borderRadius between "8px" and "24px"
+
 Return a JSON object with this structure:
 {
   "title": "Poster title",
@@ -152,11 +179,12 @@ Return a JSON object with this structure:
       "x": position (0-800),
       "y": position (0-1000),
       "width": size,
-      "height": size,
+      "height": size (must equal width for circles!),
       "color": "#hexcolor",
       "fontSize": size (12-72),
       "fontWeight": "normal|bold",
-      "shape": "rectangle|circle|triangle" (if type is shape)
+      "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
+      "shape": "rectangle|circle" (if type is shape)
     }
   ],
   "style": "description of overall style",

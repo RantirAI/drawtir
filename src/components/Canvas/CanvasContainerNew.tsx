@@ -357,26 +357,39 @@ export default function CanvasContainerNew({
 
         // Add elements to the current frame
         if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
-          const newElements = designSpec.elements.map((el: any) => ({
-            id: crypto.randomUUID(),
-            type: el.type,
-            x: el.x || 100,
-            y: el.y || 100,
-            width: el.width || 200,
-            height: el.height || 100,
-            fill: el.color || el.backgroundColor || "#000000",
-            stroke: el.borderColor || "#000000",
-            strokeWidth: el.borderWidth || 0,
-            text: el.content || "",
-            fontSize: el.fontSize || 16,
-            fontWeight: el.fontWeight || "normal",
-            fontFamily: "Arial",
-            shapeType: el.shape || "rectangle",
-            imageData: el.type === "image" && captionImage ? captionImage : undefined,
-            rotation: 0,
-            opacity: 100,
-            blendMode: "normal" as const,
-          }));
+          const newElements = designSpec.elements.map((el: any) => {
+            // Determine border radius based on shape type
+            let borderRadius = 0;
+            if (el.borderRadius) {
+              // If AI provided borderRadius, use it
+              borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+            } else if (el.shape === 'circle') {
+              // Fallback: if shape is circle but no borderRadius, make it circular
+              borderRadius = 9999;
+            }
+
+            return {
+              id: crypto.randomUUID(),
+              type: el.type,
+              x: el.x || 100,
+              y: el.y || 100,
+              width: el.width || 200,
+              height: el.height || 100,
+              fill: el.color || el.backgroundColor || "#000000",
+              stroke: el.borderColor || "#000000",
+              strokeWidth: el.borderWidth || 0,
+              borderRadius,
+              text: el.content || "",
+              fontSize: el.fontSize || 16,
+              fontWeight: el.fontWeight || "normal",
+              fontFamily: "Arial",
+              shapeType: el.shape || "rectangle",
+              imageData: el.type === "image" && captionImage ? captionImage : undefined,
+              rotation: 0,
+              opacity: 100,
+              blendMode: "normal" as const,
+            };
+          });
 
           setFrames(frames.map(f => 
             f.id === selectedFrameId 
