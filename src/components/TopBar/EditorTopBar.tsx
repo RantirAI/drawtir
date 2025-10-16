@@ -52,7 +52,7 @@ export default function EditorTopBar({
 
   return (
     <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border shadow-lg">
+      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6">
