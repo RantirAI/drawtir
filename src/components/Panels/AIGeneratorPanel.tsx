@@ -284,10 +284,10 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                 <Badge
                   key={pref.value}
                   variant={selectedPreference === pref.value ? "default" : "secondary"}
-                  className={`cursor-pointer text-xs py-1.5 px-3 transition-colors ${
+                  className={`cursor-pointer text-xs py-1.5 px-3 transition-colors rounded-md ${
                     selectedPreference === pref.value
                       ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                      : "bg-muted text-muted-foreground hover:bg-muted/80"
+                      : "bg-background/50 text-foreground hover:bg-background/70 border border-border"
                   }`}
                   onClick={() => setSelectedPreference(pref.value)}
                 >
