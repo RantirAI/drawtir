@@ -409,6 +409,37 @@ export default function CanvasContainerNew({
 
         // Add elements to the current frame
         if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
+          // First, calculate the bounding box of all elements
+          let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+          
+          designSpec.elements.forEach((el: any) => {
+            const x = el.x || 0;
+            const y = el.y || 0;
+            const width = el.width || 100;
+            const height = el.height || 100;
+            
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x + width);
+            maxY = Math.max(maxY, y + height);
+          });
+          
+          const contentWidth = maxX - minX;
+          const contentHeight = maxY - minY;
+          
+          // Get current frame dimensions
+          const currentFrame = frames.find(f => f.id === selectedFrameId);
+          if (!currentFrame) return;
+          
+          const frameWidth = currentFrame.width;
+          const frameHeight = currentFrame.height;
+          const padding = 40; // Padding from frame edges
+          
+          // Calculate scale to fit content in frame with padding
+          const scaleX = (frameWidth - padding * 2) / contentWidth;
+          const scaleY = (frameHeight - padding * 2) / contentHeight;
+          const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+          
           const newElements = designSpec.elements.map((el: any) => {
             // Determine border radius based on shape type
             let borderRadius = 0;
@@ -420,19 +451,26 @@ export default function CanvasContainerNew({
               borderRadius = 9999;
             }
 
+            // Scale and center the positions
+            const scaledX = ((el.x || 0) - minX) * scale + padding;
+            const scaledY = ((el.y || 0) - minY) * scale + padding;
+            const scaledWidth = (el.width || 200) * scale;
+            const scaledHeight = (el.height || 100) * scale;
+            const scaledFontSize = Math.max(12, (el.fontSize || 16) * scale);
+
             return {
               id: crypto.randomUUID(),
               type: el.type,
-              x: el.x || 100,
-              y: el.y || 100,
-              width: el.width || 200,
-              height: el.height || 100,
+              x: scaledX,
+              y: scaledY,
+              width: scaledWidth,
+              height: scaledHeight,
               fill: el.color || el.backgroundColor || "#000000",
               stroke: el.borderColor || "#000000",
               strokeWidth: el.borderWidth || 0,
               borderRadius,
               text: el.content || "",
-              fontSize: el.fontSize || 16,
+              fontSize: scaledFontSize,
               fontWeight: el.fontWeight || "normal",
               fontFamily: "Arial",
               shapeType: el.shape || "rectangle",
