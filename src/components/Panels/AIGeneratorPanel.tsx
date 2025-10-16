@@ -126,58 +126,95 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
 
       if (response.error) throw response.error;
 
-      // Stream the response
-      const reader = response.data.getReader();
-      const decoder = new TextDecoder();
-      let fullResponse = "";
-      let thinkingMessage: Message = {
-        role: "assistant",
-        content: "",
-        thinking: true,
-      };
-      
-      setMessages((prev) => [...prev, thinkingMessage]);
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.status) {
-                fullResponse += data.status + "\n";
-                setMessages((prev) => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1] = {
-                    role: "assistant",
-                    content: fullResponse,
-                    thinking: true,
-                  };
-                  return newMessages;
-                });
+      // Handle image generation response (JSON)
+      if (hasImageGen) {
+        console.log("Image generation response:", response.data);
+        
+        if (response.data.images && response.data.images.length > 0) {
+          const imageUrl = response.data.images[0].url;
+          
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content: `Image generated successfully! You can now use this in your poster design.`,
+              thinking: false,
+            },
+          ]);
+          
+          // Create a design with the generated image
+          const design = {
+            elements: [
+              {
+                id: `generated-image-${Date.now()}`,
+                type: "image",
+                content: imageUrl,
+                x: 100,
+                y: 100,
+                width: 400,
+                height: 400,
+                rotation: 0,
               }
+            ]
+          };
+          
+          onGenerate(design);
+          toast.success("Generated image added to canvas!");
+        }
+      } else {
+        // Stream the response for poster generation
+        const reader = response.data.getReader();
+        const decoder = new TextDecoder();
+        let fullResponse = "";
+        let thinkingMessage: Message = {
+          role: "assistant",
+          content: "",
+          thinking: true,
+        };
+        
+        setMessages((prev) => [...prev, thinkingMessage]);
 
-              if (data.design) {
-                setMessages((prev) => {
-                  const newMessages = [...prev];
-                  newMessages[newMessages.length - 1] = {
-                    role: "assistant",
-                    content: "Design generated successfully! Applied to canvas.",
-                    thinking: false,
-                  };
-                  return newMessages;
-                });
-                onGenerate(data.design);
-                toast.success("Design applied to canvas!");
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                
+                if (data.status) {
+                  fullResponse += data.status + "\n";
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = {
+                      role: "assistant",
+                      content: fullResponse,
+                      thinking: true,
+                    };
+                    return newMessages;
+                  });
+                }
+
+                if (data.design) {
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = {
+                      role: "assistant",
+                      content: "Design generated successfully! Applied to canvas.",
+                      thinking: false,
+                    };
+                    return newMessages;
+                  });
+                  onGenerate(data.design);
+                  toast.success("Design applied to canvas!");
+                }
+              } catch (e) {
+                console.error("Error parsing SSE:", e);
               }
-            } catch (e) {
-              console.error("Error parsing SSE:", e);
             }
           }
         }
