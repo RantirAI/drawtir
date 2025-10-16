@@ -468,14 +468,15 @@ export default function CanvasContainerNew({
     if (isEmbedded && onSaveRequest) {
       const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
       await onSaveRequest(snapshot);
-      toast.success("Saved!");
       return;
     }
 
-    setIsSaving(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+      if (!user) {
+        toast.error("Please sign in to save your work");
+        return;
+      }
 
       const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
       const thumbnail = await generateThumbnail(frames);
@@ -500,29 +501,33 @@ export default function CanvasContainerNew({
           .select()
           .single();
         if (error) throw error;
-        if (data) setProjectId(data.id);
+        if (data) {
+          setProjectId(data.id);
+          // Update URL with project ID
+          const url = new URL(window.location.href);
+          url.searchParams.set('project', data.id);
+          window.history.replaceState({}, '', url);
+        }
       }
-
-      toast.success("Project saved!");
     } catch (error: any) {
       console.error("Error saving project:", error);
       toast.error(error.message || "Failed to save project");
-    } finally {
-      setIsSaving(false);
+      throw error;
     }
   };
 
   const { isSaving: isAutoSaving, lastSaved, debouncedSave, forceSave } = useAutoSave({
     onSave: saveToCloud,
-    enabled: !isEmbedded && projectId !== null,
+    enabled: !isEmbedded,
+    delay: 2000,
   });
 
   // Trigger auto-save when frames change
   useEffect(() => {
-    if (!isEmbedded && projectId) {
+    if (!isEmbedded && frames.length > 0) {
       debouncedSave();
     }
-  }, [frames, projectTitle, zoom, panOffset, isEmbedded, projectId]);
+  }, [frames, projectTitle, zoom, panOffset, isEmbedded, debouncedSave]);
 
   // Notify parent of changes in embedded mode
   useEffect(() => {
@@ -1095,7 +1100,7 @@ export default function CanvasContainerNew({
       <EditorTopBar
         projectName={projectTitle}
         onProjectNameChange={setProjectTitle}
-        onSave={saveToCloud}
+        onSave={forceSave}
         onDownload={downloadPoster}
         onExport={downloadPoster}
         onShare={() => setShowShareDialog(true)}
@@ -1103,7 +1108,7 @@ export default function CanvasContainerNew({
         onRedo={handleRedo}
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
-        isSaving={isSaving}
+        isSaving={isAutoSaving}
         hideCloudFeatures={isEmbedded}
       />
 
