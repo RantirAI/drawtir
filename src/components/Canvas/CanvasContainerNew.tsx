@@ -107,6 +107,7 @@ export default function CanvasContainerNew({
   const [generationMode, setGenerationMode] = useState<"caption" | "create" | "replicate">("caption");
   const [captionImage, setCaptionImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationProgress, setGenerationProgress] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -313,6 +314,7 @@ export default function CanvasContainerNew({
     }
 
     setIsGenerating(true);
+    setGenerationProgress("Starting generation...");
     try {
       if (generationMode === "caption") {
         // Original caption generation
@@ -333,22 +335,68 @@ export default function CanvasContainerNew({
           setDescription("");
         }
       } else {
-        // Full AI poster generation
-        const { data, error } = await supabase.functions.invoke("generate-ai-poster", {
-          body: {
-            prompt: description,
-            imageBase64: captionImage,
-            analysisType: generationMode,
-          },
-        });
+        // Full AI poster generation with streaming
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ai-poster`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            },
+            body: JSON.stringify({
+              prompt: description,
+              imageBase64: captionImage,
+              analysisType: generationMode,
+            }),
+          }
+        );
 
-        if (error) throw error;
-
-        if (!data.designSpec) {
-          throw new Error("No design specification received");
+        if (!response.ok) {
+          throw new Error(`Failed to generate: ${response.statusText}`);
         }
 
-        const designSpec = data.designSpec;
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let designSpec = null;
+
+        if (!reader) {
+          throw new Error("No response body");
+        }
+
+        // Read the stream
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                
+                if (data.type === 'progress') {
+                  // Update progress text
+                  setGenerationProgress(prev => prev + data.text);
+                  console.log('Generating:', data.text);
+                } else if (data.type === 'complete') {
+                  designSpec = data.designSpec;
+                }
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
+
+        if (!designSpec) {
+          throw new Error("No design specification received");
+        }
 
         // Update current frame background
         if (selectedFrameId && designSpec.backgroundColor) {
@@ -408,6 +456,7 @@ export default function CanvasContainerNew({
       toast.error(error.message || "Failed to generate");
     } finally {
       setIsGenerating(false);
+      setGenerationProgress("");
     }
   };
 
@@ -1390,8 +1439,19 @@ export default function CanvasContainerNew({
             {/* Generate Button */}
             <Button onClick={generateWithAI} disabled={isGenerating} className="w-full h-8 text-xs">
               <Sparkles className="h-3 w-3 mr-2" />
-              {isGenerating ? "Generating..." : "Generate with AI"}
+              {isGenerating ? (
+                <span className="truncate">{generationProgress || "Generating..."}</span>
+              ) : (
+                "Generate with AI"
+              )}
             </Button>
+            
+            {/* Progress indicator */}
+            {isGenerating && generationProgress && (
+              <div className="text-[10px] text-muted-foreground mt-1 line-clamp-2 break-words">
+                {generationProgress}
+              </div>
+            )}
           </div>
         </DraggablePanel>
       )}

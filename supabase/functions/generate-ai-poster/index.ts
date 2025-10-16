@@ -47,40 +47,64 @@ serve(async (req) => {
           },
           {
             type: 'text',
-            text: `Analyze this poster design in extreme detail and provide specifications to replicate it. Include:
-- Layout structure (frame dimensions, element positions)
-- Text elements (content, font sizes, colors, positions)
-- Color scheme (background, text colors in hex)
-- Visual elements (shapes, images, their positions and sizes)
-- Style and mood
+            text: `Analyze this poster design in EXTREME DETAIL and provide precise specifications to replicate it as closely as possible.
 
-IMPORTANT: For shapes, set borderRadius correctly:
-- Circles: use borderRadius of 50% or 9999px (width and height should be equal)
-- Rectangles: use borderRadius of 0
-- Rounded rectangles: use borderRadius between 8-24px
+CRITICAL ANALYSIS REQUIREMENTS:
+1. Measure EXACT positions of all elements (x, y coordinates relative to poster edges)
+2. Measure EXACT dimensions (width, height in pixels)
+3. Extract EXACT colors using hex codes (use color picker precision)
+4. Identify EXACT font sizes, weights, and text alignment
+5. Analyze spacing, padding, and margins between elements
+6. Note layering order (z-index) of overlapping elements
+7. Identify ALL visual elements including subtle background shapes
 
-Return a JSON object with this structure:
+SHAPE SPECIFICATIONS:
+- For circles: width MUST equal height, borderRadius MUST be "50%"
+- For rounded rectangles: measure corner radius precisely (e.g., "12px", "16px", "24px")
+- For sharp rectangles: borderRadius is "0"
+- For ellipses: width differs from height, borderRadius is "50%"
+
+TEXT SPECIFICATIONS:
+- Extract exact text content including line breaks
+- Measure font size in pixels
+- Identify font weight: "normal", "bold", "600", etc.
+- Note text color in hex format
+- Identify text alignment if visible
+
+COLOR EXTRACTION:
+- Background color in exact hex format
+- All element colors in exact hex format
+- If gradients exist, note the gradient colors and direction
+
+POSITIONING:
+- Use the poster frame as reference (0,0 is top-left)
+- Measure from top-left corner of each element
+- Account for element centering and alignment
+
+Return a JSON object with this EXACT structure:
 {
-  "title": "Poster title",
+  "title": "Descriptive title of the design",
   "backgroundColor": "#hexcolor",
   "elements": [
     {
       "type": "text|shape|image",
-      "content": "text content or description",
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "color": "#hexcolor",
-      "fontSize": size,
-      "fontWeight": "normal|bold",
-      "borderRadius": "0|8px|16px|50%" (for shapes - use 50% for circles!),
-      "shape": "rectangle|circle|triangle" (if type is shape)
+      "content": "exact text or description",
+      "x": precise_x_position,
+      "y": precise_y_position,
+      "width": exact_width,
+      "height": exact_height,
+      "color": "#exacthexcolor",
+      "fontSize": exact_size,
+      "fontWeight": "normal|bold|600|700",
+      "borderRadius": "0|12px|16px|50%",
+      "shape": "rectangle|circle|ellipse" (only for shapes)
     }
   ],
-  "style": "description of overall style",
-  "mood": "description of mood/feeling"
-}`
+  "style": "detailed description of visual style",
+  "mood": "mood and feeling of the design"
+}
+
+BE PRECISE. The goal is pixel-perfect replication.`
           }
         ]
       });
@@ -204,6 +228,7 @@ Return a JSON object with this structure:
         model: 'claude-sonnet-4-5',
         max_tokens: 4096,
         messages: messages,
+        stream: true,
       }),
     });
 
@@ -213,31 +238,87 @@ Return a JSON object with this structure:
       throw new Error(`Anthropic API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    const content = data.content?.[0]?.text;
+    // Stream the response
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
+    let fullContent = '';
 
-    if (!content) {
-      throw new Error('No content generated from AI');
+    if (!reader) {
+      throw new Error('No response body');
     }
 
-    console.log('AI Response:', content);
+    // Create a stream to send back to client
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-    // Extract JSON from response (handle markdown code blocks)
-    let designSpec;
-    try {
-      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/) || content.match(/\{[\s\S]*\}/);
-      const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : content;
-      designSpec = JSON.parse(jsonStr);
-    } catch (e) {
-      console.error('Failed to parse AI response as JSON:', e);
-      throw new Error('AI generated invalid design specification');
-    }
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
 
-    console.log('Successfully generated poster design');
-    return new Response(
-      JSON.stringify({ designSpec, rawResponse: content }), 
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  
+                  if (parsed.type === 'content_block_delta') {
+                    const text = parsed.delta?.text || '';
+                    fullContent += text;
+                    
+                    // Send progress update
+                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                      type: 'progress', 
+                      text 
+                    })}\n\n`));
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+
+          // Parse final result
+          let designSpec;
+          try {
+            const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
+            const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
+            designSpec = JSON.parse(jsonStr);
+          } catch (e) {
+            console.error('Failed to parse AI response as JSON:', e);
+            throw new Error('AI generated invalid design specification');
+          }
+
+          console.log('Successfully generated poster design');
+          
+          // Send final result
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+            type: 'complete', 
+            designSpec,
+            rawResponse: fullContent 
+          })}\n\n`));
+          
+          controller.close();
+        } catch (error) {
+          console.error('Stream error:', error);
+          controller.error(error);
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
+    });
 
   } catch (error) {
     console.error('Error in generate-ai-poster:', error);
