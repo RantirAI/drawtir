@@ -15,6 +15,7 @@ const AIPosterGenerator = () => {
   const [image, setImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [mode, setMode] = useState<"create" | "replicate">("create");
+  const [isDragging, setIsDragging] = useState(false);
 
   const examplePrompts = [
     "Create a vibrant summer music festival poster with bold typography, palm trees, and a sunset background",
@@ -35,8 +36,43 @@ const AIPosterGenerator = () => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setImage(reader.result as string);
+      toast.success("Image uploaded successfully!");
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be less than 10MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImage(reader.result as string);
+      toast.success("Image uploaded successfully!");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
   };
 
   const generatePoster = async () => {
@@ -189,72 +225,129 @@ const AIPosterGenerator = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div>
-              <Textarea
-                placeholder={
-                  mode === "create"
-                    ? "Example: Create a vibrant summer music festival poster with bold typography, palm trees, and a sunset background..."
-                    : "Additional instructions for the AI (optional)..."
-                }
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[120px] resize-none"
-              />
-              
-              {mode === "create" && (
-                <div className="mt-4 space-y-2">
-                  <Label className="text-xs text-muted-foreground">Try these examples:</Label>
-                  <div className="grid grid-cols-1 gap-2">
-                    {examplePrompts.map((example, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setPrompt(example)}
-                        className="text-left text-xs p-2 rounded border border-border hover:bg-accent transition-colors"
-                      >
-                        {example}
-                      </button>
-                    ))}
-                  </div>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Prompt Area */}
+              <div className="space-y-4">
+                <div>
+                  <Label>Describe Your Poster</Label>
+                  <Textarea
+                    placeholder={
+                      mode === "create"
+                        ? "Example: Create a vibrant summer music festival poster with bold typography, palm trees, and a sunset background..."
+                        : "Additional instructions for the AI (optional)..."
+                    }
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    className="min-h-[200px] resize-none mt-2"
+                  />
                 </div>
-              )}
-            </div>
+                
+                {mode === "create" && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Quick examples:</Label>
+                    <div className="grid grid-cols-1 gap-2">
+                      {examplePrompts.map((example, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setPrompt(example)}
+                          className="text-left text-xs p-2 rounded border border-border hover:bg-accent transition-colors"
+                        >
+                          {example}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            <div className="space-y-4">
-              <Label>
-                {mode === "create" ? "Upload Image (Optional)" : "Upload Reference Image"}
-              </Label>
-              <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="image-upload"
-                />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  {image ? (
-                    <div className="space-y-4">
-                      <img
-                        src={image}
-                        alt="Uploaded"
-                        className="max-h-64 mx-auto rounded-lg"
-                      />
-                      <Button variant="outline" size="sm" type="button">
-                        Change Image
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
-                      <div>
-                        <p className="font-medium">Click to upload image</p>
-                        <p className="text-sm text-muted-foreground">
-                          PNG, JPG up to 10MB
-                        </p>
+              {/* Image Upload Area */}
+              <div className="space-y-4">
+                <Label>
+                  {mode === "create" ? "Upload Image (Optional)" : "Upload Reference Image"}
+                </Label>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
+                    isDragging 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary"
+                  }`}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    {image ? (
+                      <div className="space-y-4">
+                        <div className="relative group">
+                          <img
+                            src={image}
+                            alt="Uploaded"
+                            className="max-h-48 mx-auto rounded-lg"
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <div className="text-white space-y-2">
+                              <Upload className="w-8 h-8 mx-auto" />
+                              <p className="text-sm">Click to change</p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 justify-center">
+                          <Button variant="outline" size="sm" type="button">
+                            <Upload className="w-3 h-3 mr-2" />
+                            Change Image
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setImage(null);
+                              toast.info("Image removed");
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </label>
+                    ) : (
+                      <div className="space-y-4 py-8">
+                        <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                          <Upload className="w-8 h-8 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-lg">
+                            {isDragging ? "Drop image here" : "Upload an image"}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Drag & drop or click to browse
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            PNG, JPG up to 10MB
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </label>
+                </div>
+                
+                {mode === "create" && !image && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    💡 Upload an image to incorporate it into your AI-generated design
+                  </p>
+                )}
+                {mode === "replicate" && !image && (
+                  <p className="text-xs text-muted-foreground text-center">
+                    ⚠️ Reference image is required for replication mode
+                  </p>
+                )}
               </div>
             </div>
 
