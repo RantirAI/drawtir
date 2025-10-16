@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { description, imageContext } = await req.json();
+    const { description, imageContext, imageBase64 } = await req.json();
     console.log('Generating caption for description:', description);
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -29,11 +29,40 @@ Your task is to create compelling marketing copy that is:
 
 Format the response as plain text with line breaks. Do not use markdown or special formatting.`;
 
-    const userPrompt = `Create a compelling marketing caption for a poster about: ${description}
+    let userPrompt = `Create a compelling marketing caption for a poster about: ${description}
 
 ${imageContext ? `Context about the image: The poster will feature ${imageContext}` : ''}
 
 Create 3-4 short, punchy lines that would work perfectly on a marketing poster. Make it memorable and impactful.`;
+
+    // Build messages array for API call
+    const messages: any[] = [
+      { role: 'system', content: systemPrompt }
+    ];
+
+    // If image is provided, include it in the message
+    if (imageBase64) {
+      messages.push({
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: userPrompt
+          },
+          {
+            type: 'image_url',
+            image_url: {
+              url: imageBase64
+            }
+          }
+        ]
+      });
+    } else {
+      messages.push({
+        role: 'user',
+        content: userPrompt
+      });
+    }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -43,10 +72,7 @@ Create 3-4 short, punchy lines that would work perfectly on a marketing poster. 
       },
       body: JSON.stringify({
         model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
+        messages: messages,
       }),
     });
 

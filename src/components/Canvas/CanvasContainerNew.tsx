@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Layers, SlidersHorizontal } from "lucide-react";
+import { Sparkles, Layers, SlidersHorizontal, Upload } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -104,10 +104,12 @@ export default function CanvasContainerNew({
   const [showLayersPanel, setShowLayersPanel] = useState(false);
 
   const [description, setDescription] = useState("");
+  const [captionImage, setCaptionImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const captionImageInputRef = useRef<HTMLInputElement>(null);
 
   const selectedFrame = frames.find((f) => f.id === selectedFrameId);
   const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
@@ -307,7 +309,11 @@ export default function CanvasContainerNew({
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-poster-caption", {
-        body: { description, imageContext: selectedFrame?.image ? "with image" : "no image" },
+        body: { 
+          description, 
+          imageContext: captionImage ? "with uploaded image" : (selectedFrame?.image ? "with image" : "no image"),
+          imageBase64: captionImage || undefined
+        },
       });
 
       if (error) throw error;
@@ -315,6 +321,7 @@ export default function CanvasContainerNew({
       if (data.caption && selectedFrameId) {
         handleFrameUpdate(selectedFrameId, { bottomCaption: data.caption });
         toast.success("Caption generated!");
+        setCaptionImage(null); // Clear image after generation
       }
     } catch (error: any) {
       console.error("Error generating caption:", error);
@@ -1170,6 +1177,76 @@ export default function CanvasContainerNew({
                 className="h-20 text-xs"
               />
             </div>
+            
+            <div>
+              <Label className="text-xs mb-1 block">Upload Image (Optional)</Label>
+              <input
+                type="file"
+                accept="image/*"
+                ref={captionImageInputRef}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  
+                  if (file.size > 10 * 1024 * 1024) {
+                    toast.error("Image must be less than 10MB");
+                    return;
+                  }
+                  
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setCaptionImage(reader.result as string);
+                    toast.success("Image uploaded!");
+                  };
+                  reader.readAsDataURL(file);
+                }}
+                className="hidden"
+                id="caption-image-upload"
+              />
+              <label
+                htmlFor="caption-image-upload"
+                className="flex items-center justify-center gap-2 p-2 border-2 border-dashed rounded cursor-pointer hover:border-primary transition-colors text-xs"
+              >
+                {captionImage ? (
+                  <div className="w-full space-y-2">
+                    <img src={captionImage} alt="Uploaded" className="w-full h-16 object-cover rounded" />
+                    <div className="flex gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 h-6 text-xs"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          captionImageInputRef.current?.click();
+                        }}
+                      >
+                        Change
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="flex-1 h-6 text-xs"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCaptionImage(null);
+                          if (captionImageInputRef.current) {
+                            captionImageInputRef.current.value = '';
+                          }
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-3 w-3" />
+                    <span>Upload image</span>
+                  </>
+                )}
+              </label>
+            </div>
+            
             <Button onClick={generateCaption} disabled={isGenerating} className="w-full h-8 text-xs">
               <Sparkles className="h-3 w-3 mr-2" />
               {isGenerating ? "Generating..." : "Generate"}
