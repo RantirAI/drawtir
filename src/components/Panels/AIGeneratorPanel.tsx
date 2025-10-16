@@ -191,38 +191,8 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
           </Button>
         </div>
 
-        {/* Chat History */}
-        <ScrollArea ref={scrollRef} className="flex-1 mb-3 pr-2">
-          {messages.length === 0 ? (
-            <div className="text-center text-muted-foreground text-sm py-8">
-              Start a conversation to generate designs
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {messages.map((msg, idx) => (
-                <div
-                  key={idx}
-                  className={`p-3 rounded-lg ${
-                    msg.role === "user"
-                      ? "bg-primary/10 ml-4"
-                      : "bg-muted mr-4"
-                  }`}
-                >
-                  {msg.thinking && (
-                    <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
-                      <Settings2 className="w-3 h-3 animate-spin" />
-                      Drawtir Creator
-                    </div>
-                  )}
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-
         {/* Description Input */}
-        <div className="space-y-3">
+        <div className="space-y-3 mb-3">
           <div>
             <label className="text-xs font-medium mb-1.5 block">Description</label>
             <Textarea
@@ -305,6 +275,36 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
             Select Multiple to produce multi-modal agents
           </p>
         </div>
+
+        {/* Chat History - Moved to bottom */}
+        <ScrollArea ref={scrollRef} className="flex-1 mt-3 pr-2">
+          {messages.length === 0 ? (
+            <div className="text-center text-muted-foreground text-sm py-8">
+              Start a conversation to generate designs
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 rounded-lg ${
+                    msg.role === "user"
+                      ? "bg-primary/10 ml-4"
+                      : "bg-muted mr-4"
+                  }`}
+                >
+                  {msg.thinking && (
+                    <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                      <Settings2 className="w-3 h-3 animate-spin" />
+                      Drawtir Creator
+                    </div>
+                  )}
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </ScrollArea>
       </div>
     </DraggablePanel>
   );
