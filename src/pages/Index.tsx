@@ -41,22 +41,6 @@ const Index = () => {
   }, [navigate]);
 
   const loadProject = async () => {
-    // Check for AI generated poster first
-    const aiPoster = sessionStorage.getItem("aiGeneratedPoster");
-    if (aiPoster) {
-      try {
-        const parsed = JSON.parse(aiPoster);
-        if (validateSnapshot(parsed)) {
-          setSnapshot(parsed);
-        }
-        sessionStorage.removeItem("aiGeneratedPoster");
-        setIsLoading(false);
-        return;
-      } catch (error) {
-        console.error("Error loading AI poster:", error);
-      }
-    }
-
     const projectId = searchParams.get("project");
     if (!projectId) {
       setIsLoading(false);

@@ -10,7 +10,6 @@ import Editor from "./pages/Editor";
 import Documentation from "./pages/Documentation";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
-import AIPosterGenerator from "./pages/AIPosterGenerator";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +32,6 @@ const App = () => (
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/documentation" element={<Documentation />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/ai-generator" element={<AIPosterGenerator />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

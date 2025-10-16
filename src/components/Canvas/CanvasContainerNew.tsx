@@ -104,6 +104,7 @@ export default function CanvasContainerNew({
   const [showLayersPanel, setShowLayersPanel] = useState(false);
 
   const [description, setDescription] = useState("");
+  const [generationMode, setGenerationMode] = useState<"caption" | "create" | "replicate">("caption");
   const [captionImage, setCaptionImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -300,32 +301,98 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateCaption = async () => {
-    if (!description.trim()) {
+  const generateWithAI = async () => {
+    if (!description.trim() && generationMode !== "replicate") {
       toast.error("Please enter a description");
+      return;
+    }
+
+    if (generationMode === "replicate" && !captionImage) {
+      toast.error("Please upload an image to replicate");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-poster-caption", {
-        body: { 
-          description, 
-          imageContext: captionImage ? "with uploaded image" : (selectedFrame?.image ? "with image" : "no image"),
-          imageBase64: captionImage || undefined
-        },
-      });
+      if (generationMode === "caption") {
+        // Original caption generation
+        const { data, error } = await supabase.functions.invoke("generate-poster-caption", {
+          body: { 
+            description, 
+            imageContext: captionImage ? "with uploaded image" : (selectedFrame?.image ? "with image" : "no image"),
+            imageBase64: captionImage || undefined
+          },
+        });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      if (data.caption && selectedFrameId) {
-        handleFrameUpdate(selectedFrameId, { bottomCaption: data.caption });
-        toast.success("Caption generated!");
-        setCaptionImage(null); // Clear image after generation
+        if (data.caption && selectedFrameId) {
+          handleFrameUpdate(selectedFrameId, { bottomCaption: data.caption });
+          toast.success("Caption generated!");
+          setCaptionImage(null);
+          setDescription("");
+        }
+      } else {
+        // Full AI poster generation
+        const { data, error } = await supabase.functions.invoke("generate-ai-poster", {
+          body: {
+            prompt: description,
+            imageBase64: captionImage,
+            analysisType: generationMode,
+          },
+        });
+
+        if (error) throw error;
+
+        if (!data.designSpec) {
+          throw new Error("No design specification received");
+        }
+
+        const designSpec = data.designSpec;
+
+        // Update current frame background
+        if (selectedFrameId && designSpec.backgroundColor) {
+          handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
+        }
+
+        // Add elements to the current frame
+        if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
+          const newElements = designSpec.elements.map((el: any) => ({
+            id: crypto.randomUUID(),
+            type: el.type,
+            x: el.x || 100,
+            y: el.y || 100,
+            width: el.width || 200,
+            height: el.height || 100,
+            fill: el.color || el.backgroundColor || "#000000",
+            stroke: el.borderColor || "#000000",
+            strokeWidth: el.borderWidth || 0,
+            text: el.content || "",
+            fontSize: el.fontSize || 16,
+            fontWeight: el.fontWeight || "normal",
+            fontFamily: "Arial",
+            shapeType: el.shape || "rectangle",
+            imageData: el.type === "image" && captionImage ? captionImage : undefined,
+            rotation: 0,
+            opacity: 100,
+            blendMode: "normal" as const,
+          }));
+
+          setFrames(frames.map(f => 
+            f.id === selectedFrameId 
+              ? { ...f, elements: [...(f.elements || []), ...newElements] }
+              : f
+          ));
+        }
+
+        toast.success("AI design generated!");
+        setCaptionImage(null);
+        setDescription("");
+        setShowGeneratePanel(false);
       }
     } catch (error: any) {
-      console.error("Error generating caption:", error);
-      toast.error(error.message || "Failed to generate caption");
+      console.error("Error generating with AI:", error);
+      toast.error(error.message || "Failed to generate");
     } finally {
       setIsGenerating(false);
     }
@@ -1164,22 +1231,79 @@ export default function CanvasContainerNew({
         )}
       </div>
 
-      {/* Panels */}
+      {/* AI Generation Panel */}
       {showGeneratePanel && (
-        <DraggablePanel title="Generate Caption" defaultPosition={{ x: 50, y: 150 }} onClose={() => setShowGeneratePanel(false)}>
-          <div className="space-y-3">
+        <DraggablePanel 
+          title="AI Generator" 
+          defaultPosition={{ x: 50, y: 150 }} 
+          onClose={() => {
+            setShowGeneratePanel(false);
+            setGenerationMode("caption");
+            setDescription("");
+            setCaptionImage(null);
+          }}
+        >
+          <div className="space-y-3 w-80">
+            {/* Mode Selection */}
+            <div className="space-y-2">
+              <Label className="text-xs">Generation Mode</Label>
+              <div className="grid grid-cols-3 gap-1">
+                <Button
+                  size="sm"
+                  variant={generationMode === "caption" ? "default" : "outline"}
+                  onClick={() => setGenerationMode("caption")}
+                  className="h-7 text-xs"
+                >
+                  Caption
+                </Button>
+                <Button
+                  size="sm"
+                  variant={generationMode === "create" ? "default" : "outline"}
+                  onClick={() => setGenerationMode("create")}
+                  className="h-7 text-xs"
+                >
+                  Create
+                </Button>
+                <Button
+                  size="sm"
+                  variant={generationMode === "replicate" ? "default" : "outline"}
+                  onClick={() => setGenerationMode("replicate")}
+                  className="h-7 text-xs"
+                >
+                  Replicate
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {generationMode === "caption" && "Generate captions for your poster"}
+                {generationMode === "create" && "Create full poster designs from description"}
+                {generationMode === "replicate" && "Analyze and replicate an existing design"}
+              </p>
+            </div>
+
+            {/* Description Input */}
             <div>
-              <Label className="text-xs mb-1 block">Description</Label>
+              <Label className="text-xs mb-1 block">
+                {generationMode === "replicate" ? "Instructions (Optional)" : "Description"}
+              </Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe your poster..."
-                className="h-20 text-xs"
+                placeholder={
+                  generationMode === "caption" 
+                    ? "Describe your poster..."
+                    : generationMode === "create"
+                    ? "Create a vibrant summer music festival poster..."
+                    : "Additional instructions for AI..."
+                }
+                className="h-20 text-xs resize-none"
               />
             </div>
             
+            {/* Image Upload */}
             <div>
-              <Label className="text-xs mb-1 block">Upload Image (Optional)</Label>
+              <Label className="text-xs mb-1 block">
+                {generationMode === "replicate" ? "Upload Design to Replicate" : "Upload Image (Optional)"}
+              </Label>
               <input
                 type="file"
                 accept="image/*"
@@ -1245,11 +1369,15 @@ export default function CanvasContainerNew({
                   </>
                 )}
               </label>
+              {generationMode === "replicate" && !captionImage && (
+                <p className="text-xs text-destructive mt-1">Required for replication mode</p>
+              )}
             </div>
             
-            <Button onClick={generateCaption} disabled={isGenerating} className="w-full h-8 text-xs">
+            {/* Generate Button */}
+            <Button onClick={generateWithAI} disabled={isGenerating} className="w-full h-8 text-xs">
               <Sparkles className="h-3 w-3 mr-2" />
-              {isGenerating ? "Generating..." : "Generate"}
+              {isGenerating ? "Generating..." : "Generate with AI"}
             </Button>
           </div>
         </DraggablePanel>
