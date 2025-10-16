@@ -518,18 +518,10 @@ export default function CanvasContainerNew({
     }
   };
 
-  const { isSaving: isAutoSaving, lastSaved, debouncedSave, forceSave } = useAutoSave({
+  const { isSaving: isAutoSaving, forceSave } = useAutoSave({
     onSave: saveToCloud,
     enabled: !isEmbedded,
-    delay: 2000,
   });
-
-  // Trigger auto-save when frames change
-  useEffect(() => {
-    if (!isEmbedded && frames.length > 0) {
-      debouncedSave();
-    }
-  }, [frames, projectTitle, zoom, panOffset, isEmbedded, debouncedSave]);
 
   // Notify parent of changes in embedded mode
   useEffect(() => {
