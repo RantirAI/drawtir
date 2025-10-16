@@ -14,6 +14,7 @@ import ShareDialog from "./ShareDialog";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
 import DrawtirFooter from "../Footer/DrawtirFooter";
+import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -102,6 +103,7 @@ export default function CanvasContainerNew({
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   const [description, setDescription] = useState("");
   const [generationMode, setGenerationMode] = useState<"caption" | "create" | "replicate">("caption");
@@ -299,6 +301,55 @@ export default function CanvasContainerNew({
         toast.success("Image added!");
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAIGenerate = (designSpec: any) => {
+    // Update current frame background
+    if (selectedFrameId && designSpec.backgroundColor) {
+      handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
+    }
+
+    // Add elements to the current frame
+    if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
+      const newElements = designSpec.elements.map((el: any) => {
+        // Determine border radius based on shape type
+        let borderRadius = 0;
+        if (el.borderRadius) {
+          // If AI provided borderRadius, use it
+          borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+        } else if (el.shape === 'circle') {
+          // Fallback: if shape is circle but no borderRadius, make it circular
+          borderRadius = 9999;
+        }
+
+        return {
+          id: crypto.randomUUID(),
+          type: el.type,
+          x: el.x || 100,
+          y: el.y || 100,
+          width: el.width || 200,
+          height: el.height || 100,
+          fill: el.color || el.backgroundColor || "#000000",
+          stroke: el.borderColor || "#000000",
+          strokeWidth: el.borderWidth || 0,
+          borderRadius,
+          text: el.content || "",
+          fontSize: el.fontSize || 16,
+          fontWeight: el.fontWeight || "normal",
+          fontFamily: "Arial",
+          shapeType: el.shape || "rectangle",
+          rotation: 0,
+          opacity: 100,
+          blendMode: "normal" as const,
+        };
+      });
+
+      setFrames(frames.map(f => 
+        f.id === selectedFrameId 
+          ? { ...f, elements: [...(f.elements || []), ...newElements] }
+          : f
+      ));
     }
   };
 
@@ -1341,167 +1392,12 @@ export default function CanvasContainerNew({
         )}
       </div>
 
-      {/* AI Generation Panel */}
-      {showGeneratePanel && (
-        <DraggablePanel 
-          title="AI Generator" 
-          defaultPosition={{ x: 50, y: 150 }} 
-          onClose={() => {
-            setShowGeneratePanel(false);
-            setGenerationMode("caption");
-            setDescription("");
-            setCaptionImage(null);
-          }}
-        >
-          <div className="space-y-3 w-80">
-            {/* Mode Selection */}
-            <div className="space-y-2">
-              <Label className="text-xs">Generation Mode</Label>
-              <div className="grid grid-cols-3 gap-1">
-                <Button
-                  size="sm"
-                  variant={generationMode === "caption" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("caption")}
-                  className="h-7 text-xs"
-                >
-                  Caption
-                </Button>
-                <Button
-                  size="sm"
-                  variant={generationMode === "create" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("create")}
-                  className="h-7 text-xs"
-                >
-                  Create
-                </Button>
-                <Button
-                  size="sm"
-                  variant={generationMode === "replicate" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("replicate")}
-                  className="h-7 text-xs"
-                >
-                  Replicate
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {generationMode === "caption" && "Generate captions for your poster"}
-                {generationMode === "create" && "Create full poster designs from description"}
-                {generationMode === "replicate" && "Analyze and replicate an existing design"}
-              </p>
-            </div>
-
-            {/* Description Input */}
-            <div>
-              <Label className="text-xs mb-1 block">
-                {generationMode === "replicate" ? "Instructions (Optional)" : "Description"}
-              </Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={
-                  generationMode === "caption" 
-                    ? "Describe your poster..."
-                    : generationMode === "create"
-                    ? "Create a vibrant summer music festival poster..."
-                    : "Additional instructions for AI..."
-                }
-                className="h-20 text-xs resize-none"
-              />
-            </div>
-            
-            {/* Image Upload */}
-            <div>
-              <Label className="text-xs mb-1 block">
-                {generationMode === "replicate" ? "Upload Design to Replicate" : "Upload Image (Optional)"}
-              </Label>
-              <input
-                type="file"
-                accept="image/*"
-                ref={captionImageInputRef}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  
-                  if (file.size > 10 * 1024 * 1024) {
-                    toast.error("Image must be less than 10MB");
-                    return;
-                  }
-                  
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setCaptionImage(reader.result as string);
-                    toast.success("Image uploaded!");
-                  };
-                  reader.readAsDataURL(file);
-                }}
-                className="hidden"
-                id="caption-image-upload"
-              />
-              <label
-                htmlFor="caption-image-upload"
-                className="flex items-center justify-center gap-2 p-2 border-2 border-dashed rounded cursor-pointer hover:border-primary transition-colors text-xs"
-              >
-                {captionImage ? (
-                  <div className="w-full space-y-2">
-                    <img src={captionImage} alt="Uploaded" className="w-full h-16 object-cover rounded" />
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          captionImageInputRef.current?.click();
-                        }}
-                      >
-                        Change
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCaptionImage(null);
-                          if (captionImageInputRef.current) {
-                            captionImageInputRef.current.value = '';
-                          }
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-3 w-3" />
-                    <span>Upload image</span>
-                  </>
-                )}
-              </label>
-              {generationMode === "replicate" && !captionImage && (
-                <p className="text-xs text-destructive mt-1">Required for replication mode</p>
-              )}
-            </div>
-            
-            {/* Generate Button */}
-            <Button onClick={generateWithAI} disabled={isGenerating} className="w-full h-8 text-xs">
-              <Sparkles className="h-3 w-3 mr-2" />
-              {isGenerating ? (
-                <span className="truncate">{generationProgress || "Generating..."}</span>
-              ) : (
-                "Generate with AI"
-              )}
-            </Button>
-            
-            {/* Progress indicator */}
-            {isGenerating && generationProgress && (
-              <div className="text-[10px] text-muted-foreground mt-1 line-clamp-2 break-words">
-                {generationProgress}
-              </div>
-            )}
-          </div>
-        </DraggablePanel>
+      {/* AI Generation Panel - New */}
+      {showAIGenerator && (
+        <AIGeneratorPanel 
+          onClose={() => setShowAIGenerator(false)}
+          onGenerate={handleAIGenerate}
+        />
       )}
 
       {/* Unified Shape Settings Panel */}
@@ -1691,9 +1587,9 @@ export default function CanvasContainerNew({
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
-            showGeneratePanel ? 'ring-2 ring-blue-500' : ''
+            showAIGenerator ? 'ring-2 ring-blue-500' : ''
           }`}
-          onClick={() => setShowGeneratePanel(!showGeneratePanel)}
+          onClick={() => setShowAIGenerator(!showAIGenerator)}
         >
           <Sparkles className="h-4 w-4" />
         </Button>
