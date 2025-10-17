@@ -220,6 +220,9 @@ export default function ResizableElement({
   };
 
   const handleTextKeyDown = (e: React.KeyboardEvent) => {
+    // Stop propagation for all keyboard events while editing to prevent canvas shortcuts
+    e.stopPropagation();
+    
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleTextBlur();
