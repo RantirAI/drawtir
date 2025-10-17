@@ -347,7 +347,19 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
         }
       } else {
         // Call AI poster generation with streaming
-        const analysisType = hasReplicate ? "replicate" : "create";
+        const hasImage = uploadedImages.length > 0;
+        const wantsReplicate = hasReplicate || /\b(replica(te|tion)|copy|match|mirror)\b/i.test(description);
+        let analysisType: 'replicate' | 'create' = 'create';
+        if (hasImage && wantsReplicate) {
+          analysisType = 'replicate';
+        } else if (hasImage) {
+          analysisType = 'create'; // use uploaded image as content
+        } else {
+          analysisType = 'create'; // text-only generation
+        }
+        if (wantsReplicate && !hasImage) {
+          toast.info('Upload an image to replicate. Proceeding with creation from description.');
+        }
         
         // Use direct fetch for streaming
         const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
@@ -361,11 +373,11 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
           },
           body: JSON.stringify({
             prompt: description,
-            imageBase64: uploadedImages[0] || null,
+            imageBase64: hasImage ? uploadedImages[0] : null,
             analysisType,
-            layoutType: hasAutoLayout ? "auto" : undefined,
+            layoutType: hasAutoLayout ? 'auto' : undefined,
             multiFrame: hasMultiFrame,
-            nestingFrames: true, // Enable nesting frames
+            nestingFrames: true, // Enable nesting frames by default
           }),
         });
 
@@ -398,19 +410,6 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
               try {
                 const data = JSON.parse(line.slice(6));
                 
-                if (data.status) {
-                  fullResponse += data.status + "\n";
-                  setMessages((prev) => {
-                    const newMessages = [...prev];
-                    newMessages[newMessages.length - 1] = {
-                      role: "assistant",
-                      content: fullResponse,
-                      thinking: true,
-                    };
-                    return newMessages;
-                  });
-                }
-
                 if (data.type === 'status' && data.message) {
                   fullResponse += data.message + "\n";
                   setMessages((prev) => {
@@ -422,6 +421,10 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                     };
                     return newMessages;
                   });
+                }
+
+                if (data.type === 'progress' && data.text) {
+                  // Optionally accumulate raw progress text
                 }
 
                 if (data.type === 'complete' && data.designSpec) {
@@ -448,8 +451,7 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
         }
       }
 
-      setDescription("");
-      setUploadedImages([]);
+      setDescription(""); // Keep uploaded images to allow follow-up prompts (replicate then describe)
     } catch (error) {
       console.error("Generation error:", error);
       toast.error(error instanceof Error ? error.message : "Generation failed");
