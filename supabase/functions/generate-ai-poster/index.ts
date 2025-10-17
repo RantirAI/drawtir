@@ -10,9 +10,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    const { prompt, imageBase64, analysisType } = await req.json();
-    console.log('AI Poster Generation - Type:', analysisType);
+    try {
+      const { prompt, imageBase64, analysisType, layoutType, multiFrame, nestingFrames } = await req.json();
+      console.log('AI Poster Generation - Type:', analysisType, 'Layout:', layoutType, 'MultiFrame:', multiFrame, 'Nesting:', nestingFrames);
 
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
     if (!ANTHROPIC_API_KEY) {
@@ -181,11 +181,23 @@ Return a JSON object with this structure:
       });
     } else {
       // Generate from text description only
+      const layoutInstruction = layoutType === 'auto' 
+        ? '\n\nIMPORTANT: Design with AUTO LAYOUT in mind. Elements should be positioned to hug their parent containers with minimal spacing. Group related elements closely together.'
+        : '';
+      
+      const multiFrameInstruction = multiFrame
+        ? '\n\nCREATE MULTIPLE FRAMES: Organize the design into multiple logical frames/sections. Each major component should be in its own frame.'
+        : '';
+      
+      const nestingInstruction = nestingFrames
+        ? '\n\nUSE NESTING FRAMES: Create a hierarchy of frames where smaller frames can be nested inside larger ones. This allows for better organization and grouping of related elements.'
+        : '';
+      
       messages.push({
         role: 'user',
         content: `Create a professional poster design based on this description: "${prompt}"
 
-Design a complete poster with layout, colors, text, and visual elements.
+Design a complete poster with layout, colors, text, and visual elements.${layoutInstruction}${multiFrameInstruction}${nestingInstruction}
 
 IMPORTANT: For shapes, set borderRadius correctly:
 - Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
@@ -196,6 +208,9 @@ Return a JSON object with this structure:
 {
   "title": "Poster title",
   "backgroundColor": "#hexcolor",
+  "autoLayout": ${layoutType === 'auto'},
+  "multiFrame": ${multiFrame || false},
+  "nestingFrames": ${nestingFrames || false},
   "elements": [
     {
       "type": "text|shape",

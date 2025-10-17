@@ -31,6 +31,173 @@ const generationPreferences = [
   { label: "Notes", value: "notes" },
 ];
 
+// Transform AI design spec to canvas format with nesting frames support
+const transformDesignSpec = (designSpec: any) => {
+  const elements: any[] = [];
+  let frameCounter = 1;
+  
+  // Helper to create a frame from a group of elements
+  const createFrame = (groupElements: any[], frameId: string, parentId?: string) => {
+    if (groupElements.length === 0) return null;
+    
+    // Calculate bounds for the frame
+    const bounds = groupElements.reduce((acc, el) => {
+      const right = el.x + el.width;
+      const bottom = el.y + el.height;
+      return {
+        minX: Math.min(acc.minX, el.x),
+        minY: Math.min(acc.minY, el.y),
+        maxX: Math.max(acc.maxX, right),
+        maxY: Math.max(acc.maxY, bottom),
+      };
+    }, { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
+    
+    const framePadding = 20;
+    const frame = {
+      id: frameId,
+      type: "frame",
+      name: `Frame ${frameCounter++}`,
+      x: bounds.minX - framePadding,
+      y: bounds.minY - framePadding,
+      width: bounds.maxX - bounds.minX + framePadding * 2,
+      height: bounds.maxY - bounds.minY + framePadding * 2,
+      backgroundColor: "transparent",
+      children: groupElements.map(el => {
+        // Adjust child positions to be relative to frame
+        return {
+          ...el,
+          x: el.x - (bounds.minX - framePadding),
+          y: el.y - (bounds.minY - framePadding),
+        };
+      }),
+      autoLayout: designSpec.autoLayout || false,
+      parentId: parentId,
+    };
+    
+    return frame;
+  };
+  
+  // Process elements and group them into frames if multiFrame is enabled
+  if (designSpec.multiFrame || designSpec.nestingFrames) {
+    // Group elements by proximity and type
+    const groups: any[][] = [];
+    let currentGroup: any[] = [];
+    
+    designSpec.elements?.forEach((element: any, index: number) => {
+      const canvasElement = {
+        id: `element-${Date.now()}-${index}`,
+        type: element.type,
+        content: element.content,
+        x: element.x || 100,
+        y: element.y || 100,
+        width: element.width || 200,
+        height: element.height || 100,
+        color: element.color,
+        fontSize: element.fontSize,
+        fontWeight: element.fontWeight,
+        rotation: element.rotation || 0,
+        borderRadius: element.borderRadius,
+        shape: element.shape,
+      };
+      
+      // Group elements that are close together
+      if (currentGroup.length === 0) {
+        currentGroup.push(canvasElement);
+      } else {
+        const lastElement = currentGroup[currentGroup.length - 1];
+        const distance = Math.abs(canvasElement.y - lastElement.y);
+        
+        // If elements are far apart, start a new group
+        if (distance > 200 || currentGroup.length >= 5) {
+          groups.push([...currentGroup]);
+          currentGroup = [canvasElement];
+        } else {
+          currentGroup.push(canvasElement);
+        }
+      }
+    });
+    
+    if (currentGroup.length > 0) {
+      groups.push(currentGroup);
+    }
+    
+    // Create frames for each group
+    groups.forEach((group, index) => {
+      const frame = createFrame(group, `frame-${Date.now()}-${index}`);
+      if (frame) {
+        elements.push(frame);
+      }
+    });
+    
+    // If nesting is enabled and we have multiple frames, nest smaller frames into larger ones
+    if (designSpec.nestingFrames && elements.length > 1) {
+      // Sort frames by size (largest first)
+      elements.sort((a, b) => (b.width * b.height) - (a.width * a.height));
+      
+      // Try to nest smaller frames into larger ones
+      for (let i = 1; i < elements.length; i++) {
+        const smallFrame = elements[i];
+        for (let j = 0; j < i; j++) {
+          const largeFrame = elements[j];
+          
+          // Check if small frame is within large frame bounds
+          const isInside = 
+            smallFrame.x >= largeFrame.x &&
+            smallFrame.y >= largeFrame.y &&
+            (smallFrame.x + smallFrame.width) <= (largeFrame.x + largeFrame.width) &&
+            (smallFrame.y + smallFrame.height) <= (largeFrame.y + largeFrame.height);
+          
+          if (isInside) {
+            // Make positions relative to parent
+            smallFrame.x = smallFrame.x - largeFrame.x;
+            smallFrame.y = smallFrame.y - largeFrame.y;
+            smallFrame.parentId = largeFrame.id;
+            
+            if (!largeFrame.children) {
+              largeFrame.children = [];
+            }
+            largeFrame.children.push(smallFrame);
+            
+            // Remove from top-level elements
+            elements.splice(i, 1);
+            i--;
+            break;
+          }
+        }
+      }
+    }
+  } else {
+    // Single frame mode - all elements in one frame
+    const allElements = designSpec.elements?.map((element: any, index: number) => ({
+      id: `element-${Date.now()}-${index}`,
+      type: element.type,
+      content: element.content,
+      x: element.x || 100,
+      y: element.y || 100,
+      width: element.width || 200,
+      height: element.height || 100,
+      color: element.color,
+      fontSize: element.fontSize,
+      fontWeight: element.fontWeight,
+      rotation: element.rotation || 0,
+      borderRadius: element.borderRadius,
+      shape: element.shape,
+    })) || [];
+    
+    const mainFrame = createFrame(allElements, `frame-${Date.now()}-main`);
+    if (mainFrame) {
+      elements.push(mainFrame);
+    }
+  }
+  
+  return {
+    title: designSpec.title,
+    backgroundColor: designSpec.backgroundColor || "#ffffff",
+    elements: elements,
+    autoLayout: designSpec.autoLayout || false,
+  };
+};
+
 export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPanelProps) {
   const [description, setDescription] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -99,35 +266,17 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
         toast.info("Notes feature coming soon!");
       }
       
-      let response;
-      
       if (hasImageGen) {
         // Call OpenAI image generation
-        response = await supabase.functions.invoke("generate-image-openai", {
+        const response = await supabase.functions.invoke("generate-image-openai", {
           body: { 
             prompt: description,
             n: 1,
             size: "1024x1024"
           },
         });
-      } else {
-        // Call AI poster generation for canvas design
-        const analysisType = hasReplicate ? "replicate" : "create";
-        response = await supabase.functions.invoke("generate-ai-poster", {
-          body: {
-            prompt: description,
-            imageBase64: uploadedImages[0] || null,
-            analysisType,
-            layoutType: hasAutoLayout ? "auto" : undefined,
-            multiFrame: hasMultiFrame,
-          },
-        });
-      }
 
-      if (response.error) throw response.error;
-
-      // Handle image generation response (JSON)
-      if (hasImageGen) {
+        if (response.error) throw response.error;
         console.log("Image generation response:", response.data);
         
         if (response.data.images && response.data.images.length > 0) {
@@ -197,8 +346,36 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
           }
         }
       } else {
+        // Call AI poster generation with streaming
+        const analysisType = hasReplicate ? "replicate" : "create";
+        
+        // Use direct fetch for streaming
+        const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+        const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/generate-ai-poster`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+          },
+          body: JSON.stringify({
+            prompt: description,
+            imageBase64: uploadedImages[0] || null,
+            analysisType,
+            layoutType: hasAutoLayout ? "auto" : undefined,
+            multiFrame: hasMultiFrame,
+            nestingFrames: true, // Enable nesting frames
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         // Stream the response for poster generation
-        const reader = response.data.getReader();
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No response body");
         const decoder = new TextDecoder();
         let fullResponse = "";
         let thinkingMessage: Message = {
@@ -234,7 +411,20 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                   });
                 }
 
-                if (data.design) {
+                if (data.type === 'status' && data.message) {
+                  fullResponse += data.message + "\n";
+                  setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1] = {
+                      role: "assistant",
+                      content: fullResponse,
+                      thinking: true,
+                    };
+                    return newMessages;
+                  });
+                }
+
+                if (data.type === 'complete' && data.designSpec) {
                   setMessages((prev) => {
                     const newMessages = [...prev];
                     newMessages[newMessages.length - 1] = {
@@ -244,7 +434,10 @@ export default function AIGeneratorPanel({ onClose, onGenerate }: AIGeneratorPan
                     };
                     return newMessages;
                   });
-                  onGenerate(data.design);
+                  
+                  // Transform the design spec into the canvas format
+                  const design = transformDesignSpec(data.designSpec);
+                  onGenerate(design);
                   toast.success("Design applied to canvas!");
                 }
               } catch (e) {
