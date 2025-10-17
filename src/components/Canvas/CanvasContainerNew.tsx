@@ -1507,17 +1507,21 @@ export default function CanvasContainerNew({
       {/* Unified Shape Settings Panel */}
       {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
-          elementType={selectedElement ? (selectedElement.type === "icon" ? "shape" : selectedElement.type) : "frame"}
+          elementType={selectedElement ? selectedElement.type : "frame"}
           elementName={
             selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType
                 ? `Shape - ${selectedElement.shapeType.charAt(0).toUpperCase() + selectedElement.shapeType.slice(1)}`
-                : selectedElement.text 
-                  ? selectedElement.text.substring(0, 20)
-                  : selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)
+                : selectedElement.type === "icon"
+                  ? "Icon"
+                  : selectedElement.text 
+                    ? selectedElement.text.substring(0, 20)
+                    : selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)
               : selectedFrame?.name
           }
           shapeType={selectedElement?.shapeType}
+          iconName={selectedElement?.iconName}
+          iconFamily={selectedElement?.iconFamily}
           backgroundColor={selectedFrame?.backgroundColor}
           backgroundType={selectedFrame?.backgroundType}
           fillType={selectedElement?.fillType}
@@ -1661,6 +1665,7 @@ export default function CanvasContainerNew({
           onPatternFrameIdChange={(frameId) => selectedElement && handleElementUpdate(selectedElement.id, { patternFrameId: frameId })}
           onVideoUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { videoUrl: url })}
           availableFrames={frames.map(f => ({ id: f.id, name: f.name }))}
+          onIconChange={(iconName, iconFamily) => selectedElement && handleElementUpdate(selectedElement.id, { iconName, iconFamily })}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);

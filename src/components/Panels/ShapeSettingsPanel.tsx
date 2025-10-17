@@ -24,13 +24,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
+import {
   AlignLeft, AlignCenter, AlignRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box, RotateCcw,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
-  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows
+  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile
 } from "lucide-react";
+import IconSelector from "../Toolbar/IconSelector";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -78,9 +79,11 @@ const GOOGLE_FONTS = [
 ];
 
 interface ShapeSettingsPanelProps {
-  elementType?: "frame" | "shape" | "text" | "image" | "drawing" | null;
+  elementType?: "frame" | "shape" | "text" | "image" | "drawing" | "icon" | null;
   elementName?: string;
   shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+  iconName?: string;
+  iconFamily?: string;
   backgroundColor?: string;
   backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
   fillType?: "solid" | "image" | "gradient" | "pattern" | "video";
@@ -164,16 +167,18 @@ interface ShapeSettingsPanelProps {
   onAlignItemsChange?: (align: string) => void;
   onGapChange?: (gap: number) => void;
   availableFrames?: Array<{id: string, name: string}>;
+  onIconChange?: (iconName: string, iconFamily: string) => void;
   onClose?: () => void;
 }
 
-const getElementIcon = (type?: "frame" | "shape" | "text" | "image" | "drawing" | null) => {
+const getElementIcon = (type?: "frame" | "shape" | "text" | "image" | "drawing" | "icon" | null) => {
   switch (type) {
     case "frame": return Box;
     case "shape": return Square;
     case "text": return Type;
     case "image": return Image;
     case "drawing": return Pen;
+    case "icon": return Smile;
     default: return Square;
   }
 };
@@ -182,6 +187,8 @@ export default function ShapeSettingsPanel({
   elementType,
   elementName = "Nothing selected",
   shapeType,
+  iconName,
+  iconFamily,
   backgroundColor = "#ffffff",
   backgroundType = "solid",
   fillType = "solid",
@@ -268,6 +275,7 @@ export default function ShapeSettingsPanel({
   onAlignItemsChange,
   onGapChange,
   availableFrames = [],
+  onIconChange,
   onClose,
 }: ShapeSettingsPanelProps) {
   const ElementIcon = getElementIcon(elementType);
@@ -814,6 +822,30 @@ export default function ShapeSettingsPanel({
             )}
           </AccordionContent>
         </AccordionItem>
+
+        {/* Icon Selector Section - for icon elements */}
+        {elementType === "icon" && onIconChange && (
+          <AccordionItem value="icon" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Icon</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-2">
+              <div className="space-y-2">
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">
+                  Selected: {iconName || "None"} ({iconFamily || "N/A"})
+                </Label>
+                <IconSelector onIconSelect={onIconChange}>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full h-8 text-[11px] rounded"
+                  >
+                    <Smile className="h-3 w-3 mr-2" />
+                    Change Icon
+                  </Button>
+                </IconSelector>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        )}
 
         {/* Fill Section */}
         {(onFillChange || onBackgroundColorChange) && (
