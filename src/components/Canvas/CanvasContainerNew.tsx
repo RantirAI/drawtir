@@ -104,7 +104,6 @@ export default function CanvasContainerNew({
   const [showLayersPanel, setShowLayersPanel] = useState(false);
 
   const [description, setDescription] = useState("");
-  const [generationMode, setGenerationMode] = useState<"caption" | "create" | "replicate">("caption");
   const [captionImage, setCaptionImage] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState("");
@@ -303,158 +302,144 @@ export default function CanvasContainerNew({
   };
 
   const generateWithAI = async () => {
-    if (!description.trim() && generationMode !== "replicate") {
-      toast.error("Please enter a description");
-      return;
-    }
-
-    if (generationMode === "replicate" && !captionImage) {
-      toast.error("Please upload an image to replicate");
+    if (!description.trim() && !captionImage) {
+      toast.error("Please provide a description or upload an image");
       return;
     }
 
     setIsGenerating(true);
     setGenerationProgress("Starting generation...");
     try {
-      if (generationMode === "caption") {
-        // Original caption generation
-        const { data, error } = await supabase.functions.invoke("generate-poster-caption", {
-          body: { 
-            description, 
-            imageContext: captionImage ? "with uploaded image" : (selectedFrame?.image ? "with image" : "no image"),
-            imageBase64: captionImage || undefined
+      // Intelligently determine analysisType based on context
+      let analysisType = "create";
+      
+      if (captionImage) {
+        // Check if prompt suggests replication
+        const replicateKeywords = ["replicate", "copy", "duplicate", "same", "similar", "like this", "recreate"];
+        const promptLower = description.toLowerCase();
+        const isReplicating = replicateKeywords.some(keyword => promptLower.includes(keyword));
+        
+        analysisType = isReplicating ? "replicate" : "create";
+      }
+
+      // Full AI poster generation with streaming
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ai-poster`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
+          body: JSON.stringify({
+            prompt: description,
+            imageBase64: captionImage,
+            analysisType,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate: ${response.statusText}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let designSpec = null;
+
+      if (!reader) {
+        throw new Error("No response body");
+      }
+
+      // Read the stream
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'status') {
+                // Show friendly status message
+                setGenerationProgress(data.message);
+                console.log('Status:', data.message);
+              } else if (data.type === 'progress') {
+                // Log raw progress for debugging
+                console.log('Generating:', data.text);
+              } else if (data.type === 'complete') {
+                setGenerationProgress('Finalizing design...');
+                designSpec = data.designSpec;
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+
+      if (!designSpec) {
+        throw new Error("No design specification received");
+      }
+
+      // Update current frame background
+      if (selectedFrameId && designSpec.backgroundColor) {
+        handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
+      }
+
+      // Add elements to the current frame
+      if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
+        const newElements = designSpec.elements.map((el: any) => {
+          // Determine border radius based on shape type
+          let borderRadius = 0;
+          if (el.borderRadius) {
+            // If AI provided borderRadius, use it
+            borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+          } else if (el.shape === 'circle') {
+            // Fallback: if shape is circle but no borderRadius, make it circular
+            borderRadius = 9999;
+          }
+
+          return {
+            id: crypto.randomUUID(),
+            type: el.type,
+            x: el.x || 100,
+            y: el.y || 100,
+            width: el.width || 200,
+            height: el.height || 100,
+            fill: el.color || el.backgroundColor || "#000000",
+            stroke: el.borderColor || "#000000",
+            strokeWidth: el.borderWidth || 0,
+            borderRadius,
+            text: el.content || "",
+            fontSize: el.fontSize || 16,
+            fontWeight: el.fontWeight || "normal",
+            fontFamily: "Arial",
+            shapeType: el.shape || "rectangle",
+            imageData: el.type === "image" && captionImage ? captionImage : undefined,
+            rotation: 0,
+            opacity: 100,
+            blendMode: "normal" as const,
+          };
         });
 
-        if (error) throw error;
-
-        if (data.caption && selectedFrameId) {
-          handleFrameUpdate(selectedFrameId, { bottomCaption: data.caption });
-          toast.success("Caption generated!");
-          setCaptionImage(null);
-          setDescription("");
-        }
-      } else {
-        // Full AI poster generation with streaming
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ai-poster`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            },
-            body: JSON.stringify({
-              prompt: description,
-              imageBase64: captionImage,
-              analysisType: generationMode,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to generate: ${response.statusText}`);
-        }
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-        let designSpec = null;
-
-        if (!reader) {
-          throw new Error("No response body");
-        }
-
-        // Read the stream
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                
-                if (data.type === 'status') {
-                  // Show friendly status message
-                  setGenerationProgress(data.message);
-                  console.log('Status:', data.message);
-                } else if (data.type === 'progress') {
-                  // Log raw progress for debugging
-                  console.log('Generating:', data.text);
-                } else if (data.type === 'complete') {
-                  setGenerationProgress('Finalizing design...');
-                  designSpec = data.designSpec;
-                }
-              } catch (e) {
-                // Skip invalid JSON
-              }
-            }
-          }
-        }
-
-        if (!designSpec) {
-          throw new Error("No design specification received");
-        }
-
-        // Update current frame background
-        if (selectedFrameId && designSpec.backgroundColor) {
-          handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
-        }
-
-        // Add elements to the current frame
-        if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
-          const newElements = designSpec.elements.map((el: any) => {
-            // Determine border radius based on shape type
-            let borderRadius = 0;
-            if (el.borderRadius) {
-              // If AI provided borderRadius, use it
-              borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
-            } else if (el.shape === 'circle') {
-              // Fallback: if shape is circle but no borderRadius, make it circular
-              borderRadius = 9999;
-            }
-
-            return {
-              id: crypto.randomUUID(),
-              type: el.type,
-              x: el.x || 100,
-              y: el.y || 100,
-              width: el.width || 200,
-              height: el.height || 100,
-              fill: el.color || el.backgroundColor || "#000000",
-              stroke: el.borderColor || "#000000",
-              strokeWidth: el.borderWidth || 0,
-              borderRadius,
-              text: el.content || "",
-              fontSize: el.fontSize || 16,
-              fontWeight: el.fontWeight || "normal",
-              fontFamily: "Arial",
-              shapeType: el.shape || "rectangle",
-              imageData: el.type === "image" && captionImage ? captionImage : undefined,
-              rotation: 0,
-              opacity: 100,
-              blendMode: "normal" as const,
-            };
-          });
-
-          setFrames(frames.map(f => 
-            f.id === selectedFrameId 
-              ? { ...f, elements: [...(f.elements || []), ...newElements] }
-              : f
-          ));
-        }
-
-        toast.success("AI design generated!");
-        setCaptionImage(null);
-        setDescription("");
-        setShowGeneratePanel(false);
+        setFrames(frames.map(f => 
+          f.id === selectedFrameId 
+            ? { ...f, elements: [...(f.elements || []), ...newElements] }
+            : f
+        ));
       }
+
+      toast.success("AI design generated!");
+      setDescription("");
+      setShowGeneratePanel(false);
     } catch (error: any) {
       console.error("Error generating with AI:", error);
       toast.error(error.message || "Failed to generate");
@@ -1348,72 +1333,28 @@ export default function CanvasContainerNew({
           defaultPosition={{ x: 50, y: 150 }} 
           onClose={() => {
             setShowGeneratePanel(false);
-            setGenerationMode("caption");
             setDescription("");
             setCaptionImage(null);
           }}
         >
           <div className="space-y-3 w-80">
-            {/* Mode Selection */}
-            <div className="space-y-2">
-              <Label className="text-xs">Generation Mode</Label>
-              <div className="grid grid-cols-3 gap-1">
-                <Button
-                  size="sm"
-                  variant={generationMode === "caption" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("caption")}
-                  className="h-7 text-xs"
-                >
-                  Caption
-                </Button>
-                <Button
-                  size="sm"
-                  variant={generationMode === "create" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("create")}
-                  className="h-7 text-xs"
-                >
-                  Create
-                </Button>
-                <Button
-                  size="sm"
-                  variant={generationMode === "replicate" ? "default" : "outline"}
-                  onClick={() => setGenerationMode("replicate")}
-                  className="h-7 text-xs"
-                >
-                  Replicate
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {generationMode === "caption" && "Generate captions for your poster"}
-                {generationMode === "create" && "Create full poster designs from description"}
-                {generationMode === "replicate" && "Analyze and replicate an existing design"}
-              </p>
-            </div>
-
             {/* Description Input */}
             <div>
-              <Label className="text-xs mb-1 block">
-                {generationMode === "replicate" ? "Instructions (Optional)" : "Description"}
-              </Label>
+              <Label className="text-xs mb-1 block">Describe what you want</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={
-                  generationMode === "caption" 
-                    ? "Describe your poster..."
-                    : generationMode === "create"
-                    ? "Create a vibrant summer music festival poster..."
-                    : "Additional instructions for AI..."
-                }
-                className="h-20 text-xs resize-none"
+                placeholder="Create a vibrant summer music festival poster... or replicate this design..."
+                className="h-24 text-xs resize-none"
               />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Tip: Upload an image and say "replicate this" to copy a design, or describe what you want to create
+              </p>
             </div>
             
             {/* Image Upload */}
             <div>
-              <Label className="text-xs mb-1 block">
-                {generationMode === "replicate" ? "Upload Design to Replicate" : "Upload Image (Optional)"}
-              </Label>
+              <Label className="text-xs mb-1 block">Upload Reference Image (Optional)</Label>
               <input
                 type="file"
                 accept="image/*"
@@ -1479,9 +1420,6 @@ export default function CanvasContainerNew({
                   </>
                 )}
               </label>
-              {generationMode === "replicate" && !captionImage && (
-                <p className="text-xs text-destructive mt-1">Required for replication mode</p>
-              )}
             </div>
             
             {/* Generate Button */}
