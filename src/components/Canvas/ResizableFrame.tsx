@@ -242,10 +242,12 @@ export default function ResizableFrame({
       )}
       
       {/* Elements inside frame */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div 
-          className="relative w-full h-full pointer-events-auto flex"
+          className="pointer-events-auto flex"
           style={{
+            width: enableDynamicScale && initialWidth ? `${initialWidth}px` : '100%',
+            height: enableDynamicScale && initialHeight ? `${initialHeight}px` : '100%',
             flexDirection: flexDirection,
             justifyContent: justifyContent,
             alignItems: alignItems,
