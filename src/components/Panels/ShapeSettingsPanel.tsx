@@ -300,7 +300,7 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters"]} className="w-full space-y-0 [&>div]:space-y-0">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon"]} className="w-full space-y-0 [&>div]:space-y-0">
         {/* Auto Layout Section - Only for Frames */}
         {elementType === "frame" && (
           <AccordionItem value="layout" className="border-b-0">

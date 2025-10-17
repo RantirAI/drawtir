@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
+import DynamicIcon from "./DynamicIcon";
 
 interface ResizableElementProps {
   id: string;
@@ -440,52 +441,14 @@ export default function ResizableElement({
           </svg>
         );
       case "icon":
-        // Dynamically render icon
-        const renderIcon = () => {
-          if (!iconName || !iconFamily) return null;
-          
-          try {
-            if (iconFamily === "lucide") {
-              const iconModule = require("lucide-react");
-              const IconComponent = iconModule[iconName.split('-').map((w: string) => 
-                w.charAt(0).toUpperCase() + w.slice(1)).join('')];
-              if (IconComponent) {
-                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
-              }
-            } else if (iconFamily === "fa") {
-              const iconModule = require("react-icons/fa");
-              const IconComponent = iconModule[iconName];
-              if (IconComponent) {
-                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
-              }
-            } else if (iconFamily === "md") {
-              const iconModule = require("react-icons/md");
-              const IconComponent = iconModule[iconName];
-              if (IconComponent) {
-                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
-              }
-            } else if (iconFamily === "hi") {
-              const iconModule = require("react-icons/hi");
-              const IconComponent = iconModule[iconName];
-              if (IconComponent) {
-                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
-              }
-            } else if (iconFamily === "ai") {
-              const iconModule = require("react-icons/ai");
-              const IconComponent = iconModule[iconName];
-              if (IconComponent) {
-                return <IconComponent style={{ width: '100%', height: '100%', color: fill }} />;
-              }
-            }
-          } catch (error) {
-            console.error("Error loading icon:", error);
-          }
-          return null;
-        };
-
         return (
           <div className="w-full h-full flex items-center justify-center">
-            {renderIcon()}
+            <DynamicIcon 
+              iconName={iconName}
+              iconFamily={iconFamily}
+              color={fill}
+              className="w-full h-full"
+            />
           </div>
         );
       default:
