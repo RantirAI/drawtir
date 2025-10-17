@@ -39,6 +39,9 @@ interface ResizableFrameProps {
   justifyContent?: string;
   alignItems?: string;
   gap?: number;
+  initialWidth?: number; // For dynamic scaling
+  initialHeight?: number; // For dynamic scaling
+  enableDynamicScale?: boolean; // Enable/disable dynamic scaling
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -80,6 +83,9 @@ export default function ResizableFrame({
   justifyContent = "start",
   alignItems = "start",
   gap = 0,
+  initialWidth,
+  initialHeight,
+  enableDynamicScale = true,
   onUpdate,
   isSelected,
   onSelect,
@@ -89,6 +95,10 @@ export default function ResizableFrame({
   const [isResizing, setIsResizing] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const frameRef = useRef<HTMLDivElement>(null);
+
+  // Calculate scale for dynamic content
+  const scaleX = enableDynamicScale && initialWidth ? width / initialWidth : 1;
+  const scaleY = enableDynamicScale && initialHeight ? height / initialHeight : 1;
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -240,6 +250,10 @@ export default function ResizableFrame({
             justifyContent: justifyContent,
             alignItems: alignItems,
             gap: `${gap}px`,
+            transform: enableDynamicScale && (scaleX !== 1 || scaleY !== 1) 
+              ? `scale(${scaleX}, ${scaleY})` 
+              : undefined,
+            transformOrigin: 'top left',
           }}
         >
           {children}

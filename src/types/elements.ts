@@ -111,6 +111,11 @@ export interface Frame {
   paddingBottom?: number;
   paddingLeft?: number;
   
+  // Dynamic scaling properties
+  initialWidth?: number;
+  initialHeight?: number;
+  enableDynamicScale?: boolean;
+  
   elements?: Element[];
   frames?: Frame[]; // Nested frames support
   opacity?: number;

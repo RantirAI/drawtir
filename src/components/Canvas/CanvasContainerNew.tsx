@@ -462,9 +462,9 @@ export default function CanvasContainerNew({
           ));
         }
 
-        // Add nested frames if provided
+        // Add nested frames if provided (as children of selected frame)
         if (selectedFrameId && designSpec.frames && Array.isArray(designSpec.frames)) {
-          const newFrames = designSpec.frames.map((frameSpec: any) => {
+          const nestedFrames = designSpec.frames.map((frameSpec: any) => {
             const frameElements = (frameSpec.elements || []).map((el: any) => {
               let borderRadius = 0;
               if (el.borderRadius) {
@@ -498,12 +498,15 @@ export default function CanvasContainerNew({
 
             return {
               id: crypto.randomUUID(),
-              name: `AI Frame ${frames.length + 1}`,
+              name: `AI Frame ${(selectedFrame?.frames?.length || 0) + 1}`,
               x: frameSpec.x || 100,
               y: frameSpec.y || 100,
               width: frameSpec.width || 200,
               height: frameSpec.height || 100,
-              backgroundColor: frameSpec.backgroundColor || "#ffffff",
+              initialWidth: frameSpec.width || 200,
+              initialHeight: frameSpec.height || 100,
+              enableDynamicScale: true,
+              backgroundColor: frameSpec.backgroundColor || "transparent",
               autoLayout: frameSpec.autoLayout || false,
               flexDirection: frameSpec.flexDirection || undefined,
               justifyContent: frameSpec.justifyContent || undefined,
@@ -514,10 +517,30 @@ export default function CanvasContainerNew({
               opacity: 100,
               blendMode: "normal" as const,
               elements: frameElements,
-            };
+              image: null,
+              topCaption: "",
+              bottomCaption: "",
+              textColor: "#000000",
+              textAlign: "center",
+              textSize: 2,
+              textOpacity: 100,
+              imageStyle: "cover",
+              brightness: 100,
+              contrast: 100,
+              saturation: 100,
+              blur: 0,
+              linkText: "",
+              linkPosition: "top-right",
+              gradientIntensity: 80,
+            } as Frame;
           });
 
-          setFrames([...frames, ...newFrames]);
+          // Add nested frames as children of the selected frame
+          setFrames(frames.map(f => 
+            f.id === selectedFrameId 
+              ? { ...f, frames: [...(f.frames || []), ...nestedFrames] }
+              : f
+          ));
         }
 
       toast.success("AI design generated!");
@@ -1293,6 +1316,9 @@ export default function CanvasContainerNew({
                 justifyContent={frame.justifyContent}
                 alignItems={frame.alignItems}
                 gap={frame.gap}
+                initialWidth={frame.initialWidth}
+                initialHeight={frame.initialHeight}
+                enableDynamicScale={frame.enableDynamicScale}
                 isSelected={frame.id === selectedFrameId}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
@@ -1369,8 +1395,147 @@ export default function CanvasContainerNew({
                       onDelete={() => handleElementDelete(element.id)}
                       onDuplicate={() => handleElementDuplicate(element.id)}
                     />
-                  </CanvasContextMenu>
+                   </CanvasContextMenu>
                 )})}
+                
+                {/* Nested frames inside parent frame */}
+                {(frame.frames || []).map((nestedFrame) => (
+                  <CanvasContextMenu
+                    key={nestedFrame.id}
+                    onDelete={() => {
+                      setFrames(frames.map(f => 
+                        f.id === frame.id 
+                          ? { ...f, frames: (f.frames || []).filter(nf => nf.id !== nestedFrame.id) }
+                          : f
+                      ));
+                      toast.success("Nested frame deleted");
+                    }}
+                    onDuplicate={() => {
+                      const duplicated = { ...nestedFrame, id: crypto.randomUUID(), x: nestedFrame.x + 20, y: nestedFrame.y + 20 };
+                      setFrames(frames.map(f => 
+                        f.id === frame.id 
+                          ? { ...f, frames: [...(f.frames || []), duplicated] }
+                          : f
+                      ));
+                      toast.success("Nested frame duplicated");
+                    }}
+                    onBringToFront={() => handleArrange('toFront', [], frame.id)}
+                    onSendToBack={() => handleArrange('toBack', [], frame.id)}
+                  >
+                    <div
+                      style={{
+                        position: 'absolute',
+                        left: nestedFrame.x,
+                        top: nestedFrame.y,
+                        width: nestedFrame.width,
+                        height: nestedFrame.height,
+                      }}
+                    >
+                      <ResizableFrame
+                        id={nestedFrame.id}
+                        x={0}
+                        y={0}
+                        width={nestedFrame.width}
+                        height={nestedFrame.height}
+                        backgroundColor={nestedFrame.backgroundColor}
+                        backgroundType={nestedFrame.backgroundType}
+                        backgroundImage={nestedFrame.backgroundImage}
+                        backgroundImageFit={nestedFrame.backgroundImageFit}
+                        gradientType={nestedFrame.gradientType}
+                        gradientAngle={nestedFrame.gradientAngle}
+                        gradientStops={nestedFrame.gradientStops}
+                        image={nestedFrame.image}
+                        topCaption={nestedFrame.topCaption || ""}
+                        bottomCaption={nestedFrame.bottomCaption || ""}
+                        textColor={nestedFrame.textColor || "#000000"}
+                        textAlign={nestedFrame.textAlign || "center"}
+                        textSize={nestedFrame.textSize || 2}
+                        textOpacity={nestedFrame.textOpacity || 100}
+                        imageStyle={nestedFrame.imageStyle || "cover"}
+                        filterStyle={{}}
+                        linkText={nestedFrame.linkText || ""}
+                        linkPosition={nestedFrame.linkPosition || "top-right"}
+                        gradientIntensity={nestedFrame.gradientIntensity || 80}
+                        cornerRadius={nestedFrame.cornerRadius || 0}
+                        fillOpacity={nestedFrame.fillOpacity || 100}
+                        opacity={nestedFrame.opacity || 100}
+                        blendMode={nestedFrame.blendMode || "normal"}
+                        flexDirection={nestedFrame.flexDirection}
+                        justifyContent={nestedFrame.justifyContent}
+                        alignItems={nestedFrame.alignItems}
+                        gap={nestedFrame.gap}
+                        initialWidth={nestedFrame.initialWidth}
+                        initialHeight={nestedFrame.initialHeight}
+                        enableDynamicScale={nestedFrame.enableDynamicScale}
+                        isSelected={false}
+                        onUpdate={(id, updates) => {
+                          setFrames(frames.map(f => 
+                            f.id === frame.id 
+                              ? { 
+                                  ...f, 
+                                  frames: (f.frames || []).map(nf => 
+                                    nf.id === id ? { ...nf, ...updates } : nf
+                                  )
+                                }
+                              : f
+                          ));
+                        }}
+                        onSelect={() => {
+                          toast.info("Nested frame selected");
+                        }}
+                      >
+                        {/* Elements inside nested frame */}
+                        {(nestedFrame.elements || []).map((element) => (
+                          <ResizableElement
+                            key={element.id}
+                            id={element.id}
+                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type}
+                            x={element.x}
+                            y={element.y}
+                            width={element.width}
+                            height={element.height}
+                            text={element.text}
+                            shapeType={element.shapeType}
+                            fill={element.fill}
+                            stroke={element.stroke}
+                            strokeWidth={element.strokeWidth}
+                            opacity={element.opacity}
+                            cornerRadius={element.cornerRadius}
+                            fontSize={element.fontSize}
+                            fontFamily={element.fontFamily}
+                            fontWeight={element.fontWeight}
+                            iconName={element.iconName}
+                            iconFamily={element.iconFamily}
+                            useFlexLayout={nestedFrame.flexDirection !== undefined}
+                            isSelected={false}
+                            onUpdate={(id, updates) => {
+                              setFrames(frames.map(f => 
+                                f.id === frame.id 
+                                  ? {
+                                      ...f,
+                                      frames: (f.frames || []).map(nf =>
+                                        nf.id === nestedFrame.id
+                                          ? {
+                                              ...nf,
+                                              elements: (nf.elements || []).map(el =>
+                                                el.id === id ? { ...el, ...updates } : el
+                                              )
+                                            }
+                                          : nf
+                                      )
+                                    }
+                                  : f
+                              ));
+                            }}
+                            onSelect={() => {}}
+                            onDelete={() => {}}
+                            onDuplicate={() => {}}
+                          />
+                        ))}
+                      </ResizableFrame>
+                    </div>
+                  </CanvasContextMenu>
+                ))}
               </ResizableFrame>
             </CanvasContextMenu>
           </div>
