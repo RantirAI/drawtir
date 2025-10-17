@@ -220,7 +220,7 @@ export default function CanvasContainerNew({
 
   const handleAddFrame = () => {
     const newFrame: Frame = {
-      id: `frame-${frames.length + 1}`,
+      id: `frame-${Date.now()}`,
       name: `Frame ${frames.length + 1}`,
       x: 150 + frames.length * 50,
       y: 150 + frames.length * 50,
@@ -1181,7 +1181,7 @@ export default function CanvasContainerNew({
     const maxY = Math.max(...elements.map(e => e.y + e.height));
 
     const newFrame: Frame = {
-      id: `frame-${frames.length + 1}`,
+      id: `frame-${Date.now()}-wrapped`,
       name: `Frame ${frames.length + 1}`,
       x: (selectedFrame?.x || 0) + minX - 20,
       y: (selectedFrame?.y || 0) + minY - 20,
