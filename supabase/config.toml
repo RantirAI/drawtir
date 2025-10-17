@@ -5,6 +5,3 @@ verify_jwt = false
 
 [functions.generate-ai-poster]
 verify_jwt = false
-
-[functions.generate-image-openai]
-verify_jwt = false
