@@ -1388,8 +1388,8 @@ export default function CanvasContainerNew({
                        videoUrl={element.videoUrl}
                        iconName={element.iconName}
                        iconFamily={element.iconFamily}
-                       useFlexLayout={frame.flexDirection !== undefined && frame.flexDirection !== null}
-                      isSelected={selectedElementIds.includes(element.id)}
+                       useFlexLayout={false}
+                       isSelected={selectedElementIds.includes(element.id)}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                       onDelete={() => handleElementDelete(element.id)}
@@ -1506,7 +1506,7 @@ export default function CanvasContainerNew({
                             fontWeight={element.fontWeight}
                             iconName={element.iconName}
                             iconFamily={element.iconFamily}
-                            useFlexLayout={nestedFrame.flexDirection !== undefined}
+                            useFlexLayout={false}
                             isSelected={false}
                             onUpdate={(id, updates) => {
                               setFrames(frames.map(f => 
