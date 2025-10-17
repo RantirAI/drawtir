@@ -394,48 +394,131 @@ export default function CanvasContainerNew({
         handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
       }
 
-      // Add elements to the current frame
-      if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
-        const newElements = designSpec.elements.map((el: any) => {
-          // Determine border radius based on shape type
-          let borderRadius = 0;
-          if (el.borderRadius) {
-            // If AI provided borderRadius, use it
-            borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
-          } else if (el.shape === 'circle') {
-            // Fallback: if shape is circle but no borderRadius, make it circular
-            borderRadius = 9999;
-          }
+        // Add elements to the current frame
+        if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
+          const newElements = designSpec.elements.map((el: any) => {
+            // Determine border radius based on shape type
+            let borderRadius = 0;
+            if (el.borderRadius) {
+              // If AI provided borderRadius, use it
+              borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+            } else if (el.shape === 'circle') {
+              // Fallback: if shape is circle but no borderRadius, make it circular
+              borderRadius = 9999;
+            }
 
-          return {
-            id: crypto.randomUUID(),
-            type: el.type,
-            x: el.x || 100,
-            y: el.y || 100,
-            width: el.width || 200,
-            height: el.height || 100,
-            fill: el.color || el.backgroundColor || "#000000",
-            stroke: el.borderColor || "#000000",
-            strokeWidth: el.borderWidth || 0,
-            borderRadius,
-            text: el.content || "",
-            fontSize: el.fontSize || 16,
-            fontWeight: el.fontWeight || "normal",
-            fontFamily: "Arial",
-            shapeType: el.shape || "rectangle",
-            imageData: el.type === "image" && captionImage ? captionImage : undefined,
-            rotation: 0,
-            opacity: 100,
-            blendMode: "normal" as const,
-          };
-        });
+            // Base element properties
+            const baseElement: any = {
+              id: crypto.randomUUID(),
+              type: el.type,
+              x: el.x || 100,
+              y: el.y || 100,
+              width: el.width || 200,
+              height: el.height || 100,
+              rotation: 0,
+              opacity: 100,
+              blendMode: "normal" as const,
+            };
 
-        setFrames(frames.map(f => 
-          f.id === selectedFrameId 
-            ? { ...f, elements: [...(f.elements || []), ...newElements] }
-            : f
-        ));
-      }
+            // Type-specific properties
+            if (el.type === "icon") {
+              return {
+                ...baseElement,
+                iconName: el.iconName || "heart",
+                iconFamily: el.iconFamily || "lucide",
+                fill: el.color || "#000000",
+              };
+            } else if (el.type === "text") {
+              return {
+                ...baseElement,
+                text: el.content || "",
+                fontSize: el.fontSize || 16,
+                fontWeight: el.fontWeight || "normal",
+                fontFamily: "Arial",
+                fill: el.color || "#000000",
+              };
+            } else if (el.type === "image") {
+              return {
+                ...baseElement,
+                imageData: captionImage || undefined,
+              };
+            } else {
+              // shape
+              return {
+                ...baseElement,
+                fill: el.color || el.backgroundColor || "#000000",
+                stroke: el.borderColor || "#000000",
+                strokeWidth: el.borderWidth || 0,
+                borderRadius,
+                shapeType: el.shape || "rectangle",
+              };
+            }
+          });
+
+          setFrames(frames.map(f => 
+            f.id === selectedFrameId 
+              ? { ...f, elements: [...(f.elements || []), ...newElements] }
+              : f
+          ));
+        }
+
+        // Add nested frames if provided
+        if (selectedFrameId && designSpec.frames && Array.isArray(designSpec.frames)) {
+          const newFrames = designSpec.frames.map((frameSpec: any) => {
+            const frameElements = (frameSpec.elements || []).map((el: any) => {
+              let borderRadius = 0;
+              if (el.borderRadius) {
+                borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+              } else if (el.shape === 'circle') {
+                borderRadius = 9999;
+              }
+
+              const baseElement: any = {
+                id: crypto.randomUUID(),
+                type: el.type,
+                x: el.x || 0,
+                y: el.y || 0,
+                width: el.width || 100,
+                height: el.height || 50,
+                rotation: 0,
+                opacity: 100,
+                blendMode: "normal" as const,
+              };
+
+              if (el.type === "icon") {
+                return { ...baseElement, iconName: el.iconName || "heart", iconFamily: el.iconFamily || "lucide", fill: el.color || "#000000" };
+              } else if (el.type === "text") {
+                return { ...baseElement, text: el.content || "", fontSize: el.fontSize || 14, fontWeight: el.fontWeight || "normal", fontFamily: "Arial", fill: el.color || "#000000" };
+              } else if (el.type === "image") {
+                return { ...baseElement, imageData: captionImage || undefined };
+              } else {
+                return { ...baseElement, fill: el.color || "#000000", stroke: el.borderColor || "#000000", strokeWidth: el.borderWidth || 0, borderRadius, shapeType: el.shape || "rectangle" };
+              }
+            });
+
+            return {
+              id: crypto.randomUUID(),
+              name: `AI Frame ${frames.length + 1}`,
+              x: frameSpec.x || 100,
+              y: frameSpec.y || 100,
+              width: frameSpec.width || 200,
+              height: frameSpec.height || 100,
+              backgroundColor: frameSpec.backgroundColor || "#ffffff",
+              autoLayout: frameSpec.autoLayout || false,
+              flexDirection: frameSpec.flexDirection || undefined,
+              justifyContent: frameSpec.justifyContent || undefined,
+              alignItems: frameSpec.alignItems || undefined,
+              gap: frameSpec.gap || 0,
+              padding: frameSpec.padding || 0,
+              cornerRadius: frameSpec.cornerRadius || 0,
+              opacity: 100,
+              blendMode: "normal" as const,
+              elements: frameElements,
+            };
+          });
+
+          setFrames([...frames, ...newFrames]);
+        }
 
       toast.success("AI design generated!");
       setDescription("");
@@ -1092,8 +1175,8 @@ export default function CanvasContainerNew({
       linkPosition: "top-right",
       gradientIntensity: 80,
       flexDirection: "row",
-      justifyContent: "start",
-      alignItems: "start",
+      justifyContent: "flex-start",
+      alignItems: "flex-start",
       gap: 0,
       elements: elements.map(e => ({ ...e, x: e.x - minX + 20, y: e.y - minY + 20 })),
       cornerRadius: 0,

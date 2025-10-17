@@ -57,6 +57,21 @@ CRITICAL ANALYSIS REQUIREMENTS:
 5. Analyze spacing, padding, and margins between elements
 6. Note layering order (z-index) of overlapping elements
 7. Identify ALL visual elements including subtle background shapes
+8. Identify any icons present and match them to appropriate icon names
+
+ICON SPECIFICATIONS:
+- Identify any icons in the design
+- Choose appropriate icon names from lucide-react library
+- Common icons: heart, star, circle, square, triangle, home, user, settings, search, menu, x, check, arrow-right, arrow-left, plus, minus, etc.
+- For social icons: facebook, twitter, instagram, linkedin, youtube, github
+- For UI icons: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi, zap
+- Note icon size and color
+
+NESTED FRAMES & AUTO LAYOUT:
+- Identify groups of elements that should be contained together
+- Note if elements are arranged in rows or columns
+- Measure spacing/gaps between grouped elements
+- Identify containers with consistent padding
 
 SHAPE SPECIFICATIONS:
 - For circles: width MUST equal height, borderRadius MUST be "50%"
@@ -87,7 +102,7 @@ Return a JSON object with this EXACT structure:
   "backgroundColor": "#hexcolor",
   "elements": [
     {
-      "type": "text|shape|image",
+      "type": "text|shape|image|icon",
       "content": "exact text or description",
       "x": precise_x_position,
       "y": precise_y_position,
@@ -97,7 +112,25 @@ Return a JSON object with this EXACT structure:
       "fontSize": exact_size,
       "fontWeight": "normal|bold|600|700",
       "borderRadius": "0|12px|16px|50%",
-      "shape": "rectangle|circle|ellipse" (only for shapes)
+      "shape": "rectangle|circle|ellipse" (only for shapes),
+      "iconName": "heart|star|circle|etc" (only for icons),
+      "iconFamily": "lucide" (only for icons)
+    }
+  ],
+  "frames": [
+    {
+      "x": position,
+      "y": position,
+      "width": size,
+      "height": size,
+      "backgroundColor": "#hexcolor",
+      "autoLayout": true,
+      "flexDirection": "row|column",
+      "gap": spacing_between_children,
+      "padding": uniform_padding,
+      "justifyContent": "flex-start|center|flex-end|space-between",
+      "alignItems": "flex-start|center|flex-end",
+      "elements": [nested elements array]
     }
   ],
   "style": "detailed description of visual style",
@@ -130,10 +163,29 @@ Analyze the image and design a poster with:
 - Strategic placement of the image
 - Complementary text overlays
 - Color scheme that matches the image
-- Professional layout
+- Professional layout with auto-layout where appropriate
+- Relevant icons to enhance the design
+
+AVAILABLE ICONS (from lucide-react):
+Common: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music
+Social: facebook, twitter, instagram, linkedin, youtube, github
+UI: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi
+Arrows: arrow-right, arrow-left, arrow-up, arrow-down, chevron-right, chevron-left
+Actions: plus, minus, x, check, settings, search, menu, refresh, maximize, minimize
+
+USE ICONS THOUGHTFULLY:
+- Select icons that match the poster theme and content
+- Use appropriate sizes (typically 24-48px)
+- Match icon colors to the design palette
+
+AUTO LAYOUT USAGE:
+- Group related elements in frames with autoLayout: true
+- Use flexDirection: "row" for horizontal layouts, "column" for vertical
+- Set appropriate gap values (8-24px typically)
+- Use justifyContent and alignItems for proper alignment
 
 IMPORTANT: For shapes, set borderRadius correctly:
-- Circles: use borderRadius of "50%" or "9999px" (width and height MUST be equal for circles!)
+- Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
 - Rectangles: use borderRadius of "0"
 - Rounded rectangles: use borderRadius between "8px" and "24px"
 
@@ -162,6 +214,17 @@ Return a JSON object with this structure:
       "fontWeight": "normal|bold"
     },
     {
+      "type": "icon",
+      "content": "description of icon purpose",
+      "x": position,
+      "y": position,
+      "width": size,
+      "height": size,
+      "color": "#hexcolor",
+      "iconName": "heart|star|etc",
+      "iconFamily": "lucide"
+    },
+    {
       "type": "shape",
       "content": "description",
       "x": position,
@@ -171,6 +234,22 @@ Return a JSON object with this structure:
       "color": "#hexcolor",
       "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
       "shape": "rectangle|circle"
+    }
+  ],
+  "frames": [
+    {
+      "x": position,
+      "y": position,
+      "width": size,
+      "height": size,
+      "backgroundColor": "#hexcolor",
+      "autoLayout": true,
+      "flexDirection": "row|column",
+      "gap": 12,
+      "padding": 16,
+      "justifyContent": "center",
+      "alignItems": "center",
+      "elements": [nested elements]
     }
   ],
   "style": "description",
@@ -185,7 +264,26 @@ Return a JSON object with this structure:
         role: 'user',
         content: `Create a professional poster design based on this description: "${prompt}"
 
-Design a complete poster with layout, colors, text, and visual elements.
+Design a complete poster with layout, colors, text, visual elements, and appropriate icons.
+
+AVAILABLE ICONS (from lucide-react):
+Common: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music, crown, gift, award, trophy
+Social: facebook, twitter, instagram, linkedin, youtube, github, twitch
+UI: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi, battery, bluetooth, cast
+Arrows: arrow-right, arrow-left, arrow-up, arrow-down, chevron-right, chevron-left, move, external-link
+Actions: plus, minus, x, check, settings, search, menu, refresh, maximize, minimize, play, pause, skip-forward, volume
+
+USE ICONS STRATEGICALLY:
+- Choose icons that enhance the poster's message
+- Size icons appropriately (24-64px typically)
+- Use icon colors that complement the design
+
+AUTO LAYOUT & NESTED FRAMES:
+- Group related elements in frames with autoLayout enabled
+- Use flexDirection: "row" for horizontal, "column" for vertical
+- Set gap for spacing between children (8-32px)
+- Apply padding to frames (12-24px typically)
+- Nest frames inside frames for complex layouts
 
 IMPORTANT: For shapes, set borderRadius correctly:
 - Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
@@ -198,7 +296,7 @@ Return a JSON object with this structure:
   "backgroundColor": "#hexcolor",
   "elements": [
     {
-      "type": "text|shape",
+      "type": "text|shape|icon",
       "content": "text content or description",
       "x": position (0-800),
       "y": position (0-1000),
@@ -208,7 +306,27 @@ Return a JSON object with this structure:
       "fontSize": size (12-72),
       "fontWeight": "normal|bold",
       "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
-      "shape": "rectangle|circle" (if type is shape)
+      "shape": "rectangle|circle" (if type is shape),
+      "iconName": "heart|star|sparkles|etc" (if type is icon),
+      "iconFamily": "lucide" (if type is icon)
+    }
+  ],
+  "frames": [
+    {
+      "x": position,
+      "y": position,
+      "width": size,
+      "height": size,
+      "backgroundColor": "#hexcolor or transparent",
+      "autoLayout": true,
+      "flexDirection": "row|column",
+      "gap": spacing_value,
+      "padding": padding_value,
+      "justifyContent": "flex-start|center|flex-end|space-between",
+      "alignItems": "flex-start|center|flex-end|stretch",
+      "cornerRadius": 0-24,
+      "elements": [array of nested elements],
+      "frames": [array of nested frames if needed]
     }
   ],
   "style": "description of overall style",

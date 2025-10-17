@@ -98,11 +98,21 @@ export interface Frame {
   linkText?: string;
   linkPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
   gradientIntensity?: number;
+  
+  // Auto Layout properties
+  autoLayout?: boolean;
   flexDirection?: "row" | "column";
   justifyContent?: string;
   alignItems?: string;
   gap?: number;
+  padding?: number;
+  paddingTop?: number;
+  paddingRight?: number;
+  paddingBottom?: number;
+  paddingLeft?: number;
+  
   elements?: Element[];
+  frames?: Frame[]; // Nested frames support
   opacity?: number;
   fillOpacity?: number;
   cornerRadius?: number;
