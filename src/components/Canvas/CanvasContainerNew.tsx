@@ -1216,17 +1216,22 @@ export default function CanvasContainerNew({
       blendMode: "normal",
     };
 
-    // Remove elements from current frame
+    // Remove selected elements from current frame and add nested frame as child
     setFrames(frames.map(f => {
       if (f.id === selectedFrameId) {
-        return { ...f, elements: (f.elements || []).filter(e => !selectedElementIds.includes(e.id)) };
+        const remaining = (f.elements || []).filter(e => !selectedElementIds.includes(e.id));
+        return {
+          ...f,
+          elements: remaining,
+          frames: [...(f.frames || []), newFrame]
+        };
       }
       return f;
-    }).concat(newFrame));
+    }));
     
-    setSelectedFrameId(newFrame.id);
+    // Keep current frame selected so users can continue editing context
     setSelectedElementIds([]);
-    toast.success("Wrapped in new frame!");
+    toast.success("Wrapped into nested frame!");
   };
 
   // Main canvas container component
