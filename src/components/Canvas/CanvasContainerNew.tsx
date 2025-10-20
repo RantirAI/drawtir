@@ -441,9 +441,10 @@ export default function CanvasContainerNew({
                 fill: el.color || "#000000",
               };
             } else if (el.type === "image") {
+              // For images, use the first image from the array if multiple were uploaded
               return {
                 ...baseElement,
-                imageData: captionImage || undefined,
+                imageData: captionImage.length > 0 ? captionImage[0] : undefined,
               };
             } else {
               // shape

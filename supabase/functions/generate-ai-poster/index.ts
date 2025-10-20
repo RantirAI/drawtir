@@ -13,9 +13,18 @@ serve(async (req) => {
   try {
     const { prompt, imageBase64, analysisType } = await req.json();
     console.log('AI Poster Generation - Type:', analysisType);
+    console.log('Image data type:', typeof imageBase64, Array.isArray(imageBase64) ? `Array(${imageBase64.length})` : 'Not array');
     
-    // Handle multiple images
-    const images = Array.isArray(imageBase64) ? imageBase64 : (imageBase64 ? [imageBase64] : []);
+    // Handle multiple images - ensure we convert to array properly
+    let images: string[] = [];
+    if (imageBase64) {
+      if (Array.isArray(imageBase64)) {
+        images = imageBase64.filter(img => img && typeof img === 'string');
+      } else if (typeof imageBase64 === 'string') {
+        images = [imageBase64];
+      }
+    }
+    console.log('Processed images count:', images.length);
 
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
     if (!ANTHROPIC_API_KEY) {
