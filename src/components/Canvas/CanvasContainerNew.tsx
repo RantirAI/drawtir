@@ -325,6 +325,11 @@ export default function CanvasContainerNew({
         return;
       }
 
+      // Get current frame dimensions to tell AI the canvas size
+      const selectedFrame = frames.find(f => f.id === selectedFrameId);
+      const canvasWidth = selectedFrame?.width || 800;
+      const canvasHeight = selectedFrame?.height || 1200;
+
       // Full AI poster generation with streaming
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ai-poster`,
@@ -339,6 +344,8 @@ export default function CanvasContainerNew({
             prompt: description,
             imageBase64: captionImage.length > 0 ? captionImage : null,
             analysisType,
+            canvasWidth,
+            canvasHeight,
           }),
         }
       );

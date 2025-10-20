@@ -11,8 +11,10 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, imageBase64, analysisType } = await req.json();
+    const { prompt, imageBase64, analysisType, canvasWidth = 800, canvasHeight = 1200 } = await req.json();
+    
     console.log('AI Poster Generation - Type:', analysisType);
+    console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
     console.log('Image data type:', typeof imageBase64, Array.isArray(imageBase64) ? `Array(${imageBase64.length})` : 'Not array');
     
     // Handle multiple images - ensure we convert to array properly
@@ -61,6 +63,8 @@ serve(async (req) => {
           {
             type: 'text',
             text: `Analyze this poster design with EXTREME PRECISION and provide exact specifications to replicate it.
+
+CRITICAL: Target canvas size is ${canvasWidth}x${canvasHeight} pixels. Scale ALL measurements proportionally to fit this size.
 
 CRITICAL: This is a REPLICATION task. You must recreate the EXACT layout, colors, fonts, and positioning.
 
@@ -146,6 +150,8 @@ BE PIXEL-PERFECT. The goal is an EXACT replica.`
           {
             type: 'text',
             text: `Create a professional poster design using ${images.length > 1 ? `these ${images.length} images` : 'this image'}. User request: "${prompt || 'Create an eye-catching poster'}"
+
+CRITICAL: The canvas size is ${canvasWidth}x${canvasHeight} pixels. ALL element positions and sizes MUST fit within these dimensions.
 
 ${images.length > 1 ? `Create ${images.length} separate frames, one for each image provided.` : ''}
 
@@ -253,6 +259,11 @@ Return a JSON object with this structure:
       messages.push({
         role: 'user',
         content: `Create a professional poster design based on this description: "${prompt}"
+
+CRITICAL: The canvas size is ${canvasWidth}x${canvasHeight} pixels. ALL element positions and sizes MUST fit within these dimensions:
+- X coordinates: 0 to ${canvasWidth}
+- Y coordinates: 0 to ${canvasHeight}
+- Position elements proportionally within this space
 
 Design a complete poster with layout, colors, text, visual elements, and appropriate icons.
 
