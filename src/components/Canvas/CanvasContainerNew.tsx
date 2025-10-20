@@ -102,6 +102,28 @@ export default function CanvasContainerNew({
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
+  // Auto-fit frame to viewport
+  const fitFrameToView = (frameId: string) => {
+    const frame = frames.find(f => f.id === frameId);
+    if (!frame) return;
+
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const padding = 100; // Leave some padding around the frame
+
+    // Calculate zoom to fit frame with padding
+    const zoomX = (viewportWidth - padding * 2) / frame.width;
+    const zoomY = (viewportHeight - padding * 2) / frame.height;
+    const newZoom = Math.min(zoomX, zoomY, 1); // Don't zoom in beyond 100%
+
+    // Calculate pan offset to center the frame
+    const centerX = (viewportWidth / 2) - (frame.width * newZoom / 2) - (frame.x * newZoom);
+    const centerY = (viewportHeight / 2) - (frame.height * newZoom / 2) - (frame.y * newZoom);
+
+    setZoom(newZoom);
+    setPanOffset({ x: centerX, y: centerY });
+  };
+
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
@@ -505,8 +527,13 @@ export default function CanvasContainerNew({
         // Frames from AI are intentionally ignored; content was flattened above to keep everything editable.
 
 
-      console.log(`Added ${designSpec.elements.length} elements to canvas`);
-      toast.success(`Design generated successfully with ${designSpec.elements.length} elements!`);
+      console.log(`Added ${combinedElements.length} elements to canvas`);
+      toast.success(`Design generated successfully with ${combinedElements.length} elements!`);
+      
+      // Auto-fit the frame to view after generation
+      if (selectedFrameId) {
+        setTimeout(() => fitFrameToView(selectedFrameId), 100);
+      }
       
       // Save to conversation history
       if (projectId) {
