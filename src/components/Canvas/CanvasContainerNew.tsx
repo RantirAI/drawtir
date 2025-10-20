@@ -404,13 +404,27 @@ export default function CanvasContainerNew({
         throw new Error("No design specification received from AI. Please try again.");
       }
 
-      if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
-        console.error('Invalid design spec - no elements array:', designSpec);
-        throw new Error("AI generated an invalid design. Please try again.");
+      // Flatten any frames into a single editable elements array
+      const baseElements = Array.isArray(designSpec.elements) ? designSpec.elements : [];
+      let combinedElements: any[] = [...baseElements];
+
+      if (Array.isArray(designSpec.frames)) {
+        for (const frameSpec of designSpec.frames) {
+          const offsetX = frameSpec.x || 0;
+          const offsetY = frameSpec.y || 0;
+          const children = Array.isArray(frameSpec.elements) ? frameSpec.elements : [];
+          for (const child of children) {
+            combinedElements.push({
+              ...child,
+              x: (child.x || 0) + offsetX,
+              y: (child.y || 0) + offsetY,
+            });
+          }
+        }
       }
 
-      if (designSpec.elements.length === 0) {
-        console.warn('Design spec has no elements, adding background only');
+      if (combinedElements.length === 0) {
+        console.warn('Design spec has no elements; only background may be present');
         toast.info("AI generated only a background. Try adding more details to your prompt.");
       }
 
@@ -420,8 +434,8 @@ export default function CanvasContainerNew({
       }
 
         // Add elements to the current frame
-        if (selectedFrameId && designSpec.elements && Array.isArray(designSpec.elements)) {
-          const newElements = designSpec.elements.map((el: any) => {
+        if (selectedFrameId && combinedElements.length > 0) {
+          const newElements = combinedElements.map((el: any) => {
             // Determine border radius based on shape type
             let borderRadius = 0;
             if (el.borderRadius) {
@@ -488,86 +502,8 @@ export default function CanvasContainerNew({
           ));
         }
 
-        // Add nested frames only for non-replicate operations
-        if (selectedFrameId && analysisType !== 'replicate' && designSpec.frames && Array.isArray(designSpec.frames)) {
-          const nestedFrames = designSpec.frames.map((frameSpec: any) => {
-            const frameElements = (frameSpec.elements || []).map((el: any) => {
-              let borderRadius = 0;
-              if (el.borderRadius) {
-                borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
-              } else if (el.shape === 'circle') {
-                borderRadius = 9999;
-              }
+        // Frames from AI are intentionally ignored; content was flattened above to keep everything editable.
 
-              const baseElement: any = {
-                id: crypto.randomUUID(),
-                type: el.type,
-                x: el.x || 0,
-                y: el.y || 0,
-                width: el.width || 100,
-                height: el.height || 50,
-                rotation: 0,
-                opacity: 100,
-                blendMode: "normal" as const,
-              };
-
-              if (el.type === "icon") {
-                return { ...baseElement, iconName: el.iconName || "heart", iconFamily: el.iconFamily || "lucide", fill: el.color || "#000000" };
-              } else if (el.type === "text") {
-                return { ...baseElement, text: el.content || "", fontSize: el.fontSize || 14, fontWeight: el.fontWeight || "normal", fontFamily: "Arial", fill: el.color || "#000000" };
-              } else if (el.type === "image") {
-                return { ...baseElement, imageData: imgs.length > 0 ? imgs[0] : undefined };
-              } else {
-                return { ...baseElement, fill: el.color || "#000000", stroke: el.borderColor || "#000000", strokeWidth: el.borderWidth || 0, borderRadius, shapeType: el.shape || "rectangle" };
-              }
-            });
-
-            return {
-              id: crypto.randomUUID(),
-              name: `AI Frame ${(selectedFrame?.frames?.length || 0) + 1}`,
-              x: frameSpec.x || 100,
-              y: frameSpec.y || 100,
-              width: frameSpec.width || 200,
-              height: frameSpec.height || 100,
-              initialWidth: frameSpec.width || 200,
-              initialHeight: frameSpec.height || 100,
-              enableDynamicScale: true,
-              backgroundColor: frameSpec.backgroundColor || "transparent",
-              autoLayout: frameSpec.autoLayout || false,
-              flexDirection: frameSpec.flexDirection || undefined,
-              justifyContent: frameSpec.justifyContent || undefined,
-              alignItems: frameSpec.alignItems || undefined,
-              gap: frameSpec.gap || 0,
-              padding: frameSpec.padding || 0,
-              cornerRadius: frameSpec.cornerRadius || 0,
-              opacity: 100,
-              blendMode: "normal" as const,
-              elements: frameElements,
-              image: null,
-              topCaption: "",
-              bottomCaption: "",
-              textColor: "#000000",
-              textAlign: "center",
-              textSize: 2,
-              textOpacity: 100,
-              imageStyle: "cover",
-              brightness: 100,
-              contrast: 100,
-              saturation: 100,
-              blur: 0,
-              linkText: "",
-              linkPosition: "top-right",
-              gradientIntensity: 80,
-            } as Frame;
-          });
-
-          // Add nested frames as children of the selected frame
-          setFrames(frames.map(f => 
-            f.id === selectedFrameId 
-              ? { ...f, frames: [...(f.frames || []), ...nestedFrames] }
-              : f
-          ));
-        }
 
       console.log(`Added ${designSpec.elements.length} elements to canvas`);
       toast.success(`Design generated successfully with ${designSpec.elements.length} elements!`);

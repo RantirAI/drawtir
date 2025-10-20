@@ -310,12 +310,11 @@ USE ICONS STRATEGICALLY:
 - Size icons appropriately (24-64px typically)
 - Use icon colors that complement the design
 
-AUTO LAYOUT & NESTED FRAMES:
-- Group related elements in frames with autoLayout enabled
-- Use flexDirection: "row" for horizontal, "column" for vertical
-- Set gap for spacing between children (8-32px)
-- Apply padding to frames (12-24px typically)
-- Nest frames inside frames for complex layouts
+DO NOT USE FRAMES:
+- Return a flat design with only top-level elements
+- Do not group content into frames or auto layout containers
+- All positions are absolute relative to the canvas (0,0 top-left)
+- This ensures every element is directly editable in the canvas
 
 IMPORTANT: For shapes, set borderRadius correctly:
 - Circles: use borderRadius of "50%" (width and height MUST be equal!)
