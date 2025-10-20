@@ -309,7 +309,8 @@ export default function CanvasContainerNew({
   };
 
   const generateWithAI = async (generationType: string = "freeform") => {
-    if (!description.trim() && captionImage.length === 0) {
+    const imgs = Array.isArray(captionImage) ? captionImage : [];
+    if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
       return;
     }
@@ -320,8 +321,9 @@ export default function CanvasContainerNew({
       // Intelligently determine analysisType based on context
       let analysisType = generationType === "replicate" ? "replicate" : "create";
       
-      if (captionImage.length === 0 && analysisType === "replicate") {
+      if (imgs.length === 0 && analysisType === "replicate") {
         toast.error("Please upload an image to replicate");
+        setIsGenerating(false);
         return;
       }
 
@@ -342,7 +344,7 @@ export default function CanvasContainerNew({
           },
           body: JSON.stringify({
             prompt: description,
-            imageBase64: captionImage.length > 0 ? captionImage : null,
+            imageBase64: imgs.length > 0 ? imgs : null,
             analysisType,
             canvasWidth,
             canvasHeight,
@@ -451,7 +453,7 @@ export default function CanvasContainerNew({
               // For images, use the first image from the array if multiple were uploaded
               return {
                 ...baseElement,
-                imageData: captionImage.length > 0 ? captionImage[0] : undefined,
+                imageData: imgs.length > 0 ? imgs[0] : undefined,
               };
             } else {
               // shape
@@ -501,7 +503,7 @@ export default function CanvasContainerNew({
               } else if (el.type === "text") {
                 return { ...baseElement, text: el.content || "", fontSize: el.fontSize || 14, fontWeight: el.fontWeight || "normal", fontFamily: "Arial", fill: el.color || "#000000" };
               } else if (el.type === "image") {
-                return { ...baseElement, imageData: captionImage || undefined };
+                return { ...baseElement, imageData: imgs.length > 0 ? imgs[0] : undefined };
               } else {
                 return { ...baseElement, fill: el.color || "#000000", stroke: el.borderColor || "#000000", strokeWidth: el.borderWidth || 0, borderRadius, shapeType: el.shape || "rectangle" };
               }
