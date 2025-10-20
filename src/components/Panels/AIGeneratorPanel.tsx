@@ -40,7 +40,7 @@ export default function AIGeneratorPanel({
   currentSnapshot,
   description,
   setDescription,
-  captionImage,
+  captionImage = [], // Default to empty array
   setCaptionImage,
   isGenerating,
   generationProgress,
@@ -179,7 +179,7 @@ export default function AIGeneratorPanel({
                       });
                     })
                   ).then(results => {
-                    setCaptionImage([...captionImage, ...results]);
+                    setCaptionImage([...(captionImage || []), ...results]);
                     toast.success(`${files.length} image(s) uploaded!`);
                   });
                 }}
@@ -187,7 +187,7 @@ export default function AIGeneratorPanel({
                 id="ai-image-upload"
               />
               
-              {captionImage.length > 0 && (
+              {captionImage && captionImage.length > 0 && (
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   {captionImage.map((img, idx) => (
                     <div key={idx} className="relative bg-secondary/30 rounded border">
@@ -213,7 +213,7 @@ export default function AIGeneratorPanel({
                 className="flex items-center justify-center gap-2 px-3 py-2 border rounded cursor-pointer hover:bg-secondary transition-colors text-xs"
               >
                 <Upload className="h-3.5 w-3.5" />
-                <span>{captionImage.length > 0 ? `Add more images (${captionImage.length})` : 'Upload images'}</span>
+                <span>{captionImage && captionImage.length > 0 ? `Add more images (${captionImage.length})` : 'Upload images'}</span>
               </label>
             </div>
 
