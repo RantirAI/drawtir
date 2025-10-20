@@ -568,7 +568,7 @@ export default function CanvasContainerNew({
               title: description.substring(0, 50) || "AI Generation",
               description: description,
               generation_type: generationType,
-              input_data: { prompt: description, hasImage: !!captionImage },
+              input_data: { prompt: description, hasImage: (captionImage?.length ?? 0) > 0 },
               output_snapshot: snapshot as any
             });
           }
@@ -579,7 +579,7 @@ export default function CanvasContainerNew({
       }
       
       setDescription("");
-      setCaptionImage(null);
+      setCaptionImage([]);
       setShowGeneratePanel(false);
     } catch (error: any) {
       console.error("Error generating with AI:", error);
@@ -1695,7 +1695,7 @@ export default function CanvasContainerNew({
           onClose={() => {
             setShowGeneratePanel(false);
             setDescription("");
-            setCaptionImage(null);
+            setCaptionImage([]);
           }}
         />
       )}
