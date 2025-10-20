@@ -5,6 +5,7 @@ import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
 import LayersPanel from "../Panels/LayersPanel";
+import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
@@ -307,7 +308,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async () => {
+  const generateWithAI = async (generationType: string = "freeform") => {
     if (!description.trim() && !captionImage) {
       toast.error("Please provide a description or upload an image");
       return;
@@ -317,15 +318,11 @@ export default function CanvasContainerNew({
     setGenerationProgress("Starting generation...");
     try {
       // Intelligently determine analysisType based on context
-      let analysisType = "create";
+      let analysisType = generationType === "replicate" ? "replicate" : "create";
       
-      if (captionImage) {
-        // Check if prompt suggests replication
-        const replicateKeywords = ["replicate", "copy", "duplicate", "same", "similar", "like this", "recreate"];
-        const promptLower = description.toLowerCase();
-        const isReplicating = replicateKeywords.some(keyword => promptLower.includes(keyword));
-        
-        analysisType = isReplicating ? "replicate" : "create";
+      if (!captionImage && analysisType === "replicate") {
+        toast.error("Please upload an image to replicate");
+        return;
       }
 
       // Full AI poster generation with streaming
@@ -550,7 +547,31 @@ export default function CanvasContainerNew({
         }
 
       toast.success("AI design generated!");
+      
+      // Save to conversation history
+      if (projectId) {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+            await supabase.from('ai_conversations').insert({
+              project_id: projectId,
+              user_id: user.id,
+              title: description.substring(0, 50) || "AI Generation",
+              description: description,
+              generation_type: generationType,
+              input_data: { prompt: description, hasImage: !!captionImage },
+              output_snapshot: snapshot as any
+            });
+          }
+        } catch (error) {
+          console.error("Error saving conversation:", error);
+          // Don't show error to user, just log it
+        }
+      }
+      
       setDescription("");
+      setCaptionImage(null);
       setShowGeneratePanel(false);
     } catch (error: any) {
       console.error("Error generating with AI:", error);
@@ -1646,118 +1667,29 @@ export default function CanvasContainerNew({
 
       {/* AI Generation Panel */}
       {showGeneratePanel && (
-        <DraggablePanel 
-          title="AI Generator" 
-          defaultPosition={{ x: 50, y: 150 }} 
+        <AIGeneratorPanel
+          projectId={projectId}
+          currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff")}
+          description={description}
+          setDescription={setDescription}
+          captionImage={captionImage}
+          setCaptionImage={setCaptionImage}
+          isGenerating={isGenerating}
+          generationProgress={generationProgress}
+          captionImageInputRef={captionImageInputRef}
+          onGenerate={generateWithAI}
+          onRestoreConversation={(snapshot) => {
+            setProjectTitle(snapshot.metadata.title);
+            setFrames(snapshot.frames);
+            setZoom(snapshot.canvas.zoom);
+            setPanOffset(snapshot.canvas.panOffset);
+          }}
           onClose={() => {
             setShowGeneratePanel(false);
             setDescription("");
             setCaptionImage(null);
           }}
-        >
-          <div className="space-y-3 w-80">
-            {/* Description Input */}
-            <div>
-              <Label className="text-xs mb-1 block">Describe what you want</Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Create a vibrant summer music festival poster... or replicate this design..."
-                className="h-24 text-xs resize-none"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1">
-                Tip: Upload an image and say "replicate this" to copy a design, or describe what you want to create
-              </p>
-            </div>
-            
-            {/* Image Upload */}
-            <div>
-              <Label className="text-xs mb-1 block">Upload Reference Image (Optional)</Label>
-              <input
-                type="file"
-                accept="image/*"
-                ref={captionImageInputRef}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  
-                  if (file.size > 10 * 1024 * 1024) {
-                    toast.error("Image must be less than 10MB");
-                    return;
-                  }
-                  
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setCaptionImage(reader.result as string);
-                    toast.success("Image uploaded!");
-                  };
-                  reader.readAsDataURL(file);
-                }}
-                className="hidden"
-                id="caption-image-upload"
-              />
-              <label
-                htmlFor="caption-image-upload"
-                className="flex items-center justify-center gap-2 p-2 border-2 border-dashed rounded cursor-pointer hover:border-primary transition-colors text-xs"
-              >
-                {captionImage ? (
-                  <div className="w-full space-y-2">
-                    <img src={captionImage} alt="Uploaded" className="w-full h-16 object-cover rounded" />
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          captionImageInputRef.current?.click();
-                        }}
-                      >
-                        Change
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCaptionImage(null);
-                          if (captionImageInputRef.current) {
-                            captionImageInputRef.current.value = '';
-                          }
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-3 w-3" />
-                    <span>Upload image</span>
-                  </>
-                )}
-              </label>
-            </div>
-            
-            {/* Generate Button */}
-            <Button onClick={generateWithAI} disabled={isGenerating} className="w-full h-8 text-xs">
-              <Sparkles className="h-3 w-3 mr-2" />
-              {isGenerating ? (
-                <span className="truncate">{generationProgress || "Generating..."}</span>
-              ) : (
-                "Generate with AI"
-              )}
-            </Button>
-            
-            {/* Progress indicator */}
-            {isGenerating && generationProgress && (
-              <div className="text-[10px] text-muted-foreground mt-1 line-clamp-2 break-words">
-                {generationProgress}
-              </div>
-            )}
-          </div>
-        </DraggablePanel>
+        />
       )}
 
       {/* Unified Shape Settings Panel */}

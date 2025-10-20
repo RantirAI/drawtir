@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_conversations: {
+        Row: {
+          created_at: string
+          description: string | null
+          generation_type: string
+          id: string
+          input_data: Json | null
+          output_snapshot: Json
+          project_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          generation_type: string
+          id?: string
+          input_data?: Json | null
+          output_snapshot: Json
+          project_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          generation_type?: string
+          id?: string
+          input_data?: Json | null
+          output_snapshot?: Json
+          project_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       posters: {
         Row: {
           canvas_data: Json | null
