@@ -190,8 +190,8 @@ export default function AIGeneratorPanel({
               {captionImage.length > 0 && (
                 <div className="grid grid-cols-2 gap-2 mb-2">
                   {captionImage.map((img, idx) => (
-                    <div key={idx} className="relative">
-                      <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-16 object-cover rounded" />
+                    <div key={idx} className="relative bg-secondary/30 rounded border">
+                      <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-24 object-contain rounded p-1" />
                       <Button
                         size="sm"
                         variant="ghost"
