@@ -397,8 +397,21 @@ export default function CanvasContainerNew({
         }
       }
 
+      console.log('Design spec received:', designSpec);
+
       if (!designSpec) {
-        throw new Error("No design specification received");
+        console.error('No design specification received from AI');
+        throw new Error("No design specification received from AI. Please try again.");
+      }
+
+      if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
+        console.error('Invalid design spec - no elements array:', designSpec);
+        throw new Error("AI generated an invalid design. Please try again.");
+      }
+
+      if (designSpec.elements.length === 0) {
+        console.warn('Design spec has no elements, adding background only');
+        toast.info("AI generated only a background. Try adding more details to your prompt.");
       }
 
       // Update current frame background
@@ -556,7 +569,8 @@ export default function CanvasContainerNew({
           ));
         }
 
-      toast.success("AI design generated!");
+      console.log(`Added ${designSpec.elements.length} elements to canvas`);
+      toast.success(`Design generated successfully with ${designSpec.elements.length} elements!`);
       
       // Save to conversation history
       if (projectId) {
@@ -583,10 +597,12 @@ export default function CanvasContainerNew({
       setDescription("");
       setCaptionImage([]);
       setShowGeneratePanel(false);
+      setIsGenerating(false);
+      setGenerationProgress("");
     } catch (error: any) {
       console.error("Error generating with AI:", error);
-      toast.error(error.message || "Failed to generate");
-    } finally {
+      console.error("Error details:", error.message, error.stack);
+      toast.error(error.message || "Failed to generate design. Please try again.");
       setIsGenerating(false);
       setGenerationProgress("");
     }
