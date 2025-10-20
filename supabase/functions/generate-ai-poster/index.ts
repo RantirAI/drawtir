@@ -13,6 +13,9 @@ serve(async (req) => {
   try {
     const { prompt, imageBase64, analysisType } = await req.json();
     console.log('AI Poster Generation - Type:', analysisType);
+    
+    // Handle multiple images
+    const images = Array.isArray(imageBase64) ? imageBase64 : (imageBase64 ? [imageBase64] : []);
 
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
     if (!ANTHROPIC_API_KEY) {
@@ -31,23 +34,26 @@ serve(async (req) => {
     // Build messages based on input type
     const messages: any[] = [];
     
-    if (analysisType === 'replicate' && imageBase64) {
-      // Replicate an existing design
-      const mediaType = getMediaType(imageBase64);
+    if (analysisType === 'replicate' && images.length > 0) {
+      // Replicate an existing design - support multiple images for multi-frame generation
+      const imageContents = images.map(img => ({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: getMediaType(img),
+          data: img.split(',')[1] || img,
+        },
+      }));
+      
       messages.push({
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType,
-              data: imageBase64.split(',')[1] || imageBase64,
-            },
-          },
+          ...imageContents,
           {
             type: 'text',
-            text: `Analyze this poster design in EXTREME DETAIL and provide precise specifications to replicate it as closely as possible.
+            text: `${images.length > 1 
+              ? `Analyze these ${images.length} poster designs in EXTREME DETAIL and create ${images.length} separate frames to replicate each design as closely as possible. Generate one frame for each image provided.` 
+              : 'Analyze this poster design in EXTREME DETAIL and provide precise specifications to replicate it as closely as possible.'}
 
 CRITICAL ANALYSIS REQUIREMENTS:
 1. Measure EXACT positions of all elements (x, y coordinates relative to poster edges)
@@ -141,25 +147,28 @@ BE PRECISE. The goal is pixel-perfect replication.`
           }
         ]
       });
-    } else if (analysisType === 'create' && imageBase64) {
-      // Create poster using uploaded image
-      const mediaType = getMediaType(imageBase64);
+    } else if (analysisType === 'create' && images.length > 0) {
+      // Create poster using uploaded images
+      const imageContents = images.map(img => ({
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: getMediaType(img),
+          data: img.split(',')[1] || img,
+        },
+      }));
+      
       messages.push({
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: mediaType,
-              data: imageBase64.split(',')[1] || imageBase64,
-            },
-          },
+          ...imageContents,
           {
             type: 'text',
-            text: `Create a professional poster design using this image. User request: "${prompt || 'Create an eye-catching poster'}"
+            text: `Create a professional poster design using ${images.length > 1 ? `these ${images.length} images` : 'this image'}. User request: "${prompt || 'Create an eye-catching poster'}"
 
-Analyze the image and design a poster with:
+${images.length > 1 ? `Create ${images.length} separate frames, one for each image provided.` : ''}
+
+Analyze the image${images.length > 1 ? 's' : ''} and design a poster with:
 - Strategic placement of the image
 - Complementary text overlays
 - Color scheme that matches the image

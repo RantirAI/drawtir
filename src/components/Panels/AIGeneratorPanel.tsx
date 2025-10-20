@@ -16,8 +16,8 @@ interface AIGeneratorPanelProps {
   currentSnapshot: CanvasSnapshot;
   description: string;
   setDescription: (desc: string) => void;
-  captionImage: string | null;
-  setCaptionImage: (img: string | null) => void;
+  captionImage: string[];
+  setCaptionImage: (img: string[]) => void;
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
@@ -152,70 +152,68 @@ export default function AIGeneratorPanel({
 
             {/* Image Upload */}
             <div>
+              <Label className="text-xs mb-1 block">Reference Images (Optional)</Label>
               <input
                 type="file"
                 accept="image/*"
+                multiple
                 ref={captionImageInputRef}
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+                  const files = Array.from(e.target.files || []);
+                  if (files.length === 0) return;
                   
-                  if (file.size > 10 * 1024 * 1024) {
-                    toast.error("Image must be less than 10MB");
+                  // Check file sizes
+                  const oversizedFiles = files.filter(f => f.size > 10 * 1024 * 1024);
+                  if (oversizedFiles.length > 0) {
+                    toast.error("All images must be less than 10MB");
                     return;
                   }
                   
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setCaptionImage(reader.result as string);
-                    toast.success("Image uploaded!");
-                  };
-                  reader.readAsDataURL(file);
+                  // Read all files
+                  Promise.all(
+                    files.map(file => {
+                      return new Promise<string>((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result as string);
+                        reader.readAsDataURL(file);
+                      });
+                    })
+                  ).then(results => {
+                    setCaptionImage([...captionImage, ...results]);
+                    toast.success(`${files.length} image(s) uploaded!`);
+                  });
                 }}
                 className="hidden"
                 id="ai-image-upload"
               />
+              
+              {captionImage.length > 0 && (
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  {captionImage.map((img, idx) => (
+                    <div key={idx} className="relative">
+                      <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-16 object-cover rounded" />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-0 right-0 h-5 w-5 p-0 bg-background/80"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCaptionImage(captionImage.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
               <label
                 htmlFor="ai-image-upload"
                 className="flex items-center justify-center gap-2 px-3 py-2 border rounded cursor-pointer hover:bg-secondary transition-colors text-xs"
               >
-                {captionImage ? (
-                  <div className="w-full space-y-2">
-                    <img src={captionImage} alt="Uploaded" className="w-full h-16 object-cover rounded" />
-                    <div className="flex gap-1">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          captionImageInputRef.current?.click();
-                        }}
-                      >
-                        Change
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="flex-1 h-6 text-xs"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCaptionImage(null);
-                          if (captionImageInputRef.current) {
-                            captionImageInputRef.current.value = '';
-                          }
-                        }}
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <Upload className="h-3.5 w-3.5" />
-                    <span>Upload image</span>
-                  </>
-                )}
+                <Upload className="h-3.5 w-3.5" />
+                <span>{captionImage.length > 0 ? `Add more images (${captionImage.length})` : 'Upload images'}</span>
               </label>
             </div>
 

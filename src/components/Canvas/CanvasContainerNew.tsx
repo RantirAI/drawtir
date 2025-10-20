@@ -108,7 +108,7 @@ export default function CanvasContainerNew({
   const [showLayersPanel, setShowLayersPanel] = useState(false);
 
   const [description, setDescription] = useState("");
-  const [captionImage, setCaptionImage] = useState<string | null>(null);
+  const [captionImage, setCaptionImage] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -309,7 +309,7 @@ export default function CanvasContainerNew({
   };
 
   const generateWithAI = async (generationType: string = "freeform") => {
-    if (!description.trim() && !captionImage) {
+    if (!description.trim() && captionImage.length === 0) {
       toast.error("Please provide a description or upload an image");
       return;
     }
@@ -320,7 +320,7 @@ export default function CanvasContainerNew({
       // Intelligently determine analysisType based on context
       let analysisType = generationType === "replicate" ? "replicate" : "create";
       
-      if (!captionImage && analysisType === "replicate") {
+      if (captionImage.length === 0 && analysisType === "replicate") {
         toast.error("Please upload an image to replicate");
         return;
       }
@@ -337,7 +337,7 @@ export default function CanvasContainerNew({
           },
           body: JSON.stringify({
             prompt: description,
-            imageBase64: captionImage,
+            imageBase64: captionImage.length > 0 ? captionImage : null,
             analysisType,
           }),
         }
