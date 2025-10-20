@@ -1133,6 +1133,62 @@ export default function CanvasContainerNew({
     toast.success("Layer reordered");
   };
 
+  const handleFrameReorder = (sourceFrameId: string, targetFrameId: string, position: 'before' | 'after' | 'inside') => {
+    const findAndRemoveFrame = (frames: Frame[]): { frames: Frame[], removedFrame: Frame | null } => {
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i].id === sourceFrameId) {
+          const [removed] = frames.splice(i, 1);
+          return { frames, removedFrame: removed };
+        }
+        if (frames[i].frames && frames[i].frames!.length > 0) {
+          const result = findAndRemoveFrame(frames[i].frames!);
+          if (result.removedFrame) {
+            frames[i] = { ...frames[i], frames: result.frames };
+            return { frames, removedFrame: result.removedFrame };
+          }
+        }
+      }
+      return { frames, removedFrame: null };
+    };
+
+    const insertFrame = (frames: Frame[], frame: Frame): Frame[] => {
+      for (let i = 0; i < frames.length; i++) {
+        if (frames[i].id === targetFrameId) {
+          if (position === 'before') {
+            frames.splice(i, 0, frame);
+            return frames;
+          } else if (position === 'after') {
+            frames.splice(i + 1, 0, frame);
+            return frames;
+          } else if (position === 'inside') {
+            frames[i] = {
+              ...frames[i],
+              frames: [...(frames[i].frames || []), frame]
+            };
+            return frames;
+          }
+        }
+        if (frames[i].frames && frames[i].frames!.length > 0) {
+          const updated = insertFrame(frames[i].frames!, frame);
+          if (updated !== frames[i].frames) {
+            frames[i] = { ...frames[i], frames: updated };
+            return frames;
+          }
+        }
+      }
+      return frames;
+    };
+
+    const newFrames = [...frames];
+    const { frames: framesWithoutSource, removedFrame } = findAndRemoveFrame(newFrames);
+    
+    if (removedFrame) {
+      const finalFrames = insertFrame(framesWithoutSource, removedFrame);
+      setFrames(finalFrames);
+      toast.success("Frame moved");
+    }
+  };
+
   const handleElementsDelete = () => {
     if (selectedElementIds.length === 0) return;
     
@@ -1886,6 +1942,7 @@ export default function CanvasContainerNew({
           }}
           onElementDelete={handleElementDelete}
           onElementReorder={handleElementReorder}
+          onFrameReorder={handleFrameReorder}
           onClose={() => setShowLayersPanel(false)}
         />
       )}
