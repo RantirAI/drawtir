@@ -64,32 +64,48 @@ serve(async (req) => {
             type: 'text',
             text: `Analyze this poster design with EXTREME PRECISION and provide exact specifications to replicate it.
 
-CRITICAL: Target canvas size is ${canvasWidth}x${canvasHeight} pixels. Scale ALL measurements proportionally to fit this size.
+CRITICAL REPLICATION REQUIREMENTS:
+1. Target canvas: ${canvasWidth}px × ${canvasHeight}px
+2. Measure the SOURCE image dimensions first
+3. Calculate scaling factors: scaleX = ${canvasWidth}/sourceWidth, scaleY = ${canvasHeight}/sourceHeight
+4. Apply scaling to ALL measurements:
+   - x_new = x_original × scaleX
+   - y_new = y_original × scaleY
+   - width_new = width_original × scaleX
+   - height_new = height_original × scaleY
+   - fontSize_new = fontSize_original × Math.min(scaleX, scaleY)
 
-CRITICAL: This is a REPLICATION task. You must recreate the EXACT layout, colors, fonts, and positioning.
+MEASUREMENT PRECISION:
 
 ANALYSIS REQUIREMENTS:
-1. EXACT MEASUREMENTS:
-   - Measure precise x, y coordinates for EVERY element (in pixels)
-   - Measure exact width and height for EVERY element
-   - The canvas is typically 800x1000 pixels - measure positions relative to this
+1. MEASURE SOURCE DIMENSIONS:
+   - First, estimate the source image dimensions (width × height)
+   - Calculate scale factors to fit ${canvasWidth}×${canvasHeight}:
+     * scaleX = ${canvasWidth} / sourceWidth
+     * scaleY = ${canvasHeight} / sourceHeight
    
-2. COLOR EXTRACTION:
+2. SCALE ALL MEASUREMENTS:
+   - x_new = x_original × scaleX
+   - y_new = y_original × scaleY  
+   - width_new = width_original × scaleX
+   - height_new = height_original × scaleY
+   - fontSize_new = fontSize_original × min(scaleX, scaleY)
+   
+3. COLOR EXTRACTION:
    - Extract EXACT hex colors from every element
    - Background color must be precise
    - Text colors, shape fills, icon colors - all must be exact
    
 3. TEXT ANALYSIS:
    - Copy the EXACT text content (word for word)
-   - Measure font sizes precisely (in pixels)
+   - Measure font sizes and scale them appropriately
    - Identify font weight: normal, bold, 600, 700, etc.
-   - Note text alignment if visible
    
 4. SHAPES & ICONS:
    - For rectangles: borderRadius = "0"
-   - For rounded rectangles: measure corner radius (e.g., "8px", "12px", "16px")
+   - For rounded rectangles: scale corner radius proportionally
    - For circles: width MUST equal height, borderRadius = "50%"
-   - Identify icons and match to lucide-react names (heart, star, sparkles, etc.)
+   - Match icons to lucide-react names
    
 5. LAYERING:
    - Note which elements are in front/behind others
@@ -260,12 +276,27 @@ Return a JSON object with this structure:
         role: 'user',
         content: `Create a professional poster design based on this description: "${prompt}"
 
-CRITICAL: The canvas size is ${canvasWidth}x${canvasHeight} pixels. ALL element positions and sizes MUST fit within these dimensions:
+CRITICAL CANVAS CONSTRAINTS:
+- Canvas dimensions: ${canvasWidth}px × ${canvasHeight}px
+- ALL elements MUST be positioned within these bounds
 - X coordinates: 0 to ${canvasWidth}
 - Y coordinates: 0 to ${canvasHeight}
-- Position elements proportionally within this space
+- Scale your design proportionally to fit this canvas size
 
-Design a complete poster with layout, colors, text, visual elements, and appropriate icons.
+DESIGN REQUIREMENTS:
+1. Create a visually striking poster with balanced composition
+2. Use the full canvas space effectively
+3. Choose colors that work well together
+4. Add text with appropriate sizing (scale fonts to canvas size)
+5. Include relevant icons to enhance the message
+6. Consider visual hierarchy and spacing
+
+IMPORTANT SIZING GUIDELINES:
+- Titles: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
+- Subtitles: ${Math.floor(canvasHeight * 0.04)}-${Math.floor(canvasHeight * 0.05)}px  
+- Body text: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.03)}px
+- Icons: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.08)}px
+- Spacing: Use ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.04)}px margins
 
 AVAILABLE ICONS (from lucide-react):
 Common: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music, crown, gift, award, trophy
@@ -287,9 +318,15 @@ AUTO LAYOUT & NESTED FRAMES:
 - Nest frames inside frames for complex layouts
 
 IMPORTANT: For shapes, set borderRadius correctly:
-- Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
+- Circles: use borderRadius of "50%" (width and height MUST be equal!)
 - Rectangles: use borderRadius of "0"
-- Rounded rectangles: use borderRadius between "8px" and "24px"
+- Rounded rectangles: use borderRadius between "8px" and "16px"
+
+ELEMENT POSITIONING RULES:
+- Ensure no elements are cut off at canvas edges
+- Leave appropriate margins (at least ${Math.floor(canvasWidth * 0.05)}px from edges)
+- Center important content vertically and horizontally
+- Use the full canvas height effectively
 
 Return a JSON object with this structure:
 {
@@ -299,12 +336,12 @@ Return a JSON object with this structure:
     {
       "type": "text|shape|icon",
       "content": "text content or description",
-      "x": position (0-800),
-      "y": position (0-1000),
+      "x": position (0-${canvasWidth}),
+      "y": position (0-${canvasHeight}),
       "width": size,
       "height": size (must equal width for circles!),
       "color": "#hexcolor",
-      "fontSize": size (12-72),
+      "fontSize": size (scale to canvas),
       "fontWeight": "normal|bold",
       "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
       "shape": "rectangle|circle" (if type is shape),
