@@ -60,99 +60,71 @@ serve(async (req) => {
           ...imageContents,
           {
             type: 'text',
-            text: `${images.length > 1 
-              ? `Analyze these ${images.length} poster designs in EXTREME DETAIL and create ${images.length} separate frames to replicate each design as closely as possible. Generate one frame for each image provided.` 
-              : 'Analyze this poster design in EXTREME DETAIL and provide precise specifications to replicate it as closely as possible.'}
+            text: `Analyze this poster design with EXTREME PRECISION and provide exact specifications to replicate it.
 
-CRITICAL ANALYSIS REQUIREMENTS:
-1. Measure EXACT positions of all elements (x, y coordinates relative to poster edges)
-2. Measure EXACT dimensions (width, height in pixels)
-3. Extract EXACT colors using hex codes (use color picker precision)
-4. Identify EXACT font sizes, weights, and text alignment
-5. Analyze spacing, padding, and margins between elements
-6. Note layering order (z-index) of overlapping elements
-7. Identify ALL visual elements including subtle background shapes
-8. Identify any icons present and match them to appropriate icon names
+CRITICAL: This is a REPLICATION task. You must recreate the EXACT layout, colors, fonts, and positioning.
 
-ICON SPECIFICATIONS:
-- Identify any icons in the design
-- Choose appropriate icon names from lucide-react library
-- Common icons: heart, star, circle, square, triangle, home, user, settings, search, menu, x, check, arrow-right, arrow-left, plus, minus, etc.
-- For social icons: facebook, twitter, instagram, linkedin, youtube, github
-- For UI icons: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi, zap
-- Note icon size and color
+ANALYSIS REQUIREMENTS:
+1. EXACT MEASUREMENTS:
+   - Measure precise x, y coordinates for EVERY element (in pixels)
+   - Measure exact width and height for EVERY element
+   - The canvas is typically 800x1000 pixels - measure positions relative to this
+   
+2. COLOR EXTRACTION:
+   - Extract EXACT hex colors from every element
+   - Background color must be precise
+   - Text colors, shape fills, icon colors - all must be exact
+   
+3. TEXT ANALYSIS:
+   - Copy the EXACT text content (word for word)
+   - Measure font sizes precisely (in pixels)
+   - Identify font weight: normal, bold, 600, 700, etc.
+   - Note text alignment if visible
+   
+4. SHAPES & ICONS:
+   - For rectangles: borderRadius = "0"
+   - For rounded rectangles: measure corner radius (e.g., "8px", "12px", "16px")
+   - For circles: width MUST equal height, borderRadius = "50%"
+   - Identify icons and match to lucide-react names (heart, star, sparkles, etc.)
+   
+5. LAYERING:
+   - Note which elements are in front/behind others
+   - Bottom elements should appear first in the array
 
-NESTED FRAMES & AUTO LAYOUT:
-- Identify groups of elements that should be contained together
-- Note if elements are arranged in rows or columns
-- Measure spacing/gaps between grouped elements
-- Identify containers with consistent padding
+IMPORTANT RULES FOR REPLICATION:
+- DO NOT create nested frames - output all elements in a flat "elements" array
+- DO NOT include a "frames" property in your response
+- Position all elements relative to the canvas (0,0 is top-left)
+- Be pixel-perfect with measurements
+- Match colors exactly
 
-SHAPE SPECIFICATIONS:
-- For circles: width MUST equal height, borderRadius MUST be "50%"
-- For rounded rectangles: measure corner radius precisely (e.g., "12px", "16px", "24px")
-- For sharp rectangles: borderRadius is "0"
-- For ellipses: width differs from height, borderRadius is "50%"
-
-TEXT SPECIFICATIONS:
-- Extract exact text content including line breaks
-- Measure font size in pixels
-- Identify font weight: "normal", "bold", "600", etc.
-- Note text color in hex format
-- Identify text alignment if visible
-
-COLOR EXTRACTION:
-- Background color in exact hex format
-- All element colors in exact hex format
-- If gradients exist, note the gradient colors and direction
-
-POSITIONING:
-- Use the poster frame as reference (0,0 is top-left)
-- Measure from top-left corner of each element
-- Account for element centering and alignment
-
-Return a JSON object with this EXACT structure:
+Return a JSON object with this structure (NO frames property):
 {
-  "title": "Descriptive title of the design",
-  "backgroundColor": "#hexcolor",
+  "title": "Replicated: [original design name]",
+  "backgroundColor": "#exacthexcolor",
   "elements": [
     {
-      "type": "text|shape|image|icon",
-      "content": "exact text or description",
+      "type": "text|shape|icon",
+      "content": "exact text",
       "x": precise_x_position,
       "y": precise_y_position,
       "width": exact_width,
       "height": exact_height,
       "color": "#exacthexcolor",
-      "fontSize": exact_size,
-      "fontWeight": "normal|bold|600|700",
-      "borderRadius": "0|12px|16px|50%",
-      "shape": "rectangle|circle|ellipse" (only for shapes),
-      "iconName": "heart|star|circle|etc" (only for icons),
-      "iconFamily": "lucide" (only for icons)
+      "fontSize": exact_size (for text),
+      "fontWeight": "normal|bold|600" (for text),
+      "borderRadius": "0|12px|50%" (for shapes),
+      "shape": "rectangle|circle" (for shapes),
+      "iconName": "heart|star|etc" (for icons),
+      "iconFamily": "lucide" (for icons)
     }
   ],
-  "frames": [
-    {
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "backgroundColor": "#hexcolor",
-      "autoLayout": true,
-      "flexDirection": "row|column",
-      "gap": spacing_between_children,
-      "padding": uniform_padding,
-      "justifyContent": "flex-start|center|flex-end|space-between",
-      "alignItems": "flex-start|center|flex-end",
-      "elements": [nested elements array]
-    }
-  ],
-  "style": "detailed description of visual style",
-  "mood": "mood and feeling of the design"
+  "style": "exact visual style description",
+  "mood": "mood of the design"
 }
 
-BE PRECISE. The goal is pixel-perfect replication.`
+
+BE PIXEL-PERFECT. The goal is an EXACT replica.`
           }
         ]
       });

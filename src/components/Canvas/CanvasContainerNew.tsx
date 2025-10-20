@@ -466,8 +466,8 @@ export default function CanvasContainerNew({
           ));
         }
 
-        // Add nested frames if provided (as children of selected frame)
-        if (selectedFrameId && designSpec.frames && Array.isArray(designSpec.frames)) {
+        // Add nested frames only for non-replicate operations
+        if (selectedFrameId && analysisType !== 'replicate' && designSpec.frames && Array.isArray(designSpec.frames)) {
           const nestedFrames = designSpec.frames.map((frameSpec: any) => {
             const frameElements = (frameSpec.elements || []).map((el: any) => {
               let borderRadius = 0;
