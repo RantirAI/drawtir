@@ -393,7 +393,10 @@ Return JSON (flat structure, NO nested frames):
     } else {
       // OpenAI API
       const messages: any[] = [
-        { role: 'system', content: DESIGN_SYSTEM_PROMPT }
+        { 
+          role: 'system', 
+          content: DESIGN_SYSTEM_PROMPT + '\n\nIMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks. Your entire response must be a single JSON object.' 
+        }
       ];
       
       if (images.length > 0) {
@@ -577,31 +580,44 @@ Return JSON (flat structure, NO nested frames):
       // Non-streaming response (for OpenAI models)
       const responseData = await response.json();
       console.log('Non-streaming response received');
+      console.log('Full OpenAI response:', JSON.stringify(responseData));
       
       let fullContent = '';
       if (modelConfig.provider === 'openai') {
         fullContent = responseData.choices?.[0]?.message?.content || '';
+        console.log('OpenAI content length:', fullContent.length);
+        console.log('OpenAI content preview:', fullContent.substring(0, 500));
       }
 
       // Parse result
       let designSpec;
       try {
-        // First try direct JSON parse (response_format=json_object)
+        // First try direct JSON parse (response_format=json_object should return pure JSON)
         if (typeof fullContent === 'string' && fullContent.trim()) {
+          console.log('Attempting direct JSON parse...');
           designSpec = JSON.parse(fullContent);
+          console.log('Direct JSON parse successful');
         } else {
-          throw new Error('Empty content');
+          throw new Error('Empty or invalid content');
         }
-      } catch (_) {
+      } catch (parseError) {
+        console.error('Direct JSON parse failed:', parseError);
+        // Fallback: try to extract JSON from markdown code blocks
         try {
+          console.log('Attempting to extract JSON from markdown...');
           const jsonMatch = typeof fullContent === 'string'
             ? fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/)
             : null;
           const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : '';
-          if (!jsonStr) throw new Error('No JSON found');
+          if (!jsonStr) {
+            console.error('No JSON pattern found in content');
+            throw new Error('No JSON found');
+          }
           designSpec = JSON.parse(jsonStr);
+          console.log('Markdown extraction successful');
         } catch (e) {
-          console.error('Failed to parse AI response:', e);
+          console.error('All parsing attempts failed:', e);
+          console.error('Full content that failed to parse:', fullContent);
           throw new Error('AI generated invalid design specification');
         }
       }
