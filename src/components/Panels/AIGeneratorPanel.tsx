@@ -161,43 +161,42 @@ export default function AIGeneratorPanel({
           </div>
 
           <TabsContent value="generator" className="p-4 space-y-4 mt-0 bg-[#1a1a1a]">
-            {/* Model Selector - At the top */}
-            <div>
-              <Label className="text-xs mb-2 block text-gray-400">AI Model</Label>
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger className="w-full h-9 text-xs bg-[#2a2a2a] border-white/10 text-white">
-                  <SelectValue placeholder="Select AI Model" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#2a2a2a] border-white/10 z-50">
-                  <SelectGroup>
-                    <SelectLabel className="text-gray-400">Claude (Anthropic)</SelectLabel>
-                    <SelectItem value="claude-sonnet-4-5" className="text-white hover:bg-white/10">
-                      Claude Sonnet 4.5 (Recommended)
-                    </SelectItem>
-                    <SelectItem value="claude-opus-4-1" className="text-white hover:bg-white/10">
-                      Claude Opus 4.1 (Most Powerful)
-                    </SelectItem>
-                  </SelectGroup>
-                  <SelectSeparator className="bg-white/10" />
-                  <SelectGroup>
-                    <SelectLabel className="text-gray-400">GPT-5 Series (OpenAI)</SelectLabel>
-                    <SelectItem value="gpt-5" className="text-white hover:bg-white/10">GPT-5 (Flagship)</SelectItem>
-                    <SelectItem value="gpt-5-mini" className="text-white hover:bg-white/10">GPT-5 Mini (Fast & Efficient)</SelectItem>
-                    <SelectItem value="gpt-5-nano" className="text-white hover:bg-white/10">GPT-5 Nano (Fastest)</SelectItem>
-                  </SelectGroup>
-                  <SelectSeparator className="bg-white/10" />
-                  <SelectGroup>
-                    <SelectLabel className="text-gray-400">O-Series (Reasoning Models)</SelectLabel>
-                    <SelectItem value="o3" className="text-white hover:bg-white/10">O3 (Deep Reasoning)</SelectItem>
-                    <SelectItem value="o4-mini" className="text-white hover:bg-white/10">O4 Mini (Fast Reasoning)</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Description Section - Darker Container */}
             <div className="bg-[#0a0a0a] border border-white/5 rounded-lg p-4 space-y-3">
-              <Label className="text-xs text-gray-400">Description</Label>
+              {/* Description Label and AI Model Selector Row */}
+              <div className="flex items-center justify-between gap-3">
+                <Label className="text-xs text-gray-400">Description</Label>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-[200px] h-8 text-xs bg-[#1a1a1a] border-white/10 text-white">
+                    <SelectValue placeholder="Select AI Model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#2a2a2a] border-white/10 z-50">
+                    <SelectGroup>
+                      <SelectLabel className="text-gray-400">Claude (Anthropic)</SelectLabel>
+                      <SelectItem value="claude-sonnet-4-5" className="text-white hover:bg-white/10">
+                        Claude Sonnet 4.5 (Recommended)
+                      </SelectItem>
+                      <SelectItem value="claude-opus-4-1" className="text-white hover:bg-white/10">
+                        Claude Opus 4.1 (Most Powerful)
+                      </SelectItem>
+                    </SelectGroup>
+                    <SelectSeparator className="bg-white/10" />
+                    <SelectGroup>
+                      <SelectLabel className="text-gray-400">GPT-5 Series (OpenAI)</SelectLabel>
+                      <SelectItem value="gpt-5" className="text-white hover:bg-white/10">GPT-5 (Flagship)</SelectItem>
+                      <SelectItem value="gpt-5-mini" className="text-white hover:bg-white/10">GPT-5 Mini (Fast & Efficient)</SelectItem>
+                      <SelectItem value="gpt-5-nano" className="text-white hover:bg-white/10">GPT-5 Nano (Fastest)</SelectItem>
+                    </SelectGroup>
+                    <SelectSeparator className="bg-white/10" />
+                    <SelectGroup>
+                      <SelectLabel className="text-gray-400">O-Series (Reasoning Models)</SelectLabel>
+                      <SelectItem value="o3" className="text-white hover:bg-white/10">O3 (Deep Reasoning)</SelectItem>
+                      <SelectItem value="o4-mini" className="text-white hover:bg-white/10">O4 Mini (Fast Reasoning)</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+              
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
