@@ -59,7 +59,10 @@ export type Database = {
           id: string
           image_style: string | null
           image_url: string | null
+          is_public: boolean | null
+          is_template: boolean | null
           project_name: string | null
+          template_category: string | null
           thumbnail_url: string | null
           user_id: string
         }
@@ -71,7 +74,10 @@ export type Database = {
           id?: string
           image_style?: string | null
           image_url?: string | null
+          is_public?: boolean | null
+          is_template?: boolean | null
           project_name?: string | null
+          template_category?: string | null
           thumbnail_url?: string | null
           user_id: string
         }
@@ -83,7 +89,10 @@ export type Database = {
           id?: string
           image_style?: string | null
           image_url?: string | null
+          is_public?: boolean | null
+          is_template?: boolean | null
           project_name?: string | null
+          template_category?: string | null
           thumbnail_url?: string | null
           user_id?: string
         }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trash2, Loader2, Edit, FolderOpen } from "lucide-react";
+import { Trash2, Loader2, Edit, FolderOpen, Globe, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -16,6 +16,8 @@ interface Project {
   thumbnail_url: string | null;
   canvas_data: any;
   created_at: string;
+  is_public: boolean;
+  is_template: boolean;
 }
 
 export default function Gallery() {
@@ -40,7 +42,7 @@ export default function Gallery() {
     try {
       const { data, error } = await supabase
         .from('posters')
-        .select('id, project_name, thumbnail_url, canvas_data, created_at')
+        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -95,6 +97,30 @@ export default function Gallery() {
     }
   };
 
+  const togglePublic = async (id: string, currentPublic: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const { error } = await supabase
+        .from('posters')
+        .update({ 
+          is_public: !currentPublic,
+          is_template: !currentPublic // Make it a template when making public
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setProjects(projects.map(p => 
+        p.id === id ? { ...p, is_public: !currentPublic, is_template: !currentPublic } : p
+      ));
+      
+      toast.success(!currentPublic ? "Design is now public! Others can use it as a template." : "Design is now private");
+    } catch (error) {
+      console.error('Error toggling public status:', error);
+      toast.error("Failed to update design");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
@@ -135,6 +161,12 @@ export default function Gallery() {
                         <FolderOpen className="w-8 h-8 text-muted-foreground/50" />
                       </div>
                     )}
+                    {project.is_public && (
+                      <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-[10px] font-medium flex items-center gap-1">
+                        <Globe className="w-3 h-3" />
+                        Public
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <Button
                         onClick={(e) => {
@@ -145,6 +177,18 @@ export default function Gallery() {
                         className="bg-white/90 hover:bg-white text-foreground h-6 text-xs"
                       >
                         Open
+                      </Button>
+                      <Button
+                        onClick={(e) => togglePublic(project.id, project.is_public, e)}
+                        size="sm"
+                        className="bg-white/90 hover:bg-blue-500 text-blue-600 hover:text-white h-6"
+                        title={project.is_public ? "Make Private" : "Make Public Template"}
+                      >
+                        {project.is_public ? (
+                          <Lock className="w-3 h-3" />
+                        ) : (
+                          <Globe className="w-3 h-3" />
+                        )}
                       </Button>
                       <Button
                         onClick={(e) => deleteProject(project.id, e)}
