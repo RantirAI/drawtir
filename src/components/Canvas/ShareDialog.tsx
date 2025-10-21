@@ -3,22 +3,116 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Download } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Copy, Download, Globe, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ShareDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   framePreview?: string;
   frameName?: string;
+  projectId?: string | null;
   onExport?: (format: string, resolution: number) => void;
 }
 
-export default function ShareDialog({ open, onOpenChange, framePreview, frameName, onExport }: ShareDialogProps) {
+export default function ShareDialog({ open, onOpenChange, framePreview, frameName, projectId, onExport }: ShareDialogProps) {
   const [format, setFormat] = useState("png");
   const [resolution, setResolution] = useState(1920);
-  const shareUrl = window.location.href;
+  const [isPublic, setIsPublic] = useState(false);
+  const [isTemplate, setIsTemplate] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const publicUrl = projectId ? `${window.location.origin}/public/${projectId}` : '';
+  const shareUrl = isPublic ? publicUrl : window.location.href;
+
+  useEffect(() => {
+    const checkPublicStatus = async () => {
+      if (!projectId) return;
+      
+      try {
+        const { data } = await supabase
+          .from('posters')
+          .select('is_public, is_template')
+          .eq('id', projectId)
+          .maybeSingle();
+
+        if (data) {
+          setIsPublic(data.is_public || false);
+          setIsTemplate(data.is_template || false);
+        }
+      } catch (error) {
+        console.error('Error checking public status:', error);
+      }
+    };
+
+    if (open) {
+      checkPublicStatus();
+    }
+  }, [open, projectId]);
+
+  const handleTogglePublic = async () => {
+    if (!projectId) {
+      toast.error("Save your project first to share it publicly");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const newPublicState = !isPublic;
+      const { error } = await supabase
+        .from('posters')
+        .update({ 
+          is_public: newPublicState,
+          is_template: newPublicState ? isTemplate : false
+        })
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      setIsPublic(newPublicState);
+      if (!newPublicState) {
+        setIsTemplate(false);
+      }
+      toast.success(newPublicState ? "Project is now public!" : "Project is now private");
+    } catch (error) {
+      console.error('Error toggling public status:', error);
+      toast.error("Failed to update sharing settings");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleToggleTemplate = async () => {
+    if (!projectId || !isPublic) {
+      toast.error("Project must be public to be a template");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const newTemplateState = !isTemplate;
+      const { error } = await supabase
+        .from('posters')
+        .update({ 
+          is_template: newTemplateState,
+          template_category: newTemplateState ? 'user-created' : null
+        })
+        .eq('id', projectId);
+
+      if (error) throw error;
+
+      setIsTemplate(newTemplateState);
+      toast.success(newTemplateState ? "Added as template!" : "Removed from templates");
+    } catch (error) {
+      console.error('Error toggling template status:', error);
+      toast.error("Failed to update template status");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -42,6 +136,43 @@ export default function ShareDialog({ open, onOpenChange, framePreview, frameNam
             <div className="aspect-video w-full rounded-lg overflow-hidden border">
               <img src={framePreview} alt={frameName} className="w-full h-full object-cover" />
             </div>
+          )}
+
+          {projectId && (
+            <>
+              <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                <div className="flex items-center gap-2">
+                  {isPublic ? <Globe className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
+                  <div>
+                    <Label className="text-sm font-medium">Public Access</Label>
+                    <p className="text-xs text-muted-foreground">
+                      {isPublic ? "Anyone with the link can view" : "Only you can view"}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={isPublic}
+                  onCheckedChange={handleTogglePublic}
+                  disabled={isLoading}
+                />
+              </div>
+
+              {isPublic && (
+                <div className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+                  <div>
+                    <Label className="text-sm font-medium">Share as Template</Label>
+                    <p className="text-xs text-muted-foreground">
+                      Others can use this as a starting point
+                    </p>
+                  </div>
+                  <Switch
+                    checked={isTemplate}
+                    onCheckedChange={handleToggleTemplate}
+                    disabled={isLoading || !isPublic}
+                  />
+                </div>
+              )}
+            </>
           )}
 
           <div className="space-y-2">

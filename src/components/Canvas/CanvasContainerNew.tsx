@@ -13,6 +13,7 @@ import CanvasBackground from "./CanvasBackground";
 import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
+import ExportAllDialog from "./ExportAllDialog";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
 import DrawtirFooter from "../Footer/DrawtirFooter";
@@ -157,6 +158,7 @@ export default function CanvasContainerNew({
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showExportAllDialog, setShowExportAllDialog] = useState(false);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
 
@@ -1401,6 +1403,7 @@ export default function CanvasContainerNew({
         onSave={forceSave}
         onDownload={downloadPoster}
         onExport={downloadPoster}
+        onExportAll={() => setShowExportAllDialog(true)}
         onShare={() => setShowShareDialog(true)}
         onUndo={handleUndo}
         onRedo={handleRedo}
@@ -2067,10 +2070,17 @@ export default function CanvasContainerNew({
         onOpenChange={setShowShareDialog}
         framePreview={selectedFrame?.image || undefined}
         frameName={selectedFrame?.name}
+        projectId={projectId}
         onExport={(format, resolution) => {
           console.log(`Exporting as ${format} at ${resolution}px`);
           downloadPoster();
         }}
+      />
+
+      <ExportAllDialog
+        open={showExportAllDialog}
+        onOpenChange={setShowExportAllDialog}
+        frames={frames}
       />
 
       <DrawtirFooter />

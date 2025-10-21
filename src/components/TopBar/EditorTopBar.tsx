@@ -19,6 +19,7 @@ interface EditorTopBarProps {
   onSave?: () => void;
   onDownload?: () => void;
   onExport?: () => void;
+  onExportAll?: () => void;
   onShare?: () => void;
   onUndo?: () => void;
   onRedo?: () => void;
@@ -33,7 +34,8 @@ export default function EditorTopBar({
   onProjectNameChange,
   onSave,
   onDownload,
-  onExport, 
+  onExport,
+  onExportAll,
   onShare,
   onUndo,
   onRedo,
@@ -72,8 +74,14 @@ export default function EditorTopBar({
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onExport}>
               <FileDown className="h-3 w-3 mr-2" />
-              Export
+              Export Current Frame
             </DropdownMenuItem>
+            {onExportAll && (
+              <DropdownMenuItem onClick={onExportAll}>
+                <Download className="h-3 w-3 mr-2" />
+                Export All Frames
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleSignOut}>
               Sign Out
