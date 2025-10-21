@@ -369,10 +369,62 @@ export default function CanvasContainerNew({
     setIsGenerating(true);
     setGenerationProgress(`Starting generation with ${model}...`);
     try {
+      // Handle image generation first if selected
+      let imagesToUse = [...imgs];
+      
+      if (generationType === "generate-image") {
+        if (!description.trim()) {
+          toast.error("Please provide a description for image generation");
+          setIsGenerating(false);
+          return;
+        }
+
+        setGenerationProgress("Generating image with AI...");
+        
+        try {
+          const imageResponse = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-image`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              },
+              body: JSON.stringify({
+                prompt: description,
+                size: "1024x1024",
+                quality: "high",
+              }),
+            }
+          );
+
+          if (!imageResponse.ok) {
+            const errorData = await imageResponse.json();
+            throw new Error(errorData.error || "Failed to generate image");
+          }
+
+          const imageData = await imageResponse.json();
+          if (imageData.image) {
+            imagesToUse = [imageData.image];
+            toast.success("Image generated! Now creating poster...");
+            setGenerationProgress("Creating poster design...");
+          } else {
+            throw new Error("No image data received");
+          }
+        } catch (imageError: any) {
+          console.error("Image generation error:", imageError);
+          toast.error(imageError.message || "Failed to generate image");
+          setIsGenerating(false);
+          setGenerationProgress("");
+          return;
+        }
+      }
+
       // Intelligently determine analysisType based on context
       let analysisType = generationType === "replicate" ? "replicate" : "create";
       
-      if (imgs.length === 0 && analysisType === "replicate") {
+      if (imagesToUse.length === 0 && analysisType === "replicate") {
         toast.error("Please upload an image to replicate");
         setIsGenerating(false);
         return;
@@ -395,7 +447,7 @@ export default function CanvasContainerNew({
           },
           body: JSON.stringify({
             prompt: description,
-            imageBase64: imgs.length > 0 ? imgs : null,
+            imageBase64: imagesToUse.length > 0 ? imagesToUse : null,
             analysisType,
             canvasWidth,
             canvasHeight,
@@ -535,10 +587,10 @@ export default function CanvasContainerNew({
                 fill: el.color || "#000000",
               };
             } else if (el.type === "image") {
-              // For images, use the first image from the array if multiple were uploaded
+              // For images, use generated or uploaded images
               return {
                 ...baseElement,
-                imageData: imgs.length > 0 ? imgs[0] : undefined,
+                imageData: imagesToUse.length > 0 ? imagesToUse[0] : undefined,
               };
             } else {
               // shape

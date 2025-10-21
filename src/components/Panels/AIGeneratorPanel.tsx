@@ -65,7 +65,7 @@ export default function AIGeneratorPanel({
 
   const generationTypes = [
     { id: "freeform", label: "Freeform Creation" },
-    { id: "generate-image", label: "Generate Image" },
+    { id: "generate-image", label: "Generate Image", description: "Generate image using AI, then create poster" },
     { id: "replicate", label: "Replicate" },
     { id: "import-website", label: "Import a Website", disabled: true },
     { id: "auto-layout", label: "Auto Layout", disabled: true },
