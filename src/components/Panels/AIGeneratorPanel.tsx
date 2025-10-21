@@ -196,75 +196,72 @@ export default function AIGeneratorPanel({
             </div>
 
             {/* Description Section */}
-            <div className="space-y-3 bg-[#1a1a1a] border border-white/5 rounded-lg p-4">
-              {/* Description Label and Buttons Row */}
-              <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs text-gray-400">Description</Label>
-                <div className="flex gap-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    ref={captionImageInputRef}
-                    onChange={(e) => {
-                      const files = Array.from(e.target.files || []);
-                      if (files.length === 0) return;
-                      
-                      // Check file sizes
-                      const oversizedFiles = files.filter(f => f.size > 10 * 1024 * 1024);
-                      if (oversizedFiles.length > 0) {
-                        toast.error("All images must be less than 10MB");
-                        return;
-                      }
-                      
-                      // Read all files
-                      Promise.all(
-                        files.map(file => {
-                          return new Promise<string>((resolve) => {
-                            const reader = new FileReader();
-                            reader.onloadend = () => resolve(reader.result as string);
-                            reader.readAsDataURL(file);
-                          });
-                        })
-                      ).then(results => {
-                        setCaptionImage([...(captionImage || []), ...results]);
-                        toast.success(`${files.length} image(s) uploaded!`);
-                      });
-                    }}
-                    className="hidden"
-                    id="ai-image-upload"
-                  />
-                  
-                  <label
-                    htmlFor="ai-image-upload"
-                    className="flex items-center justify-center gap-1.5 px-3 h-8 bg-[#2a2a2a] border border-white/10 rounded-md cursor-pointer hover:bg-[#333] transition-colors text-xs text-white whitespace-nowrap"
-                  >
-                    <Upload className="h-3.5 w-3.5" />
-                    <span>Upload Image</span>
-                  </label>
-
-                  <Button 
-                    onClick={handleGenerate} 
-                    disabled={isGenerating || !description.trim()} 
-                    className="h-8 px-3 text-xs bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    {isGenerating ? (
-                      <span className="truncate">{generationProgress || "Generating..."}</span>
-                    ) : (
-                      "Generate"
-                    )}
-                  </Button>
-                </div>
-              </div>
-
-              {/* Textarea */}
+            <div className="space-y-3">
+              <Label className="text-xs text-gray-400">Description</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ask Drawtir to create..."
                 className="min-h-[80px] text-sm resize-none bg-black border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-white/20"
               />
+              
+              {/* Upload Image & Generate Button Row */}
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  ref={captionImageInputRef}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    if (files.length === 0) return;
+                    
+                    // Check file sizes
+                    const oversizedFiles = files.filter(f => f.size > 10 * 1024 * 1024);
+                    if (oversizedFiles.length > 0) {
+                      toast.error("All images must be less than 10MB");
+                      return;
+                    }
+                    
+                    // Read all files
+                    Promise.all(
+                      files.map(file => {
+                        return new Promise<string>((resolve) => {
+                          const reader = new FileReader();
+                          reader.onloadend = () => resolve(reader.result as string);
+                          reader.readAsDataURL(file);
+                        });
+                      })
+                    ).then(results => {
+                      setCaptionImage([...(captionImage || []), ...results]);
+                      toast.success(`${files.length} image(s) uploaded!`);
+                    });
+                  }}
+                  className="hidden"
+                  id="ai-image-upload"
+                />
+                
+                <label
+                  htmlFor="ai-image-upload"
+                  className="flex items-center justify-center gap-2 px-4 h-9 bg-transparent border border-white/20 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-sm text-white whitespace-nowrap"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload Image</span>
+                </label>
+
+                <Button 
+                  onClick={handleGenerate} 
+                  disabled={isGenerating || !description.trim()} 
+                  className="h-9 px-6 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {isGenerating ? (
+                    <span className="truncate">{generationProgress || "Generating..."}</span>
+                  ) : (
+                    "Generate"
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Uploaded Images Preview */}
