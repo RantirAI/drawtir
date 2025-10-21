@@ -405,7 +405,13 @@ export default function CanvasContainerNew({
       );
 
       if (!response.ok) {
-        throw new Error(`Failed to generate: ${response.statusText}`);
+        const text = await response.text();
+        try {
+          const err = JSON.parse(text);
+          throw new Error(err.error || `Failed to generate (${response.status})`);
+        } catch {
+          throw new Error(text || `Failed to generate (${response.status})`);
+        }
       }
 
       const reader = response.body?.getReader();

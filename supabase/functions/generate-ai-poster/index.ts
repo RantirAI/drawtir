@@ -421,6 +421,7 @@ Return JSON (flat structure, NO nested frames):
         messages: messages,
         max_completion_tokens: modelConfig.maxCompletionTokens,
         stream: modelConfig.supportsStreaming,
+        response_format: { type: 'json_object' },
       };
 
       response = await fetch(modelConfig.endpoint, {
@@ -585,12 +586,24 @@ Return JSON (flat structure, NO nested frames):
       // Parse result
       let designSpec;
       try {
-        const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
-        const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
-        designSpec = JSON.parse(jsonStr);
-      } catch (e) {
-        console.error('Failed to parse AI response:', e);
-        throw new Error('AI generated invalid design specification');
+        // First try direct JSON parse (response_format=json_object)
+        if (typeof fullContent === 'string' && fullContent.trim()) {
+          designSpec = JSON.parse(fullContent);
+        } else {
+          throw new Error('Empty content');
+        }
+      } catch (_) {
+        try {
+          const jsonMatch = typeof fullContent === 'string'
+            ? fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/)
+            : null;
+          const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : '';
+          if (!jsonStr) throw new Error('No JSON found');
+          designSpec = JSON.parse(jsonStr);
+        } catch (e) {
+          console.error('Failed to parse AI response:', e);
+          throw new Error('AI generated invalid design specification');
+        }
       }
 
       console.log('Successfully generated poster with model:', model);
