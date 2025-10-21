@@ -359,7 +359,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationType: string = "freeform") => {
+  const generateWithAI = async (generationType: string = "freeform", model: string = "claude-sonnet-4-5") => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -367,7 +367,7 @@ export default function CanvasContainerNew({
     }
 
     setIsGenerating(true);
-    setGenerationProgress("Starting generation...");
+    setGenerationProgress(`Starting generation with ${model}...`);
     try {
       // Intelligently determine analysisType based on context
       let analysisType = generationType === "replicate" ? "replicate" : "create";
@@ -399,6 +399,7 @@ export default function CanvasContainerNew({
             analysisType,
             canvasWidth,
             canvasHeight,
+            model,
           }),
         }
       );

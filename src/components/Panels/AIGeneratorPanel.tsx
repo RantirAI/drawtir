@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +22,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationType: string) => Promise<void>;
+  onGenerate: (generationType: string, model: string) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -53,6 +54,14 @@ export default function AIGeneratorPanel({
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedGenerationType, setSelectedGenerationType] = useState("freeform");
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const [selectedModel, setSelectedModel] = useState(() => {
+    return localStorage.getItem('ai-poster-model') || 'claude-sonnet-4-5';
+  });
+
+  // Save model preference
+  useEffect(() => {
+    localStorage.setItem('ai-poster-model', selectedModel);
+  }, [selectedModel]);
 
   const generationTypes = [
     { id: "freeform", label: "Freeform Creation" },
@@ -97,7 +106,7 @@ export default function AIGeneratorPanel({
   }, [activeTab, projectId]);
 
   const handleGenerate = async () => {
-    await onGenerate(selectedGenerationType);
+    await onGenerate(selectedGenerationType, selectedModel);
     // Reload conversations after generation
     if (projectId) {
       loadConversations();
@@ -148,6 +157,43 @@ export default function AIGeneratorPanel({
                 placeholder="Create a vibrant summer music festival poster... or replicate this design..."
                 className="h-20 text-xs resize-none"
               />
+            </div>
+
+            {/* Model Selector */}
+            <div>
+              <Label className="text-xs mb-1 block">AI Model</Label>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-full h-9 text-xs">
+                  <SelectValue placeholder="Select AI Model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Claude (Anthropic)</SelectLabel>
+                    <SelectItem value="claude-sonnet-4-5">
+                      Claude Sonnet 4.5 (Recommended)
+                    </SelectItem>
+                    <SelectItem value="claude-opus-4-1">
+                      Claude Opus 4.1 (Most Powerful)
+                    </SelectItem>
+                  </SelectGroup>
+                  <SelectSeparator />
+                  <SelectGroup>
+                    <SelectLabel>GPT-5 Series (OpenAI)</SelectLabel>
+                    <SelectItem value="gpt-5">GPT-5 (Flagship)</SelectItem>
+                    <SelectItem value="gpt-5-mini">GPT-5 Mini (Fast & Efficient)</SelectItem>
+                    <SelectItem value="gpt-5-nano">GPT-5 Nano (Fastest)</SelectItem>
+                  </SelectGroup>
+                  <SelectSeparator />
+                  <SelectGroup>
+                    <SelectLabel>O-Series (Reasoning Models)</SelectLabel>
+                    <SelectItem value="o3">O3 (Deep Reasoning)</SelectItem>
+                    <SelectItem value="o4-mini">O4 Mini (Fast Reasoning)</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Choose model based on speed/quality needs
+              </p>
             </div>
 
             {/* Image Upload */}

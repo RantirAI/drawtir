@@ -5,19 +5,194 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Model configuration
+const MODEL_CONFIGS: Record<string, any> = {
+  'claude-sonnet-4-5': {
+    provider: 'anthropic',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    maxTokens: 4096,
+    supportsTemperature: true,
+  },
+  'claude-opus-4-1': {
+    provider: 'anthropic',
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    maxTokens: 4096,
+    supportsTemperature: true,
+  },
+  'gpt-5': {
+    provider: 'openai',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    maxCompletionTokens: 4096,
+    supportsTemperature: false,
+  },
+  'gpt-5-mini': {
+    provider: 'openai',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    maxCompletionTokens: 4096,
+    supportsTemperature: false,
+  },
+  'gpt-5-nano': {
+    provider: 'openai',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    maxCompletionTokens: 4096,
+    supportsTemperature: false,
+  },
+  'o3': {
+    provider: 'openai',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    maxCompletionTokens: 4096,
+    supportsTemperature: false,
+  },
+  'o4-mini': {
+    provider: 'openai',
+    endpoint: 'https://api.openai.com/v1/chat/completions',
+    maxCompletionTokens: 4096,
+    supportsTemperature: false,
+  },
+};
+
+// Curated color palettes
+const COLOR_PALETTES: Record<string, string[]> = {
+  energetic: ["#FF6B35", "#F7931E", "#FDC830", "#F37335"],
+  calm: ["#89B0AE", "#BEE3DB", "#FFD6BA", "#FEEAFA"],
+  professional: ["#2C3E50", "#34495E", "#7F8C8D", "#BDC3C7"],
+  playful: ["#FF6B9D", "#C06C84", "#6C5B7B", "#355C7D"],
+  elegant: ["#1A1A2E", "#16213E", "#0F3460", "#533483"],
+  vibrant: ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0080"],
+  earth: ["#8B7355", "#C19A6B", "#D4AF37", "#B87333"],
+  ocean: ["#006994", "#0582CA", "#00A6FB", "#7DCFB6"],
+  sunset: ["#FF6F61", "#FF9068", "#FFB088", "#FFC3A0"],
+  forest: ["#2D4B32", "#4A7C59", "#6FAE7C", "#8FBC8F"],
+  neon: ["#39FF14", "#FF10F0", "#00F0FF", "#FFD700"],
+  pastel: ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9"],
+};
+
+// Enhanced design system prompt
+const DESIGN_SYSTEM_PROMPT = `You are an expert poster designer with deep knowledge of visual design principles.
+
+COLOR THEORY:
+- Use complementary colors for contrast and energy (opposite on color wheel)
+- Analogous colors for harmony (adjacent on color wheel)
+- Triadic schemes for balanced vibrancy (equidistant on wheel)
+- Follow 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
+- Ensure WCAG AA contrast ratios (4.5:1 for text, 3:1 for large text)
+
+MOOD-BASED COLOR PALETTES:
+${Object.entries(COLOR_PALETTES).map(([mood, colors]) => `- ${mood}: ${colors.join(', ')}`).join('\n')}
+
+TYPOGRAPHY HIERARCHY:
+- Titles: 72-96px, bold (700+), tight letter-spacing (-0.02em)
+- Subtitles: 48-60px, semibold (600), normal spacing
+- Body: 24-32px, regular (400-500), line-height 1.5-1.8
+- Captions: 16-20px, regular (400), looser spacing (0.02em)
+- Max line length: 60-75 characters for readability
+
+LAYOUT PRINCIPLES:
+- Rule of thirds: Place focal points at 1/3 intersections
+- Visual weight: Balance heavy elements with lighter ones
+- Whitespace: Not empty - it's breathing room for design
+- 8pt grid system: Use multiples of 8 for spacing (8, 16, 24, 32, 48, 64)
+- Visual hierarchy: Most important → largest, highest contrast
+
+SPACING SYSTEM:
+- Tight: 8px (related items)
+- Normal: 16px (grouped content)
+- Comfortable: 24px (sections)
+- Loose: 32-48px (major divisions)
+- Canvas margins: Minimum 40-60px from edges
+
+DESIGN STYLES:
+- Modern Minimal: Clean lines, lots of whitespace, 2-3 colors, sans-serif
+- Vintage: Muted palettes, textured shapes, serif fonts, ornamental elements
+- Brutalist: Bold typography, high contrast, geometric shapes, asymmetry
+- Swiss Design: Grid-based, sans-serif, objective photography, minimal color
+- Contemporary: Gradients, overlapping elements, mixed typography, vibrant colors
+
+QUALITY CHECKLIST:
+✓ Clear focal point (where eyes land first)
+✓ Sufficient contrast (WCAG AA minimum)
+✓ Harmonious colors (max 4-5 colors)
+✓ Readable text at all sizes
+✓ Grid-aligned elements (8pt grid)
+✓ Adequate whitespace (not cramped)
+✓ Matches requested mood/style`;
+
+// Few-shot learning examples
+const DESIGN_EXAMPLES = `
+EXAMPLE 1 - Concert Poster (Energetic):
+{
+  "title": "Summer Music Festival",
+  "backgroundColor": "#FF6B35",
+  "elements": [
+    {"type": "text", "content": "SUMMER", "x": 100, "y": 100, "width": 600, "height": 120, "fontSize": 96, "fontWeight": "bold", "color": "#FFFFFF"},
+    {"type": "text", "content": "MUSIC FESTIVAL", "x": 100, "y": 230, "width": 600, "height": 80, "fontSize": 60, "fontWeight": "600", "color": "#FDC830"},
+    {"type": "shape", "x": 50, "y": 350, "width": 200, "height": 200, "color": "#F7931E", "borderRadius": "50%", "shape": "circle"},
+    {"type": "icon", "iconName": "music", "iconFamily": "lucide", "x": 100, "y": 400, "width": 100, "height": 100, "color": "#FFFFFF"}
+  ]
+}
+WHY IT WORKS: Bold typography dominates, energetic orange palette, circular shape adds dynamism, music icon reinforces theme.
+
+EXAMPLE 2 - Product Poster (Minimal):
+{
+  "title": "Premium Coffee",
+  "backgroundColor": "#F5F5F5",
+  "elements": [
+    {"type": "text", "content": "ARTISAN", "x": 100, "y": 800, "width": 600, "height": 60, "fontSize": 48, "fontWeight": "300", "color": "#2C3E50"},
+    {"type": "text", "content": "COFFEE", "x": 100, "y": 870, "width": 600, "height": 80, "fontSize": 72, "fontWeight": "bold", "color": "#2C3E50"},
+    {"type": "shape", "x": 250, "y": 200, "width": 300, "height": 400, "color": "#34495E", "borderRadius": "16px", "shape": "rectangle"}
+  ]
+}
+WHY IT WORKS: Lots of whitespace, minimal color palette, elegant typography, centered composition, clean and professional.
+
+EXAMPLE 3 - Tech Conference (Modern):
+{
+  "title": "Tech Summit 2025",
+  "backgroundColor": "#0F3460",
+  "elements": [
+    {"type": "shape", "x": 50, "y": 50, "width": 700, "height": 500, "color": "#16213E", "borderRadius": "24px", "shape": "rectangle"},
+    {"type": "text", "content": "TECH SUMMIT", "x": 100, "y": 200, "width": 600, "height": 100, "fontSize": 84, "fontWeight": "bold", "color": "#00FFFF"},
+    {"type": "text", "content": "2025", "x": 100, "y": 310, "width": 600, "height": 60, "fontSize": 48, "fontWeight": "600", "color": "#FFFFFF"},
+    {"type": "icon", "iconName": "zap", "iconFamily": "lucide", "x": 650, "y": 100, "width": 64, "height": 64, "color": "#00FFFF"}
+  ]
+}
+WHY IT WORKS: Dark background with neon accents, geometric shapes, tech-forward aesthetic, icon adds visual interest.`;
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { prompt, imageBase64, analysisType, canvasWidth = 800, canvasHeight = 1200 } = await req.json();
+    const { 
+      prompt, 
+      imageBase64, 
+      analysisType, 
+      canvasWidth = 800, 
+      canvasHeight = 1200,
+      model = 'claude-sonnet-4-5' // Default model
+    } = await req.json();
     
-    console.log('AI Poster Generation - Type:', analysisType);
+    console.log('AI Poster Generation - Model:', model, 'Type:', analysisType);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
-    console.log('Image data type:', typeof imageBase64, Array.isArray(imageBase64) ? `Array(${imageBase64.length})` : 'Not array');
     
-    // Handle multiple images - ensure we convert to array properly
+    // Validate model
+    const modelConfig = MODEL_CONFIGS[model];
+    if (!modelConfig) {
+      throw new Error(`Unsupported model: ${model}`);
+    }
+
+    // Get API keys
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    
+    if (modelConfig.provider === 'anthropic' && !ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
+    }
+    if (modelConfig.provider === 'openai' && !OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY is not configured');
+    }
+
+    // Handle images
     let images: string[] = [];
     if (imageBase64) {
       if (Array.isArray(imageBase64)) {
@@ -28,372 +203,237 @@ serve(async (req) => {
     }
     console.log('Processed images count:', images.length);
 
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
-    }
-
-    // Detect media type from base64 string
+    // Detect media type
     const getMediaType = (base64: string): string => {
       if (base64.startsWith('data:image/png')) return 'image/png';
       if (base64.startsWith('data:image/jpeg') || base64.startsWith('data:image/jpg')) return 'image/jpeg';
       if (base64.startsWith('data:image/webp')) return 'image/webp';
       if (base64.startsWith('data:image/gif')) return 'image/gif';
-      return 'image/jpeg'; // default fallback
+      return 'image/jpeg';
     };
 
-    // Build messages based on input type
-    const messages: any[] = [];
+    // Extract keywords from prompt for conditional styling
+    const keywords = {
+      professional: /professional|business|corporate|formal|elegant/i.test(prompt),
+      energetic: /energetic|dynamic|bold|exciting|vibrant/i.test(prompt),
+      vintage: /vintage|retro|classic|old|traditional/i.test(prompt),
+      modern: /modern|contemporary|sleek|minimalist|clean/i.test(prompt),
+      playful: /playful|fun|colorful|whimsical|cheerful/i.test(prompt),
+    };
+
+    // Apply conditional style guidance
+    let styleGuidance = '';
+    if (keywords.professional) {
+      styleGuidance = '\nSTYLE: Professional - Use minimal colors (2-3), clean sans-serif fonts, ample whitespace, subtle shapes.';
+    } else if (keywords.energetic) {
+      styleGuidance = '\nSTYLE: Energetic - Use bold colors from energetic palette, large dynamic typography, diagonal elements, high contrast.';
+    } else if (keywords.vintage) {
+      styleGuidance = '\nSTYLE: Vintage - Use earth/muted palettes, serif or display fonts, textured rectangles, classic composition.';
+    } else if (keywords.modern) {
+      styleGuidance = '\nSTYLE: Modern - Use gradients (via overlapping shapes), geometric shapes, contemporary fonts, asymmetric layout.';
+    } else if (keywords.playful) {
+      styleGuidance = '\nSTYLE: Playful - Use playful palette, mixed sizes, circles and rounded shapes, fun icons.';
+    }
+
+    // Build prompt based on type
+    let userPrompt = '';
     
     if (analysisType === 'replicate' && images.length > 0) {
-      // Replicate an existing design - support multiple images for multi-frame generation
-      const imageContents = images.map(img => ({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: getMediaType(img),
-          data: img.split(',')[1] || img,
-        },
-      }));
-      
-      messages.push({
-        role: 'user',
-        content: [
-          ...imageContents,
-          {
-            type: 'text',
-            text: `Analyze this poster design with EXTREME PRECISION and provide exact specifications to replicate it.
+      userPrompt = `${DESIGN_SYSTEM_PROMPT}
 
-CRITICAL REPLICATION REQUIREMENTS:
-1. Target canvas: ${canvasWidth}px × ${canvasHeight}px
-2. Measure the SOURCE image dimensions first
-3. Calculate scaling factors: scaleX = ${canvasWidth}/sourceWidth, scaleY = ${canvasHeight}/sourceHeight
-4. Apply scaling to ALL measurements:
-   - x_new = x_original × scaleX
-   - y_new = y_original × scaleY
-   - width_new = width_original × scaleX
-   - height_new = height_original × scaleY
-   - fontSize_new = fontSize_original × Math.min(scaleX, scaleY)
+TASK: Analyze and replicate this poster design with EXTREME PRECISION.
 
-MEASUREMENT PRECISION:
+TARGET CANVAS: ${canvasWidth}px × ${canvasHeight}px
 
-ANALYSIS REQUIREMENTS:
-1. MEASURE SOURCE DIMENSIONS:
-   - First, estimate the source image dimensions (width × height)
-   - Calculate scale factors to fit ${canvasWidth}×${canvasHeight}:
-     * scaleX = ${canvasWidth} / sourceWidth
-     * scaleY = ${canvasHeight} / sourceHeight
-   
-2. SCALE ALL MEASUREMENTS:
-   - x_new = x_original × scaleX
-   - y_new = y_original × scaleY  
-   - width_new = width_original × scaleX
-   - height_new = height_original × scaleY
-   - fontSize_new = fontSize_original × min(scaleX, scaleY)
-   
-3. COLOR EXTRACTION:
-   - Extract EXACT hex colors from every element
-   - Background color must be precise
-   - Text colors, shape fills, icon colors - all must be exact
-   
-3. TEXT ANALYSIS:
-   - Copy the EXACT text content (word for word)
-   - Measure font sizes and scale them appropriately
-   - Identify font weight: normal, bold, 600, 700, etc.
-   
-4. SHAPES & ICONS:
-   - For rectangles: borderRadius = "0"
-   - For rounded rectangles: scale corner radius proportionally
-   - For circles: width MUST equal height, borderRadius = "50%"
-   - Match icons to lucide-react names
-   
-5. LAYERING:
-   - Note which elements are in front/behind others
-   - Bottom elements should appear first in the array
+REPLICATION STEPS:
+1. Estimate source image dimensions
+2. Calculate scale factors: scaleX = ${canvasWidth}/sourceWidth, scaleY = ${canvasHeight}/sourceHeight
+3. Scale ALL measurements: x_new = x_original × scaleX, y_new = y_original × scaleY, etc.
+4. Extract EXACT colors (hex values)
+5. Copy EXACT text content
+6. Match shapes (rectangle: borderRadius="0", circle: borderRadius="50%" + equal width/height)
+7. Match icons to lucide-react names
 
-IMPORTANT RULES FOR REPLICATION:
-- DO NOT create nested frames - output all elements in a flat "elements" array
-- DO NOT include a "frames" property in your response
-- Position all elements relative to the canvas (0,0 is top-left)
-- Be pixel-perfect with measurements
-- Match colors exactly
-
-Return a JSON object with this structure (NO frames property):
+Return JSON:
 {
-  "title": "Replicated: [original design name]",
-  "backgroundColor": "#exacthexcolor",
-  "elements": [
-    {
-      "type": "text|shape|icon",
-      "content": "exact text",
-      "x": precise_x_position,
-      "y": precise_y_position,
-      "width": exact_width,
-      "height": exact_height,
-      "color": "#exacthexcolor",
-      "fontSize": exact_size (for text),
-      "fontWeight": "normal|bold|600" (for text),
-      "borderRadius": "0|12px|50%" (for shapes),
-      "shape": "rectangle|circle" (for shapes),
-      "iconName": "heart|star|etc" (for icons),
-      "iconFamily": "lucide" (for icons)
-    }
-  ],
-  "style": "exact visual style description",
-  "mood": "mood of the design"
-}
-
-
-BE PIXEL-PERFECT. The goal is an EXACT replica.`
-          }
-        ]
-      });
-    } else if (analysisType === 'create' && images.length > 0) {
-      // Create poster using uploaded images
-      const imageContents = images.map(img => ({
-        type: 'image',
-        source: {
-          type: 'base64',
-          media_type: getMediaType(img),
-          data: img.split(',')[1] || img,
-        },
-      }));
-      
-      messages.push({
-        role: 'user',
-        content: [
-          ...imageContents,
-          {
-            type: 'text',
-            text: `Create a professional poster design using ${images.length > 1 ? `these ${images.length} images` : 'this image'}. User request: "${prompt || 'Create an eye-catching poster'}"
-
-CRITICAL: The canvas size is ${canvasWidth}x${canvasHeight} pixels. ALL element positions and sizes MUST fit within these dimensions.
-
-${images.length > 1 ? `Create ${images.length} separate frames, one for each image provided.` : ''}
-
-Analyze the image${images.length > 1 ? 's' : ''} and design a poster with:
-- Strategic placement of the image
-- Complementary text overlays
-- Color scheme that matches the image
-- Professional layout with auto-layout where appropriate
-- Relevant icons to enhance the design
-
-AVAILABLE ICONS (from lucide-react):
-Common: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music
-Social: facebook, twitter, instagram, linkedin, youtube, github
-UI: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi
-Arrows: arrow-right, arrow-left, arrow-up, arrow-down, chevron-right, chevron-left
-Actions: plus, minus, x, check, settings, search, menu, refresh, maximize, minimize
-
-USE ICONS THOUGHTFULLY:
-- Select icons that match the poster theme and content
-- Use appropriate sizes (typically 24-48px)
-- Match icon colors to the design palette
-
-AUTO LAYOUT USAGE:
-- Group related elements in frames with autoLayout: true
-- Use flexDirection: "row" for horizontal layouts, "column" for vertical
-- Set appropriate gap values (8-24px typically)
-- Use justifyContent and alignItems for proper alignment
-
-IMPORTANT: For shapes, set borderRadius correctly:
-- Circles: use borderRadius of "50%" (width and height MUST be equal for circles!)
-- Rectangles: use borderRadius of "0"
-- Rounded rectangles: use borderRadius between "8px" and "24px"
-
-Return a JSON object with this structure:
-{
-  "title": "Poster title",
-  "backgroundColor": "#hexcolor",
-  "elements": [
-    {
-      "type": "image",
-      "content": "user-uploaded-image",
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size
-    },
-    {
-      "type": "text",
-      "content": "text content",
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "color": "#hexcolor",
-      "fontSize": size,
-      "fontWeight": "normal|bold"
-    },
-    {
-      "type": "icon",
-      "content": "description of icon purpose",
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "color": "#hexcolor",
-      "iconName": "heart|star|etc",
-      "iconFamily": "lucide"
-    },
-    {
-      "type": "shape",
-      "content": "description",
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size (must equal width for circles!),
-      "color": "#hexcolor",
-      "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
-      "shape": "rectangle|circle"
-    }
-  ],
-  "frames": [
-    {
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "backgroundColor": "#hexcolor",
-      "autoLayout": true,
-      "flexDirection": "row|column",
-      "gap": 12,
-      "padding": 16,
-      "justifyContent": "center",
-      "alignItems": "center",
-      "elements": [nested elements]
-    }
-  ],
+  "title": "Replicated: [name]",
+  "backgroundColor": "#hex",
+  "elements": [{"type": "text|shape|icon", ...}],
   "style": "description",
-  "mood": "description"
-}`
-          }
-        ]
-      });
-    } else {
-      // Generate from text description only
-      messages.push({
-        role: 'user',
-        content: `Create a professional poster design based on this description: "${prompt}"
+  "mood": "mood"
+}`;
+    } else if (analysisType === 'create' && images.length > 0) {
+      userPrompt = `${DESIGN_SYSTEM_PROMPT}
 
-CRITICAL CANVAS CONSTRAINTS:
-- Canvas dimensions: ${canvasWidth}px × ${canvasHeight}px
-- ALL elements MUST be positioned within these bounds
-- X coordinates: 0 to ${canvasWidth}
-- Y coordinates: 0 to ${canvasHeight}
-- Scale your design proportionally to fit this canvas size
+${DESIGN_EXAMPLES}
+
+TASK: Create a professional poster using ${images.length > 1 ? `these ${images.length} images` : 'this image'}.
+USER REQUEST: "${prompt || 'Create an eye-catching poster'}"
+
+CANVAS: ${canvasWidth}px × ${canvasHeight}px
+${styleGuidance}
 
 DESIGN REQUIREMENTS:
-1. Create a visually striking poster with balanced composition
-2. Use the full canvas space effectively
-3. Choose colors that work well together
-4. Add text with appropriate sizing (scale fonts to canvas size)
-5. Include relevant icons to enhance the message
-6. Consider visual hierarchy and spacing
+- Choose a mood-based color palette that complements the image
+- Create clear typography hierarchy (title 72-96px, body 24-32px)
+- Use 8pt grid spacing (16, 24, 32, 48px)
+- Add relevant lucide icons (heart, star, sparkles, trophy, etc.)
+- Ensure adequate whitespace (min 40px margins)
+- Apply quality checklist principles
 
-IMPORTANT SIZING GUIDELINES:
-- Titles: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
-- Subtitles: ${Math.floor(canvasHeight * 0.04)}-${Math.floor(canvasHeight * 0.05)}px  
-- Body text: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.03)}px
-- Icons: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.08)}px
-- Spacing: Use ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.04)}px margins
-
-AVAILABLE ICONS (from lucide-react):
-Common: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music, crown, gift, award, trophy
-Social: facebook, twitter, instagram, linkedin, youtube, github, twitch
-UI: bell, bookmark, calendar, camera, clock, download, edit, eye, file, folder, image, lock, mail, message, phone, share, shopping-cart, thumbs-up, trash, upload, video, wifi, battery, bluetooth, cast
-Arrows: arrow-right, arrow-left, arrow-up, arrow-down, chevron-right, chevron-left, move, external-link
-Actions: plus, minus, x, check, settings, search, menu, refresh, maximize, minimize, play, pause, skip-forward, volume
-
-USE ICONS STRATEGICALLY:
-- Choose icons that enhance the poster's message
-- Size icons appropriately (24-64px typically)
-- Use icon colors that complement the design
-
-DO NOT USE FRAMES:
-- Return a flat design with only top-level elements
-- Do not group content into frames or auto layout containers
-- All positions are absolute relative to the canvas (0,0 top-left)
-- This ensures every element is directly editable in the canvas
-
-IMPORTANT: For shapes, set borderRadius correctly:
-- Circles: use borderRadius of "50%" (width and height MUST be equal!)
-- Rectangles: use borderRadius of "0"
-- Rounded rectangles: use borderRadius between "8px" and "16px"
-
-ELEMENT POSITIONING RULES:
-- Ensure no elements are cut off at canvas edges
-- Leave appropriate margins (at least ${Math.floor(canvasWidth * 0.05)}px from edges)
-- Center important content vertically and horizontally
-- Use the full canvas height effectively
-
-Return a JSON object with this structure:
+Return JSON:
 {
   "title": "Poster title",
-  "backgroundColor": "#hexcolor",
+  "backgroundColor": "#hex",
   "elements": [
-    {
-      "type": "text|shape|icon",
-      "content": "text content or description",
-      "x": position (0-${canvasWidth}),
-      "y": position (0-${canvasHeight}),
-      "width": size,
-      "height": size (must equal width for circles!),
-      "color": "#hexcolor",
-      "fontSize": size (scale to canvas),
-      "fontWeight": "normal|bold",
-      "borderRadius": "0|8px|16px|50%" (use 50% for circles!),
-      "shape": "rectangle|circle" (if type is shape),
-      "iconName": "heart|star|sparkles|etc" (if type is icon),
-      "iconFamily": "lucide" (if type is icon)
-    }
+    {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 0, "height": 0},
+    {"type": "text", "content": "text", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "fontSize": 0, "fontWeight": "normal|bold"},
+    {"type": "icon", "content": "desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "iconName": "heart", "iconFamily": "lucide"},
+    {"type": "shape", "content": "desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "borderRadius": "0|16px|50%", "shape": "rectangle|circle"}
   ],
-  "frames": [
-    {
-      "x": position,
-      "y": position,
-      "width": size,
-      "height": size,
-      "backgroundColor": "#hexcolor or transparent",
-      "autoLayout": true,
-      "flexDirection": "row|column",
-      "gap": spacing_value,
-      "padding": padding_value,
-      "justifyContent": "flex-start|center|flex-end|space-between",
-      "alignItems": "flex-start|center|flex-end|stretch",
-      "cornerRadius": 0-24,
-      "elements": [array of nested elements],
-      "frames": [array of nested frames if needed]
-    }
+  "style": "description",
+  "mood": "mood"
+}`;
+    } else {
+      userPrompt = `${DESIGN_SYSTEM_PROMPT}
+
+${DESIGN_EXAMPLES}
+
+TASK: Create a professional poster design.
+USER REQUEST: "${prompt}"
+
+CANVAS: ${canvasWidth}px × ${canvasHeight}px
+${styleGuidance}
+
+SIZING GUIDELINES:
+- Titles: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
+- Subtitles: ${Math.floor(canvasHeight * 0.04)}-${Math.floor(canvasHeight * 0.05)}px
+- Body: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.03)}px
+- Icons: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.08)}px
+- Margins: ${Math.floor(canvasHeight * 0.04)}px minimum
+
+DESIGN REQUIREMENTS:
+- Select a mood-based palette (energetic, calm, professional, etc.)
+- Create visual hierarchy with typography sizes
+- Use 8pt grid spacing throughout
+- Add strategic icons from lucide-react (music, star, award, trophy, heart, sparkles, etc.)
+- Balance elements using rule of thirds
+- Ensure whitespace and breathing room
+
+AVAILABLE ICONS: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music, crown, gift, award, trophy, facebook, twitter, instagram, bell, bookmark, calendar, camera, clock, mail, phone, share, thumbs-up
+
+Return JSON (flat structure, NO nested frames):
+{
+  "title": "Poster title",
+  "backgroundColor": "#hex",
+  "elements": [
+    {"type": "text|shape|icon", "content": "text or desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "fontSize": 0, "fontWeight": "normal|bold", "borderRadius": "0|16px|50%", "shape": "rectangle|circle", "iconName": "icon", "iconFamily": "lucide"}
   ],
-  "style": "description of overall style",
-  "mood": "description of mood/feeling"
-}`
-      });
+  "style": "Modern minimal with energetic palette",
+  "mood": "Exciting and professional"
+}`;
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 4096,
+    // Make API call based on provider
+    let response: Response;
+    
+    if (modelConfig.provider === 'anthropic') {
+      // Anthropic Claude API
+      const messages: any[] = [];
+      
+      if (images.length > 0) {
+        const imageContents = images.map(img => ({
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: getMediaType(img),
+            data: img.split(',')[1] || img,
+          },
+        }));
+        
+        messages.push({
+          role: 'user',
+          content: [...imageContents, { type: 'text', text: userPrompt }]
+        });
+      } else {
+        messages.push({
+          role: 'user',
+          content: userPrompt
+        });
+      }
+
+      response = await fetch(modelConfig.endpoint, {
+        method: 'POST',
+        headers: {
+          'x-api-key': ANTHROPIC_API_KEY!,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: model,
+          max_tokens: modelConfig.maxTokens,
+          messages: messages,
+          stream: true,
+        }),
+      });
+    } else {
+      // OpenAI API
+      const messages: any[] = [
+        { role: 'system', content: DESIGN_SYSTEM_PROMPT }
+      ];
+      
+      if (images.length > 0) {
+        const imageContents = images.map(img => ({
+          type: 'image_url',
+          image_url: { url: img }
+        }));
+        
+        messages.push({
+          role: 'user',
+          content: [
+            { type: 'text', text: userPrompt },
+            ...imageContents
+          ]
+        });
+      } else {
+        messages.push({
+          role: 'user',
+          content: userPrompt
+        });
+      }
+
+      const bodyParams: any = {
+        model: model,
         messages: messages,
+        max_completion_tokens: modelConfig.maxCompletionTokens,
         stream: true,
-      }),
-    });
+      };
+
+      response = await fetch(modelConfig.endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY!}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bodyParams),
+      });
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Anthropic API error:', response.status, errorText);
-      throw new Error(`Anthropic API error: ${response.status}`);
+      console.error(`${modelConfig.provider} API error:`, response.status, errorText);
+      
+      if (response.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again in a moment.');
+      }
+      if (response.status === 402) {
+        throw new Error('Payment required. Please add credits to continue.');
+      }
+      
+      throw new Error(`AI API error: ${response.status}`);
     }
 
-    // Stream the response
+    // Stream response
     const reader = response.body?.getReader();
     const decoder = new TextDecoder();
     let fullContent = '';
@@ -402,7 +442,6 @@ Return a JSON object with this structure:
       throw new Error('No response body');
     }
 
-    // Create a stream to send back to client
     const stream = new ReadableStream({
       async start(controller) {
         try {
@@ -417,70 +456,57 @@ Return a JSON object with this structure:
             const lines = chunk.split('\n');
 
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-                if (data === '[DONE]') continue;
+              if (!line.startsWith('data: ')) continue;
+              
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
 
-                try {
-                  const parsed = JSON.parse(data);
-                  
+              try {
+                const parsed = JSON.parse(data);
+                let text = '';
+                
+                if (modelConfig.provider === 'anthropic') {
                   if (parsed.type === 'content_block_delta') {
-                    const text = parsed.delta?.text || '';
-                    fullContent += text;
-                    
-                    // Try to detect what's being generated
-                    let progressMessage = '';
-                    
-                    // Detect title
-                    if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
-                      const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
-                      if (titleMatch) {
-                        progressMessage = `Setting up design: "${titleMatch[1]}"`;
-                      }
+                    text = parsed.delta?.text || '';
+                  }
+                } else {
+                  // OpenAI
+                  text = parsed.choices?.[0]?.delta?.content || '';
+                }
+                
+                if (text) {
+                  fullContent += text;
+                  
+                  // Progress messages
+                  let progressMessage = '';
+                  
+                  if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
+                    const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
+                    if (titleMatch) {
+                      progressMessage = `Setting up design: "${titleMatch[1]}"`;
                     }
-                    
-                    // Detect background color
-                    if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
-                      progressMessage = 'Setting background color...';
-                    }
-                    
-                    // Detect elements being created
-                    const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|image)"/g);
-                    if (elementMatches && elementMatches.length > elementCount) {
-                      elementCount = elementMatches.length;
-                      
-                      // Try to get element description
-                      const lastElementMatch = fullContent.match(/"type"\s*:\s*"([^"]+)"[^}]*"content"\s*:\s*"([^"]+)"/g);
-                      if (lastElementMatch && lastElementMatch[elementCount - 1]) {
-                        const typeMatch = lastElementMatch[elementCount - 1].match(/"type"\s*:\s*"([^"]+)"/);
-                        const contentMatch = lastElementMatch[elementCount - 1].match(/"content"\s*:\s*"([^"]+)"/);
-                        
-                        if (typeMatch && contentMatch) {
-                          const type = typeMatch[1];
-                          const content = contentMatch[1];
-                          progressMessage = `Adding ${type}: ${content}`;
-                        }
-                      }
-                    }
-                    
-                    // Send progress update if we have a message
-                    if (progressMessage && progressMessage !== lastProgressSent) {
-                      lastProgressSent = progressMessage;
-                      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-                        type: 'status', 
-                        message: progressMessage 
-                      })}\n\n`));
-                    }
-                    
-                    // Also send raw text for debugging
+                  }
+                  
+                  if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
+                    progressMessage = 'Applying color palette...';
+                  }
+                  
+                  const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
+                  if (elementMatches && elementMatches.length > elementCount) {
+                    elementCount = elementMatches.length;
+                    progressMessage = `Adding element ${elementCount}...`;
+                  }
+                  
+                  if (progressMessage && progressMessage !== lastProgressSent) {
+                    lastProgressSent = progressMessage;
                     controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-                      type: 'progress', 
-                      text 
+                      type: 'status', 
+                      message: progressMessage 
                     })}\n\n`));
                   }
-                } catch (e) {
-                  // Skip invalid JSON
                 }
+              } catch (e) {
+                // Skip invalid JSON
               }
             }
           }
@@ -492,17 +518,16 @@ Return a JSON object with this structure:
             const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
             designSpec = JSON.parse(jsonStr);
           } catch (e) {
-            console.error('Failed to parse AI response as JSON:', e);
+            console.error('Failed to parse AI response:', e);
             throw new Error('AI generated invalid design specification');
           }
 
-          console.log('Successfully generated poster design');
+          console.log('Successfully generated poster with model:', model);
           
-          // Send final result
           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
             type: 'complete', 
             designSpec,
-            rawResponse: fullContent 
+            model
           })}\n\n`));
           
           controller.close();
