@@ -160,7 +160,7 @@ export default function AIGeneratorPanel({
             </TabsList>
           </div>
 
-          <TabsContent value="generator" className="p-4 space-y-4 mt-0">
+          <TabsContent value="generator" className="p-4 space-y-4 mt-0 bg-[#1a1a1a]">
             {/* Model Selector - At the top */}
             <div>
               <Label className="text-xs mb-2 block text-gray-400">AI Model</Label>
