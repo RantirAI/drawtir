@@ -44,12 +44,25 @@ export default function TemplatesPanel({
                   <button
                     key={template.id}
                     onClick={() => handleTemplateClick(template.snapshot, template.name)}
-                    className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105"
+                    className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                   >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Layout className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
+                    {/* Preview */}
+                    <div className="absolute inset-0 p-3">
+                      <div 
+                        className="w-full h-full rounded-md overflow-hidden"
+                        style={{
+                          backgroundColor: template.snapshot.frames[0]?.backgroundColor || '#ffffff',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '6px',
+                          color: template.snapshot.frames[0]?.textColor || '#000000',
+                        }}
+                      >
+                        <div className="text-center text-[6px] opacity-50">Preview</div>
+                      </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/90 to-transparent">
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
                       <p className="text-xs font-medium text-foreground truncate">{template.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{template.category}</p>
                     </div>
@@ -75,12 +88,31 @@ export default function TemplatesPanel({
                     <button
                       key={template.id}
                       onClick={() => handleTemplateClick(template.canvas_data, template.project_name)}
-                      className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105"
+                      className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                     >
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Layout className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/90 to-transparent">
+                      {/* Preview */}
+                      {template.thumbnail_url ? (
+                        <img 
+                          src={template.thumbnail_url} 
+                          alt={template.project_name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 p-3">
+                          <div 
+                            className="w-full h-full rounded-md overflow-hidden"
+                            style={{
+                              backgroundColor: template.canvas_data.frames[0]?.backgroundColor || '#ffffff',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            <Layout className="w-8 h-8 text-muted-foreground group-hover:text-foreground transition-colors opacity-30" />
+                          </div>
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
                         <p className="text-xs font-medium text-foreground truncate">{template.project_name}</p>
                         {template.template_category && (
                           <p className="text-[10px] text-muted-foreground truncate">{template.template_category}</p>
