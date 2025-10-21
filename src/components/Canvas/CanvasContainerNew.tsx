@@ -6,6 +6,7 @@ import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
 import LayersPanel from "../Panels/LayersPanel";
 import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
+import TemplatesPanel from "../Panels/TemplatesPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
@@ -19,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Layers, SlidersHorizontal, Upload } from "lucide-react";
+import { Sparkles, Layers, SlidersHorizontal, Upload, Layout } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -157,6 +158,7 @@ export default function CanvasContainerNew({
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
+  const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -1769,6 +1771,20 @@ export default function CanvasContainerNew({
         />
       )}
 
+      {/* Templates Panel */}
+      {showTemplatesPanel && (
+        <TemplatesPanel
+          onRestoreTemplate={(snapshot) => {
+            setProjectTitle(snapshot.metadata.title);
+            setFrames(snapshot.frames);
+            setZoom(snapshot.canvas.zoom);
+            setPanOffset(snapshot.canvas.panOffset);
+            setShowTemplatesPanel(false);
+          }}
+          onClose={() => setShowTemplatesPanel(false)}
+        />
+      )}
+
       {/* Unified Shape Settings Panel */}
       {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
@@ -1967,6 +1983,16 @@ export default function CanvasContainerNew({
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
           <Sparkles className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showTemplatesPanel ? 'ring-2 ring-blue-500' : ''
+          }`}
+          onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
+        >
+          <Layout className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
