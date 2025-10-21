@@ -195,8 +195,8 @@ export default function AIGeneratorPanel({
               </Select>
             </div>
 
-            {/* Description Section */}
-            <div className="space-y-3">
+            {/* Description Section - Darker Container */}
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-lg p-4 space-y-3">
               <Label className="text-xs text-gray-400">Description</Label>
               <Textarea
                 value={description}
@@ -206,7 +206,7 @@ export default function AIGeneratorPanel({
               />
               
               {/* Upload Image & Generate Button Row */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 justify-between">
                 <input
                   type="file"
                   accept="image/*"
@@ -243,7 +243,7 @@ export default function AIGeneratorPanel({
                 
                 <label
                   htmlFor="ai-image-upload"
-                  className="flex items-center justify-center gap-2 px-4 h-9 bg-transparent border border-white/20 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-sm text-white whitespace-nowrap"
+                  className="flex items-center justify-center gap-2 px-4 h-9 bg-transparent border border-white/20 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-sm text-white"
                 >
                   <Upload className="h-4 w-4" />
                   <span>Upload Image</span>
@@ -252,7 +252,7 @@ export default function AIGeneratorPanel({
                 <Button 
                   onClick={handleGenerate} 
                   disabled={isGenerating || !description.trim()} 
-                  className="h-9 px-6 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-9 px-5 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
                   {isGenerating ? (
