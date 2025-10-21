@@ -206,45 +206,8 @@ export default function AIGeneratorPanel({
               />
             </div>
 
-            {/* Model Selector */}
-            <div>
-              <Label className="text-xs mb-1 block">AI Model</Label>
-              <Select value={selectedModel} onValueChange={setSelectedModel}>
-                <SelectTrigger className="w-full h-9 text-xs">
-                  <SelectValue placeholder="Select AI Model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Claude (Anthropic)</SelectLabel>
-                    <SelectItem value="claude-sonnet-4-5">
-                      Claude Sonnet 4.5 (Recommended)
-                    </SelectItem>
-                    <SelectItem value="claude-opus-4-1">
-                      Claude Opus 4.1 (Most Powerful)
-                    </SelectItem>
-                  </SelectGroup>
-                  <SelectSeparator />
-                  <SelectGroup>
-                    <SelectLabel>GPT-5 Series (OpenAI)</SelectLabel>
-                    <SelectItem value="gpt-5">GPT-5 (Flagship)</SelectItem>
-                    <SelectItem value="gpt-5-mini">GPT-5 Mini (Fast & Efficient)</SelectItem>
-                    <SelectItem value="gpt-5-nano">GPT-5 Nano (Fastest)</SelectItem>
-                  </SelectGroup>
-                  <SelectSeparator />
-                  <SelectGroup>
-                    <SelectLabel>O-Series (Reasoning Models)</SelectLabel>
-                    <SelectItem value="o3">O3 (Deep Reasoning)</SelectItem>
-                    <SelectItem value="o4-mini">O4 Mini (Fast Reasoning)</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <p className="text-[10px] text-muted-foreground mt-1">
-                Choose model based on speed/quality needs
-              </p>
-            </div>
-
             {/* Upload Image & Generate Button Row */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <input
                 type="file"
                 accept="image/*"
