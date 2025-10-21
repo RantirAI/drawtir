@@ -10,44 +10,58 @@ const MODEL_CONFIGS: Record<string, any> = {
   'claude-sonnet-4-5': {
     provider: 'anthropic',
     endpoint: 'https://api.anthropic.com/v1/messages',
+    apiModel: 'claude-sonnet-4-5',
     maxTokens: 4096,
     supportsTemperature: true,
+    supportsStreaming: true,
   },
   'claude-opus-4-1': {
     provider: 'anthropic',
     endpoint: 'https://api.anthropic.com/v1/messages',
+    apiModel: 'claude-opus-4-1-20250805',
     maxTokens: 4096,
     supportsTemperature: true,
+    supportsStreaming: true,
   },
   'gpt-5': {
     provider: 'openai',
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiModel: 'gpt-5-2025-08-07',
     maxCompletionTokens: 4096,
     supportsTemperature: false,
+    supportsStreaming: false, // Streaming may require org verification
   },
   'gpt-5-mini': {
     provider: 'openai',
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiModel: 'gpt-5-mini-2025-08-07',
     maxCompletionTokens: 4096,
     supportsTemperature: false,
+    supportsStreaming: false,
   },
   'gpt-5-nano': {
     provider: 'openai',
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiModel: 'gpt-5-nano-2025-08-07',
     maxCompletionTokens: 4096,
     supportsTemperature: false,
+    supportsStreaming: false,
   },
   'o3': {
     provider: 'openai',
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiModel: 'o3-2025-04-16',
     maxCompletionTokens: 4096,
     supportsTemperature: false,
+    supportsStreaming: false,
   },
   'o4-mini': {
     provider: 'openai',
     endpoint: 'https://api.openai.com/v1/chat/completions',
+    apiModel: 'o4-mini-2025-04-16',
     maxCompletionTokens: 4096,
     supportsTemperature: false,
+    supportsStreaming: false,
   },
 };
 
@@ -370,10 +384,10 @@ Return JSON (flat structure, NO nested frames):
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          model: model,
+          model: modelConfig.apiModel,
           max_tokens: modelConfig.maxTokens,
           messages: messages,
-          stream: true,
+          stream: modelConfig.supportsStreaming,
         }),
       });
     } else {
@@ -403,10 +417,10 @@ Return JSON (flat structure, NO nested frames):
       }
 
       const bodyParams: any = {
-        model: model,
+        model: modelConfig.apiModel,
         messages: messages,
         max_completion_tokens: modelConfig.maxCompletionTokens,
-        stream: true,
+        stream: modelConfig.supportsStreaming,
       };
 
       response = await fetch(modelConfig.endpoint, {
@@ -429,100 +443,165 @@ Return JSON (flat structure, NO nested frames):
       if (response.status === 402) {
         throw new Error('Payment required. Please add credits to continue.');
       }
-      
-      throw new Error(`AI API error: ${response.status}`);
-    }
-
-    // Stream response
-    const reader = response.body?.getReader();
-    const decoder = new TextDecoder();
-    let fullContent = '';
-
-    if (!reader) {
-      throw new Error('No response body');
-    }
-
-    const stream = new ReadableStream({
-      async start(controller) {
+      if (response.status === 400) {
+        // Try to parse error details
         try {
-          let elementCount = 0;
-          let lastProgressSent = '';
-          
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+          const errorData = JSON.parse(errorText);
+          const errorMsg = errorData.error?.message || errorText;
+          throw new Error(`${modelConfig.provider} API error: ${errorMsg}`);
+        } catch {
+          throw new Error(`${modelConfig.provider} API error (400): ${errorText}`);
+        }
+      }
+      
+      throw new Error(`AI API error: ${response.status} - ${errorText}`);
+    }
 
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
+    // Handle streaming vs non-streaming responses
+    if (modelConfig.supportsStreaming) {
+      // Stream response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
 
-            for (const line of lines) {
-              if (!line.startsWith('data: ')) continue;
-              
-              const data = line.slice(6);
-              if (data === '[DONE]') continue;
+      if (!reader) {
+        throw new Error('No response body');
+      }
 
-              try {
-                const parsed = JSON.parse(data);
-                let text = '';
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            let elementCount = 0;
+            let lastProgressSent = '';
+            
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+
+              const chunk = decoder.decode(value);
+              const lines = chunk.split('\n');
+
+              for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
                 
-                if (modelConfig.provider === 'anthropic') {
-                  if (parsed.type === 'content_block_delta') {
-                    text = parsed.delta?.text || '';
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  let text = '';
+                  
+                  if (modelConfig.provider === 'anthropic') {
+                    if (parsed.type === 'content_block_delta') {
+                      text = parsed.delta?.text || '';
+                    }
+                  } else {
+                    // OpenAI
+                    text = parsed.choices?.[0]?.delta?.content || '';
                   }
-                } else {
-                  // OpenAI
-                  text = parsed.choices?.[0]?.delta?.content || '';
-                }
-                
-                if (text) {
-                  fullContent += text;
                   
-                  // Progress messages
-                  let progressMessage = '';
-                  
-                  if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
-                    const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
-                    if (titleMatch) {
-                      progressMessage = `Setting up design: "${titleMatch[1]}"`;
+                  if (text) {
+                    fullContent += text;
+                    
+                    // Progress messages
+                    let progressMessage = '';
+                    
+                    if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
+                      const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
+                      if (titleMatch) {
+                        progressMessage = `Setting up design: "${titleMatch[1]}"`;
+                      }
+                    }
+                    
+                    if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
+                      progressMessage = 'Applying color palette...';
+                    }
+                    
+                    const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
+                    if (elementMatches && elementMatches.length > elementCount) {
+                      elementCount = elementMatches.length;
+                      progressMessage = `Adding element ${elementCount}...`;
+                    }
+                    
+                    if (progressMessage && progressMessage !== lastProgressSent) {
+                      lastProgressSent = progressMessage;
+                      controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                        type: 'status', 
+                        message: progressMessage 
+                      })}\n\n`));
                     }
                   }
-                  
-                  if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
-                    progressMessage = 'Applying color palette...';
-                  }
-                  
-                  const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
-                  if (elementMatches && elementMatches.length > elementCount) {
-                    elementCount = elementMatches.length;
-                    progressMessage = `Adding element ${elementCount}...`;
-                  }
-                  
-                  if (progressMessage && progressMessage !== lastProgressSent) {
-                    lastProgressSent = progressMessage;
-                    controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-                      type: 'status', 
-                      message: progressMessage 
-                    })}\n\n`));
-                  }
+                } catch (e) {
+                  // Skip invalid JSON
                 }
-              } catch (e) {
-                // Skip invalid JSON
               }
             }
-          }
 
-          // Parse final result
-          let designSpec;
-          try {
-            const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
-            const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
-            designSpec = JSON.parse(jsonStr);
-          } catch (e) {
-            console.error('Failed to parse AI response:', e);
-            throw new Error('AI generated invalid design specification');
-          }
+            // Parse final result
+            let designSpec;
+            try {
+              const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
+              const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
+              designSpec = JSON.parse(jsonStr);
+            } catch (e) {
+              console.error('Failed to parse AI response:', e);
+              throw new Error('AI generated invalid design specification');
+            }
 
-          console.log('Successfully generated poster with model:', model);
+            console.log('Successfully generated poster with model:', model);
+            
+            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+              type: 'complete', 
+              designSpec,
+              model
+            })}\n\n`));
+            
+            controller.close();
+          } catch (error) {
+            console.error('Stream error:', error);
+            controller.error(error);
+          }
+        }
+      });
+
+      return new Response(stream, {
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
+    } else {
+      // Non-streaming response (for OpenAI models)
+      const responseData = await response.json();
+      console.log('Non-streaming response received');
+      
+      let fullContent = '';
+      if (modelConfig.provider === 'openai') {
+        fullContent = responseData.choices?.[0]?.message?.content || '';
+      }
+
+      // Parse result
+      let designSpec;
+      try {
+        const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
+        const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
+        designSpec = JSON.parse(jsonStr);
+      } catch (e) {
+        console.error('Failed to parse AI response:', e);
+        throw new Error('AI generated invalid design specification');
+      }
+
+      console.log('Successfully generated poster with model:', model);
+
+      // Return as SSE for consistency with streaming
+      const stream = new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+            type: 'status', 
+            message: 'Generating design...' 
+          })}\n\n`));
           
           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
             type: 'complete', 
@@ -531,21 +610,18 @@ Return JSON (flat structure, NO nested frames):
           })}\n\n`));
           
           controller.close();
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.error(error);
         }
-      }
-    });
+      });
 
-    return new Response(stream, {
-      headers: { 
-        ...corsHeaders, 
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
-    });
+      return new Response(stream, {
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive'
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Error in generate-ai-poster:', error);
