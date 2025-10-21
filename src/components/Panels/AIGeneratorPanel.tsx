@@ -140,22 +140,69 @@ export default function AIGeneratorPanel({
       defaultPosition={{ x: 50, y: 150 }}
       onClose={onClose}
     >
-      <div className="w-80">
+      <div className="w-[380px] bg-[#1a1a1a] text-white rounded-lg">
+        {/* Header Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="generator">Description</TabsTrigger>
-            <TabsTrigger value="history">Past Conversations</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/10">
+            <TabsList className="grid w-fit grid-cols-2 bg-transparent gap-4 p-0">
+              <TabsTrigger 
+                value="generator"
+                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
+              >
+                Description
+              </TabsTrigger>
+              <TabsTrigger 
+                value="history"
+                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
+              >
+                Past Conversations
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="generator" className="space-y-3">
+          <TabsContent value="generator" className="p-4 space-y-4 mt-0">
+            {/* Model Selector - At the top */}
+            <div>
+              <Label className="text-xs mb-2 block text-gray-400">AI Model</Label>
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-full h-9 text-xs bg-[#2a2a2a] border-white/10 text-white">
+                  <SelectValue placeholder="Select AI Model" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#2a2a2a] border-white/10 z-50">
+                  <SelectGroup>
+                    <SelectLabel className="text-gray-400">Claude (Anthropic)</SelectLabel>
+                    <SelectItem value="claude-sonnet-4-5" className="text-white hover:bg-white/10">
+                      Claude Sonnet 4.5 (Recommended)
+                    </SelectItem>
+                    <SelectItem value="claude-opus-4-1" className="text-white hover:bg-white/10">
+                      Claude Opus 4.1 (Most Powerful)
+                    </SelectItem>
+                  </SelectGroup>
+                  <SelectSeparator className="bg-white/10" />
+                  <SelectGroup>
+                    <SelectLabel className="text-gray-400">GPT-5 Series (OpenAI)</SelectLabel>
+                    <SelectItem value="gpt-5" className="text-white hover:bg-white/10">GPT-5 (Flagship)</SelectItem>
+                    <SelectItem value="gpt-5-mini" className="text-white hover:bg-white/10">GPT-5 Mini (Fast & Efficient)</SelectItem>
+                    <SelectItem value="gpt-5-nano" className="text-white hover:bg-white/10">GPT-5 Nano (Fastest)</SelectItem>
+                  </SelectGroup>
+                  <SelectSeparator className="bg-white/10" />
+                  <SelectGroup>
+                    <SelectLabel className="text-gray-400">O-Series (Reasoning Models)</SelectLabel>
+                    <SelectItem value="o3" className="text-white hover:bg-white/10">O3 (Deep Reasoning)</SelectItem>
+                    <SelectItem value="o4-mini" className="text-white hover:bg-white/10">O4 Mini (Fast Reasoning)</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Description Input */}
             <div>
-              <Label className="text-xs mb-1 block">Ask Drawtir to create...</Label>
+              <Label className="text-xs mb-2 block text-gray-400">Description</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Create a vibrant summer music festival poster... or replicate this design..."
-                className="h-20 text-xs resize-none"
+                placeholder="Ask Drawtir to create..."
+                className="h-20 text-sm resize-none bg-[#2a2a2a] border-white/10 text-white placeholder:text-gray-500"
               />
             </div>
 
@@ -196,9 +243,8 @@ export default function AIGeneratorPanel({
               </p>
             </div>
 
-            {/* Image Upload */}
-            <div>
-              <Label className="text-xs mb-1 block">Reference Images (Optional)</Label>
+            {/* Upload Image & Generate Button Row */}
+            <div className="flex gap-2">
               <input
                 type="file"
                 accept="image/*"
@@ -233,60 +279,64 @@ export default function AIGeneratorPanel({
                 id="ai-image-upload"
               />
               
-              {captionImage && captionImage.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mb-2">
-                  {captionImage.map((img, idx) => (
-                    <div key={idx} className="relative bg-secondary/30 rounded border">
-                      <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-24 object-contain rounded p-1" />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="absolute top-0 right-0 h-5 w-5 p-0 bg-background/80"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setCaptionImage(captionImage.filter((_, i) => i !== idx));
-                        }}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
               <label
                 htmlFor="ai-image-upload"
-                className="flex items-center justify-center gap-2 px-3 py-2 border rounded cursor-pointer hover:bg-secondary transition-colors text-xs"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-[#2a2a2a] border border-white/10 rounded-md cursor-pointer hover:bg-[#333] transition-colors text-sm text-white"
               >
-                <Upload className="h-3.5 w-3.5" />
-                <span>{captionImage && captionImage.length > 0 ? `Add more images (${captionImage.length})` : 'Upload images'}</span>
+                <Upload className="h-4 w-4" />
+                <span>Upload Image</span>
               </label>
+
+              <Button 
+                onClick={handleGenerate} 
+                disabled={isGenerating || !description.trim()} 
+                className="flex-1 h-10 text-sm bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {isGenerating ? (
+                  <span className="truncate">{generationProgress || "Generating..."}</span>
+                ) : (
+                  "Generate"
+                )}
+              </Button>
             </div>
 
-            {/* Generate Button */}
-            <Button 
-              onClick={handleGenerate} 
-              disabled={isGenerating || !description.trim()} 
-              className="w-full h-9 text-xs"
-            >
-              <Sparkles className="h-3.5 w-3.5 mr-2" />
-              {isGenerating ? (
-                <span className="truncate">{generationProgress || "Generating..."}</span>
-              ) : (
-                "Generate"
-              )}
-            </Button>
+            {/* Uploaded Images Preview */}
+            {captionImage && captionImage.length > 0 && (
+              <div className="grid grid-cols-3 gap-2">
+                {captionImage.map((img, idx) => (
+                  <div key={idx} className="relative bg-[#2a2a2a] rounded border border-white/10">
+                    <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCaptionImage(captionImage.filter((_, i) => i !== idx));
+                      }}
+                    >
+                      ×
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Generation Preferences */}
             <div>
-              <Label className="text-xs mb-2 block">Generation Preferences</Label>
-              <div className="flex flex-wrap gap-1.5">
+              <Label className="text-xs mb-2 block text-gray-400">Generation Preferences</Label>
+              <div className="flex flex-wrap gap-2">
                 {generationTypes.map((type) => (
                   <Button
                     key={type.id}
                     variant={selectedGenerationType === type.id ? "default" : "outline"}
                     size="sm"
-                    className="h-7 text-xs"
+                    className={`h-8 text-xs rounded-full transition-colors ${
+                      selectedGenerationType === type.id
+                        ? "bg-blue-600 hover:bg-blue-700 text-white border-0"
+                        : "bg-[#2a2a2a] hover:bg-[#333] text-gray-300 border-white/10"
+                    } ${type.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={type.disabled}
                     onClick={() => !type.disabled && setSelectedGenerationType(type.id)}
                   >
@@ -294,62 +344,62 @@ export default function AIGeneratorPanel({
                   </Button>
                 ))}
               </div>
-              <p className="text-[10px] text-muted-foreground mt-2">
+              <p className="text-[10px] text-gray-500 mt-2">
                 Select Multiple to produce multi-modal agents
               </p>
             </div>
 
             {/* Progress indicator */}
             {isGenerating && generationProgress && (
-              <div className="text-[10px] text-muted-foreground mt-1 line-clamp-2 break-words">
+              <div className="text-xs text-gray-400 mt-2 p-3 bg-[#2a2a2a] rounded-md border border-white/10">
                 {generationProgress}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="history">
-            <ScrollArea className="h-[400px]">
+          <TabsContent value="history" className="p-4 mt-0">
+            <ScrollArea className="h-[500px]">
               {isLoadingConversations ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="text-xs text-muted-foreground">Loading...</div>
+                  <div className="text-sm text-gray-400">Loading...</div>
                 </div>
               ) : conversations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <Clock className="h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-xs text-muted-foreground">No past conversations yet</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <Clock className="h-10 w-10 text-gray-600 mb-3" />
+                  <p className="text-sm text-gray-400">No past conversations yet</p>
+                  <p className="text-xs text-gray-500 mt-1">
                     Generate designs to see them here
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {conversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className="p-3 border rounded-lg hover:bg-secondary/50 transition-colors space-y-2"
+                      className="p-3 bg-[#2a2a2a] border border-white/10 rounded-lg hover:bg-[#333] transition-colors"
                     >
-                      <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <Sparkles className="h-3 w-3 text-primary flex-shrink-0" />
-                            <span className="text-xs font-medium truncate">{conv.title}</span>
+                            <Sparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
+                            <span className="text-sm font-medium text-white truncate">{conv.title}</span>
                           </div>
                           {conv.description && (
-                            <p className="text-[10px] text-muted-foreground line-clamp-2 mb-1">
+                            <p className="text-xs text-gray-400 line-clamp-2 mb-1">
                               {conv.description}
                             </p>
                           )}
-                          <p className="text-[10px] text-muted-foreground">
+                          <p className="text-[10px] text-gray-500">
                             {formatDate(conv.created_at)}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex gap-1">
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 h-7 text-xs"
+                          className="flex-1 h-8 text-xs bg-transparent border-white/10 text-white hover:bg-white/5"
                           onClick={() => handleRestore(conv)}
                         >
                           <RotateCcw className="h-3 w-3 mr-1" />
@@ -358,9 +408,8 @@ export default function AIGeneratorPanel({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-7 w-7 p-0"
+                          className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/5"
                           onClick={() => {
-                            // Preview functionality - could show a modal
                             toast.info("Preview feature coming soon!");
                           }}
                         >
