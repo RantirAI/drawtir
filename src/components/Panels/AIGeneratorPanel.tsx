@@ -100,7 +100,7 @@ export default function AIGeneratorPanel({
   };
 
   useEffect(() => {
-    if (activeTab === "history") {
+    if (activeTab === "history" || activeTab === "generator") {
       loadConversations();
     }
   }, [activeTab, projectId]);
@@ -315,6 +315,39 @@ export default function AIGeneratorPanel({
             {isGenerating && generationProgress && (
               <div className="text-xs text-gray-400 mt-2 p-3 bg-[#2a2a2a] rounded-md border border-white/10">
                 {generationProgress}
+              </div>
+            )}
+
+            {/* Past Conversations Preview */}
+            {conversations.length > 0 && (
+              <div className="space-y-2">
+                {conversations.slice(0, 2).map((conv) => (
+                  <div
+                    key={conv.id}
+                    className="p-3 bg-[#0a0a0a] border border-white/5 rounded-lg hover:bg-[#111] transition-colors cursor-pointer"
+                    onClick={() => handleRestore(conv)}
+                  >
+                    <div className="flex items-start gap-2 mb-1">
+                      <Sparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <div className="flex-1 min-w-0">
+                        <span className="text-sm font-medium text-white truncate block">{conv.title}</span>
+                        {conv.description && (
+                          <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">
+                            {conv.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-2 text-[10px] text-gray-500">
+                      <span>{formatDate(conv.created_at)}</span>
+                      <div className="flex gap-2">
+                        <button className="hover:text-white transition-colors">Preview</button>
+                        <button className="hover:text-white transition-colors">Restore</button>
+                        <button className="hover:text-white transition-colors">Code</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </TabsContent>
