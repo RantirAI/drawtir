@@ -242,9 +242,9 @@ export default function AIGeneratorPanel({
                 
                 <label
                   htmlFor="ai-image-upload"
-                  className="flex items-center justify-center gap-2 px-4 h-9 bg-transparent border border-white/20 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-sm text-white"
+                  className="flex items-center justify-center gap-2 px-3 h-8 bg-transparent border border-dashed border-white/30 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-xs text-white"
                 >
-                  <Upload className="h-4 w-4" />
+                  <Upload className="h-3.5 w-3.5" />
                   <span>Upload Image</span>
                 </label>
 
