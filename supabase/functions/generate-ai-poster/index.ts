@@ -5,6 +5,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Minimal JSON schema for OpenAI JSON mode
+const DESIGN_JSON_SCHEMA = {
+  name: 'design_spec',
+  schema: {
+    type: 'object',
+    properties: {
+      title: { type: 'string' },
+      backgroundColor: { type: 'string' },
+      style: { type: 'string' },
+      mood: { type: 'string' },
+      elements: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            type: { type: 'string' },
+            content: { type: 'string' },
+            x: { type: 'number' },
+            y: { type: 'number' },
+            width: { type: 'number' },
+            height: { type: 'number' },
+            color: { type: 'string' },
+            fontSize: { type: 'number' },
+            fontWeight: { type: 'string' },
+            borderRadius: { type: 'string' },
+            shape: { type: 'string' },
+            iconName: { type: 'string' },
+            iconFamily: { type: 'string' },
+          },
+          additionalProperties: true,
+        },
+      },
+    },
+    required: [ 'elements' ],
+    additionalProperties: true,
+  },
+  strict: false,
+};
+
 // Model configuration
 const MODEL_CONFIGS: Record<string, any> = {
   'claude-sonnet-4-5': {
@@ -423,8 +462,8 @@ Return JSON (flat structure, NO nested frames):
         model: modelConfig.apiModel,
         messages: messages,
         max_completion_tokens: modelConfig.maxCompletionTokens,
+        response_format: { type: 'json_schema', json_schema: DESIGN_JSON_SCHEMA },
         stream: modelConfig.supportsStreaming,
-        response_format: { type: 'json_object' },
       };
 
       response = await fetch(modelConfig.endpoint, {
@@ -582,43 +621,39 @@ Return JSON (flat structure, NO nested frames):
       console.log('Non-streaming response received');
       console.log('Full OpenAI response:', JSON.stringify(responseData));
       
-      let fullContent = '';
-      if (modelConfig.provider === 'openai') {
-        fullContent = responseData.choices?.[0]?.message?.content || '';
-        console.log('OpenAI content length:', fullContent.length);
-        console.log('OpenAI content preview:', fullContent.substring(0, 500));
-      }
+      // Prefer parsed JSON when using json_schema
+      let designSpec = responseData.choices?.[0]?.message?.parsed;
 
-      // Parse result
-      let designSpec;
-      try {
-        // First try direct JSON parse (response_format=json_object should return pure JSON)
-        if (typeof fullContent === 'string' && fullContent.trim()) {
-          console.log('Attempting direct JSON parse...');
-          designSpec = JSON.parse(fullContent);
-          console.log('Direct JSON parse successful');
-        } else {
-          throw new Error('Empty or invalid content');
+      if (!designSpec) {
+        // Fallback to content extraction
+        let fullContent = '';
+        const content = responseData.choices?.[0]?.message?.content;
+        if (typeof content === 'string') {
+          fullContent = content;
+        } else if (Array.isArray(content)) {
+          for (const part of content) {
+            if (typeof part?.text === 'string') fullContent += part.text + '\n';
+            else if (typeof part?.content === 'string') fullContent += part.content + '\n';
+          }
         }
-      } catch (parseError) {
-        console.error('Direct JSON parse failed:', parseError);
-        // Fallback: try to extract JSON from markdown code blocks
+
         try {
-          console.log('Attempting to extract JSON from markdown...');
-          const jsonMatch = typeof fullContent === 'string'
-            ? fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/)
-            : null;
+          if (fullContent.trim()) {
+            console.log('Attempting direct JSON parse of concatenated content...');
+            designSpec = JSON.parse(fullContent);
+          } else {
+            throw new Error('Empty content');
+          }
+        } catch (parseError) {
+          console.error('Direct JSON parse failed:', parseError);
+          // Fallback: try to extract JSON from markdown code blocks
+          const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
           const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : '';
           if (!jsonStr) {
-            console.error('No JSON pattern found in content');
-            throw new Error('No JSON found');
+            console.error('No JSON found in OpenAI content');
+            throw new Error('AI generated invalid design specification');
           }
           designSpec = JSON.parse(jsonStr);
-          console.log('Markdown extraction successful');
-        } catch (e) {
-          console.error('All parsing attempts failed:', e);
-          console.error('Full content that failed to parse:', fullContent);
-          throw new Error('AI generated invalid design specification');
         }
       }
 
@@ -641,6 +676,8 @@ Return JSON (flat structure, NO nested frames):
           controller.close();
         }
       });
+
+      // (duplicate stream block removed)
 
       return new Response(stream, {
         headers: { 
