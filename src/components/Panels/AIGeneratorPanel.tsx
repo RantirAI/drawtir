@@ -196,18 +196,18 @@ export default function AIGeneratorPanel({
             </div>
 
             {/* Description Input */}
-            <div>
-              <Label className="text-xs mb-2 block text-gray-400">Description</Label>
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-400">Description</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ask Drawtir to create..."
-                className="h-20 text-sm resize-none bg-[#2a2a2a] border-white/10 text-white placeholder:text-gray-500"
+                className="min-h-[80px] text-sm resize-none bg-[#2a2a2a] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-white/20"
               />
             </div>
 
             {/* Upload Image & Generate Button Row */}
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2">
               <input
                 type="file"
                 accept="image/*"
@@ -244,7 +244,7 @@ export default function AIGeneratorPanel({
               
               <label
                 htmlFor="ai-image-upload"
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-[#2a2a2a] border border-white/10 rounded-md cursor-pointer hover:bg-[#333] transition-colors text-sm text-white"
+                className="flex items-center justify-center gap-2 px-4 h-10 bg-[#2a2a2a] border border-white/10 rounded-md cursor-pointer hover:bg-[#333] transition-colors text-sm text-white whitespace-nowrap"
               >
                 <Upload className="h-4 w-4" />
                 <span>Upload Image</span>
@@ -253,7 +253,7 @@ export default function AIGeneratorPanel({
               <Button 
                 onClick={handleGenerate} 
                 disabled={isGenerating || !description.trim()} 
-                className="flex-1 h-10 text-sm bg-blue-600 hover:bg-blue-700 text-white"
+                className="flex-1 h-10 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Sparkles className="h-4 w-4 mr-2" />
                 {isGenerating ? (
