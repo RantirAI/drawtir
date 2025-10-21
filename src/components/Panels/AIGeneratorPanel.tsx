@@ -251,9 +251,9 @@ export default function AIGeneratorPanel({
                 <Button 
                   onClick={handleGenerate} 
                   disabled={isGenerating || !description.trim()} 
-                  className="h-9 px-5 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-8 px-4 text-xs bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   {isGenerating ? (
                     <span className="truncate">{generationProgress || "Generating..."}</span>
                   ) : (
