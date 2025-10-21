@@ -195,19 +195,20 @@ export default function AIGeneratorPanel({
               </Select>
             </div>
 
-            {/* Description Input */}
-            <div className="space-y-2">
-              <Label className="text-xs text-gray-400">Description</Label>
-              <Textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ask Drawtir to create..."
-                className="min-h-[80px] text-sm resize-none bg-[#2a2a2a] border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-white/20"
-              />
-            </div>
+            {/* Description Section - Darker Container */}
+            <div className="space-y-3 bg-[#0f0f0f] border border-white/5 rounded-lg p-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-gray-400">Description</Label>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Ask Drawtir to create..."
+                  className="min-h-[80px] text-sm resize-none bg-black border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-white/20"
+                />
+              </div>
 
-            {/* Upload Image & Generate Button Row */}
-            <div className="flex gap-2">
+              {/* Upload Image & Generate Button Row */}
+              <div className="flex gap-2">
               <input
                 type="file"
                 accept="image/*"
@@ -242,26 +243,27 @@ export default function AIGeneratorPanel({
                 id="ai-image-upload"
               />
               
-              <label
-                htmlFor="ai-image-upload"
-                className="flex items-center justify-center gap-2 px-4 h-10 bg-[#2a2a2a] border border-white/10 rounded-md cursor-pointer hover:bg-[#333] transition-colors text-sm text-white whitespace-nowrap"
-              >
-                <Upload className="h-4 w-4" />
-                <span>Upload Image</span>
-              </label>
+                <label
+                  htmlFor="ai-image-upload"
+                  className="flex items-center justify-center gap-2 px-4 h-10 bg-[#1a1a1a] border border-white/10 rounded-md cursor-pointer hover:bg-[#252525] transition-colors text-sm text-white whitespace-nowrap"
+                >
+                  <Upload className="h-4 w-4" />
+                  <span>Upload Image</span>
+                </label>
 
-              <Button 
-                onClick={handleGenerate} 
-                disabled={isGenerating || !description.trim()} 
-                className="flex-1 h-10 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                {isGenerating ? (
-                  <span className="truncate">{generationProgress || "Generating..."}</span>
-                ) : (
-                  "Generate"
-                )}
-              </Button>
+                <Button 
+                  onClick={handleGenerate} 
+                  disabled={isGenerating || !description.trim()} 
+                  className="flex-1 h-10 text-sm bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {isGenerating ? (
+                    <span className="truncate">{generationProgress || "Generating..."}</span>
+                  ) : (
+                    "Generate"
+                  )}
+                </Button>
+              </div>
             </div>
 
             {/* Uploaded Images Preview */}
