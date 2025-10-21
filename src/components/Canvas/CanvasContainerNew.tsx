@@ -124,6 +124,35 @@ export default function CanvasContainerNew({
     setPanOffset({ x: centerX, y: centerY });
   };
 
+  const fitDebounceRef = useRef<number | null>(null);
+
+  // Dynamically fit selected frame to viewport when it moves/resizes
+  useEffect(() => {
+    if (!selectedFrameId) return;
+    const frame = frames.find(f => f.id === selectedFrameId);
+    if (!frame) return;
+    if (fitDebounceRef.current) window.clearTimeout(fitDebounceRef.current);
+    fitDebounceRef.current = window.setTimeout(() => {
+      fitFrameToView(selectedFrameId);
+    }, 120);
+  }, [selectedFrameId, frames]);
+
+  // Also fit when the selection changes
+  useEffect(() => {
+    if (!selectedFrameId) return;
+    const t = window.setTimeout(() => fitFrameToView(selectedFrameId), 0);
+    return () => window.clearTimeout(t);
+  }, [selectedFrameId]);
+
+  // Fit on window resize to keep poster fully visible
+  useEffect(() => {
+    const onResize = () => {
+      if (selectedFrameId) fitFrameToView(selectedFrameId);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [selectedFrameId]);
+
   const [showGeneratePanel, setShowGeneratePanel] = useState(false);
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
