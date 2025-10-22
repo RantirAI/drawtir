@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Play } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -72,14 +71,21 @@ export default function AnimationsModal({
   onSelectAnimation,
 }: AnimationsModalProps) {
   const [selectedAnimation, setSelectedAnimation] = useState<AnimationType>(currentAnimation);
+  const [hoveredAnimation, setHoveredAnimation] = useState<AnimationType | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
-  const [duration, setDuration] = useState<string>(animations.find(a => a.type === currentAnimation)?.duration || "0.5s");
-  const [delay, setDelay] = useState<string>("0s");
+  const [duration, setDuration] = useState<string>("0.5");
+  const [delay, setDelay] = useState<string>("0");
   const [easing, setEasing] = useState<string>("ease-out");
   const [iterationCount, setIterationCount] = useState<string>("1");
 
   const handleApply = () => {
-    onSelectAnimation(selectedAnimation, duration, delay, easing, iterationCount);
+    onSelectAnimation(
+      selectedAnimation, 
+      `${duration}s`, 
+      `${delay}s`, 
+      easing, 
+      iterationCount
+    );
     onOpenChange(false);
   };
 
@@ -87,71 +93,154 @@ export default function AnimationsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Choose Animation</DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-2 gap-6">
-          {/* Animation List */}
-          <ScrollArea className="h-[400px] pr-4">
-            <div className="space-y-2">
-              {animations.map((animation) => (
-                <div
-                  key={animation.type}
-                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                    selectedAnimation === animation.type
-                      ? "border-primary bg-primary/10"
-                      : "border-border hover:border-primary/50 hover:bg-accent"
-                  }`}
-                  onClick={() => setSelectedAnimation(animation.type)}
-                  onMouseEnter={() => setHoveredAnimation(animation.type)}
-                  onMouseLeave={() => setHoveredAnimation(null)}
-                >
-                  <div className="font-medium text-sm">{animation.name}</div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {animation.description}
-                  </div>
-                  {animation.duration && (
-                    <div className="text-xs text-muted-foreground mt-1">
-                      Duration: {animation.duration}
+        <div className="grid grid-cols-3 gap-4">
+          {/* Animation Grid - Left 2 columns */}
+          <div className="col-span-2">
+            <ScrollArea className="h-[500px] pr-4">
+              <div className="grid grid-cols-2 gap-3">
+                {animations.map((animation) => (
+                  <div
+                    key={animation.type}
+                    className={`group relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                      selectedAnimation === animation.type
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    onClick={() => {
+                      setSelectedAnimation(animation.type);
+                      if (animation.duration) {
+                        setDuration(animation.duration.replace('s', ''));
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredAnimation(animation.type)}
+                    onMouseLeave={() => setHoveredAnimation(null)}
+                  >
+                    {/* Preview Box */}
+                    <div className="h-24 flex items-center justify-center mb-3 bg-muted/50 rounded-md overflow-hidden">
+                      <div
+                        key={`${animation.type}-${hoveredAnimation === animation.type ? previewKey : 'static'}`}
+                        className={`w-12 h-12 bg-primary rounded ${
+                          hoveredAnimation === animation.type && animation.type !== "none"
+                            ? `animate-${animation.type}`
+                            : ""
+                        }`}
+                        style={{
+                          animationDuration: `${duration}s`,
+                          animationDelay: `${delay}s`,
+                          animationTimingFunction: easing,
+                          animationIterationCount: iterationCount,
+                        }}
+                      />
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+                    
+                    {/* Animation Name */}
+                    <div className="font-medium text-sm">{animation.name}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {animation.description}
+                    </div>
+                    {animation.duration && (
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Duration: {animation.duration}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
 
-          {/* Preview Area */}
-          <div className="flex flex-col items-center justify-center bg-muted/30 rounded-lg border-2 border-dashed border-border">
-            <div className="text-center p-8">
-              <div
-                key={`${hoveredAnimation || selectedAnimation}-${previewKey}`}
-                className={`w-20 h-20 bg-primary rounded-lg mx-auto ${
-                  hoveredAnimation && hoveredAnimation !== "none"
-                    ? `animate-${hoveredAnimation}`
-                    : selectedAnimation !== "none"
-                    ? `animate-${selectedAnimation}`
-                    : ""
-                }`}
-              />
-              <p className="text-sm text-muted-foreground mt-4">
-                {hoveredAnimation && hoveredAnimation !== "none"
-                  ? "Hover preview"
-                  : selectedAnimation !== "none"
-                  ? "Selected animation"
-                  : "Select an animation to preview"}
-              </p>
+          {/* Settings Panel - Right column */}
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/30 rounded-lg border">
+              <h3 className="font-medium text-sm mb-4">Selected animation</h3>
+              
+              {/* Large Preview */}
+              <div className="h-32 flex items-center justify-center bg-background rounded-md mb-4">
+                <div
+                  key={`preview-${selectedAnimation}-${previewKey}`}
+                  className={`w-16 h-16 bg-primary rounded-lg ${
+                    selectedAnimation !== "none" ? `animate-${selectedAnimation}` : ""
+                  }`}
+                  style={{
+                    animationDuration: `${duration}s`,
+                    animationDelay: `${delay}s`,
+                    animationTimingFunction: easing,
+                    animationIterationCount: iterationCount,
+                  }}
+                />
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-4"
+                className="w-full mb-4"
                 onClick={triggerPreview}
-                disabled={(hoveredAnimation || selectedAnimation) === "none"}
+                disabled={selectedAnimation === "none"}
               >
-                <Play className="h-4 w-4 mr-2" />
                 Replay
               </Button>
+
+              {/* Animation Settings */}
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs">Duration (seconds)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={duration}
+                    onChange={(e) => setDuration(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs">Delay (seconds)</Label>
+                  <Input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={delay}
+                    onChange={(e) => setDelay(e.target.value)}
+                    className="h-8 text-xs"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs">Easing</Label>
+                  <Select value={easing} onValueChange={setEasing}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ease-out">Ease Out</SelectItem>
+                      <SelectItem value="ease-in">Ease In</SelectItem>
+                      <SelectItem value="ease-in-out">Ease In Out</SelectItem>
+                      <SelectItem value="linear">Linear</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs">Repeat</Label>
+                  <Select value={iterationCount} onValueChange={setIterationCount}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">Once</SelectItem>
+                      <SelectItem value="2">Twice</SelectItem>
+                      <SelectItem value="3">Three times</SelectItem>
+                      <SelectItem value="infinite">Infinite</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
         </div>

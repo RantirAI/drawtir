@@ -1681,6 +1681,9 @@ export default function CanvasContainerNew({
                       rotation={element.rotation}
                       animation={element.animation}
                       animationDuration={element.animationDuration}
+                      animationDelay={element.animationDelay}
+                      animationTimingFunction={element.animationTimingFunction}
+                      animationIterationCount={element.animationIterationCount}
                       useFlexLayout={false}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
@@ -1803,6 +1806,9 @@ export default function CanvasContainerNew({
                             shader={element.shader}
                             animation={element.animation}
                             animationDuration={element.animationDuration}
+                            animationDelay={element.animationDelay}
+                            animationTimingFunction={element.animationTimingFunction}
+                            animationIterationCount={element.animationIterationCount}
                             useFlexLayout={false}
                             isSelected={false}
                             zoom={zoom}
