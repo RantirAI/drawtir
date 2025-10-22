@@ -20,12 +20,28 @@ interface InputWithUnitProps extends Omit<React.ComponentProps<"input">, "onChan
 
 const InputWithUnit = React.forwardRef<HTMLInputElement, InputWithUnitProps>(
   ({ className, value, onChange, unit = "px", onUnitChange, showUnitSelector = true, ...props }, ref) => {
+    const [localValue, setLocalValue] = React.useState(String(value));
+
+    React.useEffect(() => {
+      setLocalValue(String(value));
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const inputValue = e.target.value;
+      setLocalValue(inputValue);
+      
+      const numValue = Number(inputValue);
+      if (!isNaN(numValue) && inputValue !== "") {
+        onChange(numValue);
+      }
+    };
+
     return (
       <div className={cn("relative flex items-center", className)}>
         <Input
           type="number"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          value={localValue}
+          onChange={handleChange}
           className={cn(
             "h-7 text-xs pr-14",
             className
