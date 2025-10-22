@@ -128,18 +128,7 @@ export default function CanvasContainerNew({
 
   const fitDebounceRef = useRef<number | null>(null);
 
-  // Dynamically fit selected frame to viewport when it moves/resizes
-  useEffect(() => {
-    if (!selectedFrameId) return;
-    const frame = frames.find(f => f.id === selectedFrameId);
-    if (!frame) return;
-    if (fitDebounceRef.current) window.clearTimeout(fitDebounceRef.current);
-    fitDebounceRef.current = window.setTimeout(() => {
-      fitFrameToView(selectedFrameId);
-    }, 120);
-  }, [selectedFrameId, frames]);
-
-  // Also fit when the selection changes
+  // Fit frame to view only when selection changes, not on every frame update
   useEffect(() => {
     if (!selectedFrameId) return;
     const t = window.setTimeout(() => fitFrameToView(selectedFrameId), 0);
@@ -1764,8 +1753,24 @@ export default function CanvasContainerNew({
           onRestoreConversation={(snapshot) => {
             setProjectTitle(snapshot.metadata.title);
             setFrames(snapshot.frames);
-            setZoom(snapshot.canvas.zoom);
-            setPanOffset(snapshot.canvas.panOffset);
+            setZoom(snapshot.canvas.zoom || 1);
+            
+            // Center the first frame in the viewport
+            const firstFrame = snapshot.frames[0];
+            if (firstFrame) {
+              const viewportWidth = window.innerWidth;
+              const viewportHeight = window.innerHeight;
+              const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
+              const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
+              setPanOffset({ x: centerX, y: centerY });
+            } else {
+              setPanOffset(snapshot.canvas.panOffset);
+            }
+            
+            // Select the first frame
+            if (snapshot.frames[0]) {
+              setSelectedFrameId(snapshot.frames[0].id);
+            }
           }}
           onClose={() => {
             setShowGeneratePanel(false);
@@ -1781,9 +1786,26 @@ export default function CanvasContainerNew({
           onRestoreTemplate={(snapshot) => {
             setProjectTitle(snapshot.metadata.title);
             setFrames(snapshot.frames);
-            setZoom(snapshot.canvas.zoom);
-            setPanOffset(snapshot.canvas.panOffset);
+            setZoom(snapshot.canvas.zoom || 1);
+            
+            // Center the first frame in the viewport
+            const firstFrame = snapshot.frames[0];
+            if (firstFrame) {
+              const viewportWidth = window.innerWidth;
+              const viewportHeight = window.innerHeight;
+              const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
+              const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
+              setPanOffset({ x: centerX, y: centerY });
+            } else {
+              setPanOffset(snapshot.canvas.panOffset);
+            }
+            
             setShowTemplatesPanel(false);
+            
+            // Select the first frame
+            if (snapshot.frames[0]) {
+              setSelectedFrameId(snapshot.frames[0].id);
+            }
           }}
           onClose={() => setShowTemplatesPanel(false)}
         />
