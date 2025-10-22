@@ -15,6 +15,7 @@ import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
 import ExportAllDialog from "./ExportAllDialog";
+import PreviewDialog from "./PreviewDialog";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsModal from "./AnimationsModal";
@@ -24,7 +25,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Layers, SlidersHorizontal, Upload, Layout } from "lucide-react";
+import { Sparkles, Layers, SlidersHorizontal, Upload, Layout, Play } from "lucide-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -152,6 +153,7 @@ export default function CanvasContainerNew({
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showExportAllDialog, setShowExportAllDialog] = useState(false);
   const [showAnimationsModal, setShowAnimationsModal] = useState(false);
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
@@ -2201,6 +2203,15 @@ export default function CanvasContainerNew({
         >
           <SlidersHorizontal className="h-4 w-4" />
         </Button>
+        <Button
+          variant="default"
+          size="icon"
+          className="h-10 w-10 rounded-full bg-primary hover:scale-105 transition-transform shadow-lg"
+          onClick={() => setShowPreviewDialog(true)}
+          title="Preview with animations"
+        >
+          <Play className="h-4 w-4" />
+        </Button>
       </div>
       
       {/* Zoom Controls */}
@@ -2279,6 +2290,12 @@ export default function CanvasContainerNew({
             : "none"
         }
         onSelectAnimation={handleAnimationSelect}
+      />
+
+      <PreviewDialog
+        open={showPreviewDialog}
+        onOpenChange={setShowPreviewDialog}
+        frame={selectedFrame}
       />
 
       <DrawtirFooter />
