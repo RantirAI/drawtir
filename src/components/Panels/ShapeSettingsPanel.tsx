@@ -314,6 +314,12 @@ export default function ShapeSettingsPanel({
       onClose={onClose}
       className="w-64"
     >
+      <div onKeyDown={(e) => {
+        // Prevent Delete and Backspace from bubbling up to canvas when typing in inputs
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.stopPropagation();
+        }
+      }}>
       {/* Header with element type */}
       <div className="flex items-center gap-1.5 mb-2 pb-2 border-b border-border">
         <ElementIcon className="h-3 w-3 text-muted-foreground" />
@@ -1210,6 +1216,7 @@ export default function ShapeSettingsPanel({
           </AccordionItem>
         )}
       </Accordion>
+      </div>
     </DraggablePanel>
   );
 }
