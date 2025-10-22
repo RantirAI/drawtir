@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Upload, Clock, RotateCcw, Code, Layout } from "lucide-react";
+import { Sparkles, Upload, Clock, RotateCcw, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +11,6 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Frame } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
-import { useTemplates } from "@/hooks/useTemplates";
-import { starterTemplates } from "@/data/starterTemplates";
 
 interface AIGeneratorPanelProps {
   projectId: string | null;
@@ -59,7 +57,6 @@ export default function AIGeneratorPanel({
   const [selectedModel, setSelectedModel] = useState(() => {
     return localStorage.getItem('ai-poster-model') || 'claude-sonnet-4-5';
   });
-  const { templates, isLoading: isLoadingTemplates, loadTemplates } = useTemplates();
 
   // Save model preference
   useEffect(() => {
@@ -106,9 +103,6 @@ export default function AIGeneratorPanel({
     if (activeTab === "history" || activeTab === "generator") {
       loadConversations();
     }
-    if (activeTab === "templates") {
-      loadTemplates();
-    }
   }, [activeTab, projectId]);
 
   const handleGenerate = async () => {
@@ -150,18 +144,12 @@ export default function AIGeneratorPanel({
         {/* Header Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/10">
-            <TabsList className="grid w-fit grid-cols-3 bg-transparent gap-4 p-0">
+            <TabsList className="grid w-fit grid-cols-2 bg-transparent gap-4 p-0">
               <TabsTrigger 
                 value="generator"
                 className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
               >
                 Description
-              </TabsTrigger>
-              <TabsTrigger 
-                value="templates"
-                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
-              >
-                Templates
               </TabsTrigger>
               <TabsTrigger 
                 value="history"
@@ -362,98 +350,6 @@ export default function AIGeneratorPanel({
                 ))}
               </div>
             )}
-          </TabsContent>
-
-          <TabsContent value="templates" className="p-4 mt-0">
-            <ScrollArea className="h-[500px]">
-              {isLoadingTemplates ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-gray-400">Loading templates...</div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Starter Templates Section */}
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-medium text-gray-400 mb-2">Starter Templates</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {starterTemplates.map((template) => (
-                        <div
-                          key={template.id}
-                          className="group relative bg-[#2a2a2a] border border-white/10 rounded-lg overflow-hidden hover:bg-[#333] transition-all cursor-pointer"
-                          onClick={() => {
-                            onRestoreConversation(template.snapshot);
-                            toast.success(`Loaded: ${template.name}`);
-                            setActiveTab("generator");
-                          }}
-                        >
-                          <div className="aspect-[3/4] bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                            <Layout className="h-8 w-8 text-white/50" />
-                          </div>
-                          <div className="p-2">
-                            <p className="text-xs font-medium text-white truncate">{template.name}</p>
-                            <p className="text-[10px] text-gray-400 truncate">{template.description}</p>
-                          </div>
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <span className="text-xs text-white font-medium">Use Template</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Community Templates Section */}
-                  {templates.length > 0 && (
-                    <div className="space-y-2">
-                      <h3 className="text-xs font-medium text-gray-400 mb-2">Community Templates</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {templates.map((template) => (
-                          <div
-                            key={template.id}
-                            className="group relative bg-[#2a2a2a] border border-white/10 rounded-lg overflow-hidden hover:bg-[#333] transition-all cursor-pointer"
-                            onClick={() => {
-                              onRestoreConversation(template.canvas_data);
-                              toast.success(`Loaded: ${template.project_name}`);
-                              setActiveTab("generator");
-                            }}
-                          >
-                            {template.thumbnail_url ? (
-                              <div className="aspect-[3/4]">
-                                <img 
-                                  src={template.thumbnail_url} 
-                                  alt={template.project_name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="aspect-[3/4] bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
-                                <Layout className="h-8 w-8 text-white/50" />
-                              </div>
-                            )}
-                            <div className="p-2">
-                              <p className="text-xs font-medium text-white truncate">{template.project_name}</p>
-                              <p className="text-[10px] text-gray-400 truncate">{template.template_category || 'Community'}</p>
-                            </div>
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="text-xs text-white font-medium">Use Template</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {templates.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-8 text-center">
-                      <Layout className="h-10 w-10 text-gray-600 mb-3" />
-                      <p className="text-sm text-gray-400">No community templates yet</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Create and share your designs!
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </ScrollArea>
           </TabsContent>
 
           <TabsContent value="history" className="p-4 mt-0">
