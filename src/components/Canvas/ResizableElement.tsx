@@ -138,7 +138,7 @@ export default function ResizableElement({
   const [isLocked, setIsLocked] = useState(false);
   const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
-  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
+  const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, elementX: x, elementY: y, corner: "" });
   const [rotateStart, setRotateStart] = useState({ angle: rotation, mouseAngle: 0 });
 
   // Helper function to convert hex to rgba with opacity
@@ -209,18 +209,24 @@ export default function ResizableElement({
         
         let newWidth = resizeStart.width;
         let newHeight = resizeStart.height;
-        let newX = x;
-        let newY = y;
+        let newX = resizeStart.elementX;
+        let newY = resizeStart.elementY;
 
-        if (resizeStart.corner.includes("e")) newWidth = Math.max(20, snapToGrid(resizeStart.width + (dx * multiplier)));
-        if (resizeStart.corner.includes("w")) {
-          newWidth = Math.max(20, snapToGrid(resizeStart.width - (dx * multiplier)));
-          newX = snapToGrid(x + (dx * multiplier));
+        if (resizeStart.corner.includes("e")) {
+          newWidth = Math.max(20, snapToGrid(resizeStart.width + (dx * multiplier)));
         }
-        if (resizeStart.corner.includes("s")) newHeight = Math.max(20, snapToGrid(resizeStart.height + (dy * multiplier)));
+        if (resizeStart.corner.includes("w")) {
+          const widthDelta = (dx * multiplier);
+          newWidth = Math.max(20, snapToGrid(resizeStart.width - widthDelta));
+          newX = snapToGrid(resizeStart.elementX + widthDelta);
+        }
+        if (resizeStart.corner.includes("s")) {
+          newHeight = Math.max(20, snapToGrid(resizeStart.height + (dy * multiplier)));
+        }
         if (resizeStart.corner.includes("n")) {
-          newHeight = Math.max(20, snapToGrid(resizeStart.height - (dy * multiplier)));
-          newY = snapToGrid(y + (dy * multiplier));
+          const heightDelta = (dy * multiplier);
+          newHeight = Math.max(20, snapToGrid(resizeStart.height - heightDelta));
+          newY = snapToGrid(resizeStart.elementY + heightDelta);
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
@@ -309,7 +315,7 @@ export default function ResizableElement({
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
     e.stopPropagation();
     setIsResizing(true);
-    setResizeStart({ x: e.clientX, y: e.clientY, width, height, corner });
+    setResizeStart({ x: e.clientX, y: e.clientY, width, height, elementX: x, elementY: y, corner });
   };
 
   const handleRotateStart = (e: React.MouseEvent) => {
