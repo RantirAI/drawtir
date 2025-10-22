@@ -231,6 +231,7 @@ export default function ResizableElement({
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
+      }
     };
 
     const handleMouseUp = () => {
