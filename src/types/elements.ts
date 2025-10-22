@@ -42,6 +42,17 @@ export interface Element {
   // Text properties
   text?: string;
   richTextHtml?: string;
+  richTextBlocks?: Array<{
+    id: string;
+    type: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "ul" | "ol" | "blockquote" | "code";
+    content: string;
+    styles?: {
+      bold?: boolean;
+      italic?: boolean;
+      strikethrough?: boolean;
+      link?: string;
+    };
+  }>;
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string;

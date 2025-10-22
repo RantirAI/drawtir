@@ -3,6 +3,7 @@ import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils
 import DynamicIcon from "./DynamicIcon";
 import { ShaderElement } from "./ShaderElement";
 import { BendableLine } from "./BendableLine";
+import RichTextEditor from "./RichTextEditor";
 import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
@@ -726,6 +727,52 @@ export default function ResizableElement({
             {text || "Double click to edit"}
           </div>
         )
+      ) : type === "richtext" ? (
+        <div 
+          className="w-full h-full overflow-hidden relative" 
+          style={{ 
+            borderRadius: cornerRadius ? `${cornerRadius}px` : '0',
+            background: fillType === "solid" ? fill : 
+                       fillType === "image" && fillImage ? `url(${fillImage})` :
+                       fillType === "gradient" ? generateGradientCSS(gradientType, gradientAngle, gradientStops) : 
+                       fill,
+            ...(fillType === "image" && fillImage ? getFitStyle(fillImageFit) : {})
+          }}
+        >
+          <RichTextEditor
+            blocks={(rest as any).richTextBlocks || [
+              { id: "1", type: "h2", content: "Heading 2" },
+              { id: "2", type: "h3", content: "Heading 3" },
+              { id: "3", type: "p", content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit." },
+              { id: "4", type: "blockquote", content: "Block quote" },
+              { id: "5", type: "ul", content: "List item" },
+              { id: "6", type: "ol", content: "Numbered item" }
+            ]}
+            isEditing={isEditing}
+            fontSize={fontSize}
+            fontFamily={fontFamily}
+            fontWeight={fontWeight}
+            textAlign={textAlign}
+            color={color || fill}
+            onUpdate={(blocks) => {
+              onUpdate(id, { richTextBlocks: blocks } as any);
+            }}
+            onAddBlock={(type) => {
+              const currentBlocks = (rest as any).richTextBlocks || [];
+              const newBlock = {
+                id: `block-${Date.now()}`,
+                type,
+                content: ""
+              };
+              onUpdate(id, { richTextBlocks: [...currentBlocks, newBlock] } as any);
+            }}
+            onDeleteBlock={(blockId) => {
+              const currentBlocks = (rest as any).richTextBlocks || [];
+              const filteredBlocks = currentBlocks.filter((b: any) => b.id !== blockId);
+              onUpdate(id, { richTextBlocks: filteredBlocks } as any);
+            }}
+          />
+        </div>
       ) : (
         renderShape()
       )}

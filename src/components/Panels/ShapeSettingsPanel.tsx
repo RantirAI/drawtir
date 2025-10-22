@@ -623,8 +623,8 @@ export default function ShapeSettingsPanel({
           </AccordionItem>
         )}
 
-        {/* Type Section - For Text Elements */}
-        {elementType === "text" && (
+        {/* Type Section - For Text and Rich Text Elements */}
+        {(elementType === "text" || elementType === "richtext") && (
           <AccordionItem value="type" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Type</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-1.5">
