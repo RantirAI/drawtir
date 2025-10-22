@@ -2166,6 +2166,9 @@ export default function CanvasContainerNew({
             setSelectedElementIds([]);
           }}
           onElementDelete={handleElementDelete}
+          onElementUpdate={(frameId, elementId, updates) => {
+            handleElementUpdate(elementId, updates);
+          }}
           onElementReorder={handleElementReorder}
           onFrameReorder={handleFrameReorder}
           onClose={() => setShowLayersPanel(false)}

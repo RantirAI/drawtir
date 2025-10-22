@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical } from "lucide-react";
+import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DraggablePanel from "./DraggablePanel";
@@ -12,6 +12,7 @@ interface LayersPanelProps {
   onElementSelect: (elementId: string, multiSelect?: boolean) => void;
   onFrameSelect: (frameId: string) => void;
   onElementDelete: (elementId: string) => void;
+  onElementUpdate?: (frameId: string, elementId: string, updates: Partial<Element>) => void;
   onElementReorder?: (frameId: string, fromIndex: number, toIndex: number) => void;
   onFrameReorder?: (sourceFrameId: string, targetFrameId: string, position: 'before' | 'after' | 'inside') => void;
   onClose: () => void;
@@ -36,6 +37,7 @@ export default function LayersPanel({
   onElementSelect,
   onFrameSelect,
   onElementDelete,
+  onElementUpdate,
   onElementReorder,
   onFrameReorder,
   onClose,
@@ -210,17 +212,32 @@ export default function LayersPanel({
                             : element.shapeType || element.type}
                         </span>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-destructive/20 flex-shrink-0"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onElementDelete(element.id);
-                        }}
-                      >
-                        <Trash2 className="w-3 h-3 text-destructive" />
-                      </Button>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {element.isLocked && onElementUpdate && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 hover:bg-secondary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onElementUpdate(frame.id, element.id, { isLocked: false });
+                            }}
+                          >
+                            <Lock className="w-3 h-3 text-muted-foreground" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-destructive/20"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onElementDelete(element.id);
+                          }}
+                        >
+                          <Trash2 className="w-3 h-3 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   );
                 })}
