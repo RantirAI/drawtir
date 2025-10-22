@@ -76,6 +76,7 @@ interface ResizableElementProps {
   isSelected: boolean;
   zoom?: number;
   currentTime?: number;
+  globalAnimationTrigger?: any;
   isLocked?: boolean;
   onUpdate: (id: string, updates: Partial<Element>) => void;
   onSelect: (e?: React.MouseEvent) => void;

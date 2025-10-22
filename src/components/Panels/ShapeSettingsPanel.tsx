@@ -29,7 +29,7 @@ import {
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box, RotateCcw,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
-  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles
+  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1
 } from "lucide-react";
 import IconSelector from "../Toolbar/IconSelector";
 import { useState } from "react";
@@ -79,7 +79,7 @@ const GOOGLE_FONTS = [
 ];
 
 interface ShapeSettingsPanelProps {
-  elementType?: "frame" | "shape" | "text" | "image" | "drawing" | "icon" | "shader" | null;
+  elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | null;
   elementName?: string;
   shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   iconName?: string;
@@ -187,11 +187,12 @@ interface ShapeSettingsPanelProps {
   onClose?: () => void;
 }
 
-const getElementIcon = (type?: "frame" | "shape" | "text" | "image" | "drawing" | "icon" | "shader" | null) => {
+const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | null) => {
   switch (type) {
     case "frame": return Box;
     case "shape": return Square;
     case "text": return Type;
+    case "richtext": return Heading1;
     case "image": return Image;
     case "drawing": return Pen;
     case "icon": return Smile;
