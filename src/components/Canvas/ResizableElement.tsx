@@ -309,7 +309,7 @@ export default function ResizableElement({
 
   const handleRotateStart = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const rect = (e.target as HTMLElement).closest('[data-element-container]')?.getBoundingClientRect();
+    const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
     
     const centerX = rect.left + rect.width / 2;
