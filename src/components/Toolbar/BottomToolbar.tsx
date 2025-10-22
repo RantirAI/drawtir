@@ -165,7 +165,7 @@ export default function BottomToolbar({
                 <Box className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">Add 3D Element</TooltipContent>
+            <TooltipContent side="top">Add Shader</TooltipContent>
           </Tooltip>
 
           <Separator orientation="vertical" className="h-6 mx-1" />
