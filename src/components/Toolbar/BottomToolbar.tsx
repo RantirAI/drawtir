@@ -1,6 +1,6 @@
 import { 
   MousePointer2, Paintbrush, Square, Type, Image as ImageIcon, Plus,
-  Copy, Trash2, Smile, Sparkles, Minus
+  Copy, Trash2, Smile, Box, Pen
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -148,7 +148,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onLineAdd}
               >
-                <Minus className="h-4 w-4" />
+                <Pen className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Line</TooltipContent>
@@ -162,10 +162,10 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onShaderAdd}
               >
-                <Sparkles className="h-4 w-4" />
+                <Box className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">Add Shader Effect</TooltipContent>
+            <TooltipContent side="top">Add 3D Element</TooltipContent>
           </Tooltip>
 
           <Separator orientation="vertical" className="h-6 mx-1" />

@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Play, Pause, RotateCcw } from "lucide-react";
 
 interface TimelinePanelProps {
   frame: Frame | null;
@@ -10,6 +12,9 @@ interface TimelinePanelProps {
   currentTime: number;
   onTimeChange: (time: number) => void;
   maxDuration: number;
+  isPlaying?: boolean;
+  onPlayPause?: () => void;
+  onReset?: () => void;
 }
 
 export default function TimelinePanel({
@@ -19,6 +24,9 @@ export default function TimelinePanel({
   currentTime,
   onTimeChange,
   maxDuration = 5,
+  isPlaying = false,
+  onPlayPause,
+  onReset,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
@@ -72,7 +80,6 @@ export default function TimelinePanel({
 
     const handleMouseUp = () => {
       setIsDraggingPlayhead(false);
-      setDraggedElement(null);
     };
 
     if (isDraggingPlayhead) {
@@ -84,36 +91,42 @@ export default function TimelinePanel({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDraggingPlayhead]);
+  }, [isDraggingPlayhead, maxDuration]);
 
   const handleBarDragStart = (elementId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setDraggedElement(elementId);
   };
 
-  const handleBarDrag = (elementId: string, e: React.MouseEvent) => {
-    if (!timelineRef.current || draggedElement !== elementId) return;
+  const handleBarDrag = (e: MouseEvent) => {
+    if (!timelineRef.current || !draggedElement) return;
     const rect = timelineRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const newDelay = (x / rect.width) * maxDuration;
-    onUpdateElement(elementId, { animationDelay: `${newDelay * 1000}ms` });
+    onUpdateElement(draggedElement, { animationDelay: `${newDelay * 1000}ms` });
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (draggedElement) {
-        handleBarDrag(draggedElement, e as any);
+        handleBarDrag(e);
       }
+    };
+
+    const handleMouseUp = () => {
+      setDraggedElement(null);
     };
 
     if (draggedElement) {
       document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     }
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [draggedElement]);
+  }, [draggedElement, maxDuration]);
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
@@ -122,6 +135,24 @@ export default function TimelinePanel({
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <h3 className="text-sm font-medium">Timeline</h3>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={onReset}
+            title="Reset to start"
+          >
+            <RotateCcw className="h-3 w-3" />
+          </Button>
+          <Button
+            variant={isPlaying ? "default" : "ghost"}
+            size="icon"
+            className="h-6 w-6"
+            onClick={onPlayPause}
+            title={isPlaying ? "Pause" : "Play"}
+          >
+            {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
+          </Button>
           <span className="text-xs text-muted-foreground">
             {currentTime.toFixed(2)}s / {maxDuration}s
           </span>

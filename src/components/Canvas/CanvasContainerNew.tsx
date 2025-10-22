@@ -162,6 +162,7 @@ export default function CanvasContainerNew({
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
+  const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -267,6 +268,37 @@ export default function CanvasContainerNew({
       window.removeEventListener('wheel', handleWheel);
     };
   }, [historyIndex, history, selectedElementIds]);
+
+  // Animation playback
+  useEffect(() => {
+    if (!isPlayingAnimation) return;
+
+    const fps = 60;
+    const interval = setInterval(() => {
+      setCurrentTime(prev => {
+        const next = prev + (1 / fps);
+        if (next >= maxDuration) {
+          setIsPlayingAnimation(false);
+          return maxDuration;
+        }
+        return next;
+      });
+    }, 1000 / fps);
+
+    return () => clearInterval(interval);
+  }, [isPlayingAnimation, maxDuration]);
+
+  const handlePlayPause = () => {
+    if (currentTime >= maxDuration) {
+      setCurrentTime(0);
+    }
+    setIsPlayingAnimation(!isPlayingAnimation);
+  };
+
+  const handleTimelineReset = () => {
+    setCurrentTime(0);
+    setIsPlayingAnimation(false);
+  };
 
   const getFilterStyle = () => {
     if (!selectedFrame) return {};
@@ -1294,10 +1326,8 @@ export default function CanvasContainerNew({
       });
     });
     
-    toast.success("Animation applied!");
-    setShowAnimationsPanel(false);
-    
     toast.success(`Animation ${config.animation !== 'none' ? 'applied' : 'removed'}!`);
+    setShowAnimationsPanel(false);
   };
 
   const handleAddText = () => {
@@ -2422,6 +2452,9 @@ export default function CanvasContainerNew({
             currentTime={currentTime}
             onTimeChange={setCurrentTime}
             maxDuration={maxDuration}
+            isPlaying={isPlayingAnimation}
+            onPlayPause={handlePlayPause}
+            onReset={handleTimelineReset}
           />
         </div>
       )}
