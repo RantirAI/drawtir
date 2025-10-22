@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock } from "lucide-react";
+import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DraggablePanel from "./DraggablePanel";
@@ -28,6 +28,10 @@ const getElementIcon = (type: Element["type"], shapeType?: string) => {
   if (type === "image") return ImageIcon;
   if (type === "drawing") return Pen;
   return Square;
+};
+
+const hasAnimation = (element: Element) => {
+  return element.animation && element.animation !== "none";
 };
 
 export default function LayersPanel({
@@ -213,6 +217,9 @@ export default function LayersPanel({
                         </span>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
+                        {hasAnimation(element) && (
+                          <Film className="w-2.5 h-2.5 text-primary/60" />
+                        )}
                         {element.isLocked && (
                           <div className="flex items-center">
                             <Lock className="w-2.5 h-2.5 text-muted-foreground/60" />

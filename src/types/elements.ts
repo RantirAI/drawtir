@@ -88,6 +88,7 @@ export interface Element {
   animationDelay?: string; // e.g. "0.2s"
   animationTimingFunction?: string; // e.g. "ease-out"
   animationIterationCount?: string; // e.g. "1" | "infinite"
+  animationCategory?: "in" | "out" | "custom"; // Category for organizing animations
   
   // Nesting support
   children?: Element[];

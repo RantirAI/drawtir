@@ -19,8 +19,8 @@ import PreviewDialog from "./PreviewDialog";
 import TimelinePanel from "@/components/Panels/TimelinePanel";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
-import AnimationsModal from "./AnimationsModal";
-import type { AnimationType } from "./AnimationsModal";
+import AnimationsPanel from "@/components/Panels/AnimationsPanel";
+import type { AnimationType } from "@/components/Panels/AnimationsPanel";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -153,7 +153,7 @@ export default function CanvasContainerNew({
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showExportAllDialog, setShowExportAllDialog] = useState(false);
-  const [showAnimationsModal, setShowAnimationsModal] = useState(false);
+  const [showAnimationsPanel, setShowAnimationsPanel] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
@@ -1272,18 +1272,19 @@ export default function CanvasContainerNew({
     }));
   };
 
-  const handleAnimationSelect = (animation: AnimationType, duration?: string, delay?: string, easing?: string, iterationCount?: string) => {
+  const handleAnimationSelect = (config: { animation: AnimationType; duration: string; delay: string; easing: string; iterationCount: string; category: "in" | "out" | "custom" }) => {
     if (!animatingElementId) return;
     
     handleElementUpdate(animatingElementId, {
-      animation: animation,
-      animationDuration: duration,
-      animationDelay: delay,
-      animationTimingFunction: easing,
-      animationIterationCount: iterationCount,
+      animation: config.animation,
+      animationDuration: config.duration,
+      animationDelay: config.delay,
+      animationTimingFunction: config.easing,
+      animationIterationCount: config.iterationCount,
+      animationCategory: config.category,
     });
     
-    toast.success(`Animation ${animation !== 'none' ? 'applied' : 'removed'}!`);
+    toast.success(`Animation ${config.animation !== 'none' ? 'applied' : 'removed'}!`);
   };
 
   const handleAddText = () => {
@@ -1634,7 +1635,7 @@ export default function CanvasContainerNew({
                     }}
                     onEditAnimations={() => {
                       setAnimatingElementId(element.id);
-                      setShowAnimationsModal(true);
+                      setShowAnimationsPanel(true);
                     }}
                   >
                      <ResizableElement
@@ -2301,9 +2302,9 @@ export default function CanvasContainerNew({
         frames={frames}
       />
 
-      <AnimationsModal
-        open={showAnimationsModal}
-        onOpenChange={setShowAnimationsModal}
+      <AnimationsPanel
+        open={showAnimationsPanel}
+        onClose={() => setShowAnimationsPanel(false)}
         currentAnimation={
           animatingElementId
             ? (frames
@@ -2311,6 +2312,46 @@ export default function CanvasContainerNew({
                 ?.elements?.find(e => e.id === animatingElementId)
                 ?.animation as AnimationType) || "none"
             : "none"
+        }
+        currentCategory={
+          animatingElementId
+            ? frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animationCategory || "in"
+            : "in"
+        }
+        currentDuration={
+          animatingElementId
+            ? frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animationDuration || "0.5s"
+            : "0.5s"
+        }
+        currentDelay={
+          animatingElementId
+            ? frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animationDelay || "0s"
+            : "0s"
+        }
+        currentEasing={
+          animatingElementId
+            ? frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animationTimingFunction || "ease-out"
+            : "ease-out"
+        }
+        currentIterationCount={
+          animatingElementId
+            ? frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animationIterationCount || "1"
+            : "1"
         }
         onSelectAnimation={handleAnimationSelect}
       />

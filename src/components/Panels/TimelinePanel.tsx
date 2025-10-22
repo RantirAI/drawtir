@@ -168,8 +168,15 @@ export default function TimelinePanel({
               return (
                 <div key={element.id} className="flex items-center gap-2">
                   <div className="w-32 flex-shrink-0">
-                    <div className="text-xs truncate">
-                      {element.type === "text" ? element.text || "Text" : element.type}
+                    <div className="flex items-center gap-1">
+                      <div className="text-xs truncate">
+                        {element.type === "text" ? element.text || "Text" : element.type}
+                      </div>
+                      {element.animationCategory && (
+                        <span className="text-[8px] px-1 py-0.5 rounded bg-primary/20 text-primary uppercase">
+                          {element.animationCategory}
+                        </span>
+                      )}
                     </div>
                     {element.animation && (
                       <div className="text-[10px] text-muted-foreground truncate">
