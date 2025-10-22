@@ -74,7 +74,8 @@ interface ResizableElementProps {
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
-  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string; rotation: number }>) => void;
+  isLocked?: boolean;
+  onUpdate: (id: string, updates: Partial<Element>) => void;
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -133,6 +134,7 @@ export default function ResizableElement({
   animationTimingFunction,
   animationIterationCount,
   useFlexLayout = false,
+  isLocked: isLockedProp = false,
   isSelected,
   zoom = 1,
   onUpdate,
@@ -145,7 +147,7 @@ export default function ResizableElement({
   const [isResizing, setIsResizing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(!!isLockedProp);
   const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, elementX: x, elementY: y, corner: "" });
@@ -184,6 +186,8 @@ export default function ResizableElement({
       };
     }
   };
+
+  useEffect(() => { setIsLocked(!!isLockedProp); }, [isLockedProp]);
 
   useEffect(() => {
     const snapToGrid = (value: number, gridSize: number = 10) => {
@@ -287,7 +291,9 @@ export default function ResizableElement({
       setEditText(text || "");
     } else {
       // Toggle lock state
-      setIsLocked(!isLocked);
+      const next = !isLocked;
+      setIsLocked(next);
+      onUpdate(id, { isLocked: next });
     }
   };
 
