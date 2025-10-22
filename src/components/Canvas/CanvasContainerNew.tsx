@@ -1274,16 +1274,28 @@ export default function CanvasContainerNew({
   };
 
   const handleAnimationSelect = (config: { animation: AnimationType; duration: string; delay: string; easing: string; iterationCount: string; category: "in" | "out" | "custom" }) => {
-    if (!animatingElementId) return;
+    // Use animatingElementId if set, otherwise use selectedElementIds
+    const targetIds = animatingElementId ? [animatingElementId] : selectedElementIds;
     
-    handleElementUpdate(animatingElementId, {
-      animation: config.animation,
-      animationDuration: config.duration,
-      animationDelay: config.delay,
-      animationTimingFunction: config.easing,
-      animationIterationCount: config.iterationCount,
-      animationCategory: config.category,
+    if (targetIds.length === 0) {
+      toast.error("Please select an element to animate");
+      return;
+    }
+    
+    // Apply animation to all target elements
+    targetIds.forEach(elementId => {
+      handleElementUpdate(elementId, {
+        animation: config.animation,
+        animationDuration: config.duration,
+        animationDelay: config.delay,
+        animationTimingFunction: config.easing,
+        animationIterationCount: config.iterationCount,
+        animationCategory: config.category,
+      });
     });
+    
+    toast.success("Animation applied!");
+    setShowAnimationsPanel(false);
     
     toast.success(`Animation ${config.animation !== 'none' ? 'applied' : 'removed'}!`);
   };
@@ -2233,7 +2245,13 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
             showAnimationsPanel ? 'ring-2 ring-blue-500' : ''
           }`}
-          onClick={() => setShowAnimationsPanel(!showAnimationsPanel)}
+          onClick={() => {
+            // Set animatingElementId to first selected element when opening from sidebar
+            if (!showAnimationsPanel && selectedElementIds.length > 0) {
+              setAnimatingElementId(selectedElementIds[0]);
+            }
+            setShowAnimationsPanel(!showAnimationsPanel);
+          }}
           title="Animations"
         >
           <Film className="h-4 w-4" />
@@ -2316,7 +2334,10 @@ export default function CanvasContainerNew({
 
       <AnimationsPanel
         open={showAnimationsPanel}
-        onClose={() => setShowAnimationsPanel(false)}
+        onClose={() => {
+          setShowAnimationsPanel(false);
+          setAnimatingElementId(null);
+        }}
         currentAnimation={
           animatingElementId
             ? (frames
