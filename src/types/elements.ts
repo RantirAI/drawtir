@@ -30,6 +30,13 @@ export interface Element {
   strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
   
+  // Line-specific properties
+  lineStyle?: "solid" | "dashed" | "dotted" | "dashdot";
+  lineCap?: "butt" | "round" | "square";
+  lineJoin?: "miter" | "round" | "bevel";
+  dashArray?: string; // e.g., "5,5" or "10,5,2,5"
+  controlPoints?: Array<{x: number, y: number}>; // For curved lines
+  
   // Text properties
   text?: string;
   fontSize?: number;

@@ -101,6 +101,12 @@ interface ShapeSettingsPanelProps {
   strokeOpacity?: number;
   strokePosition?: "center" | "inside" | "outside";
   fillOpacity?: number;
+  // Line-specific properties
+  lineStyle?: "solid" | "dashed" | "dotted" | "dashdot";
+  lineCap?: "butt" | "round" | "square";
+  lineJoin?: "miter" | "round" | "bevel";
+  dashArray?: string;
+  controlPoints?: Array<{x: number, y: number}>;
   width?: number;
   height?: number;
   sizeUnit?: "px" | "rem" | "%" | "em";
@@ -137,6 +143,12 @@ interface ShapeSettingsPanelProps {
   onStrokeOpacityChange?: (opacity: number) => void;
   onStrokePositionChange?: (position: "center" | "inside" | "outside") => void;
   onFillOpacityChange?: (opacity: number) => void;
+  // Line-specific handlers
+  onLineStyleChange?: (style: "solid" | "dashed" | "dotted" | "dashdot") => void;
+  onLineCapChange?: (cap: "butt" | "round" | "square") => void;
+  onLineJoinChange?: (join: "miter" | "round" | "bevel") => void;
+  onDashArrayChange?: (dashArray: string) => void;
+  onControlPointsChange?: (points: Array<{x: number, y: number}>) => void;
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
   onXChange?: (x: number) => void;
@@ -210,6 +222,12 @@ export default function ShapeSettingsPanel({
   strokeOpacity = 100,
   strokePosition = "center",
   fillOpacity = 100,
+  // Line-specific defaults
+  lineStyle = "solid",
+  lineCap = "round",
+  lineJoin = "round",
+  dashArray = "",
+  controlPoints,
   width = 100,
   height = 100,
   sizeUnit = "px",
@@ -246,6 +264,12 @@ export default function ShapeSettingsPanel({
   onStrokeOpacityChange,
   onStrokePositionChange,
   onFillOpacityChange,
+  // Line-specific handlers
+  onLineStyleChange,
+  onLineCapChange,
+  onLineJoinChange,
+  onDashArrayChange,
+  onControlPointsChange,
   onWidthChange,
   onHeightChange,
   onXChange,
@@ -939,7 +963,7 @@ export default function ShapeSettingsPanel({
                   </div>
                 )}
 
-                {onStrokeWidthChange && (
+                 {onStrokeWidthChange && (
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-0.5">
                       <Label className="text-[10px] text-muted-foreground">Weight</Label>
@@ -959,6 +983,121 @@ export default function ShapeSettingsPanel({
                       step={1}
                       className="mt-1"
                     />
+                  </div>
+                )}
+
+                {/* Line-specific settings */}
+                {shapeType === "line" && onLineStyleChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Style</Label>
+                    <div className="grid grid-cols-4 gap-0.5">
+                      {(["solid", "dashed", "dotted", "dashdot"] as const).map((style) => (
+                        <Button
+                          key={style}
+                          variant={lineStyle === style ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-[10px] capitalize rounded"
+                          onClick={() => onLineStyleChange(style)}
+                        >
+                          {style === "dashdot" ? "Dash-Dot" : style}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {shapeType === "line" && onLineCapChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Cap</Label>
+                    <div className="grid grid-cols-3 gap-0.5">
+                      {(["butt", "round", "square"] as const).map((cap) => (
+                        <Button
+                          key={cap}
+                          variant={lineCap === cap ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-[10px] capitalize rounded"
+                          onClick={() => onLineCapChange(cap)}
+                        >
+                          {cap}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {shapeType === "line" && onLineJoinChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Join</Label>
+                    <div className="grid grid-cols-3 gap-0.5">
+                      {(["miter", "round", "bevel"] as const).map((join) => (
+                        <Button
+                          key={join}
+                          variant={lineJoin === join ? "default" : "outline"}
+                          size="sm"
+                          className="h-7 text-[10px] capitalize rounded"
+                          onClick={() => onLineJoinChange(join)}
+                        >
+                          {join}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {shapeType === "line" && onDashArrayChange && lineStyle !== "solid" && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">
+                      Custom Pattern (e.g., "10,5,2,5")
+                    </Label>
+                    <Input
+                      value={dashArray || ""}
+                      onChange={(e) => onDashArrayChange(e.target.value)}
+                      placeholder="10,5,2,5"
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                )}
+
+                {shapeType === "line" && onControlPointsChange && controlPoints && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Control Points</Label>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px] flex-1"
+                        onClick={() => {
+                          const mid = controlPoints.length > 0 ? controlPoints.length / 2 : 0;
+                          const newPoints = [...controlPoints];
+                          newPoints.splice(Math.floor(mid), 0, { 
+                            x: width / 2, 
+                            y: height / 2 
+                          });
+                          onControlPointsChange(newPoints);
+                        }}
+                        disabled={controlPoints.length >= 6}
+                      >
+                        Add Point
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px] flex-1"
+                        onClick={() => {
+                          if (controlPoints.length > 2) {
+                            const newPoints = [...controlPoints];
+                            newPoints.splice(Math.floor(controlPoints.length / 2), 1);
+                            onControlPointsChange(newPoints);
+                          }
+                        }}
+                        disabled={controlPoints.length <= 2}
+                      >
+                        Remove Point
+                      </Button>
+                    </div>
+                    <p className="text-[9px] text-muted-foreground mt-1">
+                      Drag points on canvas to bend the line
+                    </p>
                   </div>
                 )}
               </div>

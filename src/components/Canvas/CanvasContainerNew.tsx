@@ -1199,6 +1199,55 @@ export default function CanvasContainerNew({
     toast.success(`Shader effect added!`);
   };
 
+  const handleLineAdd = () => {
+    const targetFrameId = selectedFrameId || frames[0]?.id;
+    if (!targetFrameId) {
+      toast.error("Please add a frame first");
+      return;
+    }
+    const frame = frames.find(f => f.id === targetFrameId);
+    if (!frame) return;
+
+    const defaultWidth = 300;
+    const defaultHeight = 100;
+    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frame.height - defaultHeight) / 2));
+
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "shape",
+      shapeType: "line",
+      x,
+      y,
+      width: defaultWidth,
+      height: defaultHeight,
+      stroke: penColor,
+      strokeWidth: 3,
+      strokeOpacity: 100,
+      lineStyle: "solid",
+      lineCap: "round",
+      lineJoin: "round",
+      controlPoints: [
+        { x: 0, y: defaultHeight / 2 },
+        { x: defaultWidth, y: defaultHeight / 2 }
+      ],
+      opacity: 100,
+      fill: "transparent",
+      fillOpacity: 0,
+    };
+
+    setFrames(prevFrames => prevFrames.map(f => {
+      if (f.id === targetFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementIds([newElement.id]);
+    setShowShapeSettings(true);
+    setActiveTool("select");
+    toast.success(`Line added! Drag control points to bend it`);
+  };
+
   const handleElementUpdate = (elementId: string, updates: Partial<Element>) => {
     setFrames(frames.map(f => {
       if (f.id === selectedFrameId) {
@@ -2041,6 +2090,17 @@ export default function CanvasContainerNew({
           onVideoUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { videoUrl: url })}
           availableFrames={frames.map(f => ({ id: f.id, name: f.name }))}
           onIconChange={(iconName, iconFamily) => selectedElement && handleElementUpdate(selectedElement.id, { iconName, iconFamily })}
+          // Line-specific props and handlers
+          lineStyle={selectedElement?.lineStyle}
+          lineCap={selectedElement?.lineCap}
+          lineJoin={selectedElement?.lineJoin}
+          dashArray={selectedElement?.dashArray}
+          controlPoints={selectedElement?.controlPoints}
+          onLineStyleChange={(style) => selectedElement && handleElementUpdate(selectedElement.id, { lineStyle: style })}
+          onLineCapChange={(cap) => selectedElement && handleElementUpdate(selectedElement.id, { lineCap: cap })}
+          onLineJoinChange={(join) => selectedElement && handleElementUpdate(selectedElement.id, { lineJoin: join })}
+          onDashArrayChange={(dashArray) => selectedElement && handleElementUpdate(selectedElement.id, { dashArray })}
+          onControlPointsChange={(points) => selectedElement && handleElementUpdate(selectedElement.id, { controlPoints: points })}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);
@@ -2150,6 +2210,7 @@ export default function CanvasContainerNew({
         onShapeSelect={handleShapeSelect}
         onIconSelect={handleIconSelect}
         onShaderAdd={handleShaderAdd}
+        onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
         onDuplicate={handleDuplicate}

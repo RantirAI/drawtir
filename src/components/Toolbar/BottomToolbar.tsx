@@ -1,6 +1,6 @@
 import { 
   MousePointer2, PenTool, Square, Type, Image as ImageIcon, Plus,
-  Copy, Trash2, Smile, Sparkles
+  Copy, Trash2, Smile, Sparkles, Minus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -18,6 +18,7 @@ interface BottomToolbarProps {
   onShapeSelect?: (shapeType: string) => void;
   onIconSelect?: (iconName: string, iconFamily: string) => void;
   onShaderAdd?: () => void;
+  onLineAdd?: () => void;
 }
 
 export default function BottomToolbar({ 
@@ -29,7 +30,8 @@ export default function BottomToolbar({
   onDelete,
   onShapeSelect,
   onIconSelect,
-  onShaderAdd
+  onShaderAdd,
+  onLineAdd
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
@@ -131,6 +133,20 @@ export default function BottomToolbar({
               <TooltipContent side="top">Icon</TooltipContent>
             </Tooltip>
           </IconSelector>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 rounded-full"
+                onClick={onLineAdd}
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Add Line</TooltipContent>
+          </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>

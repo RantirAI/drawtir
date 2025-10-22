@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
 import DynamicIcon from "./DynamicIcon";
 import { ShaderElement } from "./ShaderElement";
+import { BendableLine } from "./BendableLine";
 import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
@@ -374,9 +375,27 @@ export default function ResizableElement({
         }
       case "line":
         return (
-          <svg width={width} height={height} className="w-full h-full">
-            <line x1="0" y1={height / 2} x2={width} y2={height / 2} stroke={strokeWithOpacity} strokeWidth={strokeWidth} />
-          </svg>
+          <BendableLine
+            element={{
+              id,
+              type: "shape",
+              shapeType: "line",
+              x,
+              y,
+              width,
+              height,
+              stroke,
+              strokeWidth,
+              strokeOpacity,
+              lineStyle: (rest as any).lineStyle,
+              lineCap: (rest as any).lineCap,
+              lineJoin: (rest as any).lineJoin,
+              dashArray: (rest as any).dashArray,
+              controlPoints: (rest as any).controlPoints,
+            } as Element}
+            isSelected={isSelected}
+            onUpdate={(updates) => onUpdate(id, updates as any)}
+          />
         );
       case "arrow":
         return (
