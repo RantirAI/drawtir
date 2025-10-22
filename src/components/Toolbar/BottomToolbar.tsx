@@ -1,6 +1,6 @@
 import { 
   MousePointer2, Paintbrush, Square, Type, Image as ImageIcon, Plus,
-  Copy, Trash2, Smile, Sparkles, Minus, Film
+  Copy, Trash2, Smile, Sparkles, Minus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,8 +19,6 @@ interface BottomToolbarProps {
   onIconSelect?: (iconName: string, iconFamily: string) => void;
   onShaderAdd?: () => void;
   onLineAdd?: () => void;
-  onAnimationsToggle?: () => void;
-  animationsPanelOpen?: boolean;
   timelinePanelOpen?: boolean;
 }
 
@@ -35,8 +33,6 @@ export default function BottomToolbar({
   onIconSelect,
   onShaderAdd,
   onLineAdd,
-  onAnimationsToggle,
-  animationsPanelOpen = false,
   timelinePanelOpen = false
 }: BottomToolbarProps) {
   return (
@@ -156,20 +152,6 @@ export default function BottomToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Line</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant={animationsPanelOpen ? "default" : "ghost"}
-                size="icon" 
-                className="h-8 w-8 rounded-full"
-                onClick={onAnimationsToggle}
-              >
-                <Film className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Animations</TooltipContent>
           </Tooltip>
 
           <Tooltip>

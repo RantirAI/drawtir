@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { X, Play } from "lucide-react";
+import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import DraggablePanel from "./DraggablePanel";
 
 export type AnimationType = 
   | "none" | "fade-in" | "fade-out" 
@@ -131,51 +132,56 @@ export default function AnimationsPanel({
   if (!open) return null;
 
   return (
-    <div
-      className="fixed right-4 top-20 w-[320px] bg-card/95 backdrop-blur-xl border dark:border-zinc-700 rounded-lg shadow-lg z-50"
-      style={{ maxHeight: "calc(100vh - 120px)" }}
+    <DraggablePanel
+      title="Animations"
+      onClose={onClose}
+      defaultPosition={{ x: window.innerWidth - 360, y: 100 }}
+      className="w-[320px]"
     >
-      <div className="flex items-center justify-between px-3 py-2 border-b dark:border-zinc-700">
-        <h3 className="text-[11px] font-medium text-foreground">Animations</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-6 w-6"
-          onClick={onClose}
-        >
-          <X className="h-3 w-3" />
-        </Button>
-      </div>
-
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AnimationCategory)} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 h-7 mx-3 my-2" style={{ width: "calc(100% - 24px)" }}>
-          <TabsTrigger value="in" className="text-[10px] h-6">IN</TabsTrigger>
-          <TabsTrigger value="out" className="text-[10px] h-6">OUT</TabsTrigger>
-          <TabsTrigger value="custom" className="text-[10px] h-6">CUSTOM</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-3 h-6 p-0 bg-transparent">
+          <TabsTrigger 
+            value="in" 
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+          >
+            IN
+          </TabsTrigger>
+          <TabsTrigger 
+            value="out" 
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+          >
+            OUT
+          </TabsTrigger>
+          <TabsTrigger 
+            value="custom" 
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+          >
+            CUSTOM
+          </TabsTrigger>
         </TabsList>
 
-        <ScrollArea className="h-[320px]">
-          <TabsContent value="in" className="px-3 pb-3 mt-0">
+        <ScrollArea className="h-[280px]">
+          <TabsContent value="in" className="pb-2 mt-1">
             {Object.entries(groupedAnimations).map(([subcategory, anims]) => (
-              <div key={subcategory} className="mb-3">
-                <h4 className="text-[10px] font-medium text-muted-foreground uppercase mb-1.5">{subcategory}</h4>
-                <div className="grid grid-cols-3 gap-1.5">
+              <div key={subcategory} className="mb-2">
+                <h4 className="text-[9px] font-medium text-muted-foreground uppercase mb-1 px-0.5">{subcategory}</h4>
+                <div className="grid grid-cols-3 gap-1">
                   {anims.map((anim) => (
                     <button
                       key={anim.type}
                       onClick={() => handleAnimationSelect(anim)}
                       onMouseEnter={() => setHoveredAnimation(anim.type)}
                       onMouseLeave={() => setHoveredAnimation(null)}
-                      className={`relative h-14 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
+                      className={`relative h-11 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
                         selectedAnimation === anim.type
-                          ? "ring-2 ring-primary bg-primary/10"
+                          ? "ring-1 ring-primary bg-primary/10"
                           : "hover:border-primary/50 bg-card"
                       }`}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center pb-3">
                         <div
                           key={hoveredAnimation === anim.type ? previewKey : 0}
-                          className={`w-6 h-6 bg-primary rounded ${
+                          className={`w-4 h-4 bg-primary rounded ${
                             hoveredAnimation === anim.type ? `animate-${anim.type}` : ""
                           }`}
                           style={{
@@ -184,8 +190,8 @@ export default function AnimationsPanel({
                           }}
                         />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-1">
-                        <p className="text-[9px] font-medium text-center truncate">{anim.name}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 to-transparent p-0.5">
+                        <p className="text-[8px] font-medium text-center truncate leading-tight">{anim.name}</p>
                       </div>
                     </button>
                   ))}
@@ -194,27 +200,27 @@ export default function AnimationsPanel({
             ))}
           </TabsContent>
 
-          <TabsContent value="out" className="px-3 pb-3 mt-0">
+          <TabsContent value="out" className="pb-2 mt-1">
             {Object.entries(groupedAnimations).map(([subcategory, anims]) => (
-              <div key={subcategory} className="mb-3">
-                <h4 className="text-[10px] font-medium text-muted-foreground uppercase mb-1.5">{subcategory}</h4>
-                <div className="grid grid-cols-3 gap-1.5">
+              <div key={subcategory} className="mb-2">
+                <h4 className="text-[9px] font-medium text-muted-foreground uppercase mb-1 px-0.5">{subcategory}</h4>
+                <div className="grid grid-cols-3 gap-1">
                   {anims.map((anim) => (
                     <button
                       key={anim.type}
                       onClick={() => handleAnimationSelect(anim)}
                       onMouseEnter={() => setHoveredAnimation(anim.type)}
                       onMouseLeave={() => setHoveredAnimation(null)}
-                      className={`relative h-14 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
+                      className={`relative h-11 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
                         selectedAnimation === anim.type
-                          ? "ring-2 ring-primary bg-primary/10"
+                          ? "ring-1 ring-primary bg-primary/10"
                           : "hover:border-primary/50 bg-card"
                       }`}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 flex items-center justify-center pb-3">
                         <div
                           key={hoveredAnimation === anim.type ? previewKey : 0}
-                          className={`w-6 h-6 bg-primary rounded ${
+                          className={`w-4 h-4 bg-primary rounded ${
                             hoveredAnimation === anim.type ? `animate-${anim.type}` : ""
                           }`}
                           style={{
@@ -223,8 +229,8 @@ export default function AnimationsPanel({
                           }}
                         />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-1">
-                        <p className="text-[9px] font-medium text-center truncate">{anim.name}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 to-transparent p-0.5">
+                        <p className="text-[8px] font-medium text-center truncate leading-tight">{anim.name}</p>
                       </div>
                     </button>
                   ))}
@@ -233,31 +239,31 @@ export default function AnimationsPanel({
             ))}
           </TabsContent>
 
-          <TabsContent value="custom" className="px-3 pb-3 mt-0">
-            <div className="space-y-2">
-              <p className="text-[10px] text-muted-foreground mb-3">
+          <TabsContent value="custom" className="pb-2 mt-1">
+            <div className="space-y-1.5">
+              <p className="text-[9px] text-muted-foreground mb-2">
                 Custom animations coming soon. Use timeline to create keyframe animations.
               </p>
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-medium text-muted-foreground">TRANSFORM</p>
-                <div className="text-[9px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-1">
+                <p className="text-[9px] font-medium text-muted-foreground">TRANSFORM</p>
+                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
                   <p>• Move</p>
                   <p>• Scale</p>
                   <p>• Rotate</p>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-medium text-muted-foreground">STYLE</p>
-                <div className="text-[9px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-1">
+                <p className="text-[9px] font-medium text-muted-foreground">STYLE</p>
+                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
                   <p>• Opacity</p>
                   <p>• Color</p>
                   <p>• Shadow</p>
                   <p>• Blur</p>
                 </div>
               </div>
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-medium text-muted-foreground">OTHER</p>
-                <div className="text-[9px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-1">
+                <p className="text-[9px] font-medium text-muted-foreground">OTHER</p>
+                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
                   <p>• Hide/Show</p>
                   <p>• Resize</p>
                   <p>• Corner Radius</p>
@@ -270,16 +276,16 @@ export default function AnimationsPanel({
       </Tabs>
 
       {/* Settings Section */}
-      {activeTab !== "custom" && (
-        <div className="px-3 py-2 border-t dark:border-zinc-700 space-y-2">
+      {activeTab !== "custom" && selectedAnimation !== "none" && (
+        <div className="pt-2 border-t dark:border-zinc-700 space-y-1.5">
           {/* Preview Section */}
           <div className="flex items-center justify-between">
-            <Label className="text-[10px] text-muted-foreground">Preview</Label>
+            <Label className="text-[9px] text-muted-foreground">Preview</Label>
             <Button
               onClick={triggerPreview}
               size="sm"
               variant="outline"
-              className="h-5 px-2 text-[9px]"
+              className="h-5 px-2 text-[8px]"
             >
               <Play className="h-2.5 w-2.5 mr-1" />
               Replay
@@ -287,31 +293,31 @@ export default function AnimationsPanel({
           </div>
 
           {/* Timing Controls */}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             <div>
-              <Label className="text-[9px] text-muted-foreground">Duration</Label>
+              <Label className="text-[8px] text-muted-foreground">Duration</Label>
               <Input
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="h-6 text-[10px] mt-0.5"
+                className="h-6 text-[9px] mt-0.5"
                 placeholder="0.5s"
               />
             </div>
             <div>
-              <Label className="text-[9px] text-muted-foreground">Delay</Label>
+              <Label className="text-[8px] text-muted-foreground">Delay</Label>
               <Input
                 value={delay}
                 onChange={(e) => setDelay(e.target.value)}
-                className="h-6 text-[10px] mt-0.5"
+                className="h-6 text-[9px] mt-0.5"
                 placeholder="0s"
               />
             </div>
           </div>
 
           <div>
-            <Label className="text-[9px] text-muted-foreground">Easing</Label>
+            <Label className="text-[8px] text-muted-foreground">Easing</Label>
             <Select value={easing} onValueChange={setEasing}>
-              <SelectTrigger className="h-6 text-[10px] mt-0.5">
+              <SelectTrigger className="h-6 text-[9px] mt-0.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -325,9 +331,9 @@ export default function AnimationsPanel({
           </div>
 
           <div>
-            <Label className="text-[9px] text-muted-foreground">Iterations</Label>
+            <Label className="text-[8px] text-muted-foreground">Iterations</Label>
             <Select value={iterationCount} onValueChange={setIterationCount}>
-              <SelectTrigger className="h-6 text-[10px] mt-0.5">
+              <SelectTrigger className="h-6 text-[9px] mt-0.5">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -340,25 +346,25 @@ export default function AnimationsPanel({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-1">
+          <div className="flex gap-1.5 pt-1">
             <Button
               onClick={onClose}
               variant="outline"
               size="sm"
-              className="flex-1 h-6 text-[10px]"
+              className="flex-1 h-6 text-[9px]"
             >
               Cancel
             </Button>
             <Button
               onClick={handleApply}
               size="sm"
-              className="flex-1 h-6 text-[10px]"
+              className="flex-1 h-6 text-[9px]"
             >
               Apply
             </Button>
           </div>
         </div>
       )}
-    </div>
+    </DraggablePanel>
   );
 }

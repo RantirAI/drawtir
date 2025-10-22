@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Film } from "lucide-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
@@ -2225,6 +2226,17 @@ export default function CanvasContainerNew({
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
           <SlidersHorizontal className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showAnimationsPanel ? 'ring-2 ring-blue-500' : ''
+          }`}
+          onClick={() => setShowAnimationsPanel(!showAnimationsPanel)}
+          title="Animations"
+        >
+          <Film className="h-4 w-4" />
         </Button>
         <Button
           variant="default"
