@@ -1503,7 +1503,7 @@ export default function CanvasContainerNew({
 
   // Main canvas container component
   return (
-    <div className="w-full h-screen relative overflow-hidden">
+    <div className="w-full h-screen relative overflow-hidden flex flex-col">
       <CanvasBackground />
 
       <EditorTopBar
@@ -1525,7 +1525,7 @@ export default function CanvasContainerNew({
 
       {/* Canvas Area */}
       <div 
-        className="w-full h-full"
+        className="flex-1 overflow-hidden relative"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
@@ -2304,25 +2304,27 @@ export default function CanvasContainerNew({
         onSelectAnimation={handleAnimationSelect}
       />
 
+      {/* Timeline Panel */}
+      {selectedFrame && (
+        <div className="absolute bottom-0 left-0 right-0 z-50">
+          <TimelinePanel
+            frame={selectedFrame}
+            elements={selectedFrame.elements || []}
+            onUpdateElement={(elementId, updates) => {
+              handleElementUpdate(elementId, updates);
+            }}
+            currentTime={currentTime}
+            onTimeChange={setCurrentTime}
+            maxDuration={maxDuration}
+          />
+        </div>
+      )}
+
       <PreviewDialog
         open={showPreviewDialog}
         onOpenChange={setShowPreviewDialog}
         frame={selectedFrame}
       />
-
-      {/* Timeline Panel */}
-      {selectedFrame && (
-        <TimelinePanel
-          frame={selectedFrame}
-          elements={selectedFrame.elements || []}
-          onUpdateElement={(elementId, updates) => {
-            handleElementUpdate(elementId, updates);
-          }}
-          currentTime={currentTime}
-          onTimeChange={setCurrentTime}
-          maxDuration={maxDuration}
-        />
-      )}
 
       <DrawtirFooter />
 
