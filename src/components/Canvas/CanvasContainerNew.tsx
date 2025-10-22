@@ -1689,6 +1689,7 @@ export default function CanvasContainerNew({
                       animationTimingFunction={element.animationTimingFunction}
                       animationIterationCount={element.animationIterationCount}
                       useFlexLayout={false}
+                      isLocked={element.isLocked}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
                       onUpdate={handleElementUpdate}
@@ -1814,6 +1815,7 @@ export default function CanvasContainerNew({
                             animationTimingFunction={element.animationTimingFunction}
                             animationIterationCount={element.animationIterationCount}
                             useFlexLayout={false}
+                            isLocked={element.isLocked}
                             isSelected={false}
                             zoom={zoom}
                             onUpdate={(id, updates) => {

@@ -213,17 +213,23 @@ export default function LayersPanel({
                         </span>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
+                        {element.isLocked && (
+                          <div className="flex items-center">
+                            <Lock className="w-2.5 h-2.5 text-muted-foreground/60" />
+                          </div>
+                        )}
                         {element.isLocked && onElementUpdate && (
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-5 w-5 hover:bg-secondary"
+                            className="h-4 w-4 p-0 hover:bg-secondary/50 opacity-0 group-hover:opacity-100"
                             onClick={(e) => {
                               e.stopPropagation();
                               onElementUpdate(frame.id, element.id, { isLocked: false });
                             }}
+                            title="Unlock"
                           >
-                            <Lock className="w-3 h-3 text-muted-foreground" />
+                            <Unlock className="w-2.5 h-2.5 text-muted-foreground" />
                           </Button>
                         )}
                         <Button

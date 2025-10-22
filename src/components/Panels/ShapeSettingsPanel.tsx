@@ -752,8 +752,8 @@ export default function ShapeSettingsPanel({
 
         {/* Layout/Dimensions Section */}
         {(onWidthChange || onHeightChange) && (
-          <AccordionItem value="layout">
-            <AccordionTrigger className="text-xs font-medium py-2">Layout</AccordionTrigger>
+          <AccordionItem value="layout" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Layout</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-1.5">
               <div className="grid grid-cols-2 gap-2">
                 {onWidthChange && (
@@ -997,17 +997,50 @@ export default function ShapeSettingsPanel({
                   <div>
                     <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Style</Label>
                     <div className="grid grid-cols-4 gap-0.5">
-                      {(["solid", "dashed", "dotted", "dashdot"] as const).map((style) => (
-                        <Button
-                          key={style}
-                          variant={lineStyle === style ? "default" : "outline"}
-                          size="sm"
-                          className="h-7 text-[10px] capitalize rounded"
-                          onClick={() => onLineStyleChange(style)}
-                        >
-                          {style === "dashdot" ? "Dash-Dot" : style}
-                        </Button>
-                      ))}
+                      <Button
+                        variant={lineStyle === "solid" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        onClick={() => onLineStyleChange("solid")}
+                        title="Solid"
+                      >
+                        <svg width="20" height="2" className="mt-0.5">
+                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </Button>
+                      <Button
+                        variant={lineStyle === "dashed" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        onClick={() => onLineStyleChange("dashed")}
+                        title="Dashed"
+                      >
+                        <svg width="20" height="2" className="mt-0.5">
+                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" />
+                        </svg>
+                      </Button>
+                      <Button
+                        variant={lineStyle === "dotted" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        onClick={() => onLineStyleChange("dotted")}
+                        title="Dotted"
+                      >
+                        <svg width="20" height="2" className="mt-0.5">
+                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round" />
+                        </svg>
+                      </Button>
+                      <Button
+                        variant={lineStyle === "dashdot" ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        onClick={() => onLineStyleChange("dashdot")}
+                        title="Dash-Dot"
+                      >
+                        <svg width="20" height="2" className="mt-0.5">
+                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2 1 2" />
+                        </svg>
+                      </Button>
                     </div>
                   </div>
                 )}

@@ -1,5 +1,5 @@
 import { 
-  MousePointer2, PenTool, Square, Type, Image as ImageIcon, Plus,
+  MousePointer2, Paintbrush, Square, Type, Image as ImageIcon, Plus,
   Copy, Trash2, Smile, Sparkles, Minus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -66,10 +66,10 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={() => onToolChange?.("pen")}
               >
-                <PenTool className="h-4 w-4" />
+                <Paintbrush className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">Pen</TooltipContent>
+            <TooltipContent side="top">Draw</TooltipContent>
           </Tooltip>
 
           <ShapeSelector onShapeSelect={(shapeType) => {
