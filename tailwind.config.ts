@@ -3,6 +3,18 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  safelist: [
+    // Animation classes safelisted for dynamic usage
+    "animate-fade-in","animate-fade-out",
+    "animate-zoom-in","animate-zoom-out",
+    "animate-slide-in-from-top","animate-slide-in-from-bottom","animate-slide-in-from-left","animate-slide-in-from-right",
+    "animate-slide-out-to-top","animate-slide-out-to-bottom","animate-slide-out-to-left","animate-slide-out-to-right",
+    // Hover variants for previews
+    "group-hover:animate-fade-in","group-hover:animate-fade-out",
+    "group-hover:animate-zoom-in","group-hover:animate-zoom-out",
+    "group-hover:animate-slide-in-from-top","group-hover:animate-slide-in-from-bottom","group-hover:animate-slide-in-from-left","group-hover:animate-slide-in-from-right",
+    "group-hover:animate-slide-out-to-top","group-hover:animate-slide-out-to-bottom","group-hover:animate-slide-out-to-left","group-hover:animate-slide-out-to-right",
+  ],
   prefix: "",
   theme: {
     container: {

@@ -68,6 +68,9 @@ interface ResizableElementProps {
   rotation?: number;
   animation?: string;
   animationDuration?: string;
+  animationDelay?: string;
+  animationTimingFunction?: string;
+  animationIterationCount?: string;
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
@@ -126,6 +129,9 @@ export default function ResizableElement({
   rotation = 0,
   animation = "none",
   animationDuration,
+  animationDelay,
+  animationTimingFunction,
+  animationIterationCount,
   useFlexLayout = false,
   isSelected,
   zoom = 1,
@@ -621,6 +627,9 @@ export default function ResizableElement({
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
         animationDuration: animationDuration,
+        animationDelay: animationDelay,
+        animationTimingFunction: animationTimingFunction,
+        animationIterationCount: animationIterationCount,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}

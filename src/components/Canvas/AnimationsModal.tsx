@@ -8,6 +8,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Play } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type AnimationType = 
   | "none"
@@ -59,7 +62,7 @@ interface AnimationsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   currentAnimation?: AnimationType;
-  onSelectAnimation: (animation: AnimationType, duration?: string) => void;
+  onSelectAnimation: (animation: AnimationType, duration?: string, delay?: string, easing?: string, iterationCount?: string) => void;
 }
 
 export default function AnimationsModal({
@@ -68,19 +71,19 @@ export default function AnimationsModal({
   currentAnimation = "none",
   onSelectAnimation,
 }: AnimationsModalProps) {
-  const [hoveredAnimation, setHoveredAnimation] = useState<AnimationType | null>(null);
   const [selectedAnimation, setSelectedAnimation] = useState<AnimationType>(currentAnimation);
   const [previewKey, setPreviewKey] = useState(0);
+  const [duration, setDuration] = useState<string>(animations.find(a => a.type === currentAnimation)?.duration || "0.5s");
+  const [delay, setDelay] = useState<string>("0s");
+  const [easing, setEasing] = useState<string>("ease-out");
+  const [iterationCount, setIterationCount] = useState<string>("1");
 
   const handleApply = () => {
-    const animation = animations.find(a => a.type === selectedAnimation);
-    onSelectAnimation(selectedAnimation, animation?.duration);
+    onSelectAnimation(selectedAnimation, duration, delay, easing, iterationCount);
     onOpenChange(false);
   };
 
-  const triggerPreview = () => {
-    setPreviewKey(prev => prev + 1);
-  };
+  const triggerPreview = () => setPreviewKey(prev => prev + 1);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

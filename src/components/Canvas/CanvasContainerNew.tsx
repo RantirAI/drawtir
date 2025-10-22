@@ -1268,12 +1268,15 @@ export default function CanvasContainerNew({
     }));
   };
 
-  const handleAnimationSelect = (animation: AnimationType, duration?: string) => {
+  const handleAnimationSelect = (animation: AnimationType, duration?: string, delay?: string, easing?: string, iterationCount?: string) => {
     if (!animatingElementId) return;
     
     handleElementUpdate(animatingElementId, {
       animation: animation,
       animationDuration: duration,
+      animationDelay: delay,
+      animationTimingFunction: easing,
+      animationIterationCount: iterationCount,
     });
     
     toast.success(`Animation ${animation !== 'none' ? 'applied' : 'removed'}!`);

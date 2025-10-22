@@ -81,7 +81,10 @@ export interface Element {
   
   // Animation properties
   animation?: "none" | "fade-in" | "fade-out" | "slide-in-from-top" | "slide-in-from-bottom" | "slide-in-from-left" | "slide-in-from-right" | "slide-out-to-top" | "slide-out-to-bottom" | "slide-out-to-left" | "slide-out-to-right" | "zoom-in" | "zoom-out" | "pulse" | "bounce" | "spin" | "ping";
-  animationDuration?: string;
+  animationDuration?: string; // e.g. "0.5s"
+  animationDelay?: string; // e.g. "0.2s"
+  animationTimingFunction?: string; // e.g. "ease-out"
+  animationIterationCount?: string; // e.g. "1" | "infinite"
   
   // Nesting support
   children?: Element[];
