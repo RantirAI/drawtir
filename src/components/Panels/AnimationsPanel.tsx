@@ -98,7 +98,7 @@ export default function AnimationsPanel({
       iterationCount,
       category: activeTab,
     });
-    onClose();
+    // Keep panel open after applying to match other sidebars
   };
 
   const triggerPreview = () => {

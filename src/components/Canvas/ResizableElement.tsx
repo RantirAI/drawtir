@@ -7,13 +7,14 @@ import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
   id: string;
-  type: "image" | "shape" | "text" | "shader";
+  type: "image" | "shape" | "text" | "shader" | "richtext";
   x: number;
   y: number;
   width: number;
   height: number;
   src?: string;
   text?: string;
+  richTextHtml?: string;
   shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "icon";
   pathData?: string; // For pen drawings
   strokeWidth?: number;
@@ -74,6 +75,7 @@ interface ResizableElementProps {
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
+  currentTime?: number;
   isLocked?: boolean;
   onUpdate: (id: string, updates: Partial<Element>) => void;
   onSelect: (e?: React.MouseEvent) => void;
@@ -137,6 +139,7 @@ export default function ResizableElement({
   isLocked: isLockedProp = false,
   isSelected,
   zoom = 1,
+  currentTime,
   onUpdate,
   onSelect,
   onDelete,
@@ -154,6 +157,20 @@ export default function ResizableElement({
   const [rotateStart, setRotateStart] = useState({ angle: rotation, mouseAngle: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const [animationKey, setAnimationKey] = useState(0);
+
+  const normalizeAnimation = (name?: string) => {
+    if (!name) return "none";
+    return name.replace("-from-", "-").replace("-to-", "-");
+  };
+  const normalizedAnimation = normalizeAnimation(animation);
+
+  const parseTimeSec = (val?: string) => {
+    if (!val) return 0;
+    if (val.endsWith("ms")) return parseFloat(val) / 1000;
+    if (val.endsWith("s")) return parseFloat(val);
+    const n = parseFloat(val);
+    return isNaN(n) ? 0 : n;
+  };
 
   // Helper function to convert hex to rgba with opacity
   const hexToRgba = (hex: string, opacity: number): string => {
@@ -286,9 +303,9 @@ export default function ResizableElement({
 
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (type === "text" && !isLocked) {
+    if ((type === "text" || type === "richtext") && !isLocked) {
       setIsEditing(true);
-      setEditText(text || "");
+      setEditText((rest as any).richTextHtml || text || "");
     } else {
       // Toggle lock state
       const next = !isLocked;
@@ -621,8 +638,8 @@ export default function ResizableElement({
     <div
       {...rest}
       ref={containerRef}
-      key={`${id}-${animationKey}`}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${animation}` : ''}`}
+      key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
@@ -633,9 +650,10 @@ export default function ResizableElement({
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
         animationDuration: animationDuration,
-        animationDelay: animationDelay,
+        animationDelay: currentTime !== undefined ? `${parseTimeSec(animationDelay) - (currentTime || 0)}s` : animationDelay,
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
+        animationPlayState: currentTime !== undefined ? 'paused' as any : undefined,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}

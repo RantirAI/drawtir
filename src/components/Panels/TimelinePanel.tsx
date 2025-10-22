@@ -31,6 +31,8 @@ export default function TimelinePanel({
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
   const [draggedElement, setDraggedElement] = useState<string | null>(null);
+  const [dragOffsetPx, setDragOffsetPx] = useState(0);
+  const [dragBarWidthPx, setDragBarWidthPx] = useState(0);
 
   const getAnimationDuration = (element: Element) => {
     const duration = element.animationDuration;
@@ -96,13 +98,25 @@ export default function TimelinePanel({
   const handleBarDragStart = (elementId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setDraggedElement(elementId);
+    if (!timelineRef.current) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const el = elements.find(el => el.id === elementId);
+    if (!el) return;
+    const delay = getAnimationDelay(el);
+    const duration = getAnimationDuration(el);
+    const barLeftPx = (delay / maxDuration) * rect.width;
+    const barWidthPx = (duration / maxDuration) * rect.width;
+    setDragBarWidthPx(barWidthPx);
+    setDragOffsetPx(e.clientX - (rect.left + barLeftPx));
   };
 
   const handleBarDrag = (e: MouseEvent) => {
     if (!timelineRef.current || !draggedElement) return;
     const rect = timelineRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    const newDelay = (x / rect.width) * maxDuration;
+    let newLeftPx = x - dragOffsetPx;
+    newLeftPx = Math.max(0, Math.min(newLeftPx, rect.width - dragBarWidthPx));
+    const newDelay = (newLeftPx / rect.width) * maxDuration;
     onUpdateElement(draggedElement, { animationDelay: `${newDelay * 1000}ms` });
   };
 

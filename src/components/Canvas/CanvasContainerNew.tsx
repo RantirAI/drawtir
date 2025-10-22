@@ -163,6 +163,7 @@ export default function CanvasContainerNew({
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
+  const [animationGlobalKey, setAnimationGlobalKey] = useState(0);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -289,8 +290,9 @@ export default function CanvasContainerNew({
   }, [isPlayingAnimation, maxDuration]);
 
   const handlePlayPause = () => {
-    if (currentTime >= maxDuration) {
+    if (!isPlayingAnimation) {
       setCurrentTime(0);
+      setAnimationGlobalKey((k) => k + 1); // restart CSS animations
     }
     setIsPlayingAnimation(!isPlayingAnimation);
   };
@@ -1363,6 +1365,31 @@ export default function CanvasContainerNew({
     toast.success("Text added!");
   };
 
+  const handleAddRichText = () => {
+    if (!selectedFrameId) return;
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "richtext" as any,
+      x: 60,
+      y: 60,
+      width: 320,
+      height: 180,
+      richTextHtml: "<h2>Heading</h2><p>Start writing...</p>",
+      opacity: 100,
+      blendMode: "normal",
+    };
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementIds([newElement.id]);
+    setShowShapeSettings(true);
+    setActiveTool("select");
+    toast.success("Rich text added!");
+  };
+
   const handleElementSelect = (elementId: string, multiSelect = false) => {
     if (multiSelect) {
       if (selectedElementIds.includes(elementId)) {
@@ -1736,10 +1763,12 @@ export default function CanvasContainerNew({
                       isLocked={element.isLocked}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
+                      currentTime={currentTime}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                       onDelete={() => handleElementDelete(element.id)}
                       onDuplicate={() => handleElementDuplicate(element.id)}
+                      globalAnimationTrigger={animationGlobalKey as any}
                     />
                    </CanvasContextMenu>
                 )})}
@@ -2339,6 +2368,7 @@ export default function CanvasContainerNew({
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
+        onAddRichText={handleAddRichText}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
       />

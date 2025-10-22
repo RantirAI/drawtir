@@ -1,4 +1,4 @@
-export type ElementType = "frame" | "shape" | "text" | "image" | "drawing" | "icon" | "shader";
+export type ElementType = "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader";
 export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
 export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 
@@ -41,6 +41,7 @@ export interface Element {
   
   // Text properties
   text?: string;
+  richTextHtml?: string;
   fontSize?: number;
   fontFamily?: string;
   fontWeight?: string;
