@@ -158,6 +158,7 @@ export default function CanvasContainerNew({
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
+  const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
 
@@ -2306,7 +2307,28 @@ export default function CanvasContainerNew({
 
       {/* Timeline Panel */}
       {selectedFrame && (
-        <div className="absolute bottom-0 left-0 right-0 z-50">
+        <div 
+          className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ease-out ${
+            showTimelinePanel ? 'translate-y-0' : 'translate-y-full'
+          }`}
+          style={{ marginBottom: showTimelinePanel ? '0' : '-4px' }}
+        >
+          {/* Toggle Handle */}
+          <button
+            onClick={() => setShowTimelinePanel(!showTimelinePanel)}
+            className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border rounded-t-lg px-4 py-1.5 hover:bg-card transition-colors shadow-lg z-50 flex items-center gap-2"
+          >
+            <span className="text-xs font-medium">Timeline</span>
+            <svg 
+              className={`w-4 h-4 transition-transform ${showTimelinePanel ? 'rotate-180' : ''}`}
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
           <TimelinePanel
             frame={selectedFrame}
             elements={selectedFrame.elements || []}
