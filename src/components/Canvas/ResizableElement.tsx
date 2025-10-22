@@ -115,6 +115,11 @@ export default function ResizableElement({
   patternFrameId,
   videoUrl,
   shader,
+  lineStyle,
+  lineCap,
+  lineJoin,
+  dashArray,
+  controlPoints,
   useFlexLayout = false,
   isSelected,
   zoom = 1,
@@ -398,11 +403,11 @@ export default function ResizableElement({
               stroke,
               strokeWidth,
               strokeOpacity,
-              lineStyle: (rest as any).lineStyle,
-              lineCap: (rest as any).lineCap,
-              lineJoin: (rest as any).lineJoin,
-              dashArray: (rest as any).dashArray,
-              controlPoints: (rest as any).controlPoints,
+              lineStyle,
+              lineCap,
+              lineJoin,
+              dashArray,
+              controlPoints,
             } as Element}
             isSelected={isSelected}
             onUpdate={(updates) => onUpdate(id, updates as any)}
