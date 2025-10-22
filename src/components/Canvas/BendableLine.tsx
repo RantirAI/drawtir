@@ -11,6 +11,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const [isDraggingPoint, setIsDraggingPoint] = useState<number | null>(null);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
   const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const [isCreatingPoint, setIsCreatingPoint] = useState(false);
 
   const controlPoints = element.controlPoints || [
     { x: 0, y: element.height / 2 },
@@ -129,38 +130,6 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
     return closestPoint;
   };
 
-  const handleLineClick = (e: React.MouseEvent<SVGPathElement>) => {
-    if (!isShiftHeld || !isSelected) return;
-    
-    e.stopPropagation();
-    
-    const svg = e.currentTarget.ownerSVGElement;
-    if (!svg) return;
-    
-    const rect = svg.getBoundingClientRect();
-    const mouseX = ((e.clientX - rect.left) / rect.width) * element.width;
-    const mouseY = ((e.clientY - rect.top) / rect.height) * element.height;
-    
-    const closestPoint = getClosestPointOnLine(mouseX, mouseY);
-    
-    // Find where to insert the new point
-    let insertIndex = 1;
-    let minDist = Infinity;
-    
-    for (let i = 0; i < controlPoints.length - 1; i++) {
-      const midX = (controlPoints[i].x + controlPoints[i + 1].x) / 2;
-      const midY = (controlPoints[i].y + controlPoints[i + 1].y) / 2;
-      const dist = Math.sqrt(Math.pow(midX - closestPoint.x, 2) + Math.pow(midY - closestPoint.y, 2));
-      if (dist < minDist) {
-        minDist = dist;
-        insertIndex = i + 1;
-      }
-    }
-    
-    const newPoints = [...controlPoints];
-    newPoints.splice(insertIndex, 0, closestPoint);
-    onUpdate({ controlPoints: newPoints });
-  };
 
   const handleLineMouseMove = (e: React.MouseEvent<SVGPathElement>) => {
     if (!isShiftHeld || !isSelected) {
@@ -182,8 +151,39 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const handleLineMouseDown = (e: React.MouseEvent<SVGPathElement> | React.PointerEvent<SVGPathElement>) => {
     if (isSelected && isShiftHeld) {
       e.stopPropagation();
-      // Prevent frame from capturing the press and deselecting the line
-      if ('preventDefault' in e) (e as any).preventDefault?.();
+      e.preventDefault();
+      
+      // Calculate position and add new point
+      const svg = e.currentTarget.ownerSVGElement;
+      if (!svg) return;
+      
+      const rect = svg.getBoundingClientRect();
+      const mouseX = ((e.clientX - rect.left) / rect.width) * element.width;
+      const mouseY = ((e.clientY - rect.top) / rect.height) * element.height;
+      
+      const closestPoint = getClosestPointOnLine(mouseX, mouseY);
+      
+      // Find where to insert the new point
+      let insertIndex = 1;
+      let minDist = Infinity;
+      
+      for (let i = 0; i < controlPoints.length - 1; i++) {
+        const midX = (controlPoints[i].x + controlPoints[i + 1].x) / 2;
+        const midY = (controlPoints[i].y + controlPoints[i + 1].y) / 2;
+        const dist = Math.sqrt(Math.pow(midX - closestPoint.x, 2) + Math.pow(midY - closestPoint.y, 2));
+        if (dist < minDist) {
+          minDist = dist;
+          insertIndex = i + 1;
+        }
+      }
+      
+      const newPoints = [...controlPoints];
+      newPoints.splice(insertIndex, 0, closestPoint);
+      onUpdate({ controlPoints: newPoints });
+      
+      // Immediately start dragging the new point
+      setIsDraggingPoint(insertIndex);
+      setIsCreatingPoint(true);
     }
   };
 
@@ -215,6 +215,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
 
     const handleMouseUp = () => {
       setIsDraggingPoint(null);
+      setIsCreatingPoint(false);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -243,7 +244,6 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
         style={{ cursor: isSelected && isShiftHeld ? 'crosshair' : 'default', pointerEvents: 'stroke' }}
         onPointerDown={handleLineMouseDown}
         onMouseDown={handleLineMouseDown}
-        onClick={handleLineClick}
         onMouseMove={handleLineMouseMove}
         onMouseLeave={() => setHoverPosition(null)}
       />
