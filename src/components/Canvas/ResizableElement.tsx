@@ -218,6 +218,11 @@ export default function ResizableElement({
   }, [isDragging, isResizing, dragStart, resizeStart, id, onUpdate, x, y]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // For lines, only handle if NOT in bend mode (shift not held)
+    if (type === 'shape' && shapeType === 'line' && isSelected && e.shiftKey) {
+      return; // Let BendableLine handle the shift-click
+    }
+    
     // Don't start dragging if clicking on resize handles, right-click, or locked
     if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || e.button === 2 || isLocked) {
       return;
@@ -557,9 +562,8 @@ export default function ResizableElement({
         height,
         opacity: opacity / 100,
         mixBlendMode: (blendMode || 'normal') as any,
-        pointerEvents: (type === 'shape' && shapeType === 'line' && isSelected) ? 'none' : 'auto'
       }}
-      onMouseDown={type === 'shape' && shapeType === 'line' && isSelected ? undefined : handleMouseDown}
+      onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >
       {type === "shader" && shader ? (
