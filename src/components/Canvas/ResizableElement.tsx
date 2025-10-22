@@ -48,6 +48,7 @@ interface ResizableElementProps {
   videoUrl?: string;
   useFlexLayout?: boolean;
   isSelected: boolean;
+  zoom?: number;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
@@ -96,6 +97,7 @@ export default function ResizableElement({
   videoUrl,
   useFlexLayout = false,
   isSelected,
+  zoom = 1,
   onUpdate,
   onSelect,
   onDelete,
@@ -105,6 +107,7 @@ export default function ResizableElement({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
@@ -147,30 +150,37 @@ export default function ResizableElement({
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        const dx = e.clientX - dragStart.x;
-        const dy = e.clientY - dragStart.y;
-        const newX = snapToGrid(dragStart.elementX + dx);
-        const newY = snapToGrid(dragStart.elementY + dy);
+      if (isDragging && !isLocked) {
+        const dx = (e.clientX - dragStart.x) / zoom;
+        const dy = (e.clientY - dragStart.y) / zoom;
+        
+        // Hold Shift for fine control
+        const multiplier = e.shiftKey ? 0.5 : 1;
+        
+        const newX = snapToGrid(dragStart.elementX + (dx * multiplier));
+        const newY = snapToGrid(dragStart.elementY + (dy * multiplier));
         onUpdate(id, { x: newX, y: newY });
       } else if (isResizing) {
-        const dx = e.clientX - resizeStart.x;
-        const dy = e.clientY - resizeStart.y;
+        const dx = (e.clientX - resizeStart.x) / zoom;
+        const dy = (e.clientY - resizeStart.y) / zoom;
+        
+        // Hold Shift for fine control
+        const multiplier = e.shiftKey ? 0.5 : 1;
         
         let newWidth = resizeStart.width;
         let newHeight = resizeStart.height;
         let newX = x;
         let newY = y;
 
-        if (resizeStart.corner.includes("e")) newWidth = Math.max(20, snapToGrid(resizeStart.width + dx));
+        if (resizeStart.corner.includes("e")) newWidth = Math.max(20, snapToGrid(resizeStart.width + (dx * multiplier)));
         if (resizeStart.corner.includes("w")) {
-          newWidth = Math.max(20, snapToGrid(resizeStart.width - dx));
-          newX = snapToGrid(x + dx);
+          newWidth = Math.max(20, snapToGrid(resizeStart.width - (dx * multiplier)));
+          newX = snapToGrid(x + (dx * multiplier));
         }
-        if (resizeStart.corner.includes("s")) newHeight = Math.max(20, snapToGrid(resizeStart.height + dy));
+        if (resizeStart.corner.includes("s")) newHeight = Math.max(20, snapToGrid(resizeStart.height + (dy * multiplier)));
         if (resizeStart.corner.includes("n")) {
-          newHeight = Math.max(20, snapToGrid(resizeStart.height - dy));
-          newY = snapToGrid(y + dy);
+          newHeight = Math.max(20, snapToGrid(resizeStart.height - (dy * multiplier)));
+          newY = snapToGrid(y + (dy * multiplier));
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
@@ -194,8 +204,8 @@ export default function ResizableElement({
   }, [isDragging, isResizing, dragStart, resizeStart, id, onUpdate, x, y]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Don't start dragging if clicking on resize handles or right-click
-    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || e.button === 2) {
+    // Don't start dragging if clicking on resize handles, right-click, or locked
+    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || e.button === 2 || isLocked) {
       return;
     }
     e.stopPropagation();
@@ -205,10 +215,13 @@ export default function ResizableElement({
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
-    if (type === "text") {
-      e.stopPropagation();
+    e.stopPropagation();
+    if (type === "text" && !isLocked) {
       setIsEditing(true);
       setEditText(text || "");
+    } else {
+      // Toggle lock state
+      setIsLocked(!isLocked);
     }
   };
 
@@ -579,16 +592,30 @@ export default function ResizableElement({
 
       {isSelected && (
         <>
+          {/* Lock indicator */}
+          {isLocked && (
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium flex items-center gap-1">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              </svg>
+              Locked
+            </div>
+          )}
+          
           {/* Dimension label at bottom in blue */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium">
             {Math.round(width)} × {Math.round(height)}
           </div>
           
-          {/* Resize handles in blue */}
-          <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-          <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-          <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-          <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
+          {/* Resize handles in blue - hidden when locked */}
+          {!isLocked && (
+            <>
+              <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
+              <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
+              <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
+              <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
+            </>
+          )}
         </>
       )}
     </div>

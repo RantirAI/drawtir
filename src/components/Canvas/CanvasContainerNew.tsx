@@ -1547,12 +1547,13 @@ export default function CanvasContainerNew({
                       gradientType={element.gradientType}
                       gradientAngle={element.gradientAngle}
                       gradientStops={element.gradientStops}
-                       patternFrameId={element.patternFrameId}
-                       videoUrl={element.videoUrl}
-                       iconName={element.iconName}
-                       iconFamily={element.iconFamily}
-                       useFlexLayout={false}
-                       isSelected={selectedElementIds.includes(element.id)}
+                      patternFrameId={element.patternFrameId}
+                      videoUrl={element.videoUrl}
+                      iconName={element.iconName}
+                      iconFamily={element.iconFamily}
+                      useFlexLayout={false}
+                      isSelected={selectedElementIds.includes(element.id)}
+                      zoom={zoom}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                       onDelete={() => handleElementDelete(element.id)}
@@ -1671,6 +1672,7 @@ export default function CanvasContainerNew({
                             iconFamily={element.iconFamily}
                             useFlexLayout={false}
                             isSelected={false}
+                            zoom={zoom}
                             onUpdate={(id, updates) => {
                               setFrames(frames.map(f => 
                                 f.id === frame.id 

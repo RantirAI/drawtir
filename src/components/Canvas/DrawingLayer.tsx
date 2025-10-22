@@ -99,8 +99,8 @@ export default function DrawingLayer({
       
       if (onPathComplete) {
         onPathComplete(translatedPath, color, strokeWidth, {
-          x: frameX + minX,
-          y: frameY + minY,
+          x: minX,
+          y: minY,
           width: Math.max(20, maxX - minX),
           height: Math.max(20, maxY - minY)
         });
