@@ -1654,6 +1654,7 @@ export default function CanvasContainerNew({
                       lineJoin={element.lineJoin}
                       dashArray={element.dashArray}
                       controlPoints={element.controlPoints}
+                      rotation={element.rotation}
                       useFlexLayout={false}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
@@ -1973,6 +1974,7 @@ export default function CanvasContainerNew({
           sizeUnit={selectedElement?.sizeUnit || selectedFrame?.sizeUnit || "px"}
           x={selectedElement?.x}
           y={selectedElement?.y}
+          rotation={selectedElement?.rotation || 0}
           opacity={selectedElement?.opacity || selectedFrame?.opacity || 100}
           cornerRadius={selectedElement?.cornerRadius || selectedFrame?.cornerRadius || 0}
           cornerRadiusUnit={selectedElement?.cornerRadiusUnit || selectedFrame?.cornerRadiusUnit || "px"}
@@ -2044,6 +2046,7 @@ export default function CanvasContainerNew({
           }}
           onXChange={(x) => selectedElement && handleElementUpdate(selectedElement.id, { x })}
           onYChange={(y) => selectedElement && handleElementUpdate(selectedElement.id, { y })}
+          onRotationChange={(rotation) => selectedElement && handleElementUpdate(selectedElement.id, { rotation })}
           onOpacityChange={(o) => {
             if (selectedElement) {
               handleElementUpdate(selectedElement.id, { opacity: o });

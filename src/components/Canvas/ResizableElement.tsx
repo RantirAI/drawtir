@@ -65,6 +65,7 @@ interface ResizableElementProps {
   lineJoin?: "miter" | "round" | "bevel";
   dashArray?: string;
   controlPoints?: Array<{ x: number; y: number }>;
+  rotation?: number;
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
@@ -120,6 +121,7 @@ export default function ResizableElement({
   lineJoin,
   dashArray,
   controlPoints,
+  rotation = 0,
   useFlexLayout = false,
   isSelected,
   zoom = 1,
@@ -131,11 +133,13 @@ export default function ResizableElement({
 }: ResizableElementProps & React.HTMLAttributes<HTMLDivElement>) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isRotating, setIsRotating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [editText, setEditText] = useState(text || "");
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, corner: "" });
+  const [rotateStart, setRotateStart] = useState({ angle: rotation, mouseAngle: 0 });
 
   // Helper function to convert hex to rgba with opacity
   const hexToRgba = (hex: string, opacity: number): string => {
@@ -209,12 +213,25 @@ export default function ResizableElement({
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
+      } else if (isRotating) {
+        // Calculate angle from element center to mouse
+        const rect = (e.target as HTMLElement).closest('[data-element-container]')?.getBoundingClientRect();
+        if (!rect) return;
+        
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const mouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const angleDiff = mouseAngle - rotateStart.mouseAngle;
+        const newRotation = (rotateStart.angle + angleDiff) % 360;
+        
+        onUpdate(id, { rotation: newRotation } as any);
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      setIsRotating(false);
     };
 
     if (isDragging || isResizing) {
@@ -226,7 +243,7 @@ export default function ResizableElement({
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, isResizing, dragStart, resizeStart, id, onUpdate, x, y]);
+  }, [isDragging, isResizing, isRotating, dragStart, resizeStart, rotateStart, id, onUpdate, x, y, zoom]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // For lines, only handle if NOT in bend mode (shift not held)
@@ -235,7 +252,9 @@ export default function ResizableElement({
     }
     
     // Don't start dragging if clicking on resize handles, right-click, or locked
-    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || e.button === 2 || isLocked) {
+    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || 
+        (e.target as HTMLElement).hasAttribute('data-rotate-handle') || 
+        e.button === 2 || isLocked) {
       return;
     }
     e.stopPropagation();
@@ -280,6 +299,19 @@ export default function ResizableElement({
     e.stopPropagation();
     setIsResizing(true);
     setResizeStart({ x: e.clientX, y: e.clientY, width, height, corner });
+  };
+
+  const handleRotateStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = (e.target as HTMLElement).closest('[data-element-container]')?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const mouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    
+    setIsRotating(true);
+    setRotateStart({ angle: rotation, mouseAngle });
   };
 
   const generateFillStyle = () => {
@@ -565,6 +597,7 @@ export default function ResizableElement({
   return (
     <div
       {...rest}
+      data-element-container
       className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
@@ -573,6 +606,8 @@ export default function ResizableElement({
         height,
         opacity: opacity / 100,
         mixBlendMode: (blendMode || 'normal') as any,
+        transform: `rotate(${rotation}deg)`,
+        transformOrigin: 'center center',
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
@@ -672,6 +707,18 @@ export default function ResizableElement({
               <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
               <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
               <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
+              
+              {/* Rotation handle */}
+              <div 
+                data-rotate-handle 
+                className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-green-500 rounded-full cursor-grab active:cursor-grabbing border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                onMouseDown={handleRotateStart}
+                title="Rotate"
+              >
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
             </>
           )}
         </>
