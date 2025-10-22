@@ -66,6 +66,8 @@ interface ResizableElementProps {
   dashArray?: string;
   controlPoints?: Array<{ x: number; y: number }>;
   rotation?: number;
+  animation?: string;
+  animationDuration?: string;
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
@@ -122,6 +124,8 @@ export default function ResizableElement({
   dashArray,
   controlPoints,
   rotation = 0,
+  animation = "none",
+  animationDuration,
   useFlexLayout = false,
   isSelected,
   zoom = 1,
@@ -604,7 +608,7 @@ export default function ResizableElement({
     <div
       {...rest}
       ref={containerRef}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${animation}` : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
@@ -614,6 +618,7 @@ export default function ResizableElement({
         mixBlendMode: (blendMode || 'normal') as any,
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
+        animationDuration: animationDuration,
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}

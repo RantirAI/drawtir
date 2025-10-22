@@ -79,6 +79,10 @@ export interface Element {
   cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
   
+  // Animation properties
+  animation?: "none" | "fade-in" | "fade-out" | "scale-in" | "scale-out" | "slide-in-right" | "slide-out-right" | "accordion-down" | "accordion-up" | "pulse" | "bounce" | "spin" | "ping";
+  animationDuration?: string;
+  
   // Nesting support
   children?: Element[];
 }

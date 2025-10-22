@@ -17,6 +17,8 @@ import ShareDialog from "./ShareDialog";
 import ExportAllDialog from "./ExportAllDialog";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
+import AnimationsModal from "./AnimationsModal";
+import type { AnimationType } from "./AnimationsModal";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -149,6 +151,8 @@ export default function CanvasContainerNew({
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showExportAllDialog, setShowExportAllDialog] = useState(false);
+  const [showAnimationsModal, setShowAnimationsModal] = useState(false);
+  const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
 
@@ -1262,6 +1266,17 @@ export default function CanvasContainerNew({
     }));
   };
 
+  const handleAnimationSelect = (animation: AnimationType, duration?: string) => {
+    if (!animatingElementId) return;
+    
+    handleElementUpdate(animatingElementId, {
+      animation: animation,
+      animationDuration: duration,
+    });
+    
+    toast.success(`Animation ${animation !== 'none' ? 'applied' : 'removed'}!`);
+  };
+
   const handleAddText = () => {
     if (!selectedFrameId) return;
     
@@ -1608,6 +1623,10 @@ export default function CanvasContainerNew({
                       setSelectedElementIds([element.id]);
                       setShowShapeSettings(true);
                     }}
+                    onEditAnimations={() => {
+                      setAnimatingElementId(element.id);
+                      setShowAnimationsModal(true);
+                    }}
                   >
                      <ResizableElement
                       id={element.id}
@@ -1655,6 +1674,8 @@ export default function CanvasContainerNew({
                       dashArray={element.dashArray}
                       controlPoints={element.controlPoints}
                       rotation={element.rotation}
+                      animation={element.animation}
+                      animationDuration={element.animationDuration}
                       useFlexLayout={false}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
@@ -1775,6 +1796,8 @@ export default function CanvasContainerNew({
                             iconName={element.iconName}
                             iconFamily={element.iconFamily}
                             shader={element.shader}
+                            animation={element.animation}
+                            animationDuration={element.animationDuration}
                             useFlexLayout={false}
                             isSelected={false}
                             zoom={zoom}
@@ -2242,6 +2265,20 @@ export default function CanvasContainerNew({
         open={showExportAllDialog}
         onOpenChange={setShowExportAllDialog}
         frames={frames}
+      />
+
+      <AnimationsModal
+        open={showAnimationsModal}
+        onOpenChange={setShowAnimationsModal}
+        currentAnimation={
+          animatingElementId
+            ? (frames
+                .find(f => f.id === selectedFrameId)
+                ?.elements?.find(e => e.id === animatingElementId)
+                ?.animation as AnimationType) || "none"
+            : "none"
+        }
+        onSelectAnimation={handleAnimationSelect}
       />
 
       <DrawtirFooter />
