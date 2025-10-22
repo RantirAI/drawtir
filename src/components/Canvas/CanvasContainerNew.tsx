@@ -1714,6 +1714,9 @@ export default function CanvasContainerNew({
             frameY={selectedFrame.y}
             frameWidth={selectedFrame.width}
             frameHeight={selectedFrame.height}
+            zoom={zoom}
+            panOffsetX={panOffset.x}
+            panOffsetY={panOffset.y}
             onPathComplete={(pathData, color, strokeW, bounds) => {
               if (!selectedFrameId) return;
               const newElement: Element = {

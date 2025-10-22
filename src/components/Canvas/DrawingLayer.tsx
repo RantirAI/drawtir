@@ -9,6 +9,9 @@ interface DrawingLayerProps {
   frameY?: number;
   frameWidth?: number;
   frameHeight?: number;
+  zoom?: number;
+  panOffsetX?: number;
+  panOffsetY?: number;
   onPathComplete?: (pathData: string, color: string, strokeWidth: number, bounds: { x: number; y: number; width: number; height: number }) => void;
 }
 
@@ -21,6 +24,9 @@ export default function DrawingLayer({
   frameY = 0,
   frameWidth = 400,
   frameHeight = 600,
+  zoom = 1,
+  panOffsetX = 0,
+  panOffsetY = 0,
   onPathComplete 
 }: DrawingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,8 +62,8 @@ export default function DrawingLayer({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
     setCurrentPath(`M ${x} ${y}`);
     setPathPoints([{x, y}]);
   };
@@ -68,8 +74,8 @@ export default function DrawingLayer({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
     setCurrentPath(prev => `${prev} L ${x} ${y}`);
     setPathPoints(prev => [...prev, {x, y}]);
   };
@@ -93,8 +99,8 @@ export default function DrawingLayer({
       
       if (onPathComplete) {
         onPathComplete(translatedPath, color, strokeWidth, {
-          x: minX,
-          y: minY,
+          x: frameX + minX,
+          y: frameY + minY,
           width: Math.max(20, maxX - minX),
           height: Math.max(20, maxY - minY)
         });

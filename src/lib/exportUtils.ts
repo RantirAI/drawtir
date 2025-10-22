@@ -63,6 +63,7 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
   } else if (element.type === "drawing" && element.pathData) {
     ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
+    ctx.translate(frame.x, frame.y);
   }
 
   ctx.restore();
