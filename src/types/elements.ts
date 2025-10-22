@@ -80,7 +80,7 @@ export interface Element {
   blendMode?: string;
   
   // Animation properties
-  animation?: "none" | "fade-in" | "fade-out" | "scale-in" | "scale-out" | "slide-in-right" | "slide-out-right" | "accordion-down" | "accordion-up" | "pulse" | "bounce" | "spin" | "ping";
+  animation?: "none" | "fade-in" | "fade-out" | "slide-in-from-top" | "slide-in-from-bottom" | "slide-in-from-left" | "slide-in-from-right" | "slide-out-to-top" | "slide-out-to-bottom" | "slide-out-to-left" | "slide-out-to-right" | "zoom-in" | "zoom-out" | "pulse" | "bounce" | "spin" | "ping";
   animationDuration?: string;
   
   // Nesting support

@@ -145,6 +145,7 @@ export default function ResizableElement({
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, elementX: x, elementY: y, corner: "" });
   const [rotateStart, setRotateStart] = useState({ angle: rotation, mouseAngle: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [animationKey, setAnimationKey] = useState(0);
 
   // Helper function to convert hex to rgba with opacity
   const hexToRgba = (hex: string, opacity: number): string => {
@@ -608,6 +609,7 @@ export default function ResizableElement({
     <div
       {...rest}
       ref={containerRef}
+      key={`${id}-${animationKey}`}
       className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${animation}` : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
@@ -730,6 +732,22 @@ export default function ResizableElement({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>
+
+              {/* Play animation button - only show if animation is set */}
+              {animation && animation !== "none" && (
+                <div 
+                  className="absolute -top-8 left-1/2 translate-x-4 w-6 h-6 bg-purple-500 rounded-full cursor-pointer border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setAnimationKey(prev => prev + 1);
+                  }}
+                  title="Play Animation"
+                >
+                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              )}
             </>
           )}
         </>
