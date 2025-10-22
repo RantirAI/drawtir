@@ -1514,7 +1514,7 @@ export default function CanvasContainerNew({
                   >
                      <ResizableElement
                       id={element.id}
-                      type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type}
+                       type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
                       x={element.x}
                       y={element.y}
                       width={element.width}
@@ -1653,7 +1653,7 @@ export default function CanvasContainerNew({
                           <ResizableElement
                             key={element.id}
                             id={element.id}
-                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type}
+                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
                             x={element.x}
                             y={element.y}
                             width={element.width}

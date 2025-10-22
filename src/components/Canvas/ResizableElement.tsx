@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
 import DynamicIcon from "./DynamicIcon";
+import { ShaderElement } from "./ShaderElement";
+import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
   id: string;
-  type: "image" | "shape" | "text";
+  type: "image" | "shape" | "text" | "shader";
   x: number;
   y: number;
   width: number;
@@ -46,6 +48,16 @@ interface ResizableElementProps {
   gradientStops?: Array<{color: string, position: number}>;
   patternFrameId?: string;
   videoUrl?: string;
+  // Shader properties
+  shader?: {
+    type: "ripple" | "distortion" | "particles" | "noise" | "waves" | "tunnel" | "plasma";
+    speed?: number;
+    intensity?: number;
+    scale?: number;
+    color1?: string;
+    color2?: string;
+    color3?: string;
+  };
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
@@ -95,6 +107,7 @@ export default function ResizableElement({
   gradientStops = [{ color: "#000000", position: 0 }, { color: "#ffffff", position: 100 }],
   patternFrameId,
   videoUrl,
+  shader,
   useFlexLayout = false,
   isSelected,
   zoom = 1,
@@ -529,7 +542,17 @@ export default function ResizableElement({
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >
-      {type === "image" && src ? (
+      {type === "shader" && shader ? (
+        <ShaderElement element={{ 
+          id, 
+          type: "shader", 
+          x, 
+          y, 
+          width, 
+          height, 
+          shader 
+        } as Element} />
+      ) : type === "image" && src ? (
         <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
           <img 
             src={src} 

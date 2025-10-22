@@ -1,4 +1,4 @@
-export type ElementType = "frame" | "shape" | "text" | "image" | "drawing" | "icon";
+export type ElementType = "frame" | "shape" | "text" | "image" | "drawing" | "icon" | "shader";
 export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
 export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 
@@ -54,6 +54,17 @@ export interface Element {
   iconFamily?: string; // fa, md, hi, ai, bs, etc.
   iconColor?: string;
   iconSize?: number;
+  
+  // Shader properties
+  shader?: {
+    type: "ripple" | "distortion" | "particles" | "noise" | "waves" | "tunnel" | "plasma";
+    speed?: number;
+    intensity?: number;
+    scale?: number;
+    color1?: string;
+    color2?: string;
+    color3?: string;
+  };
   
   // Common properties
   opacity?: number;
