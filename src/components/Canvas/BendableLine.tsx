@@ -179,6 +179,14 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
     setHoverPosition(closestPoint);
   };
 
+  const handleLineMouseDown = (e: React.MouseEvent<SVGPathElement> | React.PointerEvent<SVGPathElement>) => {
+    if (isSelected && isShiftHeld) {
+      e.stopPropagation();
+      // Prevent frame from capturing the press and deselecting the line
+      if ('preventDefault' in e) (e as any).preventDefault?.();
+    }
+  };
+
   const handleControlPointMouseDown = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDraggingPoint(index);
@@ -233,6 +241,8 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
         stroke="transparent"
         strokeWidth={Math.max((element.strokeWidth || 2) + 10, 15)}
         style={{ cursor: isSelected && isShiftHeld ? 'crosshair' : 'default', pointerEvents: 'stroke' }}
+        onPointerDown={handleLineMouseDown}
+        onMouseDown={handleLineMouseDown}
         onClick={handleLineClick}
         onMouseMove={handleLineMouseMove}
         onMouseLeave={() => setHoverPosition(null)}
