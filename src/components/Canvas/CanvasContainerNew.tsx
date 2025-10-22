@@ -16,6 +16,7 @@ import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
 import ExportAllDialog from "./ExportAllDialog";
 import PreviewDialog from "./PreviewDialog";
+import TimelinePanel from "@/components/Panels/TimelinePanel";
 import ResizableElement from "./ResizableElement";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsModal from "./AnimationsModal";
@@ -157,6 +158,8 @@ export default function CanvasContainerNew({
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [maxDuration, setMaxDuration] = useState(5);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -2306,6 +2309,20 @@ export default function CanvasContainerNew({
         onOpenChange={setShowPreviewDialog}
         frame={selectedFrame}
       />
+
+      {/* Timeline Panel */}
+      {selectedFrame && (
+        <TimelinePanel
+          frame={selectedFrame}
+          elements={selectedFrame.elements || []}
+          onUpdateElement={(elementId, updates) => {
+            handleElementUpdate(elementId, updates);
+          }}
+          currentTime={currentTime}
+          onTimeChange={setCurrentTime}
+          maxDuration={maxDuration}
+        />
+      )}
 
       <DrawtirFooter />
 
