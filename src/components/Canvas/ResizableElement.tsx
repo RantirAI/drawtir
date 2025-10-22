@@ -375,29 +375,27 @@ export default function ResizableElement({
         }
       case "line":
         return (
-          <div style={{ pointerEvents: 'none', width: '100%', height: '100%' }}>
-            <BendableLine
-              element={{
-                id,
-                type: "shape",
-                shapeType: "line",
-                x,
-                y,
-                width,
-                height,
-                stroke,
-                strokeWidth,
-                strokeOpacity,
-                lineStyle: (rest as any).lineStyle,
-                lineCap: (rest as any).lineCap,
-                lineJoin: (rest as any).lineJoin,
-                dashArray: (rest as any).dashArray,
-                controlPoints: (rest as any).controlPoints,
-              } as Element}
-              isSelected={isSelected}
-              onUpdate={(updates) => onUpdate(id, updates as any)}
-            />
-          </div>
+          <BendableLine
+            element={{
+              id,
+              type: "shape",
+              shapeType: "line",
+              x,
+              y,
+              width,
+              height,
+              stroke,
+              strokeWidth,
+              strokeOpacity,
+              lineStyle: (rest as any).lineStyle,
+              lineCap: (rest as any).lineCap,
+              lineJoin: (rest as any).lineJoin,
+              dashArray: (rest as any).dashArray,
+              controlPoints: (rest as any).controlPoints,
+            } as Element}
+            isSelected={isSelected}
+            onUpdate={(updates) => onUpdate(id, updates as any)}
+          />
         );
       case "arrow":
         return (
