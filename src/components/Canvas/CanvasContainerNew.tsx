@@ -1327,7 +1327,7 @@ export default function CanvasContainerNew({
     });
     
     toast.success(`Animation ${config.animation !== 'none' ? 'applied' : 'removed'}!`);
-    setShowAnimationsPanel(false);
+    // Keep panel open like other sidebar panels
   };
 
   const handleAddText = () => {
