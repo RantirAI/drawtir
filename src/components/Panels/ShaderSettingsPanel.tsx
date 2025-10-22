@@ -21,7 +21,7 @@ export const ShaderSettingsPanel: React.FC<ShaderSettingsPanelProps> = ({ elemen
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4">
       <div>
         <Label>Shader Type</Label>
         <Select
