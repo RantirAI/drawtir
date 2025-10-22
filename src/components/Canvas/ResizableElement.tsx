@@ -69,7 +69,7 @@ interface ResizableElementProps {
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
-  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string }>) => void;
+  onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; text: string; rotation: number }>) => void;
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
@@ -189,6 +189,17 @@ export default function ResizableElement({
         const newX = snapToGrid(dragStart.elementX + (dx * multiplier));
         const newY = snapToGrid(dragStart.elementY + (dy * multiplier));
         onUpdate(id, { x: newX, y: newY });
+      } else if (isRotating) {
+        const rect = document.querySelector(`[data-element-container]`)?.getBoundingClientRect();
+        if (!rect) return;
+        
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+        const angleDelta = currentAngle - rotateStart.mouseAngle;
+        const newRotation = rotateStart.angle + angleDelta;
+        
+        onUpdate(id, { rotation: newRotation } as any);
       } else if (isResizing) {
         const dx = (e.clientX - resizeStart.x) / zoom;
         const dy = (e.clientY - resizeStart.y) / zoom;
@@ -234,7 +245,7 @@ export default function ResizableElement({
       setIsRotating(false);
     };
 
-    if (isDragging || isResizing) {
+    if (isDragging || isResizing || isRotating) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
     }
