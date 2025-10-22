@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -12,6 +12,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import EditableTitle from "@/components/Canvas/EditableTitle";
+import SettingsDialog from "@/components/Canvas/SettingsDialog";
+import { useState } from "react";
 
 interface EditorTopBarProps {
   projectName?: string;
@@ -27,6 +29,7 @@ interface EditorTopBarProps {
   canRedo?: boolean;
   isSaving?: boolean;
   hideCloudFeatures?: boolean;
+  projectId?: string;
 }
 
 export default function EditorTopBar({ 
@@ -43,8 +46,10 @@ export default function EditorTopBar({
   canRedo = false,
   isSaving,
   hideCloudFeatures = false,
+  projectId,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -68,7 +73,8 @@ export default function EditorTopBar({
             <DropdownMenuItem onClick={() => navigate("/gallery")}>
               Gallery
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/settings")}>
+            <DropdownMenuItem onClick={() => setShowSettings(true)}>
+              <Settings className="h-3 w-3 mr-2" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -129,6 +135,12 @@ export default function EditorTopBar({
         
         <ThemeToggle />
       </div>
+
+      <SettingsDialog 
+        open={showSettings} 
+        onOpenChange={setShowSettings}
+        projectId={projectId}
+      />
     </div>
   );
 }

@@ -1411,6 +1411,7 @@ export default function CanvasContainerNew({
         canRedo={historyIndex < history.length - 1}
         isSaving={isAutoSaving}
         hideCloudFeatures={isEmbedded}
+        projectId={projectId}
       />
 
       {/* Canvas Area */}
