@@ -938,14 +938,19 @@ export default function ShapeSettingsPanel({
             <AccordionContent className="space-y-1.5 pb-2">
               <div className="space-y-2">
                 <Popover open={strokeModalOpen} onOpenChange={setStrokeModalOpen}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: stroke }}
-                    >
-                      <span className="sr-only">Stroke Color</span>
-                    </button>
-                  </PopoverTrigger>
+                  <div className="flex items-center gap-2">
+                    <PopoverTrigger asChild>
+                      <button
+                        className="h-6 w-6 rounded border border-border hover:border-primary transition-colors flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: stroke }}
+                      >
+                        <span className="sr-only">Stroke Color</span>
+                      </button>
+                    </PopoverTrigger>
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {stroke}
+                    </span>
+                  </div>
                   <PopoverContent side="right" className="w-80 p-3">
                     <ColorPicker
                       color={stroke}
@@ -1003,52 +1008,54 @@ export default function ShapeSettingsPanel({
                 {/* Line-specific settings */}
                 {shapeType === "line" && onLineStyleChange && (
                   <div>
-                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Style</Label>
-                    <div className="grid grid-cols-4 gap-0.5">
-                      <Button
-                        variant={lineStyle === "solid" ? "default" : "outline"}
-                        size="sm"
-                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
-                        onClick={() => onLineStyleChange("solid")}
-                        title="Solid"
-                      >
-                        <svg width="16" height="2" viewBox="0 0 16 2">
-                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" />
-                        </svg>
-                      </Button>
-                      <Button
-                        variant={lineStyle === "dashed" ? "default" : "outline"}
-                        size="sm"
-                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
-                        onClick={() => onLineStyleChange("dashed")}
-                        title="Dashed"
-                      >
-                        <svg width="16" height="2" viewBox="0 0 16 2">
-                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" />
-                        </svg>
-                      </Button>
-                      <Button
-                        variant={lineStyle === "dotted" ? "default" : "outline"}
-                        size="sm"
-                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
-                        onClick={() => onLineStyleChange("dotted")}
-                        title="Dotted"
-                      >
-                        <svg width="16" height="2" viewBox="0 0 16 2">
-                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round" />
-                        </svg>
-                      </Button>
-                      <Button
-                        variant={lineStyle === "dashdot" ? "default" : "outline"}
-                        size="sm"
-                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
-                        onClick={() => onLineStyleChange("dashdot")}
-                        title="Dash-Dot"
-                      >
-                        <svg width="16" height="2" viewBox="0 0 16 2">
-                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2 1 2" />
-                        </svg>
-                      </Button>
+                    <div className="flex items-center justify-between mb-0.5">
+                      <Label className="text-[10px] text-muted-foreground">Line Style</Label>
+                      <div className="flex gap-0.5">
+                        <Button
+                          variant={lineStyle === "solid" ? "default" : "outline"}
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded flex items-center justify-center"
+                          onClick={() => onLineStyleChange("solid")}
+                          title="Solid"
+                        >
+                          <svg width="16" height="2" viewBox="0 0 16 2">
+                            <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant={lineStyle === "dashed" ? "default" : "outline"}
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded flex items-center justify-center"
+                          onClick={() => onLineStyleChange("dashed")}
+                          title="Dashed"
+                        >
+                          <svg width="16" height="2" viewBox="0 0 16 2">
+                            <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant={lineStyle === "dotted" ? "default" : "outline"}
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded flex items-center justify-center"
+                          onClick={() => onLineStyleChange("dotted")}
+                          title="Dotted"
+                        >
+                          <svg width="16" height="2" viewBox="0 0 16 2">
+                            <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round" />
+                          </svg>
+                        </Button>
+                        <Button
+                          variant={lineStyle === "dashdot" ? "default" : "outline"}
+                          size="sm"
+                          className="h-6 w-6 p-0 rounded flex items-center justify-center"
+                          onClick={() => onLineStyleChange("dashdot")}
+                          title="Dash-Dot"
+                        >
+                          <svg width="16" height="2" viewBox="0 0 16 2">
+                            <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2 1 2" />
+                          </svg>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 )}

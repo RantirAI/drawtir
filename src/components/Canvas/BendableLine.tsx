@@ -37,6 +37,8 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const lineStyle = element.lineStyle || "solid";
   const lineCap = element.lineCap || "round";
   const lineJoin = element.lineJoin || "round";
+  const lineArrowStart = element.lineArrowStart || "none";
+  const lineArrowEnd = element.lineArrowEnd || "none";
   
   // Track shift key
   useEffect(() => {
@@ -257,6 +259,137 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
     };
   }, [isDraggingPoint, controlPoints, element.width, element.height, onUpdate]);
 
+  // Get start and end points for arrows
+  const getLineEndPoints = () => {
+    if (controlPoints.length < 2) return { start: { x: 0, y: 0 }, end: { x: 0, y: 0 }, startAngle: 0, endAngle: 0 };
+    
+    const start = controlPoints[0];
+    const end = controlPoints[controlPoints.length - 1];
+    
+    // Calculate angles for arrow rotation
+    const secondPoint = controlPoints.length > 1 ? controlPoints[1] : start;
+    const secondLastPoint = controlPoints.length > 1 ? controlPoints[controlPoints.length - 2] : end;
+    
+    const startAngle = Math.atan2(secondPoint.y - start.y, secondPoint.x - start.x) * 180 / Math.PI;
+    const endAngle = Math.atan2(end.y - secondLastPoint.y, end.x - secondLastPoint.x) * 180 / Math.PI;
+    
+    return { start, end, startAngle, endAngle };
+  };
+
+  const renderArrow = (x: number, y: number, angle: number, type: string, strokeWidth: number) => {
+    const size = strokeWidth * 3;
+    
+    if (type === "none") return null;
+    
+    // Adjust linecap rendering for round and square
+    if (type === "round") {
+      return (
+        <circle
+          cx={x}
+          cy={y}
+          r={strokeWidth / 2}
+          fill={element.stroke || "#000000"}
+          opacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    if (type === "square") {
+      return (
+        <rect
+          x={x - strokeWidth / 2}
+          y={y - strokeWidth / 2}
+          width={strokeWidth}
+          height={strokeWidth}
+          fill={element.stroke || "#000000"}
+          opacity={(element.strokeOpacity || 100) / 100}
+          transform={`rotate(${angle} ${x} ${y})`}
+        />
+      );
+    }
+    
+    // Arrow markers
+    if (type === "line") {
+      return (
+        <line
+          x1={x - size * Math.cos((angle - 90) * Math.PI / 180)}
+          y1={y - size * Math.sin((angle - 90) * Math.PI / 180)}
+          x2={x - size * Math.cos((angle + 90) * Math.PI / 180)}
+          y2={y - size * Math.sin((angle + 90) * Math.PI / 180)}
+          stroke={element.stroke || "#000000"}
+          strokeWidth={strokeWidth}
+          strokeOpacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    if (type === "triangle") {
+      const points = `
+        ${x},${y}
+        ${x - size * Math.cos((angle + 150) * Math.PI / 180)},${y - size * Math.sin((angle + 150) * Math.PI / 180)}
+        ${x - size * Math.cos((angle - 150) * Math.PI / 180)},${y - size * Math.sin((angle - 150) * Math.PI / 180)}
+      `;
+      return (
+        <polygon
+          points={points}
+          fill={element.stroke || "#000000"}
+          opacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    if (type === "reversed-triangle") {
+      const points = `
+        ${x - size * Math.cos(angle * Math.PI / 180)},${y - size * Math.sin(angle * Math.PI / 180)}
+        ${x - size * Math.cos((angle + 150) * Math.PI / 180)},${y - size * Math.sin((angle + 150) * Math.PI / 180)}
+        ${x - size * Math.cos((angle - 150) * Math.PI / 180)},${y - size * Math.sin((angle - 150) * Math.PI / 180)}
+      `;
+      return (
+        <polygon
+          points={points}
+          fill={element.stroke || "#000000"}
+          opacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    if (type === "circle") {
+      return (
+        <circle
+          cx={x}
+          cy={y}
+          r={size / 2}
+          fill="none"
+          stroke={element.stroke || "#000000"}
+          strokeWidth={strokeWidth}
+          strokeOpacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    if (type === "diamond") {
+      const points = `
+        ${x},${y - size / 2}
+        ${x + size / 2},${y}
+        ${x},${y + size / 2}
+        ${x - size / 2},${y}
+      `;
+      return (
+        <polygon
+          points={points}
+          fill="none"
+          stroke={element.stroke || "#000000"}
+          strokeWidth={strokeWidth}
+          strokeOpacity={(element.strokeOpacity || 100) / 100}
+        />
+      );
+    }
+    
+    return null;
+  };
+
+  const { start, end, startAngle, endAngle } = getLineEndPoints();
+
   return (
     <svg
       ref={svgRef}
@@ -287,10 +420,16 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
         strokeWidth={element.strokeWidth || 2}
         strokeOpacity={(element.strokeOpacity || 100) / 100}
         strokeDasharray={getDashArray()}
-        strokeLinecap={lineCap}
+        strokeLinecap={lineArrowStart === "none" && lineArrowEnd === "none" ? lineCap : "butt"}
         strokeLinejoin={lineJoin}
         pointerEvents="none"
       />
+      
+      {/* Start arrow/cap */}
+      {renderArrow(start.x, start.y, startAngle, lineArrowStart, element.strokeWidth || 2)}
+      
+      {/* End arrow/cap */}
+      {renderArrow(end.x, end.y, endAngle, lineArrowEnd, element.strokeWidth || 2)}
       
       {/* Hover indicator when shift is held */}
       {isSelected && isShiftHeld && hoverPosition && (
