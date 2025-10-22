@@ -16,6 +16,8 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const svgRef = useRef<SVGSVGElement | null>(null);
   const dragStartPointRef = useRef<{ x: number; y: number } | null>(null);
   const dragStartMouseRef = useRef<{ x: number; y: number } | null>(null);
+  const [tempControlPoints, setTempControlPoints] = useState<Array<{ x: number; y: number }> | null>(null);
+  const lastUpdatedPointsRef = useRef<Array<{ x: number; y: number }> | null>(null);
 
   const getMouseInSvg = (clientX: number, clientY: number) => {
     const svg = svgRef.current;
@@ -27,7 +29,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
     };
   };
 
-  const controlPoints = element.controlPoints || [
+  const controlPoints = (tempControlPoints ?? element.controlPoints) || [
     { x: 0, y: element.height / 2 },
     { x: element.width, y: element.height / 2 }
   ];
@@ -185,7 +187,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       }
       const newPoints = [...controlPoints];
       newPoints.splice(insertIndex, 0, closestPoint);
-      onUpdate({ controlPoints: newPoints });
+      setTempControlPoints(newPoints);
       
       // Immediately start dragging the new point using absolute mouse coords
       setIsDraggingPoint(insertIndex);
@@ -198,6 +200,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const handleControlPointMouseDown = (index: number, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setTempControlPoints(controlPoints);
     setIsDraggingPoint(index);
     dragStartPointRef.current = { x: controlPoints[index].x, y: controlPoints[index].y };
     const pos = getMouseInSvg(e.clientX, e.clientY);
@@ -228,10 +231,15 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
         x: Math.max(0, Math.min(element.width, base.x + dx)),
         y: Math.max(0, Math.min(element.height, base.y + dy)),
       };
-      onUpdate({ controlPoints: updated });
+      lastUpdatedPointsRef.current = updated;
+      setTempControlPoints(updated);
     };
 
     const handleMouseUp = () => {
+      const finalPoints = lastUpdatedPointsRef.current || tempControlPoints || controlPoints;
+      onUpdate({ controlPoints: finalPoints });
+      lastUpdatedPointsRef.current = null;
+      setTempControlPoints(null);
       setIsDraggingPoint(null);
       setIsCreatingPoint(false);
     };
