@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
 import DynamicIcon from "./DynamicIcon";
 import { ShaderElement } from "./ShaderElement";
@@ -140,6 +140,7 @@ export default function ResizableElement({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, elementX: x, elementY: y });
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width, height, elementX: x, elementY: y, corner: "" });
   const [rotateStart, setRotateStart] = useState({ angle: rotation, mouseAngle: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Helper function to convert hex to rgba with opacity
   const hexToRgba = (hex: string, opacity: number): string => {
@@ -190,7 +191,7 @@ export default function ResizableElement({
         const newY = snapToGrid(dragStart.elementY + (dy * multiplier));
         onUpdate(id, { x: newX, y: newY });
       } else if (isRotating) {
-        const rect = document.querySelector(`[data-element-container]`)?.getBoundingClientRect();
+        const rect = containerRef.current?.getBoundingClientRect();
         if (!rect) return;
         
         const centerX = rect.left + rect.width / 2;
@@ -230,19 +231,6 @@ export default function ResizableElement({
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
-      } else if (isRotating) {
-        // Calculate angle from element center to mouse
-        const rect = (e.target as HTMLElement).closest('[data-element-container]')?.getBoundingClientRect();
-        if (!rect) return;
-        
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-        const mouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        const angleDiff = mouseAngle - rotateStart.mouseAngle;
-        const newRotation = (rotateStart.angle + angleDiff) % 360;
-        
-        onUpdate(id, { rotation: newRotation } as any);
-      }
     };
 
     const handleMouseUp = () => {
@@ -614,7 +602,7 @@ export default function ResizableElement({
   return (
     <div
       {...rest}
-      data-element-container
+      ref={containerRef}
       className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
