@@ -2144,10 +2144,14 @@ export default function CanvasContainerNew({
           lineJoin={selectedElement?.lineJoin}
           dashArray={selectedElement?.dashArray}
           controlPoints={selectedElement?.controlPoints}
+          lineArrowStart={selectedElement?.lineArrowStart}
+          lineArrowEnd={selectedElement?.lineArrowEnd}
           onLineStyleChange={(style) => selectedElement && handleElementUpdate(selectedElement.id, { lineStyle: style })}
           onLineCapChange={(cap) => selectedElement && handleElementUpdate(selectedElement.id, { lineCap: cap })}
           onLineJoinChange={(join) => selectedElement && handleElementUpdate(selectedElement.id, { lineJoin: join })}
           onDashArrayChange={(dashArray) => selectedElement && handleElementUpdate(selectedElement.id, { dashArray })}
+          onLineArrowStartChange={(arrow) => selectedElement && handleElementUpdate(selectedElement.id, { lineArrowStart: arrow })}
+          onLineArrowEndChange={(arrow) => selectedElement && handleElementUpdate(selectedElement.id, { lineArrowEnd: arrow })}
           onControlPointsChange={(points) => selectedElement && handleElementUpdate(selectedElement.id, { controlPoints: points })}
           onClose={() => {
             setShowShapeSettings(false);

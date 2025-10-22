@@ -36,6 +36,8 @@ export interface Element {
   lineJoin?: "miter" | "round" | "bevel";
   dashArray?: string; // e.g., "5,5" or "10,5,2,5"
   controlPoints?: Array<{x: number, y: number}>; // For curved lines
+  lineArrowStart?: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond";
+  lineArrowEnd?: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond";
   
   // Text properties
   text?: string;

@@ -107,6 +107,8 @@ interface ShapeSettingsPanelProps {
   lineJoin?: "miter" | "round" | "bevel";
   dashArray?: string;
   controlPoints?: Array<{x: number, y: number}>;
+  lineArrowStart?: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond";
+  lineArrowEnd?: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond";
   width?: number;
   height?: number;
   sizeUnit?: "px" | "rem" | "%" | "em";
@@ -149,6 +151,8 @@ interface ShapeSettingsPanelProps {
   onLineJoinChange?: (join: "miter" | "round" | "bevel") => void;
   onDashArrayChange?: (dashArray: string) => void;
   onControlPointsChange?: (points: Array<{x: number, y: number}>) => void;
+  onLineArrowStartChange?: (arrow: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond") => void;
+  onLineArrowEndChange?: (arrow: "none" | "round" | "square" | "line" | "triangle" | "reversed-triangle" | "circle" | "diamond") => void;
   onWidthChange?: (width: number) => void;
   onHeightChange?: (height: number) => void;
   onXChange?: (x: number) => void;
@@ -228,6 +232,8 @@ export default function ShapeSettingsPanel({
   lineJoin = "round",
   dashArray = "",
   controlPoints,
+  lineArrowStart = "none",
+  lineArrowEnd = "none",
   width = 100,
   height = 100,
   sizeUnit = "px",
@@ -270,6 +276,8 @@ export default function ShapeSettingsPanel({
   onLineJoinChange,
   onDashArrayChange,
   onControlPointsChange,
+  onLineArrowStartChange,
+  onLineArrowEndChange,
   onWidthChange,
   onHeightChange,
   onXChange,
@@ -1000,66 +1008,91 @@ export default function ShapeSettingsPanel({
                       <Button
                         variant={lineStyle === "solid" ? "default" : "outline"}
                         size="sm"
-                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
                         onClick={() => onLineStyleChange("solid")}
                         title="Solid"
                       >
-                        <svg width="20" height="2" className="mt-0.5">
-                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" />
+                        <svg width="16" height="2" viewBox="0 0 16 2">
+                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" />
                         </svg>
                       </Button>
                       <Button
                         variant={lineStyle === "dashed" ? "default" : "outline"}
                         size="sm"
-                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
                         onClick={() => onLineStyleChange("dashed")}
                         title="Dashed"
                       >
-                        <svg width="20" height="2" className="mt-0.5">
-                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" />
+                        <svg width="16" height="2" viewBox="0 0 16 2">
+                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2" />
                         </svg>
                       </Button>
                       <Button
                         variant={lineStyle === "dotted" ? "default" : "outline"}
                         size="sm"
-                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
                         onClick={() => onLineStyleChange("dotted")}
                         title="Dotted"
                       >
-                        <svg width="20" height="2" className="mt-0.5">
-                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round" />
+                        <svg width="16" height="2" viewBox="0 0 16 2">
+                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="1 2" strokeLinecap="round" />
                         </svg>
                       </Button>
                       <Button
                         variant={lineStyle === "dashdot" ? "default" : "outline"}
                         size="sm"
-                        className="h-7 text-[10px] rounded flex items-center justify-center"
+                        className="h-6 w-6 p-0 rounded flex items-center justify-center"
                         onClick={() => onLineStyleChange("dashdot")}
                         title="Dash-Dot"
                       >
-                        <svg width="20" height="2" className="mt-0.5">
-                          <line x1="0" y1="1" x2="20" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2 1 2" />
+                        <svg width="16" height="2" viewBox="0 0 16 2">
+                          <line x1="0" y1="1" x2="16" y2="1" stroke="currentColor" strokeWidth="2" strokeDasharray="4 2 1 2" />
                         </svg>
                       </Button>
                     </div>
                   </div>
                 )}
 
-                {shapeType === "line" && onLineCapChange && (
+                {shapeType === "line" && (
                   <div>
-                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Cap</Label>
-                    <div className="grid grid-cols-3 gap-0.5">
-                      {(["butt", "round", "square"] as const).map((cap) => (
-                        <Button
-                          key={cap}
-                          variant={lineCap === cap ? "default" : "outline"}
-                          size="sm"
-                          className="h-7 text-[10px] capitalize rounded"
-                          onClick={() => onLineCapChange(cap)}
-                        >
-                          {cap}
-                        </Button>
-                      ))}
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Line Caps</Label>
+                    <div className="grid grid-cols-2 gap-1">
+                      <Select
+                        value={lineArrowStart}
+                        onValueChange={(value) => onLineArrowStartChange?.(value as any)}
+                      >
+                        <SelectTrigger className="h-7 text-[10px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="round">Round</SelectItem>
+                          <SelectItem value="square">Square</SelectItem>
+                          <SelectItem value="line">→ Line</SelectItem>
+                          <SelectItem value="triangle">→ Triangle</SelectItem>
+                          <SelectItem value="reversed-triangle">▷ Reversed</SelectItem>
+                          <SelectItem value="circle">○ Circle</SelectItem>
+                          <SelectItem value="diamond">◇ Diamond</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select
+                        value={lineArrowEnd}
+                        onValueChange={(value) => onLineArrowEndChange?.(value as any)}
+                      >
+                        <SelectTrigger className="h-7 text-[10px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="round">Round</SelectItem>
+                          <SelectItem value="square">Square</SelectItem>
+                          <SelectItem value="line">→ Line</SelectItem>
+                          <SelectItem value="triangle">→ Triangle</SelectItem>
+                          <SelectItem value="reversed-triangle">▷ Reversed</SelectItem>
+                          <SelectItem value="circle">○ Circle</SelectItem>
+                          <SelectItem value="diamond">◇ Diamond</SelectItem>
+                        </SelectContent>
+                       </Select>
                     </div>
                   </div>
                 )}
