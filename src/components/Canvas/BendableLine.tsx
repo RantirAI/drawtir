@@ -23,11 +23,17 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   
   // Track shift key
   useEffect(() => {
+    if (!isSelected) return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setIsShiftHeld(true);
+      if (e.key === "Shift") {
+        setIsShiftHeld(true);
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === "Shift") setIsShiftHeld(false);
+      if (e.key === "Shift") {
+        setIsShiftHeld(false);
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -37,7 +43,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [isSelected]);
   
   // Generate dash array based on line style
   const getDashArray = () => {
@@ -218,15 +224,15 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       height="100%"
       viewBox={`0 0 ${element.width} ${element.height}`}
       preserveAspectRatio="none"
-      style={{ overflow: 'visible' }}
+      style={{ overflow: 'visible', pointerEvents: 'auto' }}
     >
       {/* The line - with wider invisible hit area */}
       <path
         d={generatePath()}
         fill="none"
         stroke="transparent"
-        strokeWidth={(element.strokeWidth || 2) + 10}
-        style={{ cursor: isSelected && isShiftHeld ? 'crosshair' : 'default' }}
+        strokeWidth={Math.max((element.strokeWidth || 2) + 10, 15)}
+        style={{ cursor: isSelected && isShiftHeld ? 'crosshair' : 'default', pointerEvents: 'stroke' }}
         onClick={handleLineClick}
         onMouseMove={handleLineMouseMove}
         onMouseLeave={() => setHoverPosition(null)}
@@ -250,9 +256,11 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
         <circle
           cx={hoverPosition.x}
           cy={hoverPosition.y}
-          r="4"
+          r="5"
           fill="#3b82f6"
-          opacity="0.5"
+          stroke="white"
+          strokeWidth="2"
+          opacity="0.8"
           pointerEvents="none"
         />
       )}
@@ -286,7 +294,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
             cursor="move"
             onMouseDown={(e) => handleControlPointMouseDown(index, e)}
             onDoubleClick={(e) => handleControlPointDoubleClick(index, e)}
-            style={{ cursor: 'move' }}
+            style={{ cursor: 'move', pointerEvents: 'auto' }}
           />
         </g>
       ))}

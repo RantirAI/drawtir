@@ -375,27 +375,29 @@ export default function ResizableElement({
         }
       case "line":
         return (
-          <BendableLine
-            element={{
-              id,
-              type: "shape",
-              shapeType: "line",
-              x,
-              y,
-              width,
-              height,
-              stroke,
-              strokeWidth,
-              strokeOpacity,
-              lineStyle: (rest as any).lineStyle,
-              lineCap: (rest as any).lineCap,
-              lineJoin: (rest as any).lineJoin,
-              dashArray: (rest as any).dashArray,
-              controlPoints: (rest as any).controlPoints,
-            } as Element}
-            isSelected={isSelected}
-            onUpdate={(updates) => onUpdate(id, updates as any)}
-          />
+          <div style={{ pointerEvents: 'none', width: '100%', height: '100%' }}>
+            <BendableLine
+              element={{
+                id,
+                type: "shape",
+                shapeType: "line",
+                x,
+                y,
+                width,
+                height,
+                stroke,
+                strokeWidth,
+                strokeOpacity,
+                lineStyle: (rest as any).lineStyle,
+                lineCap: (rest as any).lineCap,
+                lineJoin: (rest as any).lineJoin,
+                dashArray: (rest as any).dashArray,
+                controlPoints: (rest as any).controlPoints,
+              } as Element}
+              isSelected={isSelected}
+              onUpdate={(updates) => onUpdate(id, updates as any)}
+            />
+          </div>
         );
       case "arrow":
         return (
@@ -549,16 +551,17 @@ export default function ResizableElement({
   return (
     <div
       {...rest}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} cursor-move ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'outline outline-[0.5px] outline-blue-500' : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
         width, 
         height,
         opacity: opacity / 100,
-        mixBlendMode: (blendMode || 'normal') as any
+        mixBlendMode: (blendMode || 'normal') as any,
+        pointerEvents: (type === 'shape' && shapeType === 'line' && isSelected) ? 'none' : 'auto'
       }}
-      onMouseDown={handleMouseDown}
+      onMouseDown={type === 'shape' && shapeType === 'line' && isSelected ? undefined : handleMouseDown}
       onDoubleClick={handleDoubleClick}
     >
       {type === "shader" && shader ? (
