@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
+import { ShaderSettingsPanel } from "../Panels/ShaderSettingsPanel";
 import LayersPanel from "../Panels/LayersPanel";
 import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
 import TemplatesPanel from "../Panels/TemplatesPanel";
@@ -1151,6 +1152,53 @@ export default function CanvasContainerNew({
     toast.success(`Icon added!`);
   };
 
+  const handleShaderAdd = () => {
+    const targetFrameId = selectedFrameId || frames[0]?.id;
+    if (!targetFrameId) {
+      toast.error("Please add a frame first");
+      return;
+    }
+    const frame = frames.find(f => f.id === targetFrameId);
+    if (!frame) return;
+
+    const defaultWidth = 400;
+    const defaultHeight = 400;
+    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frame.height - defaultHeight) / 2));
+
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "shader",
+      x,
+      y,
+      width: defaultWidth,
+      height: defaultHeight,
+      shader: {
+        type: "ripple",
+        speed: 1,
+        intensity: 1,
+        scale: 10,
+        color1: "#ff0080",
+        color2: "#00ffff",
+        color3: "#ffff00"
+      },
+      opacity: 100,
+      cornerRadius: 0,
+      blendMode: "normal",
+    };
+
+    setFrames(prevFrames => prevFrames.map(f => {
+      if (f.id === targetFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementIds([newElement.id]);
+    setShowShapeSettings(true);
+    setActiveTool("select");
+    toast.success(`Shader effect added!`);
+  };
+
   const handleElementUpdate = (elementId: string, updates: Partial<Element>) => {
     setFrames(frames.map(f => {
       if (f.id === selectedFrameId) {
@@ -1551,6 +1599,7 @@ export default function CanvasContainerNew({
                       videoUrl={element.videoUrl}
                       iconName={element.iconName}
                       iconFamily={element.iconFamily}
+                      shader={element.shader}
                       useFlexLayout={false}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
@@ -1670,6 +1719,7 @@ export default function CanvasContainerNew({
                             fontWeight={element.fontWeight}
                             iconName={element.iconName}
                             iconFamily={element.iconFamily}
+                            shader={element.shader}
                             useFlexLayout={false}
                             isSelected={false}
                             zoom={zoom}
@@ -1817,7 +1867,20 @@ export default function CanvasContainerNew({
       )}
 
       {/* Unified Shape Settings Panel */}
-      {showShapeSettings && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
+      {showShapeSettings && selectedElement?.type === "shader" && (
+        <DraggablePanel
+          title="Shader Settings"
+          defaultPosition={{ x: window.innerWidth - 320, y: 100 }}
+          onClose={() => setShowShapeSettings(false)}
+        >
+          <ShaderSettingsPanel
+            element={selectedElement}
+            onUpdate={(updates) => handleElementUpdate(selectedElement.id, updates)}
+          />
+        </DraggablePanel>
+      )}
+
+      {showShapeSettings && (selectedElement?.type !== "shader") && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
           elementType={selectedElement ? selectedElement.type : "frame"}
           elementName={
@@ -2086,6 +2149,7 @@ export default function CanvasContainerNew({
         }}
         onShapeSelect={handleShapeSelect}
         onIconSelect={handleIconSelect}
+        onShaderAdd={handleShaderAdd}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
         onDuplicate={handleDuplicate}
