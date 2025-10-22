@@ -191,7 +191,6 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       }
       const newPoints = [...basePoints];
       newPoints.splice(insertIndex, 0, closestPoint);
-      console.log('🔵 LineMouseDown - inserting point at index', insertIndex, 'new points:', newPoints);
       setTempControlPoints(newPoints);
       
       // Immediately start dragging the new point using absolute mouse coords
@@ -242,8 +241,6 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
 
     const handleMouseUp = () => {
       const finalPoints = lastUpdatedPointsRef.current || tempControlPoints || controlPoints;
-      console.log('🟢 MouseUp - finalPoints:', finalPoints);
-      console.log('🟢 MouseUp - calling onUpdate with:', { controlPoints: finalPoints });
       onUpdate({ controlPoints: finalPoints });
       lastUpdatedPointsRef.current = null;
       setTempControlPoints(null);

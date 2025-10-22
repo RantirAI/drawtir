@@ -59,6 +59,12 @@ interface ResizableElementProps {
     color2?: string;
     color3?: string;
   };
+  // Line properties
+  lineStyle?: "solid" | "dashed" | "dotted" | "dashdot";
+  lineCap?: "butt" | "round" | "square";
+  lineJoin?: "miter" | "round" | "bevel";
+  dashArray?: string;
+  controlPoints?: Array<{ x: number; y: number }>;
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;

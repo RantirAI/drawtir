@@ -1649,6 +1649,11 @@ export default function CanvasContainerNew({
                       iconName={element.iconName}
                       iconFamily={element.iconFamily}
                       shader={element.shader}
+                      lineStyle={element.lineStyle}
+                      lineCap={element.lineCap}
+                      lineJoin={element.lineJoin}
+                      dashArray={element.dashArray}
+                      controlPoints={element.controlPoints}
                       useFlexLayout={false}
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
