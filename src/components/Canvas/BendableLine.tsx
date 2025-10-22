@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Element } from "@/types/elements";
 
 interface BendableLineProps {
@@ -12,6 +12,20 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
   const [isShiftHeld, setIsShiftHeld] = useState(false);
   const [hoverPosition, setHoverPosition] = useState<{ x: number; y: number } | null>(null);
   const [isCreatingPoint, setIsCreatingPoint] = useState(false);
+
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const dragStartPointRef = useRef<{ x: number; y: number } | null>(null);
+  const dragStartMouseRef = useRef<{ x: number; y: number } | null>(null);
+
+  const getMouseInSvg = (clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
+    const rect = svg.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left) / rect.width) * element.width,
+      y: ((clientY - rect.top) / rect.height) * element.height,
+    };
+  };
 
   const controlPoints = element.controlPoints || [
     { x: 0, y: element.height / 2 },
@@ -153,43 +167,41 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       e.stopPropagation();
       e.preventDefault();
       
-      // Calculate position and add new point
-      const svg = e.currentTarget.ownerSVGElement;
-      if (!svg) return;
-      
-      const rect = svg.getBoundingClientRect();
-      const mouseX = ((e.clientX - rect.left) / rect.width) * element.width;
-      const mouseY = ((e.clientY - rect.top) / rect.height) * element.height;
-      
+      // Calculate position in SVG coords and add new point
+      const { x: mouseX, y: mouseY } = getMouseInSvg(e.clientX, e.clientY);
       const closestPoint = getClosestPointOnLine(mouseX, mouseY);
       
       // Find where to insert the new point
       let insertIndex = 1;
       let minDist = Infinity;
-      
       for (let i = 0; i < controlPoints.length - 1; i++) {
         const midX = (controlPoints[i].x + controlPoints[i + 1].x) / 2;
         const midY = (controlPoints[i].y + controlPoints[i + 1].y) / 2;
-        const dist = Math.sqrt(Math.pow(midX - closestPoint.x, 2) + Math.pow(midY - closestPoint.y, 2));
+        const dist = Math.hypot(midX - closestPoint.x, midY - closestPoint.y);
         if (dist < minDist) {
           minDist = dist;
           insertIndex = i + 1;
         }
       }
-      
       const newPoints = [...controlPoints];
       newPoints.splice(insertIndex, 0, closestPoint);
       onUpdate({ controlPoints: newPoints });
       
-      // Immediately start dragging the new point
+      // Immediately start dragging the new point using absolute mouse coords
       setIsDraggingPoint(insertIndex);
       setIsCreatingPoint(true);
+      dragStartPointRef.current = { x: closestPoint.x, y: closestPoint.y };
+      dragStartMouseRef.current = { x: mouseX, y: mouseY };
     }
   };
 
   const handleControlPointMouseDown = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
     e.stopPropagation();
     setIsDraggingPoint(index);
+    dragStartPointRef.current = { x: controlPoints[index].x, y: controlPoints[index].y };
+    const pos = getMouseInSvg(e.clientX, e.clientY);
+    dragStartMouseRef.current = pos;
   };
 
   const handleControlPointDoubleClick = (index: number, e: React.MouseEvent) => {
@@ -205,12 +217,18 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
     if (isDraggingPoint === null) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const newPoints = [...controlPoints];
-      newPoints[isDraggingPoint] = {
-        x: Math.max(0, Math.min(element.width, newPoints[isDraggingPoint].x + e.movementX)),
-        y: Math.max(0, Math.min(element.height, newPoints[isDraggingPoint].y + e.movementY))
+      if (isDraggingPoint === null || !dragStartPointRef.current || !dragStartMouseRef.current) return;
+      const current = getMouseInSvg(e.clientX, e.clientY);
+      const dx = current.x - dragStartMouseRef.current.x;
+      const dy = current.y - dragStartMouseRef.current.y;
+
+      const base = dragStartPointRef.current;
+      const updated = [...controlPoints];
+      updated[isDraggingPoint] = {
+        x: Math.max(0, Math.min(element.width, base.x + dx)),
+        y: Math.max(0, Math.min(element.height, base.y + dy)),
       };
-      onUpdate({ controlPoints: newPoints });
+      onUpdate({ controlPoints: updated });
     };
 
     const handleMouseUp = () => {
@@ -229,6 +247,7 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
 
   return (
     <svg
+      ref={svgRef}
       width="100%"
       height="100%"
       viewBox={`0 0 ${element.width} ${element.height}`}
