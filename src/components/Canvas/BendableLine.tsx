@@ -173,20 +173,25 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
       const { x: mouseX, y: mouseY } = getMouseInSvg(e.clientX, e.clientY);
       const closestPoint = getClosestPointOnLine(mouseX, mouseY);
       
-      // Find where to insert the new point
+      // Find where to insert the new point - use base control points from element
+      const basePoints = element.controlPoints || [
+        { x: 0, y: element.height / 2 },
+        { x: element.width, y: element.height / 2 }
+      ];
       let insertIndex = 1;
       let minDist = Infinity;
-      for (let i = 0; i < controlPoints.length - 1; i++) {
-        const midX = (controlPoints[i].x + controlPoints[i + 1].x) / 2;
-        const midY = (controlPoints[i].y + controlPoints[i + 1].y) / 2;
+      for (let i = 0; i < basePoints.length - 1; i++) {
+        const midX = (basePoints[i].x + basePoints[i + 1].x) / 2;
+        const midY = (basePoints[i].y + basePoints[i + 1].y) / 2;
         const dist = Math.hypot(midX - closestPoint.x, midY - closestPoint.y);
         if (dist < minDist) {
           minDist = dist;
           insertIndex = i + 1;
         }
       }
-      const newPoints = [...controlPoints];
+      const newPoints = [...basePoints];
       newPoints.splice(insertIndex, 0, closestPoint);
+      console.log('🔵 LineMouseDown - inserting point at index', insertIndex, 'new points:', newPoints);
       setTempControlPoints(newPoints);
       
       // Immediately start dragging the new point using absolute mouse coords
@@ -237,6 +242,8 @@ export const BendableLine: React.FC<BendableLineProps> = ({ element, isSelected,
 
     const handleMouseUp = () => {
       const finalPoints = lastUpdatedPointsRef.current || tempControlPoints || controlPoints;
+      console.log('🟢 MouseUp - finalPoints:', finalPoints);
+      console.log('🟢 MouseUp - calling onUpdate with:', { controlPoints: finalPoints });
       onUpdate({ controlPoints: finalPoints });
       lastUpdatedPointsRef.current = null;
       setTempControlPoints(null);
