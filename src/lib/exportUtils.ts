@@ -47,8 +47,8 @@ async function drawFrameBackground(ctx: CanvasRenderingContext2D, frame: Frame) 
 async function drawElement(ctx: CanvasRenderingContext2D, element: Element, frame: Frame) {
   ctx.save();
   
-  const x = element.x;
-  const y = element.y;
+  const x = element.x - frame.x;
+  const y = element.y - frame.y;
   const width = element.width;
   const height = element.height;
 
@@ -61,6 +61,7 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
   } else if (element.type === "shape") {
     await drawShape(ctx, element, x, y, width, height);
   } else if (element.type === "drawing" && element.pathData) {
+    ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
   }
 
@@ -280,7 +281,11 @@ async function exportAsPDF(frames: Frame[], config: ExportConfig): Promise<void>
 
     const canvas = await renderFrameToCanvas(frames[i], { scale: config.scale });
     const imgData = canvas.toDataURL("image/png");
-    pdf.addImage(imgData, "PNG", 0, 0, frames[i].width, frames[i].height);
+
+    // Ensure the image fills the entire page exactly
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
   }
 
   pdf.save(`export-${Date.now()}.pdf`);
