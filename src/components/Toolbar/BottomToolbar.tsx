@@ -19,6 +19,7 @@ interface BottomToolbarProps {
   onIconSelect?: (iconName: string, iconFamily: string) => void;
   onShaderAdd?: () => void;
   onLineAdd?: () => void;
+  timelinePanelOpen?: boolean;
 }
 
 export default function BottomToolbar({ 
@@ -31,11 +32,16 @@ export default function BottomToolbar({
   onShapeSelect,
   onIconSelect,
   onShaderAdd,
-  onLineAdd
+  onLineAdd,
+  timelinePanelOpen = false
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
-      <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50">
+      <div 
+        className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
+          timelinePanelOpen ? 'bottom-[260px]' : 'bottom-12'
+        }`}
+      >
         <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg">
           {/* Basic Tools */}
           <Tooltip>

@@ -2264,6 +2264,7 @@ export default function CanvasContainerNew({
         }}
         onShapeSelect={handleShapeSelect}
         onIconSelect={handleIconSelect}
+        timelinePanelOpen={showTimelinePanel}
         onShaderAdd={handleShaderAdd}
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
