@@ -154,7 +154,7 @@ function createGradient(ctx: CanvasRenderingContext2D, frame: Frame): CanvasGrad
   }
 
   (gradientStops || []).forEach(stop => {
-    gradient.addColorStop(stop.position, stop.color);
+    gradient.addColorStop(stop.position / 100, stop.color);
   });
 
   return gradient;
@@ -175,7 +175,7 @@ function createElementGradient(ctx: CanvasRenderingContext2D, element: Element, 
   }
 
   (element.gradientStops || []).forEach(stop => {
-    gradient.addColorStop(stop.position, stop.color);
+    gradient.addColorStop(stop.position / 100, stop.color);
   });
 
   return gradient;
