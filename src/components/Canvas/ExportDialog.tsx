@@ -18,15 +18,24 @@ interface ExportDialogProps {
 
 export interface ExportConfig {
   frameIds: string[];
-  format: "PNG" | "JPEG" | "SVG" | "PDF" | "MOV";
+  format: "PNG" | "JPEG" | "SVG" | "PDF" | "GIF" | "MP4";
   scale: number;
+  duration?: number;
+  fps?: number;
 }
 
 export default function ExportDialog({ open, onOpenChange, frames, onExport }: ExportDialogProps) {
   const [selectedFrameIds, setSelectedFrameIds] = useState<string[]>([]);
   const [format, setFormat] = useState<ExportConfig["format"]>("PNG");
   const [scale, setScale] = useState<number>(2);
+  const [duration, setDuration] = useState<number>(3);
+  const [fps, setFps] = useState<number>(30);
   const [isExporting, setIsExporting] = useState(false);
+
+  const isAnimatedFormat = format === "GIF" || format === "MP4";
+  const hasAnimations = frames.some(f => 
+    f.elements.some(el => el.animation && el.animation !== 'none')
+  );
 
   const handleFrameToggle = (frameId: string) => {
     setSelectedFrameIds(prev =>
@@ -53,6 +62,8 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport }: E
         frameIds: selectedFrameIds,
         format,
         scale,
+        duration: isAnimatedFormat ? duration : undefined,
+        fps: isAnimatedFormat ? fps : undefined,
       });
       onOpenChange(false);
     } finally {
@@ -149,10 +160,16 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport }: E
                       PDF
                     </div>
                   </SelectItem>
-                  <SelectItem value="MOV" disabled>
+                  <SelectItem value="GIF" disabled={!hasAnimations}>
                     <div className="flex items-center gap-2">
                       <Film className="h-4 w-4" />
-                      MOV (Coming Soon)
+                      GIF {!hasAnimations && "(No animations)"}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="MP4" disabled={!hasAnimations}>
+                    <div className="flex items-center gap-2">
+                      <Film className="h-4 w-4" />
+                      MP4 {!hasAnimations && "(No animations)"}
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -160,10 +177,50 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport }: E
             </div>
           </div>
 
+          {/* Animation Settings */}
+          {isAnimatedFormat && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Duration (seconds)</Label>
+                <Select value={duration.toString()} onValueChange={(v) => setDuration(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2s</SelectItem>
+                    <SelectItem value="3">3s</SelectItem>
+                    <SelectItem value="5">5s</SelectItem>
+                    <SelectItem value="10">10s</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>FPS</Label>
+                <Select value={fps.toString()} onValueChange={(v) => setFps(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 FPS</SelectItem>
+                    <SelectItem value="24">24 FPS</SelectItem>
+                    <SelectItem value="30">30 FPS</SelectItem>
+                    <SelectItem value="60">60 FPS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+
           {/* Info */}
           {format === "PDF" && selectedFrameIds.length > 1 && (
             <div className="rounded-md bg-muted p-3 text-sm">
               All selected frames will be combined into a single PDF file.
+            </div>
+          )}
+          {isAnimatedFormat && (
+            <div className="rounded-md bg-muted p-3 text-sm">
+              The export will capture all animations exactly as they appear in the canvas.
             </div>
           )}
 

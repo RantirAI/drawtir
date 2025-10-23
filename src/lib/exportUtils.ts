@@ -1,6 +1,7 @@
 import type { Frame, Element } from "@/types/elements";
 import type { ExportConfig } from "@/components/Canvas/ExportDialog";
 import jsPDF from "jspdf";
+import GIF from "gif.js";
 
 interface RenderOptions {
   scale: number;
@@ -244,6 +245,14 @@ export async function exportFrames(frames: Frame[], config: ExportConfig): Promi
     for (const frame of selectedFrames) {
       await exportFrameAsSVG(frame);
     }
+  } else if (config.format === "GIF") {
+    for (const frame of selectedFrames) {
+      await exportFrameAsGIF(frame, config);
+    }
+  } else if (config.format === "MP4") {
+    for (const frame of selectedFrames) {
+      await exportFrameAsMP4(frame, config);
+    }
   } else {
     // PNG or JPEG
     for (const frame of selectedFrames) {
@@ -315,4 +324,211 @@ async function exportFrameAsSVG(frame: Frame): Promise<void> {
   link.href = url;
   link.click();
   URL.revokeObjectURL(url);
+}
+
+async function captureFrameAtTime(
+  frame: Frame,
+  time: number,
+  scale: number
+): Promise<HTMLCanvasElement> {
+  const canvas = document.createElement("canvas");
+  canvas.width = frame.width * scale;
+  canvas.height = frame.height * scale;
+  const ctx = canvas.getContext("2d");
+  
+  if (!ctx) throw new Error("Failed to get canvas context");
+
+  ctx.scale(scale, scale);
+
+  // Draw frame background
+  await drawFrameBackground(ctx, frame);
+
+  // Draw elements with animation state at the given time
+  for (const element of frame.elements) {
+    await drawAnimatedElement(ctx, element, frame, time);
+  }
+
+  return canvas;
+}
+
+async function drawAnimatedElement(
+  ctx: CanvasRenderingContext2D,
+  element: Element,
+  frame: Frame,
+  time: number
+) {
+  ctx.save();
+  
+  const x = element.x - frame.x;
+  const y = element.y - frame.y;
+
+  // Apply animation transformations based on time
+  if (element.animation && element.animation !== 'none') {
+    const progress = calculateAnimationProgress(element, time);
+    applyAnimationTransform(ctx, element, x, y, progress);
+  }
+
+  // Draw the element
+  if (element.type === "text") {
+    drawText(ctx, element, x, y);
+  } else if (element.type === "image" && element.imageUrl) {
+    const img = await loadImage(element.imageUrl);
+    ctx.globalAlpha = element.opacity ?? 1;
+    ctx.drawImage(img, x, y, element.width, element.height);
+  } else if (element.type === "shape") {
+    await drawShape(ctx, element, x, y, element.width, element.height);
+  } else if (element.type === "drawing" && element.pathData) {
+    ctx.translate(-frame.x, -frame.y);
+    drawPenPath(ctx, element);
+    ctx.translate(frame.x, frame.y);
+  }
+
+  ctx.restore();
+}
+
+function calculateAnimationProgress(element: Element, time: number): number {
+  const delay = (typeof element.animationDelay === 'number' ? element.animationDelay : 0) / 1000;
+  const duration = (typeof element.animationDuration === 'number' ? element.animationDuration : 1000) / 1000;
+  
+  if (time < delay) return 0;
+  if (time >= delay + duration) return 1;
+  
+  const elapsed = time - delay;
+  return elapsed / duration;
+}
+
+function applyAnimationTransform(
+  ctx: CanvasRenderingContext2D,
+  element: Element,
+  x: number,
+  y: number,
+  progress: number
+) {
+  const animation = element.animation;
+  if (!animation || animation === 'none') return;
+
+  ctx.translate(x + element.width / 2, y + element.height / 2);
+
+  if (animation.includes('fade')) {
+    const fadeProgress = animation.includes('in') ? progress : 1 - progress;
+    ctx.globalAlpha = (element.opacity ?? 1) * fadeProgress;
+  }
+
+  if (animation.includes('scale')) {
+    const scaleProgress = animation.includes('in') ? progress : 1 - progress;
+    const scale = 0.5 + scaleProgress * 0.5;
+    ctx.scale(scale, scale);
+  }
+
+  if (animation.includes('slide')) {
+    let offsetX = 0, offsetY = 0;
+    const distance = 100;
+    
+    if (animation.includes('right')) {
+      offsetX = animation.includes('in') ? -distance * (1 - progress) : distance * progress;
+    } else if (animation.includes('left')) {
+      offsetX = animation.includes('in') ? distance * (1 - progress) : -distance * progress;
+    } else if (animation.includes('up')) {
+      offsetY = animation.includes('in') ? distance * (1 - progress) : -distance * progress;
+    } else if (animation.includes('down')) {
+      offsetY = animation.includes('in') ? -distance * (1 - progress) : distance * progress;
+    }
+    
+    ctx.translate(offsetX, offsetY);
+  }
+
+  ctx.translate(-(x + element.width / 2), -(y + element.height / 2));
+}
+
+async function exportFrameAsGIF(frame: Frame, config: ExportConfig): Promise<void> {
+  const duration = config.duration || 3;
+  const fps = config.fps || 30;
+  const totalFrames = Math.floor(duration * fps);
+
+  const gif = new GIF({
+    workers: 2,
+    quality: 10,
+    width: frame.width * config.scale,
+    height: frame.height * config.scale,
+  });
+
+  for (let i = 0; i < totalFrames; i++) {
+    const time = (i / totalFrames) * duration;
+    const canvas = await captureFrameAtTime(frame, time, config.scale);
+    gif.addFrame(canvas, { delay: 1000 / fps });
+  }
+
+  return new Promise((resolve, reject) => {
+    gif.on('finished', (blob: Blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `${frame.name || "frame"}.gif`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+      resolve();
+    });
+
+    gif.on('error', reject);
+    gif.render();
+  });
+}
+
+async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<void> {
+  const duration = config.duration || 3;
+  const fps = config.fps || 30;
+  const totalFrames = Math.floor(duration * fps);
+
+  // Create a temporary canvas for recording
+  const recordCanvas = document.createElement("canvas");
+  recordCanvas.width = frame.width * config.scale;
+  recordCanvas.height = frame.height * config.scale;
+  const recordCtx = recordCanvas.getContext("2d");
+  
+  if (!recordCtx) throw new Error("Failed to get canvas context");
+
+  const stream = recordCanvas.captureStream(fps);
+  const mediaRecorder = new MediaRecorder(stream, {
+    mimeType: 'video/webm;codecs=vp9',
+    videoBitsPerSecond: 5000000,
+  });
+
+  const chunks: Blob[] = [];
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) chunks.push(e.data);
+  };
+
+  return new Promise((resolve, reject) => {
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `${frame.name || "frame"}.webm`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+      resolve();
+    };
+
+    mediaRecorder.onerror = reject;
+    mediaRecorder.start();
+
+    let currentFrame = 0;
+    const drawFrame = async () => {
+      if (currentFrame >= totalFrames) {
+        mediaRecorder.stop();
+        return;
+      }
+
+      const time = (currentFrame / totalFrames) * duration;
+      const frameCanvas = await captureFrameAtTime(frame, time, config.scale);
+      recordCtx.clearRect(0, 0, recordCanvas.width, recordCanvas.height);
+      recordCtx.drawImage(frameCanvas, 0, 0);
+
+      currentFrame++;
+      setTimeout(drawFrame, 1000 / fps);
+    };
+
+    drawFrame();
+  });
 }
