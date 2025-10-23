@@ -177,8 +177,8 @@ export default function ResizableElement({
   }, [isPlaying, currentTime, animationDelay]);
 
   const normalizeAnimation = (name?: string) => {
-    if (!name) return "none";
-    return name.replace("-from-", "-").replace("-to-", "-");
+    // Use the exact animation token configured in tailwind
+    return name || "none";
   };
   const normalizedAnimation = normalizeAnimation(animation);
 
