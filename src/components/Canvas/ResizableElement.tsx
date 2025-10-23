@@ -162,6 +162,20 @@ export default function ResizableElement({
   const containerRef = useRef<HTMLDivElement>(null);
   const [animationKey, setAnimationKey] = useState(0);
 
+  // Animation timeline playback control
+  const prevIsPlayingRef = useRef(isPlaying);
+  const frozenDelayRef = useRef<number>(0);
+
+  // Freeze effective delay on play start so animations don't restart every tick
+  useEffect(() => {
+    const delaySec = parseTimeSec(animationDelay);
+    if (!prevIsPlayingRef.current && isPlaying) {
+      const base = delaySec - (currentTime ?? 0);
+      frozenDelayRef.current = base;
+    }
+    prevIsPlayingRef.current = isPlaying;
+  }, [isPlaying, currentTime, animationDelay]);
+
   const normalizeAnimation = (name?: string) => {
     if (!name) return "none";
     return name.replace("-from-", "-").replace("-to-", "-");
@@ -655,10 +669,11 @@ export default function ResizableElement({
         transformOrigin: 'center center',
         animationDuration: animationDuration,
         animationDelay: currentTime !== undefined 
-          ? `${Math.max(0, parseTimeSec(animationDelay) - currentTime)}s`
+          ? `${(isPlaying ? frozenDelayRef.current : (parseTimeSec(animationDelay) - (currentTime ?? 0)))}s`
           : animationDelay,
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
+        animationFillMode: 'both',
         animationPlayState: currentTime !== undefined 
           ? (isPlaying ? 'running' : 'paused')
           : undefined, // Let animations run naturally when timeline is not active
