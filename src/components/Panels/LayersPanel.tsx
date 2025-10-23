@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock, Film } from "lucide-react";
+import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock, Film, Edit2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import DraggablePanel from "./DraggablePanel";
 import { Element, Frame } from "@/types/elements";
 
@@ -51,6 +52,8 @@ export default function LayersPanel({
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggedFrame, setDraggedFrame] = useState<string | null>(null);
   const [dragOverFrame, setDragOverFrame] = useState<{ frameId: string; position: 'before' | 'after' | 'inside' } | null>(null);
+  const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const toggleFrameCollapse = (frameId: string) => {
     const newCollapsed = new Set(collapsedFrames);
@@ -208,13 +211,39 @@ export default function LayersPanel({
                           <GripVertical className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 cursor-grab active:cursor-grabbing" />
                         )}
                         <Icon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                        <span className="text-xs truncate">
-                          {element.type === "text"
-                            ? element.text || "Text"
-                            : element.type === "drawing"
-                            ? "Drawing"
-                            : element.shapeType || element.type}
-                        </span>
+                        {editingElementId === element.id ? (
+                          <Input
+                            autoFocus
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            onBlur={() => {
+                              if (editingName.trim() && onElementUpdate) {
+                                onElementUpdate(frame.id, element.id, { name: editingName.trim() });
+                              }
+                              setEditingElementId(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                if (editingName.trim() && onElementUpdate) {
+                                  onElementUpdate(frame.id, element.id, { name: editingName.trim() });
+                                }
+                                setEditingElementId(null);
+                              } else if (e.key === 'Escape') {
+                                setEditingElementId(null);
+                              }
+                            }}
+                            className="h-5 text-xs py-0 px-1"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        ) : (
+                          <span className="text-xs truncate">
+                            {element.name || (element.type === "text"
+                              ? element.text || "Text"
+                              : element.type === "drawing"
+                              ? "Drawing"
+                              : element.shapeType || element.type)}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         {hasAnimation(element) && (
@@ -237,6 +266,25 @@ export default function LayersPanel({
                             title="Unlock"
                           >
                             <Unlock className="w-2.5 h-2.5 text-muted-foreground" />
+                          </Button>
+                        )}
+                        {onElementUpdate && !element.isLocked && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-secondary/50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingElementId(element.id);
+                              setEditingName(element.name || (element.type === "text"
+                                ? element.text || "Text"
+                                : element.type === "drawing"
+                                ? "Drawing"
+                                : element.shapeType || element.type));
+                            }}
+                            title="Rename"
+                          >
+                            <Edit2 className="w-3 h-3 text-muted-foreground" />
                           </Button>
                         )}
                         <Button

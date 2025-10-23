@@ -5,6 +5,7 @@ export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 export interface Element {
   id: string;
   type: Exclude<ElementType, "frame">;
+  name?: string; // Custom name for the element (for layers panel & timeline)
   x: number;
   y: number;
   width: number;

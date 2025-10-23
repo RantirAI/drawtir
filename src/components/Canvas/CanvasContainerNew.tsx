@@ -2545,6 +2545,12 @@ export default function CanvasContainerNew({
             isPlaying={isPlayingAnimation}
             onPlayPause={handlePlayPause}
             onReset={handleTimelineReset}
+            selectedElementIds={selectedElementIds}
+            onElementSelect={(elementId) => {
+              setSelectedElementIds([elementId]);
+              setShowAnimationsPanel(true);
+              setAnimatingElementId(elementId);
+            }}
           />
         </div>
       )}

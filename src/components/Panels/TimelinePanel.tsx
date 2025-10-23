@@ -15,6 +15,8 @@ interface TimelinePanelProps {
   isPlaying?: boolean;
   onPlayPause?: () => void;
   onReset?: () => void;
+  selectedElementIds?: string[];
+  onElementSelect?: (elementId: string) => void;
 }
 
 export default function TimelinePanel({
@@ -27,6 +29,8 @@ export default function TimelinePanel({
   isPlaying = false,
   onPlayPause,
   onReset,
+  selectedElementIds = [],
+  onElementSelect,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
@@ -213,13 +217,21 @@ export default function TimelinePanel({
               const duration = getAnimationDuration(element);
               const startPercent = (delay / maxDuration) * 100;
               const widthPercent = (duration / maxDuration) * 100;
+              const isSelected = selectedElementIds.includes(element.id);
+              const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
 
               return (
-                <div key={element.id} className="flex items-center gap-2">
+                <div 
+                  key={element.id} 
+                  className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                    isSelected ? "bg-blue-500/10 ring-1 ring-blue-500/50" : ""
+                  }`}
+                  onClick={() => onElementSelect?.(element.id)}
+                >
                   <div className="w-32 flex-shrink-0">
                     <div className="flex items-center gap-1">
-                      <div className="text-xs truncate">
-                        {element.type === "text" ? element.text || "Text" : element.type}
+                      <div className="text-xs truncate font-medium">
+                        {elementName}
                       </div>
                       {element.animationCategory && (
                         <span className="text-[8px] px-1 py-0.5 rounded bg-primary/20 text-primary uppercase">
@@ -237,12 +249,18 @@ export default function TimelinePanel({
                   <div className="flex-1 relative h-8 bg-muted/30 rounded">
                     {element.animation && (
                       <div
-                        className="absolute top-1 bottom-1 bg-primary rounded cursor-move hover:bg-primary/80 transition-colors"
+                        className={`absolute top-1 bottom-1 rounded cursor-move transition-colors ${
+                          isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
+                        }`}
                         style={{
                           left: `${startPercent}%`,
                           width: `${widthPercent}%`,
                         }}
-                        onMouseDown={(e) => handleBarDragStart(element.id, e)}
+                        onMouseDown={(e) => {
+                          e.stopPropagation();
+                          onElementSelect?.(element.id);
+                          handleBarDragStart(element.id, e);
+                        }}
                       >
                         <div className="h-full flex items-center justify-center">
                           <div className="text-[10px] text-primary-foreground font-medium truncate px-1">
