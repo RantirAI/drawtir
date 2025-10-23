@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, FileImage, FileType, Film } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,10 +16,17 @@ interface ExportAllDialogProps {
 }
 
 export default function ExportAllDialog({ open, onOpenChange, frames }: ExportAllDialogProps) {
-  const [format, setFormat] = useState<"PNG" | "JPEG" | "PDF" | "SVG">("PNG");
+  const [format, setFormat] = useState<"PNG" | "JPEG" | "PDF" | "SVG" | "GIF" | "MP4">("PNG");
   const [selectedFrameIds, setSelectedFrameIds] = useState<string[]>(frames.map(f => f.id));
   const [isExporting, setIsExporting] = useState(false);
   const [scale, setScale] = useState<number>(2);
+  const [duration, setDuration] = useState<number>(3);
+  const [fps, setFps] = useState<number>(30);
+
+  const isAnimatedFormat = format === "GIF" || format === "MP4";
+  const hasAnimations = frames.some(f => 
+    f.elements.some(el => el.animation && el.animation !== 'none')
+  );
 
   const handleToggleFrame = (frameId: string) => {
     setSelectedFrameIds(prev => 
@@ -49,6 +56,8 @@ export default function ExportAllDialog({ open, onOpenChange, frames }: ExportAl
         frameIds: selectedFrameIds,
         format,
         scale,
+        duration: isAnimatedFormat ? duration : undefined,
+        fps: isAnimatedFormat ? fps : undefined,
       });
       toast.success(`Exported ${selectedFrameIds.length} frame(s) as ${format}`);
       onOpenChange(false);
@@ -75,10 +84,42 @@ export default function ExportAllDialog({ open, onOpenChange, frames }: ExportAl
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="PNG">PNG (Best Quality)</SelectItem>
-                <SelectItem value="JPEG">JPEG (Smaller Size)</SelectItem>
-                <SelectItem value="PDF">PDF (Multiple Pages)</SelectItem>
-                <SelectItem value="SVG">SVG (Vector)</SelectItem>
+                <SelectItem value="PNG">
+                  <div className="flex items-center gap-2">
+                    <FileImage className="h-4 w-4" />
+                    PNG (Best Quality)
+                  </div>
+                </SelectItem>
+                <SelectItem value="JPEG">
+                  <div className="flex items-center gap-2">
+                    <FileImage className="h-4 w-4" />
+                    JPEG (Smaller Size)
+                  </div>
+                </SelectItem>
+                <SelectItem value="PDF">
+                  <div className="flex items-center gap-2">
+                    <FileType className="h-4 w-4" />
+                    PDF (Multiple Pages)
+                  </div>
+                </SelectItem>
+                <SelectItem value="SVG">
+                  <div className="flex items-center gap-2">
+                    <FileType className="h-4 w-4" />
+                    SVG (Vector)
+                  </div>
+                </SelectItem>
+                <SelectItem value="GIF" disabled={!hasAnimations}>
+                  <div className="flex items-center gap-2">
+                    <Film className="h-4 w-4" />
+                    GIF {!hasAnimations && "(No animations)"}
+                  </div>
+                </SelectItem>
+                <SelectItem value="MP4" disabled={!hasAnimations}>
+                  <div className="flex items-center gap-2">
+                    <Film className="h-4 w-4" />
+                    MP4 {!hasAnimations && "(No animations)"}
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -96,6 +137,44 @@ export default function ExportAllDialog({ open, onOpenChange, frames }: ExportAl
               </SelectContent>
             </Select>
           </div>
+
+          {isAnimatedFormat && (
+            <>
+              <div className="space-y-2">
+                <Label className="text-sm">Duration (seconds)</Label>
+                <Select value={duration.toString()} onValueChange={(v) => setDuration(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2s</SelectItem>
+                    <SelectItem value="3">3s</SelectItem>
+                    <SelectItem value="5">5s</SelectItem>
+                    <SelectItem value="10">10s</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm">FPS</Label>
+                <Select value={fps.toString()} onValueChange={(v) => setFps(Number(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 FPS</SelectItem>
+                    <SelectItem value="24">24 FPS</SelectItem>
+                    <SelectItem value="30">30 FPS</SelectItem>
+                    <SelectItem value="60">60 FPS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="rounded-md bg-muted p-3 text-sm">
+                The export will capture all animations exactly as they appear in the canvas.
+              </div>
+            </>
+          )}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
