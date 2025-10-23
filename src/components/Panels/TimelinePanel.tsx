@@ -183,31 +183,34 @@ export default function TimelinePanel({
 
       <ScrollArea className="h-48">
         <div className="p-4">
-          {/* Time markers */}
-          <div className="relative h-6 mb-2" ref={timelineRef}>
-            <div className="absolute inset-0 flex justify-between text-xs text-muted-foreground">
-              {timeMarkers.map((marker) => (
-                <div key={marker} className="flex flex-col items-center">
-                  <span>{marker}s</span>
-                  <div className="w-px h-2 bg-border mt-1" />
-                </div>
-              ))}
-            </div>
+          {/* Header with time markers - aligned with timeline track */}
+          <div className="flex items-start gap-2 mb-2">
+            <div className="w-32 flex-shrink-0 h-6" /> {/* Spacer for layer names */}
+            <div className="flex-1 relative h-6" ref={timelineRef}>
+              <div className="absolute inset-0 flex justify-between text-xs text-muted-foreground">
+                {timeMarkers.map((marker) => (
+                  <div key={marker} className="flex flex-col items-center">
+                    <span>{marker}s</span>
+                    <div className="w-px h-2 bg-border mt-1" />
+                  </div>
+                ))}
+              </div>
 
-            {/* Playhead */}
-            <div
-              className="absolute top-0 bottom-0 w-px bg-destructive z-10 cursor-ew-resize"
-              style={{ left: `${(currentTime / maxDuration) * 100}%` }}
-              onMouseDown={handleMouseDown}
-            >
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-destructive rounded-full -mt-1" />
-            </div>
+              {/* Playhead */}
+              <div
+                className="absolute top-0 bottom-0 w-px bg-destructive z-10 cursor-ew-resize"
+                style={{ left: `${(currentTime / maxDuration) * 100}%` }}
+                onMouseDown={handleMouseDown}
+              >
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-destructive rounded-full -mt-1" />
+              </div>
 
-            {/* Click area for playhead positioning */}
-            <div
-              className="absolute inset-0 cursor-pointer"
-              onMouseDown={handleMouseDown}
-            />
+              {/* Click area for playhead positioning */}
+              <div
+                className="absolute inset-0 cursor-pointer"
+                onMouseDown={handleMouseDown}
+              />
+            </div>
           </div>
 
           {/* Element tracks */}
