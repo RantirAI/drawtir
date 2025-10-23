@@ -657,7 +657,7 @@ export default function ResizableElement({
         animationDelay: isPlaying ? animationDelay : (currentTime !== undefined ? `${parseTimeSec(animationDelay) - (currentTime || 0)}s` : animationDelay),
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
-        animationPlayState: isPlaying ? (undefined as any) : (currentTime !== undefined ? 'paused' as any : undefined),
+        animationPlayState: isPlaying ? 'running' : (currentTime !== undefined ? 'paused' : undefined),
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
