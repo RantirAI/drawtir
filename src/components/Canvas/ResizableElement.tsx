@@ -654,10 +654,14 @@ export default function ResizableElement({
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
         animationDuration: animationDuration,
-        animationDelay: isPlaying ? animationDelay : (currentTime !== undefined ? `${parseTimeSec(animationDelay) - (currentTime || 0)}s` : animationDelay),
+        animationDelay: currentTime !== undefined 
+          ? (isPlaying ? animationDelay : `${parseTimeSec(animationDelay) - currentTime}s`)
+          : animationDelay,
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
-        animationPlayState: isPlaying ? 'running' : (currentTime !== undefined ? 'paused' : undefined),
+        animationPlayState: currentTime !== undefined 
+          ? (isPlaying ? 'running' : 'paused')
+          : undefined, // Let animations run naturally when timeline is not active
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
