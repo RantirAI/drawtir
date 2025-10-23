@@ -655,7 +655,7 @@ export default function ResizableElement({
         transformOrigin: 'center center',
         animationDuration: animationDuration,
         animationDelay: currentTime !== undefined 
-          ? (isPlaying ? animationDelay : `${parseTimeSec(animationDelay) - currentTime}s`)
+          ? `${Math.max(0, parseTimeSec(animationDelay) - currentTime)}s`
           : animationDelay,
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
