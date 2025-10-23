@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
   Heading1, Heading2, Heading3, Type, List, ListOrdered, 
-  Quote, Code, Link, Bold, Italic, Strikethrough, Trash2
+  Quote, Code, Link, Bold, Italic, Strikethrough, Trash2, Plus
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -44,6 +44,78 @@ export default function RichTextEditor({
   onDeleteBlock
 }: RichTextEditorProps) {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const blockRefs = useRef<Record<string, HTMLElement | null>>({});
+  const [toolbarPos, setToolbarPos] = useState<{ top: number; left: number } | null>(null);
+
+  const findBlockIndex = (id: string) => blocks.findIndex((b) => b.id === id);
+
+  const focusBlock = (id: string) => {
+    const el = blockRefs.current[id];
+    if (el) {
+      // focus and move caret to end
+      el.focus();
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+  };
+
+  const addBlockAfter = (afterId: string, type: RichTextBlock["type"] = "p") => {
+    const idx = findBlockIndex(afterId);
+    if (idx === -1) return;
+    const newBlock: RichTextBlock = {
+      id: crypto.randomUUID(),
+      type,
+      content: "",
+      styles: {},
+    };
+    const updated = [...blocks.slice(0, idx + 1), newBlock, ...blocks.slice(idx + 1)];
+    onUpdate(updated);
+    setSelectedBlockId(newBlock.id);
+    // focus next tick so DOM updates
+    setTimeout(() => focusBlock(newBlock.id), 0);
+  };
+
+  const updateBlockStyles = (id: string, styles: Partial<NonNullable<RichTextBlock["styles"]>>) => {
+    const updated = blocks.map((b) => (b.id === id ? { ...b, styles: { ...b.styles, ...styles } } : b));
+    onUpdate(updated);
+  };
+
+  const changeBlockType = (id: string, type: RichTextBlock["type"]) => {
+    const updated = blocks.map((b) => (b.id === id ? { ...b, type } : b));
+    onUpdate(updated);
+  };
+
+  const positionToolbar = (id: string) => {
+    const container = containerRef.current;
+    const el = blockRefs.current[id];
+    if (!container || !el) return;
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    const top = eRect.top - cRect.top + container.scrollTop - 40; // 40px above
+    const left = eRect.left - cRect.left + 8; // slight inset
+    setToolbarPos({ top: Math.max(0, top), left: Math.max(0, left) });
+  };
+
+  useEffect(() => {
+    if (selectedBlockId) positionToolbar(selectedBlockId);
+  }, [selectedBlockId, blocks]);
+
+  useEffect(() => {
+    const handleDocClick = (e: MouseEvent) => {
+      const container = containerRef.current;
+      if (container && !container.contains(e.target as Node)) {
+        setSelectedBlockId(null);
+        setToolbarPos(null);
+      }
+    };
+    document.addEventListener("mousedown", handleDocClick);
+    return () => document.removeEventListener("mousedown", handleDocClick);
+  }, []);
 
   const getBlockElement = (block: RichTextBlock) => {
     const baseStyle = {
@@ -171,7 +243,7 @@ export default function RichTextEditor({
         );
       case "ul":
         return (
-          <ul style={{ ...baseStyle, fontSize, paddingLeft: "20px" }}>
+          <ul style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "disc", listStylePosition: "outside" }}>
             <li 
               contentEditable={isEditing}
               suppressContentEditableWarning
@@ -184,7 +256,7 @@ export default function RichTextEditor({
         );
       case "ol":
         return (
-          <ol style={{ ...baseStyle, fontSize, paddingLeft: "20px" }}>
+          <ol style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "decimal", listStylePosition: "outside" }}>
             <li 
               contentEditable={isEditing}
               suppressContentEditableWarning
@@ -249,22 +321,60 @@ export default function RichTextEditor({
   };
 
   return (
-    <div className="w-full h-full p-2 overflow-auto">
+    <div
+      ref={containerRef}
+      className="w-full h-full p-2 overflow-auto"
+      onClick={() => {
+        setSelectedBlockId(null);
+        setToolbarPos(null);
+      }}
+      onKeyDown={(e) => {
+        if (!isEditing) return;
+        if (e.key === "Enter" && !e.shiftKey && selectedBlockId) {
+          e.preventDefault();
+          addBlockAfter(selectedBlockId, "p");
+        }
+      }}
+    >
       {blocks.map((block) => (
-        <div key={block.id} className="relative group">
+        <div
+          key={block.id}
+          className="relative group"
+          ref={(el) => {
+            blockRefs.current[block.id] = el as HTMLElement | null;
+          }}
+          data-block-id={block.id}
+        >
           {getBlockElement(block)}
           {isEditing && selectedBlockId === block.id && (
-            <Button
-              variant="destructive"
-              size="sm"
-              className="absolute -right-2 -top-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteBlock(block.id);
-              }}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="absolute -left-2 -top-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addBlockAfter(block.id, "p");
+                }}
+                aria-label="Add block below"
+                title="Add block below"
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                className="absolute -right-2 -top-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteBlock(block.id);
+                }}
+                aria-label="Delete block"
+                title="Delete block"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </>
           )}
         </div>
       ))}
