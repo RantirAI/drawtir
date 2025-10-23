@@ -85,6 +85,12 @@ export default function RichTextEditor({
     onUpdate(updated);
   };
 
+  const toggleInlineStyle = (id: string, key: 'bold' | 'italic' | 'strikethrough') => {
+    const block = blocks.find((b) => b.id === id);
+    if (!block) return;
+    updateBlockStyles(id, { [key]: !block.styles?.[key] } as any);
+  };
+
   const changeBlockType = (id: string, type: RichTextBlock["type"]) => {
     const updated = blocks.map((b) => (b.id === id ? { ...b, type } : b));
     onUpdate(updated);
@@ -127,6 +133,11 @@ export default function RichTextEditor({
       padding: "4px",
       minHeight: "24px",
       outline: isEditing && selectedBlockId === block.id ? "2px solid #3b82f6" : "none",
+      width: "100%",
+      maxWidth: "100%",
+      whiteSpace: "pre-wrap",
+      wordBreak: "break-word" as const,
+      boxSizing: "border-box" as const,
     };
 
     const getContentStyle = () => ({
@@ -243,7 +254,7 @@ export default function RichTextEditor({
         );
       case "ul":
         return (
-          <ul style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "disc", listStylePosition: "outside" }}>
+          <ul style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "disc", listStylePosition: "inside" }}>
             <li 
               contentEditable={isEditing}
               suppressContentEditableWarning
@@ -256,7 +267,7 @@ export default function RichTextEditor({
         );
       case "ol":
         return (
-          <ol style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "decimal", listStylePosition: "outside" }}>
+          <ol style={{ ...baseStyle, fontSize, paddingLeft: "20px", listStyleType: "decimal", listStylePosition: "inside" }}>
             <li 
               contentEditable={isEditing}
               suppressContentEditableWarning
@@ -323,14 +334,14 @@ export default function RichTextEditor({
   return (
     <div
       ref={containerRef}
-      className="w-full h-full p-2 overflow-auto"
+      className="relative w-full h-full p-2 overflow-auto"
       onClick={() => {
         setSelectedBlockId(null);
         setToolbarPos(null);
       }}
-      onKeyDown={(e) => {
+      onKeyDownCapture={(e) => {
         if (!isEditing) return;
-        if (e.key === "Enter" && !e.shiftKey && selectedBlockId) {
+        if (selectedBlockId && e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
           addBlockAfter(selectedBlockId, "p");
         }
@@ -379,82 +390,42 @@ export default function RichTextEditor({
         </div>
       ))}
       
-      {isEditing && (
-        <TooltipProvider>
-          <div className="flex flex-wrap gap-1 mt-4 p-2 border-t border-border">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("h1")}>
-                  <Heading1 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add H1</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("h2")}>
-                  <Heading2 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add H2</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("h3")}>
-                  <Heading3 className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add H3</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("p")}>
-                  <Type className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Paragraph</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("ul")}>
-                  <List className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Bullet List</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("ol")}>
-                  <ListOrdered className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Numbered List</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("blockquote")}>
-                  <Quote className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Quote</TooltipContent>
-            </Tooltip>
-            
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size="sm" variant="outline" onClick={() => onAddBlock("code")}>
-                  <Code className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Add Code Block</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
+      {isEditing && selectedBlockId && toolbarPos && (
+        <div
+          className="absolute z-20 rounded-md border border-border bg-popover text-popover-foreground shadow-md flex items-center gap-1 p-1"
+          style={{ top: toolbarPos.top, left: toolbarPos.left }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => toggleInlineStyle(selectedBlockId, 'bold')} aria-label="Bold">
+            <Bold className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => toggleInlineStyle(selectedBlockId, 'italic')} aria-label="Italic">
+            <Italic className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => toggleInlineStyle(selectedBlockId, 'strikethrough')} aria-label="Strikethrough">
+            <Strikethrough className="h-4 w-4" />
+          </Button>
+          <div className="mx-1 h-5 w-px bg-border" />
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h1')}>H1</Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h2')}>H2</Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h3')}>H3</Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h4')}>H4</Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h5')}>H5</Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'h6')}>H6</Button>
+          <div className="mx-1 h-5 w-px bg-border" />
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'blockquote')} aria-label="Quote">
+            <Quote className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'ul')} aria-label="Bulleted list">
+            <List className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'ol')} aria-label="Numbered list">
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => changeBlockType(selectedBlockId, 'code')} aria-label="Code block">
+            <Code className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   );
