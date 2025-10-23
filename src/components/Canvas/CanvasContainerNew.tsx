@@ -241,6 +241,34 @@ export default function CanvasContainerNew({
         e.preventDefault();
         handleArrange('backward');
       }
+      // Arrow keys to nudge selected elements
+      if (selectedElementIds.length > 0 && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+        const nudgeAmount = e.shiftKey ? 10 : 1;
+        const frame = frames.find(f => f.id === selectedFrameId);
+        if (!frame || !frame.elements) return;
+
+        const updatedElements = frame.elements.map(el => {
+          if (!selectedElementIds.includes(el.id)) return el;
+          
+          switch (e.key) {
+            case 'ArrowUp':
+              return { ...el, y: el.y - nudgeAmount };
+            case 'ArrowDown':
+              return { ...el, y: el.y + nudgeAmount };
+            case 'ArrowLeft':
+              return { ...el, x: el.x - nudgeAmount };
+            case 'ArrowRight':
+              return { ...el, x: el.x + nudgeAmount };
+            default:
+              return el;
+          }
+        });
+
+        setFrames(frames.map(f =>
+          f.id === selectedFrameId ? { ...f, elements: updatedElements } : f
+        ));
+      }
       if (e.key === ' ') {
         setIsPanning(true);
       }
@@ -1621,6 +1649,8 @@ export default function CanvasContainerNew({
         isSaving={isAutoSaving}
         hideCloudFeatures={isEmbedded}
         projectId={projectId}
+        isPanMode={isPanning}
+        onTogglePanMode={() => setIsPanning(!isPanning)}
       />
 
       {/* Canvas Area */}

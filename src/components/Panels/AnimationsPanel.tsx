@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -88,6 +88,16 @@ export default function AnimationsPanel({
   const [easing, setEasing] = useState(currentEasing);
   const [iterationCount, setIterationCount] = useState(currentIterationCount);
   const [activeTab, setActiveTab] = useState<AnimationCategory>(currentCategory);
+
+  // Sync state when props change (e.g., from timeline updates)
+  useEffect(() => {
+    setSelectedAnimation(currentAnimation);
+    setDuration(currentDuration);
+    setDelay(currentDelay);
+    setEasing(currentEasing);
+    setIterationCount(currentIterationCount);
+    setActiveTab(currentCategory);
+  }, [currentAnimation, currentDuration, currentDelay, currentEasing, currentIterationCount, currentCategory]);
 
   const handleApply = () => {
     const normalize = (v: string) => {

@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -30,6 +30,8 @@ interface EditorTopBarProps {
   isSaving?: boolean;
   hideCloudFeatures?: boolean;
   projectId?: string;
+  isPanMode?: boolean;
+  onTogglePanMode?: () => void;
 }
 
 export default function EditorTopBar({ 
@@ -47,6 +49,8 @@ export default function EditorTopBar({
   isSaving,
   hideCloudFeatures = false,
   projectId,
+  isPanMode = false,
+  onTogglePanMode,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -132,6 +136,18 @@ export default function EditorTopBar({
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShare}>
           <Share2 className="h-3 w-3" />
         </Button>
+
+        {onTogglePanMode && (
+          <Button 
+            variant={isPanMode ? "default" : "ghost"} 
+            size="icon" 
+            className="h-6 w-6" 
+            onClick={onTogglePanMode}
+            title="Hand Tool (Space)"
+          >
+            <Hand className="h-3 w-3" />
+          </Button>
+        )}
         
         <ThemeToggle />
       </div>
