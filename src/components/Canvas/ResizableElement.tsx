@@ -76,6 +76,7 @@ interface ResizableElementProps {
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
+  isPlaying?: boolean;
   currentTime?: number;
   globalAnimationTrigger?: any;
   isLocked?: boolean;
@@ -141,6 +142,7 @@ export default function ResizableElement({
   isLocked: isLockedProp = false,
   isSelected,
   zoom = 1,
+  isPlaying = false,
   currentTime,
   onUpdate,
   onSelect,
@@ -652,10 +654,10 @@ export default function ResizableElement({
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
         animationDuration: animationDuration,
-        animationDelay: currentTime !== undefined ? `${parseTimeSec(animationDelay) - (currentTime || 0)}s` : animationDelay,
+        animationDelay: isPlaying ? animationDelay : (currentTime !== undefined ? `${parseTimeSec(animationDelay) - (currentTime || 0)}s` : animationDelay),
         animationTimingFunction: animationTimingFunction,
         animationIterationCount: animationIterationCount,
-        animationPlayState: currentTime !== undefined ? 'paused' as any : undefined,
+        animationPlayState: isPlaying ? (undefined as any) : (currentTime !== undefined ? 'paused' as any : undefined),
       }}
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}

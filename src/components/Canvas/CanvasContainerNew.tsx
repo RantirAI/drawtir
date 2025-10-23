@@ -1426,6 +1426,9 @@ export default function CanvasContainerNew({
       setSelectedElementIds([elementId]);
     }
     setShowShapeSettings(true);
+    // Open animations panel without right click
+    setAnimatingElementId(elementId);
+    setShowAnimationsPanel(true);
   };
 
   const handleElementReorder = (frameId: string, fromIndex: number, toIndex: number) => {
@@ -1789,6 +1792,7 @@ export default function CanvasContainerNew({
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
                       currentTime={currentTime}
+                      isPlaying={isPlayingAnimation}
                       onUpdate={handleElementUpdate}
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                       onDelete={() => handleElementDelete(element.id)}
@@ -1910,13 +1914,14 @@ export default function CanvasContainerNew({
                             animation={element.animation}
                             animationDuration={element.animationDuration}
                             animationDelay={element.animationDelay}
-                            animationTimingFunction={element.animationTimingFunction}
-                            animationIterationCount={element.animationIterationCount}
-                            useFlexLayout={false}
-                            isLocked={element.isLocked}
-                            isSelected={false}
-                            zoom={zoom}
-                            onUpdate={(id, updates) => {
+                             animationTimingFunction={element.animationTimingFunction}
+                             animationIterationCount={element.animationIterationCount}
+                             useFlexLayout={false}
+                             isLocked={element.isLocked}
+                             isSelected={false}
+                             zoom={zoom}
+                             isPlaying={isPlayingAnimation}
+                             onUpdate={(id, updates) => {
                               setFrames(frames.map(f => 
                                 f.id === frame.id 
                                   ? {

@@ -37,11 +37,13 @@ export default function TimelinePanel({
   const getAnimationDuration = (element: Element) => {
     const duration = element.animationDuration;
     if (typeof duration === 'string') {
-      // Parse string like "1000ms" or "1s"
       if (duration.endsWith('ms')) {
         return parseFloat(duration) / 1000;
       } else if (duration.endsWith('s')) {
         return parseFloat(duration);
+      } else {
+        const n = parseFloat(duration);
+        if (!isNaN(n)) return n; // treat unitless as seconds
       }
     }
     return 1; // Default 1 second
@@ -50,11 +52,13 @@ export default function TimelinePanel({
   const getAnimationDelay = (element: Element) => {
     const delay = element.animationDelay;
     if (typeof delay === 'string') {
-      // Parse string like "1000ms" or "1s"
       if (delay.endsWith('ms')) {
         return parseFloat(delay) / 1000;
       } else if (delay.endsWith('s')) {
         return parseFloat(delay);
+      } else {
+        const n = parseFloat(delay);
+        if (!isNaN(n)) return n; // treat unitless as seconds
       }
     }
     return 0; // Default 0 seconds

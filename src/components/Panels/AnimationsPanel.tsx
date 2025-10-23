@@ -90,10 +90,16 @@ export default function AnimationsPanel({
   const [activeTab, setActiveTab] = useState<AnimationCategory>(currentCategory);
 
   const handleApply = () => {
+    const normalize = (v: string) => {
+      const t = (v || '').toString().trim();
+      if (!t) return '0s';
+      if (t.endsWith('ms') || t.endsWith('s')) return t;
+      return `${t}s`;
+    };
     onSelectAnimation({
       animation: selectedAnimation,
-      duration,
-      delay,
+      duration: normalize(duration),
+      delay: normalize(delay),
       easing,
       iterationCount,
       category: activeTab,
