@@ -79,7 +79,7 @@ export default function EditorTopBar({
         </div>
       )}
       
-      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg overflow-hidden">
+      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-card/95 backdrop-blur-xl border border-border/60 dark:border-border/40 shadow-lg overflow-hidden">
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
