@@ -1086,6 +1086,7 @@ export default function PosterGenerator() {
                         setImage(url);
                         toast.success("Image selected from media library");
                       }}
+                      onClose={() => setShowMediaLibrary(false)}
                     />
                   )}
                 </div>

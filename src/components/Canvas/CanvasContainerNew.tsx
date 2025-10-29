@@ -2466,18 +2466,47 @@ export default function CanvasContainerNew({
 
       {/* Media Library Panel */}
       {showMediaLibrary && (
-        <div className="fixed right-0 top-0 bottom-0 z-50 w-80">
-          <MediaLibraryPanel
-            onSelectImage={async (url) => {
-              if (selectedFrame) {
-                handleFrameUpdate(selectedFrameId, { image: url });
-                toast.success("Image added to frame");
-              } else {
-                toast.info("Please select a frame first");
-              }
-            }}
-          />
-        </div>
+        <MediaLibraryPanel
+          onSelectImage={(url) => {
+            if (!selectedFrame) {
+              toast.info("Please select a frame first");
+              return;
+            }
+            
+            // Add image as an editable image element to the canvas
+            const newImageElement: Element = {
+              id: `image-${Date.now()}`,
+              type: "image",
+              name: "Image",
+              x: selectedFrame.width / 2 - 100,
+              y: selectedFrame.height / 2 - 100,
+              width: 200,
+              height: 200,
+              imageUrl: url,
+              imageFit: "cover",
+              opacity: 100,
+              rotation: 0,
+              brightness: 100,
+              contrast: 100,
+              saturation: 100,
+              blur: 0,
+            };
+
+            setFrames((prevFrames) =>
+              prevFrames.map((frame) =>
+                frame.id === selectedFrameId
+                  ? {
+                      ...frame,
+                      elements: [...(frame.elements || []), newImageElement],
+                    }
+                  : frame
+              )
+            );
+            
+            toast.success("Image added to canvas");
+          }}
+          onClose={() => setShowMediaLibrary(false)}
+        />
       )}
 
       {/* Quick Action Buttons */}
