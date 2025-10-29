@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,7 @@ interface ExportDialogProps {
   onOpenChange: (open: boolean) => void;
   frames: Frame[];
   onExport: (config: ExportConfig) => Promise<void>;
+  defaultSelectedFrameIds?: string[];
 }
 
 export interface ExportConfig {
@@ -24,13 +25,19 @@ export interface ExportConfig {
   fps?: number;
 }
 
-export default function ExportDialog({ open, onOpenChange, frames, onExport }: ExportDialogProps) {
-  const [selectedFrameIds, setSelectedFrameIds] = useState<string[]>([]);
+export default function ExportDialog({ open, onOpenChange, frames, onExport, defaultSelectedFrameIds }: ExportDialogProps) {
+  const [selectedFrameIds, setSelectedFrameIds] = useState<string[]>(defaultSelectedFrameIds || []);
   const [format, setFormat] = useState<ExportConfig["format"]>("PNG");
   const [scale, setScale] = useState<number>(2);
   const [duration, setDuration] = useState<number>(3);
   const [fps, setFps] = useState<number>(30);
   const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedFrameIds(defaultSelectedFrameIds || []);
+    }
+  }, [open, defaultSelectedFrameIds]);
 
   const isAnimatedFormat = format === "GIF" || format === "MP4";
   const hasAnimations = frames.some(f => 

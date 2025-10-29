@@ -16,9 +16,11 @@ import FrameBadge from "./FrameBadge";
 import DrawingLayer from "./DrawingLayer";
 import ShareDialog from "./ShareDialog";
 import ExportAllDialog from "./ExportAllDialog";
+import ExportDialog from "./ExportDialog";
 import PreviewDialog from "./PreviewDialog";
 import TimelinePanel from "@/components/Panels/TimelinePanel";
 import ResizableElement from "./ResizableElement";
+import { exportFrames } from "@/lib/exportUtils";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
@@ -154,6 +156,7 @@ export default function CanvasContainerNew({
   const [showShapeSettings, setShowShapeSettings] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showExportAllDialog, setShowExportAllDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [showAnimationsPanel, setShowAnimationsPanel] = useState(false);
   const [showPreviewDialog, setShowPreviewDialog] = useState(false);
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
@@ -1640,7 +1643,7 @@ export default function CanvasContainerNew({
         onProjectNameChange={setProjectTitle}
         onSave={forceSave}
         onDownload={downloadPoster}
-        onExport={downloadPoster}
+        onExport={() => setShowExportDialog(true)}
         onExportAll={() => setShowExportAllDialog(true)}
         onShare={() => setShowShareDialog(true)}
         onUndo={handleUndo}
@@ -2444,6 +2447,16 @@ export default function CanvasContainerNew({
         onExport={(format, resolution) => {
           console.log(`Exporting as ${format} at ${resolution}px`);
           downloadPoster();
+        }}
+      />
+
+      <ExportDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        frames={frames}
+        defaultSelectedFrameIds={[selectedFrameId]}
+        onExport={async (config) => {
+          await exportFrames(frames, config);
         }}
       />
 
