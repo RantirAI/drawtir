@@ -7,6 +7,7 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 import { useTemplates } from "@/hooks/useTemplates";
 import { starterTemplates } from "@/data/starterTemplates";
 import PreviewDialog from "@/components/Canvas/PreviewDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TemplatesPanelProps {
   onRestoreTemplate: (snapshot: CanvasSnapshot) => void;
@@ -25,9 +26,54 @@ export default function TemplatesPanel({
     loadTemplates();
   }, []);
 
-  const handleTemplateClick = (snapshot: CanvasSnapshot, name: string) => {
-    onRestoreTemplate(snapshot);
-    toast.success(`Template loaded: ${name}`);
+  const handleTemplateClick = async (snapshot: CanvasSnapshot, name: string) => {
+    try {
+      // Transfer images from template to user's media library
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user && snapshot.frames) {
+        const imageUrls = new Set<string>();
+        
+        // Collect all image URLs from frames and elements
+        snapshot.frames.forEach(frame => {
+          if (frame.image) imageUrls.add(frame.image);
+          if (frame.elements) {
+            frame.elements.forEach(element => {
+              if (element.type === 'image' && element.imageUrl) {
+                imageUrls.add(element.imageUrl);
+              }
+              if (element.fillImage) {
+                imageUrls.add(element.fillImage);
+              }
+            });
+          }
+        });
+
+        // Save each image to media library
+        for (const url of imageUrls) {
+          if (url && url.startsWith('http')) {
+            try {
+              await supabase.from('media_library').insert({
+                user_id: user.id,
+                file_name: `template-image-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.png`,
+                file_url: url,
+                file_type: 'image/png',
+                source: 'template',
+                metadata: { templateName: name }
+              });
+            } catch (error) {
+              console.error('Error saving template image:', error);
+            }
+          }
+        }
+      }
+      
+      onRestoreTemplate(snapshot);
+      toast.success(`Template loaded: ${name}. Images added to your media library.`);
+    } catch (error) {
+      console.error('Error loading template:', error);
+      onRestoreTemplate(snapshot);
+      toast.success(`Template loaded: ${name}`);
+    }
   };
 
   const handlePreview = (snapshot: CanvasSnapshot, e: React.MouseEvent) => {

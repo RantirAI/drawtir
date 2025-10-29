@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Film } from "lucide-react";
+import { Film, Image as ImageIcon } from "lucide-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
@@ -9,6 +9,7 @@ import { ShaderSettingsPanel } from "../Panels/ShaderSettingsPanel";
 import LayersPanel from "../Panels/LayersPanel";
 import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
 import TemplatesPanel from "../Panels/TemplatesPanel";
+import { MediaLibraryPanel } from "../Panels/MediaLibraryPanel";
 import BottomToolbar from "../Toolbar/BottomToolbar";
 import EditorTopBar from "../TopBar/EditorTopBar";
 import CanvasBackground from "./CanvasBackground";
@@ -162,6 +163,7 @@ export default function CanvasContainerNew({
   const [animatingElementId, setAnimatingElementId] = useState<string | null>(null);
   const [showLayersPanel, setShowLayersPanel] = useState(false);
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
@@ -2462,6 +2464,22 @@ export default function CanvasContainerNew({
         />
       )}
 
+      {/* Media Library Panel */}
+      {showMediaLibrary && (
+        <div className="fixed right-0 top-0 bottom-0 z-50 w-80">
+          <MediaLibraryPanel
+            onSelectImage={async (url) => {
+              if (selectedFrame) {
+                handleFrameUpdate(selectedFrameId, { image: url });
+                toast.success("Image added to frame");
+              } else {
+                toast.info("Please select a frame first");
+              }
+            }}
+          />
+        </div>
+      )}
+
       {/* Quick Action Buttons */}
       <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
         <Button
@@ -2495,6 +2513,17 @@ export default function CanvasContainerNew({
           }}
         >
           <Layers className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className={`h-10 w-10 rounded-full bg-card/80 backdrop-blur-xl hover:scale-105 transition-transform ${
+            showMediaLibrary ? 'ring-2 ring-blue-500' : ''
+          }`}
+          onClick={() => setShowMediaLibrary(!showMediaLibrary)}
+          title="Media Library"
+        >
+          <ImageIcon className="h-4 w-4" />
         </Button>
         <Button
           variant="outline"
