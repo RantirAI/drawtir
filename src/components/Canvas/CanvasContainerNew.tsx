@@ -1458,9 +1458,6 @@ export default function CanvasContainerNew({
       setSelectedElementIds([elementId]);
     }
     setShowShapeSettings(true);
-    // Open animations panel without right click
-    setAnimatingElementId(elementId);
-    setShowAnimationsPanel(true);
   };
 
   const handleElementReorder = (frameId: string, fromIndex: number, toIndex: number) => {
