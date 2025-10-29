@@ -608,6 +608,77 @@ export default function CanvasContainerNew({
                 // Increment progress gradually
                 setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
                 console.log('Status:', data.message);
+              } else if (data.type === 'background') {
+                // Apply background color immediately
+                if (selectedFrameId && data.color) {
+                  handleFrameUpdate(selectedFrameId, { backgroundColor: data.color });
+                  console.log('Applied background:', data.color);
+                }
+              } else if (data.type === 'element') {
+                // Render element progressively as it arrives
+                if (selectedFrameId && data.element) {
+                  const el = data.element;
+                  
+                  // Determine border radius
+                  let borderRadius = 0;
+                  if (el.borderRadius) {
+                    borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+                  } else if (el.shape === 'circle') {
+                    borderRadius = 9999;
+                  }
+
+                  // Create element
+                  const baseElement: any = {
+                    id: crypto.randomUUID(),
+                    type: el.type,
+                    x: el.x || 100,
+                    y: el.y || 100,
+                    width: el.width || 200,
+                    height: el.height || 100,
+                    rotation: 0,
+                    opacity: 100,
+                    blendMode: "normal" as const,
+                  };
+
+                  let newElement: any;
+                  if (el.type === "icon") {
+                    newElement = {
+                      ...baseElement,
+                      iconName: el.iconName || "heart",
+                      iconFamily: el.iconFamily || "lucide",
+                      fill: el.color || "#000000",
+                    };
+                  } else if (el.type === "text") {
+                    newElement = {
+                      ...baseElement,
+                      text: el.content || el.text || "Text",
+                      fill: el.color || "#000000",
+                      fontSize: el.fontSize || 24,
+                      fontFamily: "Arial",
+                      fontWeight: el.fontWeight || "normal",
+                    };
+                  } else if (el.type === "shape") {
+                    newElement = {
+                      ...baseElement,
+                      shapeType: el.shape || "rectangle",
+                      fill: el.color || "#000000",
+                      stroke: "#000000",
+                      strokeWidth: 0,
+                      borderRadius: borderRadius,
+                    };
+                  }
+
+                  if (newElement) {
+                    // Add element to the current frame
+                    setFrames(prevFrames => prevFrames.map(f => {
+                      if (f.id === selectedFrameId) {
+                        return { ...f, elements: [...(f.elements || []), newElement] };
+                      }
+                      return f;
+                    }));
+                    console.log(`Added element ${data.index + 1}:`, el.type);
+                  }
+                }
               } else if (data.type === 'progress') {
                 // Log raw progress for debugging
                 console.log('Generating:', data.text);

@@ -475,7 +475,9 @@ Return JSON (flat structure, NO nested frames):
         async start(controller) {
           try {
             let elementCount = 0;
+            let sentElementCount = 0;
             let lastProgressSent = '';
+            let backgroundColor = '';
             
             while (true) {
               const { done, value } = await reader.read();
@@ -497,6 +499,44 @@ Return JSON (flat structure, NO nested frames):
                   if (text) {
                     fullContent += text;
                     
+                    // Stream background color immediately
+                    if (!backgroundColor && fullContent.includes('"backgroundColor"')) {
+                      const bgMatch = fullContent.match(/"backgroundColor"\s*:\s*"(#[0-9A-Fa-f]{6})"/);
+                      if (bgMatch) {
+                        backgroundColor = bgMatch[1];
+                        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                          type: 'background', 
+                          color: backgroundColor 
+                        })}\n\n`));
+                      }
+                    }
+                    
+                    // Try to extract and stream complete elements progressively
+                    const elementRegex = /\{[^{}]*"type"\s*:\s*"(text|shape|icon|image)"[^{}]*\}/g;
+                    const elementMatches = [...fullContent.matchAll(elementRegex)];
+                    
+                    // Send any new complete elements
+                    if (elementMatches.length > sentElementCount) {
+                      for (let i = sentElementCount; i < elementMatches.length; i++) {
+                        try {
+                          const elementJson = elementMatches[i][0];
+                          const element = JSON.parse(elementJson);
+                          
+                          // Validate element has required fields
+                          if (element.type && element.x !== undefined && element.y !== undefined) {
+                            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                              type: 'element', 
+                              element: element,
+                              index: i 
+                            })}\n\n`));
+                            sentElementCount++;
+                          }
+                        } catch (e) {
+                          // Element not complete yet, will try again next iteration
+                        }
+                      }
+                    }
+                    
                     // Progress messages
                     let progressMessage = '';
                     
@@ -507,13 +547,13 @@ Return JSON (flat structure, NO nested frames):
                       }
                     }
                     
-                    if (fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('background')) {
+                    if (backgroundColor && !lastProgressSent.includes('background')) {
                       progressMessage = 'Applying color palette...';
                     }
                     
-                    const elementMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
-                    if (elementMatches && elementMatches.length > elementCount) {
-                      elementCount = elementMatches.length;
+                    const elementCountMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
+                    if (elementCountMatches && elementCountMatches.length > elementCount) {
+                      elementCount = elementCountMatches.length;
                       progressMessage = `Adding element ${elementCount}...`;
                     }
                     
