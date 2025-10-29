@@ -478,12 +478,13 @@ Return JSON (flat structure, NO nested frames):
             let sentElementCount = 0;
             let lastProgressSent = '';
             let backgroundColor = '';
+            let hasContent = false;
             
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
 
-              const chunk = decoder.decode(value);
+              const chunk = decoder.decode(value, { stream: true });
               const lines = chunk.split('\n');
 
               for (const line of lines) {
@@ -498,6 +499,7 @@ Return JSON (flat structure, NO nested frames):
                   
                   if (text) {
                     fullContent += text;
+                    hasContent = true;
                     
                     // Stream background color immediately
                     if (!backgroundColor && fullContent.includes('"backgroundColor"')) {
@@ -571,21 +573,41 @@ Return JSON (flat structure, NO nested frames):
               }
             }
 
+            // Ensure we have content before parsing
+            if (!hasContent || fullContent.length < 50) {
+              console.error('Insufficient content received from AI');
+              throw new Error('AI did not generate enough content');
+            }
+
             // Parse final result with robust error handling
             let designSpec;
             try {
               // Remove any markdown code blocks
-              let cleanContent = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+              let cleanContent = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
               
-              // Try to extract JSON object
-              const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+              // Try to extract JSON object - be more lenient with incomplete JSON
+              let jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
               if (!jsonMatch) {
                 console.error('No JSON object found in response');
-                console.error('Full content:', fullContent);
+                console.error('Full content:', fullContent.substring(0, 1000));
                 throw new Error('AI did not return a valid JSON object');
               }
               
               let jsonStr = jsonMatch[0];
+              
+              // Try to fix incomplete JSON by ensuring proper closing
+              const openBraces = (jsonStr.match(/\{/g) || []).length;
+              const closeBraces = (jsonStr.match(/\}/g) || []).length;
+              const openBrackets = (jsonStr.match(/\[/g) || []).length;
+              const closeBrackets = (jsonStr.match(/\]/g) || []).length;
+              
+              // Add missing closing brackets/braces
+              if (openBrackets > closeBrackets) {
+                jsonStr += ']'.repeat(openBrackets - closeBrackets);
+              }
+              if (openBraces > closeBraces) {
+                jsonStr += '}'.repeat(openBraces - closeBraces);
+              }
               
               // Clean up common JSON issues
               jsonStr = jsonStr
@@ -595,7 +617,10 @@ Return JSON (flat structure, NO nested frames):
                 .replace(/\n/g, ' ') // Remove newlines
                 .replace(/\s+/g, ' '); // Normalize whitespace
               
-              console.log('Attempting to parse JSON:', jsonStr.substring(0, 200) + '...');
+              console.log('Attempting to parse JSON (length:', jsonStr.length, ')');
+              console.log('First 300 chars:', jsonStr.substring(0, 300));
+              console.log('Last 300 chars:', jsonStr.substring(jsonStr.length - 300));
+              
               designSpec = JSON.parse(jsonStr);
               
               // Validate required fields
@@ -603,9 +628,12 @@ Return JSON (flat structure, NO nested frames):
                 throw new Error('Invalid design spec: missing elements array');
               }
               
+              console.log('Successfully parsed design with', designSpec.elements.length, 'elements');
+              
             } catch (e) {
               console.error('Failed to parse AI response:', e);
-              console.error('Full response:', fullContent.substring(0, 500));
+              console.error('Full response length:', fullContent.length);
+              console.error('Response preview:', fullContent.substring(0, 1000));
               throw new Error(`AI generated invalid design specification: ${e instanceof Error ? e.message : 'Unknown error'}`);
             }
 
