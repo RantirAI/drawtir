@@ -512,6 +512,38 @@ export default function AIGeneratorPanel({
               </Accordion>
             </div>
 
+            {/* Generation Preferences */}
+            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+              <Label className="text-xs text-muted-foreground">Generation Preferences</Label>
+              
+              <div className="flex flex-wrap gap-2">
+                {generationTypes.map((type) => {
+                  const isSelected = selectedGenerationTypes.includes(type.id);
+                  const isFreeform = type.id === "freeform";
+                  
+                  return (
+                    <Button
+                      key={type.id}
+                      size="sm"
+                      variant={isSelected ? "default" : "outline"}
+                      disabled={type.disabled || (isFreeform && isSelected)}
+                      onClick={() => toggleGenerationType(type.id)}
+                      className={`h-8 text-xs ${
+                        isFreeform && isSelected ? "opacity-100" : ""
+                      } ${type.disabled ? "opacity-50" : ""}`}
+                      title={type.description || type.label}
+                    >
+                      {type.label}
+                    </Button>
+                  );
+                })}
+              </div>
+              
+              <p className="text-[10px] text-muted-foreground">
+                Select Multiple to produce multi-modal agents
+              </p>
+            </div>
+
             {/* Progress indicator */}
             {isGenerating && generationProgress && (
               <div className="text-xs text-muted-foreground mt-2 p-3 bg-muted rounded-md border border-border">
