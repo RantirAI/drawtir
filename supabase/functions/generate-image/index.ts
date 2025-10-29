@@ -70,11 +70,32 @@ Style: Professional poster-quality imagery with strong visual appeal.`
 
     const result = await response.json();
     
+    console.log('Lovable AI response structure:', JSON.stringify(result, null, 2).substring(0, 500));
+    
     // Extract image from Lovable AI response
-    const imageUrl = result.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    // The image can be in different locations depending on the response format
+    let imageUrl = result.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    // Alternative path if the first one doesn't work
+    if (!imageUrl && result.choices?.[0]?.message?.content) {
+      // Sometimes the image is embedded in the content
+      const content = result.choices[0].message.content;
+      if (typeof content === 'string' && content.startsWith('data:image')) {
+        imageUrl = content;
+      }
+    }
+    
+    // Check if there's an image in a different structure
+    if (!imageUrl && result.data?.[0]?.url) {
+      imageUrl = result.data[0].url;
+    }
     
     if (!imageUrl) {
-      throw new Error('No image data received from Lovable AI');
+      console.error('Could not find image in response. Full response:', JSON.stringify(result, null, 2));
+      console.error('Choices array:', result.choices);
+      console.error('First choice:', result.choices?.[0]);
+      console.error('Message:', result.choices?.[0]?.message);
+      throw new Error('No image data received from Lovable AI. Response structure may have changed.');
     }
 
     console.log('Image generated successfully with Lovable AI');
