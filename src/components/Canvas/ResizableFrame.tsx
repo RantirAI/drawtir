@@ -125,7 +125,40 @@ export default function ResizableFrame({
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging && !isResizing) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      
+      if (isDragging) {
+        const dx = touch.clientX - dragStart.x;
+        const dy = touch.clientY - dragStart.y;
+        onUpdate(id, { x: x + dx, y: y + dy });
+        setDragStart({ x: touch.clientX, y: touch.clientY });
+      } else if (isResizing) {
+        const dx = touch.clientX - dragStart.x;
+        const dy = touch.clientY - dragStart.y;
+        
+        if (isResizing === "se") {
+          onUpdate(id, { width: Math.max(200, width + dx), height: Math.max(200, height + dy) });
+        } else if (isResizing === "sw") {
+          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx), height: Math.max(200, height + dy) });
+        } else if (isResizing === "ne") {
+          onUpdate(id, { y: y + dy, width: Math.max(200, width + dx), height: Math.max(200, height - dy) });
+        } else if (isResizing === "nw") {
+          onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(200, width - dx), height: Math.max(200, height - dy) });
+        }
+        
+        setDragStart({ x: touch.clientX, y: touch.clientY });
+      }
+    };
+
     const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(null);
+    };
+
+    const handleTouchEnd = () => {
       setIsDragging(false);
       setIsResizing(null);
     };
@@ -133,11 +166,15 @@ export default function ResizableFrame({
     if (isDragging || isResizing) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchmove", handleTouchMove, { passive: false });
+      document.addEventListener("touchend", handleTouchEnd);
     }
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
 
@@ -149,11 +186,28 @@ export default function ResizableFrame({
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest(".resize-handle")) return;
+    e.stopPropagation();
+    onSelect();
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  };
+
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
     e.stopPropagation();
     onSelect();
     setIsResizing(corner);
     setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleResizeTouchStart = (e: React.TouchEvent, corner: string) => {
+    e.stopPropagation();
+    onSelect();
+    const touch = e.touches[0];
+    setIsResizing(corner);
+    setDragStart({ x: touch.clientX, y: touch.clientY });
   };
 
   const generateBackgroundStyle = () => {
@@ -207,6 +261,7 @@ export default function ResizableFrame({
         ...backgroundStyle,
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
     >
       {/* Video background for frames */}
       {backgroundType === "video" && videoUrl && (
@@ -272,18 +327,22 @@ export default function ResizableFrame({
           <div
             className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "nw")}
           />
           <div
             className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "ne")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "ne")}
           />
           <div
             className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "sw")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "sw")}
           />
           <div
             className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "se")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "se")}
           />
         </>
       )}

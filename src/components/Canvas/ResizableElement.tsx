@@ -284,7 +284,66 @@ export default function ResizableElement({
       }
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if ((!isDragging && !isResizing && !isRotating) || isLocked) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      
+      if (isDragging) {
+        const dx = (touch.clientX - dragStart.x) / zoom;
+        const dy = (touch.clientY - dragStart.y) / zoom;
+        
+        const newX = snapToGrid(dragStart.elementX + dx);
+        const newY = snapToGrid(dragStart.elementY + dy);
+        onUpdate(id, { x: newX, y: newY });
+      } else if (isRotating) {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const currentAngle = Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI);
+        const angleDelta = currentAngle - rotateStart.mouseAngle;
+        const newRotation = rotateStart.angle + angleDelta;
+        
+        onUpdate(id, { rotation: newRotation } as any);
+      } else if (isResizing) {
+        const dx = (touch.clientX - resizeStart.x) / zoom;
+        const dy = (touch.clientY - resizeStart.y) / zoom;
+        
+        let newWidth = resizeStart.width;
+        let newHeight = resizeStart.height;
+        let newX = resizeStart.elementX;
+        let newY = resizeStart.elementY;
+
+        if (resizeStart.corner.includes("e")) {
+          newWidth = Math.max(20, snapToGrid(resizeStart.width + dx));
+        }
+        if (resizeStart.corner.includes("w")) {
+          const widthDelta = dx;
+          newWidth = Math.max(20, snapToGrid(resizeStart.width - widthDelta));
+          newX = snapToGrid(resizeStart.elementX + widthDelta);
+        }
+        if (resizeStart.corner.includes("s")) {
+          newHeight = Math.max(20, snapToGrid(resizeStart.height + dy));
+        }
+        if (resizeStart.corner.includes("n")) {
+          const heightDelta = dy;
+          newHeight = Math.max(20, snapToGrid(resizeStart.height - heightDelta));
+          newY = snapToGrid(resizeStart.elementY + heightDelta);
+        }
+
+        onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
+      }
+    };
+
     const handleMouseUp = () => {
+      setIsDragging(false);
+      setIsResizing(false);
+      setIsRotating(false);
+    };
+
+    const handleTouchEnd = () => {
       setIsDragging(false);
       setIsResizing(false);
       setIsRotating(false);
@@ -293,11 +352,15 @@ export default function ResizableElement({
     if (isDragging || isResizing || isRotating) {
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove, { passive: false });
+      window.addEventListener("touchend", handleTouchEnd);
     }
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
     };
   }, [isDragging, isResizing, isRotating, dragStart, resizeStart, rotateStart, id, onUpdate, x, y, zoom]);
 
@@ -317,6 +380,25 @@ export default function ResizableElement({
     onSelect(e);
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY, elementX: x, elementY: y });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    // For lines, only handle if NOT in bend mode
+    if (type === 'shape' && shapeType === 'line' && isSelected) {
+      return;
+    }
+    
+    // Don't start dragging if clicking on resize handles or locked
+    if ((e.target as HTMLElement).hasAttribute('data-resize-handle') || 
+        (e.target as HTMLElement).hasAttribute('data-rotate-handle') || 
+        isLocked) {
+      return;
+    }
+    e.stopPropagation();
+    onSelect();
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX, y: touch.clientY, elementX: x, elementY: y });
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -359,6 +441,13 @@ export default function ResizableElement({
     setResizeStart({ x: e.clientX, y: e.clientY, width, height, elementX: x, elementY: y, corner });
   };
 
+  const handleResizeTouchStart = (e: React.TouchEvent, corner: string) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    setIsResizing(true);
+    setResizeStart({ x: touch.clientX, y: touch.clientY, width, height, elementX: x, elementY: y, corner });
+  };
+
   const handleRotateStart = (e: React.MouseEvent) => {
     e.stopPropagation();
     const rect = containerRef.current?.getBoundingClientRect();
@@ -367,6 +456,20 @@ export default function ResizableElement({
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     const mouseAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
+    
+    setIsRotating(true);
+    setRotateStart({ angle: rotation, mouseAngle });
+  };
+
+  const handleRotateTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    const touch = e.touches[0];
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const mouseAngle = Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI);
     
     setIsRotating(true);
     setRotateStart({ angle: rotation, mouseAngle });
@@ -679,6 +782,7 @@ export default function ResizableElement({
           : undefined, // Let animations run naturally when timeline is not active
       }}
       onMouseDown={handleMouseDown}
+      onTouchStart={handleTouchStart}
       onDoubleClick={handleDoubleClick}
     >
       {type === "shader" && shader ? (
@@ -818,16 +922,17 @@ export default function ResizableElement({
           {/* Resize handles in blue - hidden when locked */}
           {!isLocked && (
             <>
-              <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} />
-              <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} />
-              <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} />
-              <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} />
+              <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} onTouchStart={(e) => handleResizeTouchStart(e, "nw")} />
+              <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} onTouchStart={(e) => handleResizeTouchStart(e, "ne")} />
+              <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} onTouchStart={(e) => handleResizeTouchStart(e, "sw")} />
+              <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} onTouchStart={(e) => handleResizeTouchStart(e, "se")} />
               
               {/* Rotation handle */}
               <div 
                 data-rotate-handle 
                 className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-green-500 rounded-full cursor-grab active:cursor-grabbing border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                 onMouseDown={handleRotateStart}
+                onTouchStart={handleRotateTouchStart}
                 title="Rotate"
               >
                 <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

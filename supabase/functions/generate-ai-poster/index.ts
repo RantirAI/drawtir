@@ -120,95 +120,143 @@ const COLOR_PALETTES: Record<string, string[]> = {
   pastel: ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9"],
 };
 
-// Enhanced design system prompt
-const DESIGN_SYSTEM_PROMPT = `You are an expert poster designer with deep knowledge of visual design principles.
+// Enhanced design system prompt with professional design principles
+const DESIGN_SYSTEM_PROMPT = `You are a world-class poster designer creating magazine-quality, award-winning designs.
 
-COLOR THEORY:
-- Use complementary colors for contrast and energy (opposite on color wheel)
-- Analogous colors for harmony (adjacent on color wheel)
-- Triadic schemes for balanced vibrancy (equidistant on wheel)
-- Follow 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
-- Ensure WCAG AA contrast ratios (4.5:1 for text, 3:1 for large text)
+🎨 ADVANCED COLOR THEORY:
+- Complementary colors (opposite on wheel): High energy, maximum contrast
+- Analogous colors (adjacent): Harmonious, cohesive feel
+- Triadic schemes (120° apart): Bold, balanced vibrancy
+- 60-30-10 rule: 60% dominant, 30% secondary, 10% accent pop
+- WCAG AAA contrast: 7:1 for body text, 4.5:1 for large text
+- Color psychology: Red=energy, Blue=trust, Yellow=optimism, Purple=luxury
 
-MOOD-BASED COLOR PALETTES:
+CURATED COLOR PALETTES:
 ${Object.entries(COLOR_PALETTES).map(([mood, colors]) => `- ${mood}: ${colors.join(', ')}`).join('\n')}
 
-TYPOGRAPHY HIERARCHY:
-- Titles: 72-96px, bold (700+), tight letter-spacing (-0.02em)
-- Subtitles: 48-60px, semibold (600), normal spacing
-- Body: 24-32px, regular (400-500), line-height 1.5-1.8
-- Captions: 16-20px, regular (400), looser spacing (0.02em)
-- Max line length: 60-75 characters for readability
+📐 LAYOUT MASTERY:
+- Rule of thirds: Place key elements at intersection points (33%, 66%)
+- Golden ratio (1.618): Natural, aesthetically pleasing proportions
+- Z-pattern reading: Top-left → Top-right → Bottom-left → Bottom-right
+- F-pattern reading: Titles left, body text flowing right
+- Visual weight balance: Heavy top-left needs light bottom-right
+- Negative space as design element: Whitespace guides the eye
+- 8pt grid system: All spacing in multiples of 8 (16, 24, 32, 48, 64, 80)
 
-LAYOUT PRINCIPLES:
-- Rule of thirds: Place focal points at 1/3 intersections
-- Visual weight: Balance heavy elements with lighter ones
-- Whitespace: Not empty - it's breathing room for design
-- 8pt grid system: Use multiples of 8 for spacing (8, 16, 24, 32, 48, 64)
-- Visual hierarchy: Most important → largest, highest contrast
+✍️ TYPOGRAPHY EXCELLENCE:
+- Display titles: 80-120px, ExtraBold (800-900), tight tracking (-0.03em)
+- Headlines: 56-72px, Bold (700), tight tracking (-0.02em)
+- Subheadings: 36-48px, SemiBold (600), normal tracking
+- Body text: 24-32px, Regular (400-500), relaxed line-height (1.6-1.8)
+- Captions: 18-24px, Regular (400), slightly loose tracking (0.01em)
+- Never use more than 2 font families
+- Pair geometric sans (modern) with serif (elegant) OR monospace (tech)
 
-SPACING SYSTEM:
-- Tight: 8px (related items)
-- Normal: 16px (grouped content)
-- Comfortable: 24px (sections)
-- Loose: 32-48px (major divisions)
-- Canvas margins: Minimum 40-60px from edges
+🎯 VISUAL HIERARCHY:
+1. Primary focus (largest, highest contrast, top-third)
+2. Secondary elements (medium size, support primary)
+3. Tertiary details (smaller, subtle, bottom-third)
+- Size contrast ratio: Minimum 2:1 between levels
+- Use color, size, AND position to establish hierarchy
 
-DESIGN STYLES:
-- Modern Minimal: Clean lines, lots of whitespace, 2-3 colors, sans-serif
-- Vintage: Muted palettes, textured shapes, serif fonts, ornamental elements
-- Brutalist: Bold typography, high contrast, geometric shapes, asymmetry
-- Swiss Design: Grid-based, sans-serif, objective photography, minimal color
-- Contemporary: Gradients, overlapping elements, mixed typography, vibrant colors
+📏 SPACING & RHYTHM:
+- Micro: 8px (tight grouping)
+- Small: 16px (related items)
+- Medium: 24-32px (section spacing)
+- Large: 48-64px (major divisions)
+- XLarge: 80-120px (canvas margins, dramatic space)
+- Consistent rhythm creates professional feel
 
-QUALITY CHECKLIST:
-✓ Clear focal point (where eyes land first)
-✓ Sufficient contrast (WCAG AA minimum)
-✓ Harmonious colors (max 4-5 colors)
-✓ Readable text at all sizes
-✓ Grid-aligned elements (8pt grid)
-✓ Adequate whitespace (not cramped)
-✓ Matches requested mood/style`;
+🎭 DESIGN STYLES:
+- Modern Minimal: 90% whitespace, 1-2 bold colors, geometric shapes, sans-serif
+- Swiss International: Grid-based, flush-left text, limited colors, helvetica-style fonts
+- Brutalist: Oversized bold typography, asymmetric layouts, raw geometric shapes
+- Art Deco: Luxurious golds, geometric patterns, elegant symmetry, sophisticated
+- Contemporary: Vibrant gradients, overlapping elements, mixed typography, experimental
 
-// Few-shot learning examples
+🏆 PROFESSIONAL QUALITY STANDARDS:
+✓ Immediate focal point (eye lands in <0.5 seconds)
+✓ Clear visual path (guides viewer through content)
+✓ High contrast (WCAG AAA: 7:1 minimum)
+✓ Harmonious palette (3-4 colors maximum)
+✓ Perfect alignment (every element grid-snapped)
+✓ Generous whitespace (minimum 60px margins)
+✓ Intentional asymmetry (not accidental imbalance)
+✓ Typography scale (clear size differences)
+✓ Professional polish (no amateurish mistakes)
+
+💡 CREATIVE TECHNIQUES:
+- Overlap shapes for depth and dimension
+- Use circles for focus, rectangles for structure
+- Diagonal elements add energy and movement
+- Icons reinforce message (lucide-react library)
+- Strategic color blocking creates impact
+- Gradients add modern sophistication
+- Large numbers/dates as design elements
+- Decorative shapes (circles, lines) frame content`;
+
+// Few-shot learning with professional examples
 const DESIGN_EXAMPLES = `
-EXAMPLE 1 - Concert Poster (Energetic):
+EXAMPLE 1 - Sports Championship (Bold & Dynamic):
 {
-  "title": "Summer Music Festival",
+  "title": "Championship Finals",
+  "backgroundColor": "#1a1a2e",
+  "elements": [
+    {"type": "shape", "x": 600, "y": 100, "width": 350, "height": 350, "color": "#00d9ff", "borderRadius": "50%", "shape": "circle"},
+    {"type": "text", "content": "CHAMPIONSHIP", "x": 80, "y": 200, "width": 640, "height": 90, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "text", "content": "FINALS", "x": 80, "y": 300, "width": 640, "height": 110, "fontSize": 108, "fontWeight": "900", "color": "#00d9ff"},
+    {"type": "shape", "x": 80, "y": 430, "width": 480, "height": 6, "color": "#00d9ff", "borderRadius": "0", "shape": "rectangle"},
+    {"type": "text", "content": "MARCH 15-17, 2025", "x": 80, "y": 470, "width": 640, "height": 45, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
+    {"type": "text", "content": "City Sports Arena", "x": 80, "y": 520, "width": 640, "height": 35, "fontSize": 26, "fontWeight": "400", "color": "#a8a8a8"},
+    {"type": "icon", "iconName": "trophy", "iconFamily": "lucide", "x": 90, "y": 900, "width": 70, "height": 70, "color": "#ffd700"},
+    {"type": "icon", "iconName": "star", "iconFamily": "lucide", "x": 180, "y": 900, "width": 70, "height": 70, "color": "#ffd700"}
+  ]
+}
+WHY IT WORKS: Oversized typography creates impact, circular shape adds energy, accent line creates structure, golden icons add prestige, dark background makes colors pop.
+
+EXAMPLE 2 - Concert Experience (Vibrant & Modern):
+{
+  "title": "Summer Music Fest",
   "backgroundColor": "#FF6B35",
   "elements": [
-    {"type": "text", "content": "SUMMER", "x": 100, "y": 100, "width": 600, "height": 120, "fontSize": 96, "fontWeight": "bold", "color": "#FFFFFF"},
-    {"type": "text", "content": "MUSIC FESTIVAL", "x": 100, "y": 230, "width": 600, "height": 80, "fontSize": 60, "fontWeight": "600", "color": "#FDC830"},
-    {"type": "shape", "x": 50, "y": 350, "width": 200, "height": 200, "color": "#F7931E", "borderRadius": "50%", "shape": "circle"},
-    {"type": "icon", "iconName": "music", "iconFamily": "lucide", "x": 100, "y": 400, "width": 100, "height": 100, "color": "#FFFFFF"}
+    {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 400, "color": "#F7931E", "borderRadius": "0", "shape": "rectangle"},
+    {"type": "text", "content": "SUMMER", "x": 80, "y": 150, "width": 640, "height": 95, "fontSize": 92, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "text", "content": "MUSIC FEST", "x": 80, "y": 250, "width": 640, "height": 75, "fontSize": 72, "fontWeight": "700", "color": "#FDC830"},
+    {"type": "shape", "x": 300, "y": 500, "width": 200, "height": 200, "color": "#FFFFFF", "borderRadius": "50%", "shape": "circle"},
+    {"type": "icon", "iconName": "music", "iconFamily": "lucide", "x": 350, "y": 550, "width": 100, "height": 100, "color": "#FF6B35"},
+    {"type": "text", "content": "JULY 20-22 • OPEN AIR VENUE", "x": 80, "y": 850, "width": 640, "height": 40, "fontSize": 28, "fontWeight": "600", "color": "#FFFFFF"}
   ]
 }
-WHY IT WORKS: Bold typography dominates, energetic orange palette, circular shape adds dynamism, music icon reinforces theme.
+WHY IT WORKS: Energetic orange gradients, massive bold typography, circular focal point with icon, clear date info, vibrant color scheme creates excitement.
 
-EXAMPLE 2 - Product Poster (Minimal):
+EXAMPLE 3 - Tech Product Launch (Minimal & Sophisticated):
 {
-  "title": "Premium Coffee",
-  "backgroundColor": "#F5F5F5",
+  "title": "Product Launch",
+  "backgroundColor": "#0F1419",
   "elements": [
-    {"type": "text", "content": "ARTISAN", "x": 100, "y": 800, "width": 600, "height": 60, "fontSize": 48, "fontWeight": "300", "color": "#2C3E50"},
-    {"type": "text", "content": "COFFEE", "x": 100, "y": 870, "width": 600, "height": 80, "fontSize": 72, "fontWeight": "bold", "color": "#2C3E50"},
-    {"type": "shape", "x": 250, "y": 200, "width": 300, "height": 400, "color": "#34495E", "borderRadius": "16px", "shape": "rectangle"}
+    {"type": "shape", "x": 100, "y": 300, "width": 600, "height": 400, "color": "#16213E", "borderRadius": "32px", "shape": "rectangle"},
+    {"type": "text", "content": "NEXT", "x": 150, "y": 450, "width": 500, "height": 80, "fontSize": 76, "fontWeight": "300", "color": "#FFFFFF"},
+    {"type": "text", "content": "GENERATION", "x": 150, "y": 540, "width": 500, "height": 100, "fontSize": 96, "fontWeight": "800", "color": "#00F0FF"},
+    {"type": "icon", "iconName": "zap", "iconFamily": "lucide", "x": 650, "y": 200, "width": 80, "height": 80, "color": "#00F0FF"},
+    {"type": "text", "content": "Launch Event • March 2025", "x": 150, "y": 850, "width": 500, "height": 35, "fontSize": 24, "fontWeight": "400", "color": "#888888"}
   ]
 }
-WHY IT WORKS: Lots of whitespace, minimal color palette, elegant typography, centered composition, clean and professional.
+WHY IT WORKS: Dark minimalist aesthetic, contrast between light/bold typography, neon accent color, rounded rectangle creates modern feel, strategic whitespace.
 
-EXAMPLE 3 - Tech Conference (Modern):
+EXAMPLE 4 - Elegant Event (Luxury & Clean):
 {
-  "title": "Tech Summit 2025",
-  "backgroundColor": "#0F3460",
+  "title": "Gala Evening",
+  "backgroundColor": "#FAFAFA",
   "elements": [
-    {"type": "shape", "x": 50, "y": 50, "width": 700, "height": 500, "color": "#16213E", "borderRadius": "24px", "shape": "rectangle"},
-    {"type": "text", "content": "TECH SUMMIT", "x": 100, "y": 200, "width": 600, "height": 100, "fontSize": 84, "fontWeight": "bold", "color": "#00FFFF"},
-    {"type": "text", "content": "2025", "x": 100, "y": 310, "width": 600, "height": 60, "fontSize": 48, "fontWeight": "600", "color": "#FFFFFF"},
-    {"type": "icon", "iconName": "zap", "iconFamily": "lucide", "x": 650, "y": 100, "width": 64, "height": 64, "color": "#00FFFF"}
+    {"type": "text", "content": "ANNUAL", "x": 100, "y": 250, "width": 600, "height": 50, "fontSize": 44, "fontWeight": "300", "color": "#333333"},
+    {"type": "text", "content": "GALA", "x": 100, "y": 310, "width": 600, "height": 120, "fontSize": 112, "fontWeight": "700", "color": "#1A1A2E"},
+    {"type": "text", "content": "EVENING", "x": 100, "y": 440, "width": 600, "height": 70, "fontSize": 64, "fontWeight": "700", "color": "#1A1A2E"},
+    {"type": "shape", "x": 300, "y": 600, "width": 200, "height": 6, "color": "#D4AF37", "borderRadius": "0", "shape": "rectangle"},
+    {"type": "text", "content": "Black Tie Optional", "x": 100, "y": 700, "width": 600, "height": 35, "fontSize": 28, "fontWeight": "400", "color": "#666666"},
+    {"type": "text", "content": "December 31, 2025", "x": 100, "y": 750, "width": 600, "height": 35, "fontSize": 28, "fontWeight": "400", "color": "#666666"}
   ]
 }
-WHY IT WORKS: Dark background with neon accents, geometric shapes, tech-forward aesthetic, icon adds visual interest.`;
+WHY IT WORKS: Light elegant background, sophisticated typography hierarchy, gold accent line adds luxury, generous whitespace, refined color palette.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
