@@ -83,10 +83,11 @@ export default function EditorTopBar({
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
-            className="absolute inset-0 bg-primary transition-all duration-500 ease-out rounded-full"
+            className="absolute inset-0 bg-primary transition-all duration-500 ease-out"
             style={{ 
               width: `${generationProgress}%`,
-              transformOrigin: 'left'
+              transformOrigin: 'left',
+              borderRadius: '9999px 0 0 9999px'
             }}
           >
             {/* Shimmer effect */}
