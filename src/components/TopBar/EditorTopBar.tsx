@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -32,6 +32,9 @@ interface EditorTopBarProps {
   projectId?: string;
   isPanMode?: boolean;
   onTogglePanMode?: () => void;
+  isGenerating?: boolean;
+  generationProgress?: number;
+  generationMessage?: string;
 }
 
 export default function EditorTopBar({ 
@@ -51,6 +54,9 @@ export default function EditorTopBar({
   projectId,
   isPanMode = false,
   onTogglePanMode,
+  isGenerating = false,
+  generationProgress = 0,
+  generationMessage = "Generating...",
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -63,7 +69,39 @@ export default function EditorTopBar({
 
   return (
     <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
-      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg">
+      {/* Floating generation message */}
+      {isGenerating && (
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+          <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+          <span className="text-xs font-medium text-foreground drop-shadow-lg whitespace-nowrap">
+            {generationMessage}
+          </span>
+        </div>
+      )}
+      
+      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg overflow-hidden">
+        {/* Progress bar overlay */}
+        {isGenerating && (
+          <div 
+            className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/40 to-primary/30 transition-all duration-500 ease-out"
+            style={{ 
+              width: `${generationProgress}%`,
+              transformOrigin: 'left'
+            }}
+          >
+            {/* Shimmer effect */}
+            <div 
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              style={{ 
+                backgroundSize: '200% 100%',
+                animation: 'shimmer 2s infinite linear'
+              }}
+            />
+          </div>
+        )}
+        
+        {/* Content - positioned above progress */}
+        <div className="relative z-10 flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -150,6 +188,7 @@ export default function EditorTopBar({
         )}
         
         <ThemeToggle />
+        </div>
       </div>
 
       <SettingsDialog 
@@ -157,6 +196,14 @@ export default function EditorTopBar({
         onOpenChange={setShowSettings}
         projectId={projectId}
       />
+      
+      {/* CSS for shimmer animation */}
+      <style>{`
+        @keyframes shimmer {
+          from { background-position: -200% 0; }
+          to { background-position: 200% 0; }
+        }
+      `}</style>
     </div>
   );
 }

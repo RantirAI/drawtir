@@ -24,7 +24,6 @@ import { exportFrames } from "@/lib/exportUtils";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
-import TopProgressBar from "./TopProgressBar";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -1766,11 +1765,13 @@ export default function CanvasContainerNew({
         onRedo={handleRedo}
         canUndo={historyIndex > 0}
         canRedo={historyIndex < history.length - 1}
-        isSaving={isAutoSaving}
-        hideCloudFeatures={isEmbedded}
+        isSaving={isSaving}
         projectId={projectId}
         isPanMode={isPanning}
         onTogglePanMode={() => setIsPanning(!isPanning)}
+        isGenerating={isGenerating}
+        generationProgress={generationProgressPercent}
+        generationMessage={generationProgress}
       />
 
       {/* Canvas Area */}
@@ -2691,12 +2692,7 @@ export default function CanvasContainerNew({
         frame={selectedFrame}
       />
 
-      {/* Top Progress Bar */}
-      <TopProgressBar
-        isVisible={isGenerating}
-        message={generationProgress}
-        progress={generationProgressPercent}
-      />
+      {/* Removed TopProgressBar - now integrated into EditorTopBar */}
 
       <DrawtirFooter />
 
