@@ -44,63 +44,19 @@ const DESIGN_JSON_SCHEMA = {
   strict: false,
 };
 
-// Model configuration
+// Model configuration for Lovable AI
 const MODEL_CONFIGS: Record<string, any> = {
-  'claude-sonnet-4-5': {
-    provider: 'anthropic',
-    endpoint: 'https://api.anthropic.com/v1/messages',
-    apiModel: 'claude-sonnet-4-5',
+  'gemini-2.5-flash': {
+    model: 'google/gemini-2.5-flash',
     maxTokens: 4096,
-    supportsTemperature: true,
-    supportsStreaming: true,
   },
-  'claude-opus-4-1': {
-    provider: 'anthropic',
-    endpoint: 'https://api.anthropic.com/v1/messages',
-    apiModel: 'claude-opus-4-1-20250805',
+  'gemini-2.5-pro': {
+    model: 'google/gemini-2.5-pro',
     maxTokens: 4096,
-    supportsTemperature: true,
-    supportsStreaming: true,
   },
-  'gpt-5': {
-    provider: 'openai',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    apiModel: 'gpt-5-2025-08-07',
-    maxCompletionTokens: 4096,
-    supportsTemperature: false,
-    supportsStreaming: false, // Streaming may require org verification
-  },
-  'gpt-5-mini': {
-    provider: 'openai',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    apiModel: 'gpt-5-mini-2025-08-07',
-    maxCompletionTokens: 4096,
-    supportsTemperature: false,
-    supportsStreaming: false,
-  },
-  'gpt-5-nano': {
-    provider: 'openai',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    apiModel: 'gpt-5-nano-2025-08-07',
-    maxCompletionTokens: 4096,
-    supportsTemperature: false,
-    supportsStreaming: false,
-  },
-  'o3': {
-    provider: 'openai',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    apiModel: 'o3-2025-04-16',
-    maxCompletionTokens: 4096,
-    supportsTemperature: false,
-    supportsStreaming: false,
-  },
-  'o4-mini': {
-    provider: 'openai',
-    endpoint: 'https://api.openai.com/v1/chat/completions',
-    apiModel: 'o4-mini-2025-04-16',
-    maxCompletionTokens: 4096,
-    supportsTemperature: false,
-    supportsStreaming: false,
+  'gemini-2.5-flash-lite': {
+    model: 'google/gemini-2.5-flash-lite',
+    maxTokens: 4096,
   },
 };
 
@@ -270,28 +226,23 @@ serve(async (req) => {
       analysisType, 
       canvasWidth = 800, 
       canvasHeight = 1200,
-      model = 'claude-sonnet-4-5', // Default model
+      model = 'gemini-2.5-flash', // Default model
       colorPalette // Optional color palette preference
     } = await req.json();
     
-    console.log('AI Poster Generation - Model:', model, 'Type:', analysisType);
+    console.log('AI Poster Generation with Lovable AI - Model:', model, 'Type:', analysisType);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
     
     // Validate model
     const modelConfig = MODEL_CONFIGS[model];
     if (!modelConfig) {
-      throw new Error(`Unsupported model: ${model}`);
+      throw new Error(`Unsupported model: ${model}. Available: ${Object.keys(MODEL_CONFIGS).join(', ')}`);
     }
 
-    // Get API keys
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    
-    if (modelConfig.provider === 'anthropic' && !ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY is not configured');
-    }
-    if (modelConfig.provider === 'openai' && !OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    // Get Lovable API key
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     // Handle images
@@ -443,121 +394,74 @@ Return JSON (flat structure, NO nested frames):
 }`;
     }
 
-    // Make API call based on provider
-    let response: Response;
-    
-    if (modelConfig.provider === 'anthropic') {
-      // Anthropic Claude API
-      const messages: any[] = [];
-      
-      if (images.length > 0) {
-        const imageContents = images.map(img => ({
-          type: 'image',
-          source: {
-            type: 'base64',
-            media_type: getMediaType(img),
-            data: img.split(',')[1] || img,
-          },
-        }));
-        
-        messages.push({
-          role: 'user',
-          content: [...imageContents, { type: 'text', text: userPrompt }]
-        });
-      } else {
-        messages.push({
-          role: 'user',
-          content: userPrompt
-        });
+    // Make API call to Lovable AI Gateway
+    const messages: any[] = [
+      { 
+        role: 'system', 
+        content: DESIGN_SYSTEM_PROMPT + '\n\nIMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks. Your entire response must be a single JSON object.' 
       }
-
-      response = await fetch(modelConfig.endpoint, {
-        method: 'POST',
-        headers: {
-          'x-api-key': ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: modelConfig.apiModel,
-          max_tokens: modelConfig.maxTokens,
-          messages: messages,
-          stream: modelConfig.supportsStreaming,
-        }),
+    ];
+    
+    if (images.length > 0) {
+      const imageContents = images.map(img => ({
+        type: 'image_url',
+        image_url: { url: img }
+      }));
+      
+      messages.push({
+        role: 'user',
+        content: [
+          { type: 'text', text: userPrompt },
+          ...imageContents
+        ]
       });
     } else {
-      // OpenAI API
-      const messages: any[] = [
-        { 
-          role: 'system', 
-          content: DESIGN_SYSTEM_PROMPT + '\n\nIMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks. Your entire response must be a single JSON object.' 
-        }
-      ];
-      
-      if (images.length > 0) {
-        const imageContents = images.map(img => ({
-          type: 'image_url',
-          image_url: { url: img }
-        }));
-        
-        messages.push({
-          role: 'user',
-          content: [
-            { type: 'text', text: userPrompt },
-            ...imageContents
-          ]
-        });
-      } else {
-        messages.push({
-          role: 'user',
-          content: userPrompt
-        });
-      }
-
-      const bodyParams: any = {
-        model: modelConfig.apiModel,
-        messages: messages,
-        max_completion_tokens: modelConfig.maxCompletionTokens,
-        response_format: { type: 'json_schema', json_schema: DESIGN_JSON_SCHEMA },
-        stream: modelConfig.supportsStreaming,
-      };
-
-      response = await fetch(modelConfig.endpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${OPENAI_API_KEY!}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bodyParams),
+      messages.push({
+        role: 'user',
+        content: userPrompt
       });
     }
 
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: modelConfig.model,
+        messages: messages,
+        max_tokens: modelConfig.maxTokens,
+        stream: true, // Enable streaming for all Lovable AI models
+      }),
+    });
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`${modelConfig.provider} API error:`, response.status, errorText);
+      console.error('Lovable AI API error:', response.status, errorText);
       
       if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again in a moment.');
+        throw new Error('Rate limits exceeded. Please try again later or reduce request frequency.');
       }
       if (response.status === 402) {
-        throw new Error('Payment required. Please add credits to continue.');
+        throw new Error('Credits exhausted. Please add credits to your Lovable workspace in Settings → Usage.');
       }
       if (response.status === 400) {
         // Try to parse error details
         try {
           const errorData = JSON.parse(errorText);
           const errorMsg = errorData.error?.message || errorText;
-          throw new Error(`${modelConfig.provider} API error: ${errorMsg}`);
+          throw new Error(`Lovable AI error: ${errorMsg}`);
         } catch {
-          throw new Error(`${modelConfig.provider} API error (400): ${errorText}`);
+          throw new Error(`Lovable AI error (400): ${errorText}`);
         }
       }
       
-      throw new Error(`AI API error: ${response.status} - ${errorText}`);
+      throw new Error(`Lovable AI error: ${response.status} - ${errorText}`);
     }
 
-    // Handle streaming vs non-streaming responses
-    if (modelConfig.supportsStreaming) {
+    // Handle streaming response from Lovable AI
+    {
       // Stream response
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -588,16 +492,7 @@ Return JSON (flat structure, NO nested frames):
 
                 try {
                   const parsed = JSON.parse(data);
-                  let text = '';
-                  
-                  if (modelConfig.provider === 'anthropic') {
-                    if (parsed.type === 'content_block_delta') {
-                      text = parsed.delta?.text || '';
-                    }
-                  } else {
-                    // OpenAI
-                    text = parsed.choices?.[0]?.delta?.content || '';
-                  }
+                  const text = parsed.choices?.[0]?.delta?.content || '';
                   
                   if (text) {
                     fullContent += text;
@@ -662,78 +557,6 @@ Return JSON (flat structure, NO nested frames):
           }
         }
       });
-
-      return new Response(stream, {
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive'
-        }
-      });
-    } else {
-      // Non-streaming response (for OpenAI models)
-      const responseData = await response.json();
-      console.log('Non-streaming response received');
-      console.log('Full OpenAI response:', JSON.stringify(responseData));
-      
-      // Prefer parsed JSON when using json_schema
-      let designSpec = responseData.choices?.[0]?.message?.parsed;
-
-      if (!designSpec) {
-        // Fallback to content extraction
-        let fullContent = '';
-        const content = responseData.choices?.[0]?.message?.content;
-        if (typeof content === 'string') {
-          fullContent = content;
-        } else if (Array.isArray(content)) {
-          for (const part of content) {
-            if (typeof part?.text === 'string') fullContent += part.text + '\n';
-            else if (typeof part?.content === 'string') fullContent += part.content + '\n';
-          }
-        }
-
-        try {
-          if (fullContent.trim()) {
-            console.log('Attempting direct JSON parse of concatenated content...');
-            designSpec = JSON.parse(fullContent);
-          } else {
-            throw new Error('Empty content');
-          }
-        } catch (parseError) {
-          console.error('Direct JSON parse failed:', parseError);
-          // Fallback: try to extract JSON from markdown code blocks
-          const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
-          const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : '';
-          if (!jsonStr) {
-            console.error('No JSON found in OpenAI content');
-            throw new Error('AI generated invalid design specification');
-          }
-          designSpec = JSON.parse(jsonStr);
-        }
-      }
-
-      console.log('Successfully generated poster with model:', model);
-
-      // Return as SSE for consistency with streaming
-      const stream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-            type: 'status', 
-            message: 'Generating design...' 
-          })}\n\n`));
-          
-          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-            type: 'complete', 
-            designSpec,
-            model
-          })}\n\n`));
-          
-          controller.close();
-        }
-      });
-
-      // (duplicate stream block removed)
 
       return new Response(stream, {
         headers: { 

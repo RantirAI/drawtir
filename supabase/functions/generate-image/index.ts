@@ -11,44 +11,46 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, size = "1024x1024", quality = "high" } = await req.json();
+    const { prompt } = await req.json();
     
     if (!prompt) {
       throw new Error('Prompt is required');
     }
 
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Generating image with prompt:', prompt);
+    console.log('Generating image with Lovable AI (Nano banana):', prompt);
 
-    const response = await fetch('https://api.openai.com/v1/images/generations', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-image-1',
-        prompt: prompt,
-        n: 1,
-        size: size,
-        quality: quality,
-        output_format: 'png',
+        model: 'google/gemini-2.5-flash-image-preview',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        modalities: ['image', 'text'],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('OpenAI image generation error:', response.status, errorText);
+      console.error('Lovable AI image generation error:', response.status, errorText);
       
       if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again in a moment.');
+        throw new Error('Rate limits exceeded. Please try again later or reduce request frequency.');
       }
       if (response.status === 402) {
-        throw new Error('Payment required. Please add credits to your OpenAI account.');
+        throw new Error('Credits exhausted. Please add credits to your Lovable workspace in Settings → Usage.');
       }
       
       throw new Error(`Image generation failed: ${response.status} - ${errorText}`);
@@ -56,18 +58,18 @@ serve(async (req) => {
 
     const result = await response.json();
     
-    // gpt-image-1 returns base64 encoded images
-    const imageBase64 = result.data?.[0]?.b64_json;
+    // Extract image from Lovable AI response
+    const imageUrl = result.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     
-    if (!imageBase64) {
-      throw new Error('No image data received from OpenAI');
+    if (!imageUrl) {
+      throw new Error('No image data received from Lovable AI');
     }
 
-    console.log('Image generated successfully');
+    console.log('Image generated successfully with Lovable AI');
 
     return new Response(
       JSON.stringify({ 
-        image: `data:image/png;base64,${imageBase64}`,
+        image: imageUrl,
         success: true 
       }),
       { 

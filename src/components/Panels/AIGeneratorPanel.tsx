@@ -57,7 +57,7 @@ export default function AIGeneratorPanel({
   const [selectedGenerationType, setSelectedGenerationType] = useState("freeform");
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
-    return localStorage.getItem('ai-poster-model') || 'claude-sonnet-4-5';
+    return localStorage.getItem('ai-poster-model') || 'gemini-2.5-flash';
   });
   const [selectedPalette, setSelectedPalette] = useState<string>("auto");
   const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
@@ -239,26 +239,16 @@ export default function AIGeneratorPanel({
                   </SelectTrigger>
                   <SelectContent className="bg-popover border-border z-50">
                     <SelectGroup>
-                      <SelectLabel className="text-muted-foreground">Claude (Anthropic)</SelectLabel>
-                      <SelectItem value="claude-sonnet-4-5">
-                        Claude Sonnet 4.5 (Recommended)
+                      <SelectLabel className="text-muted-foreground">Lovable AI (Google Gemini)</SelectLabel>
+                      <SelectItem value="gemini-2.5-flash">
+                        Gemini 2.5 Flash (Recommended) 
                       </SelectItem>
-                      <SelectItem value="claude-opus-4-1">
-                        Claude Opus 4.1 (Most Powerful)
+                      <SelectItem value="gemini-2.5-pro">
+                        Gemini 2.5 Pro (Most Capable)
                       </SelectItem>
-                    </SelectGroup>
-                    <SelectSeparator />
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground">GPT-5 Series (OpenAI)</SelectLabel>
-                      <SelectItem value="gpt-5">GPT-5 (Flagship)</SelectItem>
-                      <SelectItem value="gpt-5-mini">GPT-5 Mini (Fast & Efficient)</SelectItem>
-                      <SelectItem value="gpt-5-nano">GPT-5 Nano (Fastest)</SelectItem>
-                    </SelectGroup>
-                    <SelectSeparator />
-                    <SelectGroup>
-                      <SelectLabel className="text-muted-foreground">O-Series (Reasoning Models)</SelectLabel>
-                      <SelectItem value="o3">O3 (Deep Reasoning)</SelectItem>
-                      <SelectItem value="o4-mini">O4 Mini (Fast Reasoning)</SelectItem>
+                      <SelectItem value="gemini-2.5-flash-lite">
+                        Gemini 2.5 Flash Lite (Fastest)
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
