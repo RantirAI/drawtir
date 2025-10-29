@@ -83,11 +83,10 @@ export default function EditorTopBar({
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
-            className="absolute inset-0 bg-primary transition-all duration-500 ease-out"
+            className="absolute inset-0 bg-primary transition-all duration-500 ease-out rounded-full"
             style={{ 
               width: `${generationProgress}%`,
-              transformOrigin: 'left',
-              mixBlendMode: 'difference'
+              transformOrigin: 'left'
             }}
           >
             {/* Shimmer effect */}
@@ -101,7 +100,7 @@ export default function EditorTopBar({
           </div>
         )}
         
-        {/* Content - positioned above progress */}
+        {/* Content - original (dark) */}
         <div className="relative z-10 flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -190,6 +189,78 @@ export default function EditorTopBar({
         
         <ThemeToggle />
         </div>
+        
+        {/* Content - duplicate (white) - clipped by progress */}
+        {isGenerating && (
+          <div 
+            className="absolute inset-0 z-20 flex items-center gap-1 px-2 py-1 pointer-events-none"
+            style={{
+              clipPath: `inset(0 ${100 - generationProgress}% 0 0)`
+            }}
+          >
+            <div className="flex items-center gap-1 text-white [&_svg]:text-white">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white">
+              <Menu className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+        </DropdownMenu>
+        
+        <EditableTitle value={projectName} onChange={onProjectNameChange || (() => {})} />
+
+        {/* Undo/Redo buttons */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6 text-white hover:text-white" 
+          onClick={onUndo} 
+          disabled={!canUndo}
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo className="h-3 w-3" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-6 w-6 text-white hover:text-white" 
+          onClick={onRedo} 
+          disabled={!canRedo}
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo className="h-3 w-3" />
+        </Button>
+
+        {onSave && !hideCloudFeatures && (
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onSave} disabled={isSaving}>
+            <Save className="h-3 w-3" />
+          </Button>
+        )}
+
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onDownload}>
+          <Download className="h-3 w-3" />
+        </Button>
+
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onShare}>
+          <Share2 className="h-3 w-3" />
+        </Button>
+
+        {onTogglePanMode && (
+          <Button 
+            variant={isPanMode ? "default" : "ghost"} 
+            size="icon" 
+            className="h-6 w-6 text-white hover:text-white" 
+            onClick={onTogglePanMode}
+            title="Hand Tool (Space)"
+          >
+            <Hand className="h-3 w-3" />
+          </Button>
+        )}
+        
+        <ThemeToggle />
+            </div>
+          </div>
+        )}
       </div>
 
       <SettingsDialog 
