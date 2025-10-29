@@ -26,26 +26,46 @@ export default function DraggablePanel({
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        setPosition({
-          x: e.clientX - dragOffset.x,
-          y: e.clientY - dragOffset.y,
-        });
-      }
+      if (!isDragging) return;
+      setPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y,
+      });
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      const t = e.touches[0];
+      if (!t) return;
+      e.preventDefault();
+      setPosition({
+        x: t.clientX - dragOffset.x,
+        y: t.clientY - dragOffset.y,
+      });
+    };
+
+    const handleTouchEnd = () => {
+      setIsDragging(false);
+    };
+
     if (isDragging) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
+      document.addEventListener("touchmove", handleTouchMove, { passive: false } as any);
+      document.addEventListener("touchend", handleTouchEnd);
+      document.addEventListener("touchcancel", handleTouchEnd);
     }
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("touchmove", handleTouchMove as any);
+      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchcancel", handleTouchEnd);
     };
   }, [isDragging, dragOffset]);
 
@@ -55,6 +75,19 @@ export default function DraggablePanel({
       setDragOffset({
         x: e.clientX - rect.left,
         y: e.clientY - rect.top,
+      });
+      setIsDragging(true);
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (panelRef.current) {
+      const rect = panelRef.current.getBoundingClientRect();
+      const t = e.touches[0];
+      if (!t) return;
+      setDragOffset({
+        x: t.clientX - rect.left,
+        y: t.clientY - rect.top,
       });
       setIsDragging(true);
     }
@@ -77,6 +110,7 @@ export default function DraggablePanel({
       <div
         className="flex items-center justify-between p-2 border-b border-border/40 dark:border-border/25 cursor-grab active:cursor-grabbing"
         onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
       >
         <div className="flex items-center gap-1.5">
           <GripHorizontal className="h-3 w-3 text-muted-foreground" />

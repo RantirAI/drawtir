@@ -2,6 +2,9 @@ import type { Frame, Element } from "@/types/elements";
 import type { ExportConfig } from "@/components/Canvas/ExportDialog";
 import jsPDF from "jspdf";
 import GIF from "gif.js";
+// Vite will bundle this worker and give us a URL
+// @ts-ignore
+import workerUrl from "gif.js/dist/gif.worker.js?url";
 
 interface RenderOptions {
   scale: number;
@@ -475,6 +478,7 @@ async function exportFrameAsGIF(frame: Frame, config: ExportConfig): Promise<voi
   const gif = new GIF({
     workers: 2,
     quality: 10,
+    workerScript: workerUrl,
     width: frame.width * config.scale,
     height: frame.height * config.scale,
   });
