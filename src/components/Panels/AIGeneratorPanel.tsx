@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Upload, Clock, RotateCcw, Code } from "lucide-react";
+import { Sparkles, Upload, Clock, RotateCcw, Code, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Input } from "@/components/ui/input";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +60,8 @@ export default function AIGeneratorPanel({
     return localStorage.getItem('ai-poster-model') || 'claude-sonnet-4-5';
   });
   const [selectedPalette, setSelectedPalette] = useState<string>("auto");
+  const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
+  const [accordionValue, setAccordionValue] = useState<string>("");
 
   const colorPalettes = [
     { id: "auto", name: "Auto Select", colors: [] },
@@ -120,10 +124,38 @@ export default function AIGeneratorPanel({
   }, [activeTab, projectId]);
 
   const handleGenerate = async () => {
-    await onGenerate(selectedGenerationType, selectedModel, selectedPalette !== "auto" ? selectedPalette : undefined);
+    let paletteToUse = selectedPalette !== "auto" ? selectedPalette : undefined;
+    
+    // If custom palette is selected and has valid colors, use those
+    if (selectedPalette === "custom") {
+      const validColors = customColors.filter(c => c.trim() !== "");
+      if (validColors.length > 0) {
+        paletteToUse = validColors.join(",");
+      }
+    }
+    
+    await onGenerate(selectedGenerationType, selectedModel, paletteToUse);
     // Reload conversations after generation
     if (projectId) {
       loadConversations();
+    }
+  };
+
+  const handleCustomColorChange = (index: number, value: string) => {
+    const newColors = [...customColors];
+    newColors[index] = value;
+    setCustomColors(newColors);
+  };
+
+  const addCustomColor = () => {
+    if (customColors.length < 8) {
+      setCustomColors([...customColors, ""]);
+    }
+  };
+
+  const removeCustomColor = (index: number) => {
+    if (customColors.length > 1) {
+      setCustomColors(customColors.filter((_, i) => i !== index));
     }
   };
 
@@ -154,58 +186,58 @@ export default function AIGeneratorPanel({
       defaultPosition={{ x: 50, y: 150 }}
       onClose={onClose}
     >
-      <div className="w-[380px] bg-[#1a1a1a] text-white rounded-lg">
+      <div className="w-[380px] bg-background border border-border rounded-lg">
         {/* Header Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/10">
+          <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-border">
             <TabsList className="grid w-fit grid-cols-2 bg-transparent gap-4 p-0">
               <TabsTrigger 
                 value="generator"
-                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
+                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=inactive]:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-2"
               >
                 Description
               </TabsTrigger>
               <TabsTrigger 
                 value="history"
-                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 rounded-none px-0 pb-2"
+                className="text-sm data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=inactive]:text-muted-foreground data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-0 pb-2"
               >
                 History
               </TabsTrigger>
             </TabsList>
           </div>
 
-          <TabsContent value="generator" className="p-4 space-y-4 mt-0 bg-[#1a1a1a]">
-            {/* Description Section - Darker Container */}
-            <div className="bg-[#0a0a0a] border border-white/5 rounded-lg p-4 space-y-3">
+          <TabsContent value="generator" className="p-4 space-y-4 mt-0">
+            {/* Description Section */}
+            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
               {/* Description Label and AI Model Selector Row */}
               <div className="flex items-center justify-between gap-3">
-                <Label className="text-xs text-gray-400">Description</Label>
+                <Label className="text-xs text-muted-foreground">Description</Label>
                 <Select value={selectedModel} onValueChange={setSelectedModel}>
-                  <SelectTrigger className="w-[200px] h-8 text-xs bg-[#1a1a1a] border-white/10 text-white">
+                  <SelectTrigger className="w-[200px] h-8 text-xs bg-background border-border">
                     <SelectValue placeholder="Select AI Model" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#2a2a2a] border-white/10 z-50">
+                  <SelectContent className="bg-popover border-border z-50">
                     <SelectGroup>
-                      <SelectLabel className="text-gray-400">Claude (Anthropic)</SelectLabel>
-                      <SelectItem value="claude-sonnet-4-5" className="text-white hover:bg-white/10">
+                      <SelectLabel className="text-muted-foreground">Claude (Anthropic)</SelectLabel>
+                      <SelectItem value="claude-sonnet-4-5">
                         Claude Sonnet 4.5 (Recommended)
                       </SelectItem>
-                      <SelectItem value="claude-opus-4-1" className="text-white hover:bg-white/10">
+                      <SelectItem value="claude-opus-4-1">
                         Claude Opus 4.1 (Most Powerful)
                       </SelectItem>
                     </SelectGroup>
-                    <SelectSeparator className="bg-white/10" />
+                    <SelectSeparator />
                     <SelectGroup>
-                      <SelectLabel className="text-gray-400">GPT-5 Series (OpenAI)</SelectLabel>
-                      <SelectItem value="gpt-5" className="text-white hover:bg-white/10">GPT-5 (Flagship)</SelectItem>
-                      <SelectItem value="gpt-5-mini" className="text-white hover:bg-white/10">GPT-5 Mini (Fast & Efficient)</SelectItem>
-                      <SelectItem value="gpt-5-nano" className="text-white hover:bg-white/10">GPT-5 Nano (Fastest)</SelectItem>
+                      <SelectLabel className="text-muted-foreground">GPT-5 Series (OpenAI)</SelectLabel>
+                      <SelectItem value="gpt-5">GPT-5 (Flagship)</SelectItem>
+                      <SelectItem value="gpt-5-mini">GPT-5 Mini (Fast & Efficient)</SelectItem>
+                      <SelectItem value="gpt-5-nano">GPT-5 Nano (Fastest)</SelectItem>
                     </SelectGroup>
-                    <SelectSeparator className="bg-white/10" />
+                    <SelectSeparator />
                     <SelectGroup>
-                      <SelectLabel className="text-gray-400">O-Series (Reasoning Models)</SelectLabel>
-                      <SelectItem value="o3" className="text-white hover:bg-white/10">O3 (Deep Reasoning)</SelectItem>
-                      <SelectItem value="o4-mini" className="text-white hover:bg-white/10">O4 Mini (Fast Reasoning)</SelectItem>
+                      <SelectLabel className="text-muted-foreground">O-Series (Reasoning Models)</SelectLabel>
+                      <SelectItem value="o3">O3 (Deep Reasoning)</SelectItem>
+                      <SelectItem value="o4-mini">O4 Mini (Fast Reasoning)</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -215,7 +247,7 @@ export default function AIGeneratorPanel({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Ask Drawtir to create..."
-                className="min-h-[80px] text-sm resize-none bg-black border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-white/20"
+                className="min-h-[80px] text-sm resize-none bg-background border-border placeholder:text-muted-foreground"
               />
               
               {/* Upload Image & Generate Button Row */}
@@ -256,7 +288,7 @@ export default function AIGeneratorPanel({
                 
                 <label
                   htmlFor="ai-image-upload"
-                  className="flex items-center justify-center gap-2 px-3 h-8 bg-transparent border border-dashed border-white/30 rounded-md cursor-pointer hover:bg-white/5 transition-colors text-xs text-white"
+                  className="flex items-center justify-center gap-2 px-3 h-8 bg-transparent border border-dashed border-border rounded-md cursor-pointer hover:bg-muted transition-colors text-xs"
                 >
                   <Upload className="h-3.5 w-3.5" />
                   <span>Upload Image</span>
@@ -265,7 +297,7 @@ export default function AIGeneratorPanel({
                 <Button 
                   onClick={handleGenerate} 
                   disabled={isGenerating || !description.trim()} 
-                  className="h-8 px-4 text-xs bg-[#2563eb] hover:bg-[#1d4ed8] text-white rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-8 px-4 text-xs"
                 >
                   <Sparkles className="h-3.5 w-3.5 mr-1.5" />
                   {isGenerating ? (
@@ -281,12 +313,12 @@ export default function AIGeneratorPanel({
             {captionImage && captionImage.length > 0 && (
               <div className="grid grid-cols-3 gap-2">
                 {captionImage.map((img, idx) => (
-                  <div key={idx} className="relative bg-[#2a2a2a] rounded border border-white/10">
+                  <div key={idx} className="relative bg-muted rounded border border-border">
                     <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-20 object-cover rounded" />
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                      className="absolute -top-1 -right-1 h-5 w-5 p-0 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full"
                       onClick={(e) => {
                         e.preventDefault();
                         setCaptionImage(captionImage.filter((_, i) => i !== idx));
@@ -299,53 +331,151 @@ export default function AIGeneratorPanel({
               </div>
             )}
 
-            {/* Color Palette Selection */}
-            <div className="bg-[#0a0a0a] border border-white/5 rounded-lg p-4 space-y-3">
-              <Label className="text-xs text-gray-400">Color Palette</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {colorPalettes.map((palette) => (
-                  <button
-                    key={palette.id}
-                    onClick={() => setSelectedPalette(palette.id)}
-                    className={`p-2 rounded-lg border transition-all ${
-                      selectedPalette === palette.id
-                        ? "border-blue-500 bg-blue-500/10"
-                        : "border-white/10 bg-[#1a1a1a] hover:bg-[#222]"
-                    }`}
-                  >
-                    <div className="text-xs font-medium text-white mb-1.5">{palette.name}</div>
-                    {palette.colors.length > 0 ? (
-                      <div className="flex gap-1">
-                        {palette.colors.map((color, idx) => (
+            {/* Color Palette Selection - Accordion Style */}
+            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+              <Label className="text-xs text-muted-foreground">Color Palette</Label>
+              
+              {/* Selected Palette Display */}
+              {selectedPalette && (
+                <div className="p-2 rounded-lg border border-primary bg-primary/10">
+                  <div className="text-xs font-medium mb-1.5">
+                    {colorPalettes.find(p => p.id === selectedPalette)?.name || "Custom"}
+                  </div>
+                  {selectedPalette === "custom" ? (
+                    <div className="flex gap-1">
+                      {customColors.filter(c => c.trim() !== "").map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="flex-1 h-6 rounded border border-border"
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
+                      {colorPalettes.find(p => p.id === selectedPalette)?.colors.length ? (
+                        colorPalettes.find(p => p.id === selectedPalette)?.colors.map((color, idx) => (
                           <div
                             key={idx}
                             className="flex-1 h-6 rounded"
                             style={{ backgroundColor: color }}
                           />
+                        ))
+                      ) : (
+                        <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 w-full" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Palette Accordion */}
+              <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue}>
+                <AccordionItem value="palettes" className="border-border">
+                  <AccordionTrigger className="text-xs py-2 hover:no-underline">
+                    Change Palette
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-2">
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {colorPalettes.map((palette) => (
+                        <button
+                          key={palette.id}
+                          onClick={() => {
+                            setSelectedPalette(palette.id);
+                            setAccordionValue("");
+                          }}
+                          className={`p-2 rounded-lg border transition-all ${
+                            selectedPalette === palette.id
+                              ? "border-primary bg-primary/10"
+                              : "border-border bg-background hover:bg-muted"
+                          }`}
+                        >
+                          <div className="text-xs font-medium mb-1.5">{palette.name}</div>
+                          {palette.colors.length > 0 ? (
+                            <div className="flex gap-1">
+                              {palette.colors.map((color, idx) => (
+                                <div
+                                  key={idx}
+                                  className="flex-1 h-6 rounded"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
+                          )}
+                        </button>
+                      ))}
+                      
+                      {/* Custom Palette Option */}
+                      <button
+                        onClick={() => {
+                          setSelectedPalette("custom");
+                          setAccordionValue("");
+                        }}
+                        className={`p-2 rounded-lg border transition-all ${
+                          selectedPalette === "custom"
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-background hover:bg-muted"
+                        }`}
+                      >
+                        <div className="text-xs font-medium mb-1.5">Custom</div>
+                        <div className="h-6 rounded bg-gradient-to-r from-gray-300 to-gray-600" />
+                      </button>
+                    </div>
+                    
+                    {/* Custom Color Inputs */}
+                    {selectedPalette === "custom" && (
+                      <div className="mt-3 space-y-2">
+                        <Label className="text-xs text-muted-foreground">Custom Colors (hex codes)</Label>
+                        {customColors.map((color, idx) => (
+                          <div key={idx} className="flex gap-2">
+                            <Input
+                              value={color}
+                              onChange={(e) => handleCustomColorChange(idx, e.target.value)}
+                              placeholder="#FFFFFF"
+                              className="h-8 text-xs"
+                            />
+                            {customColors.length > 1 && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={() => removeCustomColor(idx)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         ))}
+                        {customColors.length < 8 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs w-full"
+                            onClick={addCustomColor}
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Color
+                          </Button>
+                        )}
                       </div>
-                    ) : (
-                      <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
                     )}
-                  </button>
-                ))}
-              </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
             {/* Generation Preferences */}
             <div>
-              <Label className="text-xs mb-2 block text-gray-400">Generation Preferences</Label>
+              <Label className="text-xs mb-2 block text-muted-foreground">Generation Preferences</Label>
               <div className="flex flex-wrap gap-2">
                 {generationTypes.map((type) => (
                   <Button
                     key={type.id}
                     variant={selectedGenerationType === type.id ? "default" : "outline"}
                     size="sm"
-                    className={`h-8 text-xs rounded-full transition-colors ${
-                      selectedGenerationType === type.id
-                        ? "bg-blue-600 hover:bg-blue-700 text-white border-0"
-                        : "bg-[#2a2a2a] hover:bg-[#333] text-gray-300 border-white/10"
-                    } ${type.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`h-8 text-xs rounded-full ${type.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                     disabled={type.disabled}
                     onClick={() => !type.disabled && setSelectedGenerationType(type.id)}
                   >
@@ -353,14 +483,14 @@ export default function AIGeneratorPanel({
                   </Button>
                 ))}
               </div>
-              <p className="text-[10px] text-gray-500 mt-2">
+              <p className="text-[10px] text-muted-foreground mt-2">
                 Select Multiple to produce multi-modal agents
               </p>
             </div>
 
             {/* Progress indicator */}
             {isGenerating && generationProgress && (
-              <div className="text-xs text-gray-400 mt-2 p-3 bg-[#2a2a2a] rounded-md border border-white/10">
+              <div className="text-xs text-muted-foreground mt-2 p-3 bg-muted rounded-md border border-border">
                 {generationProgress}
               </div>
             )}
@@ -371,26 +501,26 @@ export default function AIGeneratorPanel({
                 {conversations.slice(0, 2).map((conv) => (
                   <div
                     key={conv.id}
-                    className="p-3 bg-[#0a0a0a] border border-white/5 rounded-lg hover:bg-[#111] transition-colors cursor-pointer"
+                    className="p-3 bg-muted/30 border border-border rounded-lg hover:bg-muted transition-colors cursor-pointer"
                     onClick={() => handleRestore(conv)}
                   >
                     <div className="flex items-start gap-2 mb-1">
-                      <Sparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
+                      <Sparkles className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <span className="text-sm font-medium text-white truncate block">{conv.title}</span>
+                        <span className="text-sm font-medium truncate block">{conv.title}</span>
                         {conv.description && (
-                          <p className="text-xs text-gray-400 line-clamp-2 mt-0.5">
+                          <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
                             {conv.description}
                           </p>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center justify-between mt-2 text-[10px] text-gray-500">
+                    <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
                       <span>{formatDate(conv.created_at)}</span>
                       <div className="flex gap-2">
-                        <button className="hover:text-white transition-colors">Preview</button>
-                        <button className="hover:text-white transition-colors">Restore</button>
-                        <button className="hover:text-white transition-colors">Code</button>
+                        <button className="hover:text-foreground transition-colors">Preview</button>
+                        <button className="hover:text-foreground transition-colors">Restore</button>
+                        <button className="hover:text-foreground transition-colors">Code</button>
                       </div>
                     </div>
                   </div>
@@ -403,13 +533,13 @@ export default function AIGeneratorPanel({
             <ScrollArea className="h-[500px]">
               {isLoadingConversations ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="text-sm text-gray-400">Loading...</div>
+                  <div className="text-sm text-muted-foreground">Loading...</div>
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <Clock className="h-10 w-10 text-gray-600 mb-3" />
-                  <p className="text-sm text-gray-400">No past conversations yet</p>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <Clock className="h-10 w-10 text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">No past conversations yet</p>
+                  <p className="text-xs text-muted-foreground mt-1">
                     Generate designs to see them here
                   </p>
                 </div>
@@ -418,20 +548,20 @@ export default function AIGeneratorPanel({
                   {conversations.map((conv) => (
                     <div
                       key={conv.id}
-                      className="p-3 bg-[#2a2a2a] border border-white/10 rounded-lg hover:bg-[#333] transition-colors"
+                      className="p-3 bg-muted border border-border rounded-lg hover:bg-muted/80 transition-colors"
                     >
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <Sparkles className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                            <span className="text-sm font-medium text-white truncate">{conv.title}</span>
+                            <Sparkles className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                            <span className="text-sm font-medium truncate">{conv.title}</span>
                           </div>
                           {conv.description && (
-                            <p className="text-xs text-gray-400 line-clamp-2 mb-1">
+                            <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
                               {conv.description}
                             </p>
                           )}
-                          <p className="text-[10px] text-gray-500">
+                          <p className="text-[10px] text-muted-foreground">
                             {formatDate(conv.created_at)}
                           </p>
                         </div>
@@ -441,7 +571,7 @@ export default function AIGeneratorPanel({
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 h-8 text-xs bg-transparent border-white/10 text-white hover:bg-white/5"
+                          className="flex-1 h-8 text-xs"
                           onClick={() => handleRestore(conv)}
                         >
                           <RotateCcw className="h-3 w-3 mr-1" />
@@ -450,7 +580,7 @@ export default function AIGeneratorPanel({
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="h-8 w-8 p-0 text-gray-400 hover:text-white hover:bg-white/5"
+                          className="h-8 w-8 p-0"
                           onClick={() => {
                             toast.info("Preview feature coming soon!");
                           }}
