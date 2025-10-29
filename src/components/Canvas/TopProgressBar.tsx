@@ -1,5 +1,3 @@
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 
 interface TopProgressBarProps {
@@ -12,53 +10,49 @@ export default function TopProgressBar({ isVisible, message, progress }: TopProg
   if (!isVisible) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-      {/* Beautiful glassmorphic card */}
-      <div className="mx-auto max-w-3xl mt-6 px-4">
-        <div className="backdrop-blur-2xl bg-gradient-to-br from-background/95 to-background/90 border border-border/60 rounded-2xl shadow-2xl overflow-hidden">
-          {/* Content */}
-          <div className="px-6 py-5 space-y-3">
-            {/* Message with icon */}
-            <div className="flex items-center justify-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary animate-pulse" />
-              <p className="text-base font-semibold text-foreground">
-                {message}
-              </p>
-            </div>
-            
-            {/* Thicker progress bar with gradient */}
-            <div className="relative">
-              <div className="h-2.5 w-full bg-muted/50 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-primary via-primary/90 to-primary rounded-full transition-all duration-300 ease-out relative overflow-hidden"
-                  style={{ width: `${progress}%` }}
-                >
-                  {/* Animated shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" 
-                       style={{ 
-                         backgroundSize: '200% 100%',
-                         animation: 'shimmer 2s infinite'
-                       }}
-                  />
-                </div>
-              </div>
-              
-              {/* Progress percentage */}
-              <div className="absolute -right-12 top-1/2 -translate-y-1/2">
-                <span className="text-xs font-medium text-muted-foreground">
-                  {Math.round(progress)}%
-                </span>
-              </div>
-            </div>
-          </div>
+    <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none animate-in fade-in slide-in-from-top-4 duration-500">
+      {/* Message floating above */}
+      <div className="flex items-center justify-center gap-2 py-3">
+        <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+        <p className="text-sm font-semibold text-foreground drop-shadow-lg">
+          {message}
+        </p>
+      </div>
+      
+      {/* Progress bar card - the card IS the progress */}
+      <div className="relative h-3 w-full overflow-hidden bg-muted/30 backdrop-blur-sm">
+        {/* Animated progress fill */}
+        <div 
+          className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-primary/90 transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        >
+          {/* Shimmer overlay */}
+          <div 
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+            style={{ 
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 2s infinite linear'
+            }}
+          />
+          
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-primary/20 blur-sm" />
+        </div>
+        
+        {/* Percentage indicator */}
+        <div 
+          className="absolute top-1/2 -translate-y-1/2 text-[10px] font-bold text-white mix-blend-difference transition-all duration-500"
+          style={{ left: `calc(${progress}% - 20px)` }}
+        >
+          {Math.round(progress)}%
         </div>
       </div>
       
-      {/* Add shimmer animation */}
+      {/* CSS for shimmer animation */}
       <style>{`
         @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+          from { background-position: -200% 0; }
+          to { background-position: 200% 0; }
         }
       `}</style>
     </div>
