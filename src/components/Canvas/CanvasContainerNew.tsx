@@ -426,7 +426,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationType: string = "freeform", model: string = "claude-sonnet-4-5") => {
+  const generateWithAI = async (generationType: string = "freeform", model: string = "claude-sonnet-4-5", colorPalette?: string) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -519,6 +519,7 @@ export default function CanvasContainerNew({
             canvasWidth,
             canvasHeight,
             model,
+            colorPalette,
           }),
         }
       );

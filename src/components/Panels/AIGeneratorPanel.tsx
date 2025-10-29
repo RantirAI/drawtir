@@ -22,7 +22,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationType: string, model: string) => Promise<void>;
+  onGenerate: (generationType: string, model: string, colorPalette?: string) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -57,6 +57,20 @@ export default function AIGeneratorPanel({
   const [selectedModel, setSelectedModel] = useState(() => {
     return localStorage.getItem('ai-poster-model') || 'claude-sonnet-4-5';
   });
+  const [selectedPalette, setSelectedPalette] = useState<string>("auto");
+
+  const colorPalettes = [
+    { id: "auto", name: "Auto Select", colors: [] },
+    { id: "energetic", name: "Energetic", colors: ["#FF6B35", "#F7931E", "#FDC830", "#F37335"] },
+    { id: "calm", name: "Calm", colors: ["#89B0AE", "#BEE3DB", "#FFD6BA", "#FEEAFA"] },
+    { id: "professional", name: "Professional", colors: ["#2C3E50", "#34495E", "#7F8C8D", "#BDC3C7"] },
+    { id: "playful", name: "Playful", colors: ["#FF6B9D", "#C06C84", "#6C5B7B", "#355C7D"] },
+    { id: "elegant", name: "Elegant", colors: ["#1A1A2E", "#16213E", "#0F3460", "#533483"] },
+    { id: "vibrant", name: "Vibrant", colors: ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0080"] },
+    { id: "sunset", name: "Sunset", colors: ["#FF6F61", "#FF9068", "#FFB088", "#FFC3A0"] },
+    { id: "ocean", name: "Ocean", colors: ["#006994", "#0582CA", "#00A6FB", "#7DCFB6"] },
+    { id: "neon", name: "Neon", colors: ["#39FF14", "#FF10F0", "#00F0FF", "#FFD700"] },
+  ];
 
   // Save model preference
   useEffect(() => {
@@ -106,7 +120,7 @@ export default function AIGeneratorPanel({
   }, [activeTab, projectId]);
 
   const handleGenerate = async () => {
-    await onGenerate(selectedGenerationType, selectedModel);
+    await onGenerate(selectedGenerationType, selectedModel, selectedPalette !== "auto" ? selectedPalette : undefined);
     // Reload conversations after generation
     if (projectId) {
       loadConversations();
@@ -284,6 +298,39 @@ export default function AIGeneratorPanel({
                 ))}
               </div>
             )}
+
+            {/* Color Palette Selection */}
+            <div className="bg-[#0a0a0a] border border-white/5 rounded-lg p-4 space-y-3">
+              <Label className="text-xs text-gray-400">Color Palette</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {colorPalettes.map((palette) => (
+                  <button
+                    key={palette.id}
+                    onClick={() => setSelectedPalette(palette.id)}
+                    className={`p-2 rounded-lg border transition-all ${
+                      selectedPalette === palette.id
+                        ? "border-blue-500 bg-blue-500/10"
+                        : "border-white/10 bg-[#1a1a1a] hover:bg-[#222]"
+                    }`}
+                  >
+                    <div className="text-xs font-medium text-white mb-1.5">{palette.name}</div>
+                    {palette.colors.length > 0 ? (
+                      <div className="flex gap-1">
+                        {palette.colors.map((color, idx) => (
+                          <div
+                            key={idx}
+                            className="flex-1 h-6 rounded"
+                            style={{ backgroundColor: color }}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {/* Generation Preferences */}
             <div>

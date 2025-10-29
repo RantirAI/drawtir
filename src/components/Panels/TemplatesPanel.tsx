@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Layout } from "lucide-react";
+import { Layout, Eye } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { useTemplates } from "@/hooks/useTemplates";
 import { starterTemplates } from "@/data/starterTemplates";
+import PreviewDialog from "@/components/Canvas/PreviewDialog";
 
 interface TemplatesPanelProps {
   onRestoreTemplate: (snapshot: CanvasSnapshot) => void;
@@ -17,6 +18,8 @@ export default function TemplatesPanel({
   onClose,
 }: TemplatesPanelProps) {
   const { templates, isLoading: isLoadingTemplates, loadTemplates } = useTemplates();
+  const [previewFrame, setPreviewFrame] = useState<any>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   useEffect(() => {
     loadTemplates();
@@ -25,6 +28,14 @@ export default function TemplatesPanel({
   const handleTemplateClick = (snapshot: CanvasSnapshot, name: string) => {
     onRestoreTemplate(snapshot);
     toast.success(`Template loaded: ${name}`);
+  };
+
+  const handlePreview = (snapshot: CanvasSnapshot, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (snapshot.frames && snapshot.frames.length > 0) {
+      setPreviewFrame(snapshot.frames[0]);
+      setPreviewOpen(true);
+    }
   };
 
   return (
@@ -46,6 +57,14 @@ export default function TemplatesPanel({
                     onClick={() => handleTemplateClick(template.snapshot, template.name)}
                     className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                   >
+                    {/* Preview Button */}
+                    <button
+                      onClick={(e) => handlePreview(template.snapshot, e)}
+                      className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Preview template"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
                     {/* Preview */}
                     <div className="absolute inset-0 p-3">
                       <div 
@@ -90,6 +109,14 @@ export default function TemplatesPanel({
                       onClick={() => handleTemplateClick(template.canvas_data, template.project_name)}
                       className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                     >
+                      {/* Preview Button */}
+                      <button
+                        onClick={(e) => handlePreview(template.canvas_data, e)}
+                        className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Preview template"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
                       {/* Preview */}
                       {template.thumbnail_url ? (
                         <img 
@@ -126,6 +153,11 @@ export default function TemplatesPanel({
           </div>
         </ScrollArea>
       </div>
+      <PreviewDialog
+        open={previewOpen}
+        onOpenChange={setPreviewOpen}
+        frame={previewFrame}
+      />
     </DraggablePanel>
   );
 }

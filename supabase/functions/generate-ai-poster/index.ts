@@ -222,7 +222,8 @@ serve(async (req) => {
       analysisType, 
       canvasWidth = 800, 
       canvasHeight = 1200,
-      model = 'claude-sonnet-4-5' // Default model
+      model = 'claude-sonnet-4-5', // Default model
+      colorPalette // Optional color palette preference
     } = await req.json();
     
     console.log('AI Poster Generation - Model:', model, 'Type:', analysisType);
@@ -274,6 +275,13 @@ serve(async (req) => {
       playful: /playful|fun|colorful|whimsical|cheerful/i.test(prompt),
     };
 
+    // Apply palette preference if provided
+    let paletteGuidance = '';
+    if (colorPalette && COLOR_PALETTES[colorPalette]) {
+      const colors = COLOR_PALETTES[colorPalette];
+      paletteGuidance = `\n\nCOLOR PALETTE REQUIREMENT: Use ONLY these colors from the ${colorPalette} palette: ${colors.join(', ')}. These colors MUST be used in your design.`;
+    }
+
     // Apply conditional style guidance
     let styleGuidance = '';
     if (keywords.professional) {
@@ -324,7 +332,7 @@ TASK: Create a professional poster using ${images.length > 1 ? `these ${images.l
 USER REQUEST: "${prompt || 'Create an eye-catching poster'}"
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px
-${styleGuidance}
+${styleGuidance}${paletteGuidance}
 
 DESIGN REQUIREMENTS:
 - Choose a mood-based color palette that complements the image
@@ -356,7 +364,7 @@ TASK: Create a professional poster design.
 USER REQUEST: "${prompt}"
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px
-${styleGuidance}
+${styleGuidance}${paletteGuidance}
 
 SIZING GUIDELINES:
 - Titles: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
