@@ -83,15 +83,16 @@ export default function EditorTopBar({
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
-            className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/80 to-primary/70 transition-all duration-500 ease-out"
+            className="absolute inset-0 bg-primary transition-all duration-500 ease-out"
             style={{ 
               width: `${generationProgress}%`,
-              transformOrigin: 'left'
+              transformOrigin: 'left',
+              mixBlendMode: 'difference'
             }}
           >
             {/* Shimmer effect */}
             <div 
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
               style={{ 
                 backgroundSize: '200% 100%',
                 animation: 'shimmer 2s infinite linear'
