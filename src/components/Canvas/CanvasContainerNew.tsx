@@ -24,7 +24,7 @@ import { exportFrames } from "@/lib/exportUtils";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
-import GenerationProgressOverlay from "./GenerationProgressOverlay";
+import TopProgressBar from "./TopProgressBar";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -2691,13 +2691,11 @@ export default function CanvasContainerNew({
         frame={selectedFrame}
       />
 
-      {/* Generation Progress Overlay */}
-      <GenerationProgressOverlay
+      {/* Top Progress Bar */}
+      <TopProgressBar
         isVisible={isGenerating}
-        currentStep={generationProgress}
+        message={generationProgress}
         progress={generationProgressPercent}
-        totalSteps={generationSteps.length}
-        steps={generationSteps}
       />
 
       <DrawtirFooter />
