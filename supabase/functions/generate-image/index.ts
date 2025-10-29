@@ -102,6 +102,8 @@ Style: Professional poster-quality imagery with strong visual appeal.`
 
     // Save to media library if user is authenticated
     const authHeader = req.headers.get('Authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (authHeader) {
       try {
         const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.7.1');
@@ -111,11 +113,15 @@ Style: Professional poster-quality imagery with strong visual appeal.`
           { global: { headers: { Authorization: authHeader } } }
         );
 
-        const { data: { user } } = await supabaseClient.auth.getUser();
+        console.log('Attempting to get user...');
+        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
         
-        if (user) {
+        if (userError) {
+          console.error('Error getting user:', userError);
+        } else if (user) {
+          console.log('User authenticated, saving to media library...');
           const fileName = `ai-generated-${Date.now()}.png`;
-          await supabaseClient.from('media_library').insert({
+          const { error: insertError } = await supabaseClient.from('media_library').insert({
             user_id: user.id,
             file_name: fileName,
             file_url: imageUrl,
@@ -123,11 +129,20 @@ Style: Professional poster-quality imagery with strong visual appeal.`
             source: 'ai-generated',
             metadata: { prompt }
           });
-          console.log('Saved to media library for user:', user.id);
+          
+          if (insertError) {
+            console.error('Error inserting to media library:', insertError);
+          } else {
+            console.log('✅ Successfully saved to media library for user:', user.id);
+          }
+        } else {
+          console.log('No user found from auth header');
         }
       } catch (error) {
-        console.error('Failed to save to media library:', error);
+        console.error('Exception saving to media library:', error);
       }
+    } else {
+      console.log('No authorization header, skipping media library save');
     }
 
     return new Response(

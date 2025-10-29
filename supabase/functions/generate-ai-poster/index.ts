@@ -267,6 +267,41 @@ Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/ca
       if (generatedImage) {
         generatedImageBase64 = generatedImage;
         console.log('Successfully generated image with AI');
+        
+        // Save to media library if user is authenticated
+        const authHeader = req.headers.get('Authorization');
+        if (authHeader) {
+          try {
+            const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.7.1');
+            const supabaseClient = createClient(
+              Deno.env.get('SUPABASE_URL') ?? '',
+              Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+              { global: { headers: { Authorization: authHeader } } }
+            );
+
+            const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+            
+            if (!userError && user) {
+              const fileName = `ai-generated-poster-${Date.now()}.png`;
+              const { error: insertError } = await supabaseClient.from('media_library').insert({
+                user_id: user.id,
+                file_name: fileName,
+                file_url: generatedImage,
+                file_type: 'image/png',
+                source: 'ai-generated',
+                metadata: { prompt, context: 'poster-generation' }
+              });
+              
+              if (!insertError) {
+                console.log('✅ Saved generated poster image to media library');
+              } else {
+                console.error('Error saving to media library:', insertError);
+              }
+            }
+          } catch (error) {
+            console.error('Exception saving to media library:', error);
+          }
+        }
       } else {
         console.warn('No image returned from AI generation');
       }
@@ -651,44 +686,46 @@ Return JSON (COMPLETE structure, NO nested frames):
             // Parse final result with robust error handling
             let designSpec;
             try {
-              // Remove any markdown code blocks
-              let cleanContent = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+              // Remove any markdown code blocks and extra text
+              let cleanContent = fullContent
+                .replace(/```json\n?/g, '')
+                .replace(/```\n?/g, '')
+                .replace(/^[^{]*/, '') // Remove everything before the first {
+                .replace(/\}[^}]*$/, '}') // Remove everything after the last }
+                .trim();
               
-              // Try to extract JSON object - be more lenient with incomplete JSON
-              let jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-              if (!jsonMatch) {
-                console.error('No JSON object found in response');
+              console.log('Cleaned content length:', cleanContent.length);
+              console.log('Cleaned content preview (first 200 chars):', cleanContent.substring(0, 200));
+              
+              // Find the first complete JSON object by tracking braces
+              let braceCount = 0;
+              let jsonStart = -1;
+              let jsonEnd = -1;
+              
+              for (let i = 0; i < cleanContent.length; i++) {
+                if (cleanContent[i] === '{') {
+                  if (jsonStart === -1) jsonStart = i;
+                  braceCount++;
+                } else if (cleanContent[i] === '}') {
+                  braceCount--;
+                  if (braceCount === 0 && jsonStart !== -1) {
+                    jsonEnd = i + 1;
+                    break;
+                  }
+                }
+              }
+              
+              if (jsonStart === -1 || jsonEnd === -1) {
+                console.error('Could not find complete JSON object');
                 console.error('Full content:', fullContent.substring(0, 1000));
                 throw new Error('AI did not return a valid JSON object');
               }
               
-              let jsonStr = jsonMatch[0];
+              let jsonStr = cleanContent.substring(jsonStart, jsonEnd);
               
-              // Try to fix incomplete JSON by ensuring proper closing
-              const openBraces = (jsonStr.match(/\{/g) || []).length;
-              const closeBraces = (jsonStr.match(/\}/g) || []).length;
-              const openBrackets = (jsonStr.match(/\[/g) || []).length;
-              const closeBrackets = (jsonStr.match(/\]/g) || []).length;
-              
-              // Add missing closing brackets/braces
-              if (openBrackets > closeBrackets) {
-                jsonStr += ']'.repeat(openBrackets - closeBrackets);
-              }
-              if (openBraces > closeBraces) {
-                jsonStr += '}'.repeat(openBraces - closeBraces);
-              }
-              
-              // Clean up common JSON issues
-              jsonStr = jsonStr
-                .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
-                .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
-                .replace(/:\s*'([^']*)'/g, ': "$1"') // Convert single quotes to double quotes
-                .replace(/\n/g, ' ') // Remove newlines
-                .replace(/\s+/g, ' '); // Normalize whitespace
-              
-              console.log('Attempting to parse JSON (length:', jsonStr.length, ')');
-              console.log('First 300 chars:', jsonStr.substring(0, 300));
-              console.log('Last 300 chars:', jsonStr.substring(jsonStr.length - 300));
+              console.log('Extracted JSON string length:', jsonStr.length);
+              console.log('JSON preview (first 300 chars):', jsonStr.substring(0, 300));
+              console.log('JSON preview (last 300 chars):', jsonStr.substring(jsonStr.length - 300));
               
               designSpec = JSON.parse(jsonStr);
               
