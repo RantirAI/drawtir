@@ -410,7 +410,7 @@ export default function AIGeneratorPanel({
                   <AccordionTrigger className="text-xs py-2 hover:no-underline">
                     Change Palette
                   </AccordionTrigger>
-                  <AccordionContent className="pb-2">
+                  <AccordionContent className="pb-2 max-h-[400px] overflow-y-auto">
                     <div className="grid grid-cols-2 gap-2 mt-2">
                       {colorPalettes.map((palette) => (
                         <button
