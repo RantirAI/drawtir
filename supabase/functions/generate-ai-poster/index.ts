@@ -531,15 +531,42 @@ Return JSON (flat structure, NO nested frames):
               }
             }
 
-            // Parse final result
+            // Parse final result with robust error handling
             let designSpec;
             try {
-              const jsonMatch = fullContent.match(/```json\n([\s\S]*?)\n```/) || fullContent.match(/\{[\s\S]*\}/);
-              const jsonStr = jsonMatch ? (jsonMatch[1] || jsonMatch[0]) : fullContent;
+              // Remove any markdown code blocks
+              let cleanContent = fullContent.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+              
+              // Try to extract JSON object
+              const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+              if (!jsonMatch) {
+                console.error('No JSON object found in response');
+                console.error('Full content:', fullContent);
+                throw new Error('AI did not return a valid JSON object');
+              }
+              
+              let jsonStr = jsonMatch[0];
+              
+              // Clean up common JSON issues
+              jsonStr = jsonStr
+                .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+                .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2":') // Ensure property names are quoted
+                .replace(/:\s*'([^']*)'/g, ': "$1"') // Convert single quotes to double quotes
+                .replace(/\n/g, ' ') // Remove newlines
+                .replace(/\s+/g, ' '); // Normalize whitespace
+              
+              console.log('Attempting to parse JSON:', jsonStr.substring(0, 200) + '...');
               designSpec = JSON.parse(jsonStr);
+              
+              // Validate required fields
+              if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
+                throw new Error('Invalid design spec: missing elements array');
+              }
+              
             } catch (e) {
               console.error('Failed to parse AI response:', e);
-              throw new Error('AI generated invalid design specification');
+              console.error('Full response:', fullContent.substring(0, 500));
+              throw new Error(`AI generated invalid design specification: ${e instanceof Error ? e.message : 'Unknown error'}`);
             }
 
             console.log('Successfully generated poster with model:', model);
