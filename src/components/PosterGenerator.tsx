@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SliderWithControls } from "@/components/ui/slider-with-controls";
+import { MediaLibraryPanel } from "@/components/Panels/MediaLibraryPanel";
 
 type ImageStyle = "cover" | "contain" | "fill" | "scale-down" | "none";
 
@@ -64,6 +65,7 @@ export default function PosterGenerator() {
   const [linkUrl, setLinkUrl] = useState("");
   const [linkPosition, setLinkPosition] = useState<"top-left" | "top-right" | "bottom-left" | "bottom-right">("top-right");
   const [gradientIntensity, setGradientIntensity] = useState(80);
+  const [showMediaLibrary, setShowMediaLibrary] = useState(false);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -541,6 +543,9 @@ export default function PosterGenerator() {
                   ← Back to Edit Prompt
                 </Button>
                 <div className="flex gap-2">
+                  <Button onClick={() => setShowMediaLibrary(!showMediaLibrary)} variant="outline" size="sm">
+                    <FileImage className="w-4 h-4 mr-1" /> {showMediaLibrary ? 'Hide' : 'Show'} Media
+                  </Button>
                   <Button onClick={savePoster} disabled={isSaving} variant="outline" size="sm">
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> Save</>}
                   </Button>
@@ -551,7 +556,7 @@ export default function PosterGenerator() {
               </div>
 
               <Card className="border shadow-sm overflow-hidden">
-                <div className="grid lg:grid-cols-[280px,1fr,320px]">
+                <div className="grid" style={{ gridTemplateColumns: showMediaLibrary ? '280px 1fr 320px 280px' : '280px 1fr 320px' }}>
                   {/* Left Sidebar - Adjustments */}
                   <div className="border-r">
                     <div className="p-4 border-b">
@@ -1073,6 +1078,16 @@ export default function PosterGenerator() {
                       </div>
                     </ScrollArea>
                   </div>
+
+                  {/* Media Library Panel */}
+                  {showMediaLibrary && (
+                    <MediaLibraryPanel
+                      onSelectImage={(url) => {
+                        setImage(url);
+                        toast.success("Image selected from media library");
+                      }}
+                    />
+                  )}
                 </div>
               </Card>
             </div>

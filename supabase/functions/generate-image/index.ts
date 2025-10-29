@@ -100,6 +100,36 @@ Style: Professional poster-quality imagery with strong visual appeal.`
 
     console.log('Image generated successfully with Lovable AI');
 
+    // Save to media library if user is authenticated
+    const authHeader = req.headers.get('Authorization');
+    if (authHeader) {
+      try {
+        const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.7.1');
+        const supabaseClient = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+          { global: { headers: { Authorization: authHeader } } }
+        );
+
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        
+        if (user) {
+          const fileName = `ai-generated-${Date.now()}.png`;
+          await supabaseClient.from('media_library').insert({
+            user_id: user.id,
+            file_name: fileName,
+            file_url: imageUrl,
+            file_type: 'image/png',
+            source: 'ai-generated',
+            metadata: { prompt }
+          });
+          console.log('Saved to media library for user:', user.id);
+        }
+      } catch (error) {
+        console.error('Failed to save to media library:', error);
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         image: imageUrl,
