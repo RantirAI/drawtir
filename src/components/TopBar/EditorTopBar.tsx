@@ -83,7 +83,7 @@ export default function EditorTopBar({
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
-            className="absolute inset-0 bg-gradient-to-r from-primary/30 via-primary/40 to-primary/30 transition-all duration-500 ease-out"
+            className="absolute inset-0 bg-gradient-to-r from-primary/70 via-primary/80 to-primary/70 transition-all duration-500 ease-out"
             style={{ 
               width: `${generationProgress}%`,
               transformOrigin: 'left'
