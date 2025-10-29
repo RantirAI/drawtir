@@ -446,6 +446,13 @@ export default function CanvasContainerNew({
     setGenerationProgress(`Starting generation with ${model}...`);
     setGenerationProgressPercent(0);
     
+    // Notify user that new elements will be added to existing design
+    const currentFrame = frames.find(f => f.id === selectedFrameId);
+    const existingElementCount = currentFrame?.elements?.length || 0;
+    if (existingElementCount > 0) {
+      toast.success(`Adding new elements to your design (${existingElementCount} existing elements will be preserved)`);
+    }
+    
     // Initialize generation steps based on selected types
     const steps = [];
     const shouldGenerateImage = generationTypes.includes("generate-image");
@@ -665,17 +672,28 @@ export default function CanvasContainerNew({
                       strokeWidth: 0,
                       borderRadius: borderRadius,
                     };
+                  } else if (el.type === "image") {
+                    newElement = {
+                      ...baseElement,
+                      imageUrl: el.imageUrl || el.src || "",
+                      imageFit: "cover",
+                      brightness: 100,
+                      contrast: 100,
+                      saturation: 100,
+                      blur: 0,
+                      cornerRadius: borderRadius,
+                    };
                   }
 
                   if (newElement) {
-                    // Add element to the current frame
+                    // Add element to the current frame (building on top of existing design)
                     setFrames(prevFrames => prevFrames.map(f => {
                       if (f.id === selectedFrameId) {
                         return { ...f, elements: [...(f.elements || []), newElement] };
                       }
                       return f;
                     }));
-                    console.log(`Added element ${data.index + 1}:`, el.type);
+                    console.log(`Added element ${data.index + 1} on top of existing design:`, el.type);
                   }
                 }
               } else if (data.type === 'progress') {
