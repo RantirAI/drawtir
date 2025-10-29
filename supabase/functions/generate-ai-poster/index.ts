@@ -60,138 +60,142 @@ const MODEL_CONFIGS: Record<string, any> = {
   },
 };
 
-// Curated color palettes
+// Curated color palettes - MODERN & VIBRANT
 const COLOR_PALETTES: Record<string, string[]> = {
-  energetic: ["#FF6B35", "#F7931E", "#FDC830", "#F37335"],
-  calm: ["#89B0AE", "#BEE3DB", "#FFD6BA", "#FEEAFA"],
-  professional: ["#2C3E50", "#34495E", "#7F8C8D", "#BDC3C7"],
-  playful: ["#FF6B9D", "#C06C84", "#6C5B7B", "#355C7D"],
-  elegant: ["#1A1A2E", "#16213E", "#0F3460", "#533483"],
-  vibrant: ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0080"],
-  earth: ["#8B7355", "#C19A6B", "#D4AF37", "#B87333"],
-  ocean: ["#006994", "#0582CA", "#00A6FB", "#7DCFB6"],
-  sunset: ["#FF6F61", "#FF9068", "#FFB088", "#FFC3A0"],
-  forest: ["#2D4B32", "#4A7C59", "#6FAE7C", "#8FBC8F"],
-  neon: ["#39FF14", "#FF10F0", "#00F0FF", "#FFD700"],
-  pastel: ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9"],
+  neonPop: ["#FF006E", "#8338EC", "#3A86FF", "#FFBE0B"],
+  cyberpunk: ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0080"],
+  modernGradient: ["#667EEA", "#764BA2", "#F093FB", "#F5576C"],
+  tropical: ["#FF6B9D", "#FEC859", "#00DFA2", "#0079FF"],
+  sunset: ["#FF6B35", "#F7931E", "#FDC830", "#37306B"],
+  oceanWave: ["#00B4D8", "#0077B6", "#03045E", "#90E0EF"],
+  forest: ["#52B788", "#40916C", "#2D6A4F", "#B7E4C7"],
+  luxury: ["#FFD700", "#FF6B35", "#1A1A2E", "#E94560"],
+  bubblegum: ["#FFB6D9", "#D864A9", "#5E17EB", "#00D9FF"],
+  fire: ["#FF0080", "#FF4D00", "#FF8800", "#FFD600"],
+  tech: ["#00F5FF", "#8B5CF6", "#EC4899", "#F59E0B"],
+  nature: ["#10B981", "#059669", "#047857", "#D1FAE5"],
 };
 
 // Enhanced design system prompt with professional design principles
-const DESIGN_SYSTEM_PROMPT = `You are an award-winning poster designer with 20 years of experience creating magazine-quality, visually stunning designs.
+const DESIGN_SYSTEM_PROMPT = `You are an award-winning poster designer specialized in MODERN, VIBRANT, 2025-STYLE designs. Your designs must be INSTAGRAM-WORTHY and CONTEMPORARY.
 
-🎨 COLOR MASTERY:
-- Use bold, high-contrast color combinations for impact
-- Apply 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
-- Ensure WCAG AAA contrast (7:1 minimum for readability)
-- Color psychology: Red=energy/urgency, Blue=trust/calm, Yellow=optimism/warmth, Purple=luxury/creativity, Green=growth/nature
+🚨 CRITICAL RULES FOR 2025 DESIGN:
+- NEVER use plain black (#000000) backgrounds - use deep colors, gradients, or rich tones
+- ALWAYS use BOLD, SATURATED colors that POP on screen
+- CREATE visual hierarchy with SIZE, not just color
+- USE modern design trends: gradients, glassmorphism effects, bold typography
+- DESIGNS must look like they're from 2025, not 2005!
 
-CURATED COLOR PALETTES (use these!):
+🎨 MODERN COLOR MASTERY:
+- Use VIBRANT, SATURATED colors that catch attention immediately
+- Create STRONG contrast - make text JUMP off the background
+- Apply gradients for depth (use 2-3 colors from same family)
+- Popular 2025 schemes: Neon + Dark, Pastel + Bold Accent, Gradient Overlays
+- NEVER use: plain gray, washed out colors, low-contrast combinations
+
+MODERN COLOR PALETTES (CHOOSE ONE AND USE BOLDLY):
 ${Object.entries(COLOR_PALETTES).map(([mood, colors]) => `- ${mood}: ${colors.join(', ')}`).join('\n')}
 
-📐 LAYOUT PRINCIPLES:
-- Rule of thirds: Place key elements at 33% or 66% positions
-- Golden ratio (1.618): Create naturally pleasing proportions
-- Visual hierarchy: Largest → Medium → Smallest elements guide the eye
-- Whitespace: Minimum 60-80px margins, generous breathing room
-- Grid system: Use 8pt grid (16, 24, 32, 48, 64, 80px spacing)
-- Balance: Asymmetric layouts with intentional weight distribution
+📐 2025 LAYOUT PRINCIPLES:
+- ASYMMETRIC layouts with intentional imbalance
+- OVERLAPPING elements for depth and dynamism
+- LARGE typography (80-120px headlines minimum!)
+- Generous whitespace - let designs BREATHE
+- Break the grid intentionally for visual interest
+- Use DIAGONAL elements and angles
 
-✍️ TYPOGRAPHY RULES:
-- Display titles: 80-120px, weight 800-900, tight letter-spacing (-0.03em)
-- Headlines: 56-80px, weight 700-800, tight letter-spacing (-0.02em)
-- Subheadings: 36-56px, weight 600-700, normal spacing
-- Body text: 24-36px, weight 400-500, relaxed line-height (1.6)
-- Use maximum 2 font families per design
-- Create clear size hierarchy (minimum 2:1 ratio between levels)
+✍️ MODERN TYPOGRAPHY:
+- Display titles: 100-140px, weight 800-900, BOLD and THICK
+- Headlines: 64-96px, weight 700-800
+- Subheads: 40-56px, weight 600-700  
+- Body: 28-36px, weight 400-500
+- Use UPPERCASE for headlines to maximize impact
+- Mix font weights for visual interest
 
-🎯 DESIGN ELEMENTS:
-- Strategic shapes: Circles for focus/softness, rectangles for structure/stability
-- Icons from lucide-react: Use sparingly for visual interest (music, star, heart, trophy, sparkles, zap, award, crown)
-- Layering: Overlap shapes and text for depth
-- Alignment: Everything must snap to grid - no random positioning
-- Contrast: High contrast between text and background (never gray on gray)
+🎯 TRENDY DESIGN ELEMENTS:
+- Geometric shapes: circles, rounded rectangles (32px+ radius)
+- Colorful blobs and organic shapes
+- Icons as accent elements (lucide-react: sparkles, zap, star, heart, award, crown, rocket, trending-up)
+- Layered elements with transparency
+- Decorative lines and dividers (8-12px thickness)
 
-💡 PROFESSIONAL TECHNIQUES:
-1. Create immediate focal point (viewer's eye lands in <0.5 seconds)
-2. Use diagonal elements for energy and movement
-3. Strategic color blocking for visual impact
-4. Large bold numbers/dates as design elements
-5. Decorative shapes frame important content
-6. Overlap elements for depth and sophistication
-7. Generous whitespace makes designs breathe
-8. Consistent visual rhythm throughout
+💡 2025 DESIGN TECHNIQUES:
+1. GRADIENT backgrounds (2-3 colors, subtle or bold)
+2. Large TYPOGRAPHY as the main visual element
+3. Geometric shapes for structure and visual interest
+4. Strategic use of bright accent colors
+5. Overlapping layers create depth
+6. Generous padding and margins (80-120px)
+7. Bold color blocking
+8. Dynamic angles and rotations
 
 🏆 QUALITY CHECKLIST:
-✓ Clear visual hierarchy (obvious what to read first)
-✓ High contrast text (easily readable)
-✓ Harmonious color palette (3-4 colors max)
-✓ Perfect alignment (grid-snapped positioning)
-✓ Generous whitespace (not cramped)
-✓ Professional polish (no amateur mistakes)
-✓ Intentional composition (every element has purpose)`;
+✓ Looks modern and fresh (2025 style, not dated)
+✓ Uses VIBRANT, eye-catching colors
+✓ LARGE, bold typography
+✓ Strong visual hierarchy
+✓ Creative use of shapes and layers
+✓ Professional polish with contemporary feel
+✓ Instagram-worthy aesthetic
 
-// Few-shot learning with professional examples
+❌ AVOID AT ALL COSTS:
+- Plain black backgrounds
+- Small, timid typography
+- Dull, muted colors
+- Centered, boring layouts
+- Cramped spacing
+- Generic corporate look
+- Anything that looks "2002-ish"`;
+
+// Few-shot learning with MODERN, VIBRANT examples
 const DESIGN_EXAMPLES = `
-EXAMPLE 1 - Sports Championship (Bold & Dynamic):
+EXAMPLE 1 - Modern Business (Bold & Colorful):
 {
-  "title": "Championship Finals",
-  "backgroundColor": "#1a1a2e",
+  "title": "Business Innovation 2025",
+  "backgroundColor": "#667EEA",
   "elements": [
-    {"type": "shape", "x": 600, "y": 100, "width": 350, "height": 350, "color": "#00d9ff", "borderRadius": "50%", "shape": "circle"},
-    {"type": "text", "content": "CHAMPIONSHIP", "x": 80, "y": 200, "width": 640, "height": 90, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
-    {"type": "text", "content": "FINALS", "x": 80, "y": 300, "width": 640, "height": 110, "fontSize": 108, "fontWeight": "900", "color": "#00d9ff"},
-    {"type": "shape", "x": 80, "y": 430, "width": 480, "height": 6, "color": "#00d9ff", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "MARCH 15-17, 2025", "x": 80, "y": 470, "width": 640, "height": 45, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
-    {"type": "text", "content": "City Sports Arena", "x": 80, "y": 520, "width": 640, "height": 35, "fontSize": 26, "fontWeight": "400", "color": "#a8a8a8"},
-    {"type": "icon", "iconName": "trophy", "iconFamily": "lucide", "x": 90, "y": 900, "width": 70, "height": 70, "color": "#ffd700"},
-    {"type": "icon", "iconName": "star", "iconFamily": "lucide", "x": 180, "y": 900, "width": 70, "height": 70, "color": "#ffd700"}
+    {"type": "shape", "x": 500, "y": -100, "width": 600, "height": 600, "color": "#F5576C", "borderRadius": "50%", "shape": "circle"},
+    {"type": "text", "content": "INNOVATE", "x": 60, "y": 180, "width": 680, "height": 100, "fontSize": 96, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "text", "content": "GROW", "x": 60, "y": 290, "width": 680, "height": 100, "fontSize": 96, "fontWeight": "900", "color": "#FFD700"},
+    {"type": "text", "content": "SUCCEED", "x": 60, "y": 400, "width": 680, "height": 100, "fontSize": 96, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "shape", "x": 60, "y": 530, "width": 200, "height": 200, "color": "#FFBE0B", "borderRadius": "32px", "shape": "rectangle"},
+    {"type": "icon", "iconName": "rocket", "iconFamily": "lucide", "x": 100, "y": 580, "width": 120, "height": 120, "color": "#667EEA"},
+    {"type": "text", "content": "BUSINESS SOLUTIONS", "x": 60, "y": 760, "width": 680, "height": 50, "fontSize": 36, "fontWeight": "700", "color": "#FFFFFF"}
   ]
 }
-WHY IT WORKS: Oversized typography creates impact, circular shape adds energy, accent line creates structure, golden icons add prestige, dark background makes colors pop.
+WHY IT WORKS: Vibrant purple gradient background, oversized BOLD typography, bright yellow accent, large circular shape creates energy, modern rounded square with contrasting icon.
 
-EXAMPLE 2 - Concert Experience (Vibrant & Modern):
+EXAMPLE 2 - Event Poster (Neon & Dynamic):
 {
-  "title": "Summer Music Fest",
-  "backgroundColor": "#FF6B35",
+  "title": "Music Festival 2025",
+  "backgroundColor": "#1A1A2E",
   "elements": [
-    {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 400, "color": "#F7931E", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "SUMMER", "x": 80, "y": 150, "width": 640, "height": 95, "fontSize": 92, "fontWeight": "900", "color": "#FFFFFF"},
-    {"type": "text", "content": "MUSIC FEST", "x": 80, "y": 250, "width": 640, "height": 75, "fontSize": 72, "fontWeight": "700", "color": "#FDC830"},
-    {"type": "shape", "x": 300, "y": 500, "width": 200, "height": 200, "color": "#FFFFFF", "borderRadius": "50%", "shape": "circle"},
-    {"type": "icon", "iconName": "music", "iconFamily": "lucide", "x": 350, "y": 550, "width": 100, "height": 100, "color": "#FF6B35"},
-    {"type": "text", "content": "JULY 20-22 • OPEN AIR VENUE", "x": 80, "y": 850, "width": 640, "height": 40, "fontSize": 28, "fontWeight": "600", "color": "#FFFFFF"}
+    {"type": "shape", "x": 100, "y": 100, "width": 400, "height": 400, "color": "#FF00FF", "borderRadius": "50%", "shape": "circle"},
+    {"type": "shape", "x": 500, "y": 300, "width": 350, "height": 350, "color": "#00FFFF", "borderRadius": "50%", "shape": "circle"},
+    {"type": "text", "content": "SUMMER", "x": 80, "y": 500, "width": 640, "height": 110, "fontSize": 104, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "text", "content": "VIBES", "x": 80, "y": 620, "width": 640, "height": 110, "fontSize": 104, "fontWeight": "900", "color": "#FFFF00"},
+    {"type": "shape", "x": 80, "y": 760, "width": 12, "height": 180, "color": "#FF00FF", "borderRadius": "0", "shape": "rectangle"},
+    {"type": "text", "content": "JUNE 15-17", "x": 110, "y": 770, "width": 600, "height": 45, "fontSize": 32, "fontWeight": "700", "color": "#FFFFFF"},
+    {"type": "icon", "iconName": "sparkles", "iconFamily": "lucide", "x": 110, "y": 850, "width": 60, "height": 60, "color": "#FFFF00"}
   ]
 }
-WHY IT WORKS: Energetic orange gradients, massive bold typography, circular focal point with icon, clear date info, vibrant color scheme creates excitement.
+WHY IT WORKS: Dark background makes neon colors POP, overlapping circles create depth, huge typography dominates, bright accent stripe, electric yellow accent color.
 
-EXAMPLE 3 - Tech Product Launch (Minimal & Sophisticated):
+EXAMPLE 3 - Product Launch (Gradient & Modern):
 {
-  "title": "Product Launch",
-  "backgroundColor": "#0F1419",
+  "title": "Product Launch",  
+  "backgroundColor": "#8B5CF6",
   "elements": [
-    {"type": "shape", "x": 100, "y": 300, "width": 600, "height": 400, "color": "#16213E", "borderRadius": "32px", "shape": "rectangle"},
-    {"type": "text", "content": "NEXT", "x": 150, "y": 450, "width": 500, "height": 80, "fontSize": 76, "fontWeight": "300", "color": "#FFFFFF"},
-    {"type": "text", "content": "GENERATION", "x": 150, "y": 540, "width": 500, "height": 100, "fontSize": 96, "fontWeight": "800", "color": "#00F0FF"},
-    {"type": "icon", "iconName": "zap", "iconFamily": "lucide", "x": 650, "y": 200, "width": 80, "height": 80, "color": "#00F0FF"},
-    {"type": "text", "content": "Launch Event • March 2025", "x": 150, "y": 850, "width": 500, "height": 35, "fontSize": 24, "fontWeight": "400", "color": "#888888"}
+    {"type": "shape", "x": -100, "y": 800, "width": 500, "height": 500, "color": "#EC4899", "borderRadius": "50%", "shape": "circle"},
+    {"type": "shape", "x": 600, "y": -50, "width": 400, "height": 400, "color": "#F59E0B", "borderRadius": "50%", "shape": "circle"},
+    {"type": "text", "content": "NEW", "x": 80, "y": 120, "width": 640, "height": 80, "fontSize": 72, "fontWeight": "600", "color": "#FFFFFF"},
+    {"type": "text", "content": "ARRIVAL", "x": 80, "y": 210, "width": 640, "height": 130, "fontSize": 120, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "shape", "x": 80, "y": 370, "width": 320, "height": 320, "color": "#00F5FF", "borderRadius": "40px", "shape": "rectangle"},
+    {"type": "text", "content": "2025", "x": 140, "y": 460, "width": 200, "height": 140, "fontSize": 128, "fontWeight": "900", "color": "#8B5CF6"},
+    {"type": "icon", "iconName": "trending-up", "iconFamily": "lucide", "x": 80, "y": 750, "width": 80, "height": 80, "color": "#FFFFFF"}
   ]
 }
-WHY IT WORKS: Dark minimalist aesthetic, contrast between light/bold typography, neon accent color, rounded rectangle creates modern feel, strategic whitespace.
-
-EXAMPLE 4 - Elegant Event (Luxury & Clean):
-{
-  "title": "Gala Evening",
-  "backgroundColor": "#FAFAFA",
-  "elements": [
-    {"type": "text", "content": "ANNUAL", "x": 100, "y": 250, "width": 600, "height": 50, "fontSize": 44, "fontWeight": "300", "color": "#333333"},
-    {"type": "text", "content": "GALA", "x": 100, "y": 310, "width": 600, "height": 120, "fontSize": 112, "fontWeight": "700", "color": "#1A1A2E"},
-    {"type": "text", "content": "EVENING", "x": 100, "y": 440, "width": 600, "height": 70, "fontSize": 64, "fontWeight": "700", "color": "#1A1A2E"},
-    {"type": "shape", "x": 300, "y": 600, "width": 200, "height": 6, "color": "#D4AF37", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "Black Tie Optional", "x": 100, "y": 700, "width": 600, "height": 35, "fontSize": 28, "fontWeight": "400", "color": "#666666"},
-    {"type": "text", "content": "December 31, 2025", "x": 100, "y": 750, "width": 600, "height": 35, "fontSize": 28, "fontWeight": "400", "color": "#666666"}
-  ]
-}
-WHY IT WORKS: Light elegant background, sophisticated typography hierarchy, gold accent line adds luxury, generous whitespace, refined color palette.`;
+WHY IT WORKS: Rich purple background, overlapping colorful circles at edges, massive "ARRIVAL" text, cyan square with year creates focal point, modern rounded corners.`;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
