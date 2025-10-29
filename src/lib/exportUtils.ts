@@ -55,12 +55,21 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
 
   if (element.type === "text") {
     drawText(ctx, element, x, y);
-  } else if (element.type === "image" && element.imageUrl) {
-    const img = await loadImage(element.imageUrl);
-    ctx.globalAlpha = element.opacity ?? 1;
-    ctx.drawImage(img, x, y, width, height);
+  } else if (element.type === "image" && (element.imageUrl || (element as any).src)) {
+    const imgSrc = element.imageUrl || (element as any).src;
+    const img = await loadImage(imgSrc);
+    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    drawFittedImage(ctx, img, x, y, width, height, element.imageFit || "cover");
   } else if (element.type === "shape") {
     await drawShape(ctx, element, x, y, width, height);
+  } else if (element.type === "icon" && element.iconName) {
+    // Draw icon placeholder (icons need to be rendered differently)
+    ctx.fillStyle = element.fill || element.iconColor || "#000000";
+    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    ctx.font = `${width}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("★", x + width/2, y + height/2);
   } else if (element.type === "drawing" && element.pathData) {
     ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
@@ -371,12 +380,21 @@ async function drawAnimatedElement(
   // Draw the element
   if (element.type === "text") {
     drawText(ctx, element, x, y);
-  } else if (element.type === "image" && element.imageUrl) {
-    const img = await loadImage(element.imageUrl);
-    ctx.globalAlpha = element.opacity ?? 1;
-    ctx.drawImage(img, x, y, element.width, element.height);
+  } else if (element.type === "image" && (element.imageUrl || (element as any).src)) {
+    const imgSrc = element.imageUrl || (element as any).src;
+    const img = await loadImage(imgSrc);
+    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    drawFittedImage(ctx, img, x, y, element.width, element.height, element.imageFit || "cover");
   } else if (element.type === "shape") {
     await drawShape(ctx, element, x, y, element.width, element.height);
+  } else if (element.type === "icon" && element.iconName) {
+    // Draw icon placeholder
+    ctx.fillStyle = element.fill || element.iconColor || "#000000";
+    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    ctx.font = `${element.width}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("★", x + element.width/2, y + element.height/2);
   } else if (element.type === "drawing" && element.pathData) {
     ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
@@ -387,8 +405,17 @@ async function drawAnimatedElement(
 }
 
 function calculateAnimationProgress(element: Element, time: number): number {
-  const delay = (typeof element.animationDelay === 'number' ? element.animationDelay : 0) / 1000;
-  const duration = (typeof element.animationDuration === 'number' ? element.animationDuration : 1000) / 1000;
+  // Parse delay and duration strings (e.g., "0.5s", "500ms")
+  const parseTime = (val?: string | number): number => {
+    if (typeof val === 'number') return val / 1000;
+    if (!val) return 0;
+    if (val.endsWith('ms')) return parseFloat(val) / 1000;
+    if (val.endsWith('s')) return parseFloat(val);
+    return parseFloat(val) / 1000;
+  };
+  
+  const delay = parseTime(element.animationDelay);
+  const duration = parseTime(element.animationDuration) || 1;
   
   if (time < delay) return 0;
   if (time >= delay + duration) return 1;
@@ -487,9 +514,18 @@ async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<voi
   
   if (!recordCtx) throw new Error("Failed to get canvas context");
 
+  // Check for supported mime types
+  let mimeType = 'video/webm;codecs=vp9';
+  if (!MediaRecorder.isTypeSupported(mimeType)) {
+    mimeType = 'video/webm;codecs=vp8';
+    if (!MediaRecorder.isTypeSupported(mimeType)) {
+      mimeType = 'video/webm';
+    }
+  }
+
   const stream = recordCanvas.captureStream(fps);
   const mediaRecorder = new MediaRecorder(stream, {
-    mimeType: 'video/webm;codecs=vp9',
+    mimeType: mimeType,
     videoBitsPerSecond: 5000000,
   });
 
@@ -500,7 +536,7 @@ async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<voi
 
   return new Promise((resolve, reject) => {
     mediaRecorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' });
+      const blob = new Blob(chunks, { type: mimeType });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = `${frame.name || "frame"}.webm`;
@@ -510,23 +546,33 @@ async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<voi
       resolve();
     };
 
-    mediaRecorder.onerror = reject;
+    mediaRecorder.onerror = (e) => {
+      console.error("MediaRecorder error:", e);
+      reject(new Error("Failed to record video"));
+    };
+    
     mediaRecorder.start();
 
     let currentFrame = 0;
     const drawFrame = async () => {
-      if (currentFrame >= totalFrames) {
+      try {
+        if (currentFrame >= totalFrames) {
+          mediaRecorder.stop();
+          return;
+        }
+
+        const time = (currentFrame / totalFrames) * duration;
+        const frameCanvas = await captureFrameAtTime(frame, time, config.scale);
+        recordCtx.clearRect(0, 0, recordCanvas.width, recordCanvas.height);
+        recordCtx.drawImage(frameCanvas, 0, 0);
+
+        currentFrame++;
+        setTimeout(drawFrame, 1000 / fps);
+      } catch (error) {
+        console.error("Error drawing frame:", error);
         mediaRecorder.stop();
-        return;
+        reject(error);
       }
-
-      const time = (currentFrame / totalFrames) * duration;
-      const frameCanvas = await captureFrameAtTime(frame, time, config.scale);
-      recordCtx.clearRect(0, 0, recordCanvas.width, recordCanvas.height);
-      recordCtx.drawImage(frameCanvas, 0, 0);
-
-      currentFrame++;
-      setTimeout(drawFrame, 1000 / fps);
     };
 
     drawFrame();
