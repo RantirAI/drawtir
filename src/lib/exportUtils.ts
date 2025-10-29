@@ -374,33 +374,57 @@ async function drawAnimatedElement(
   const x = element.x - frame.x;
   const y = element.y - frame.y;
 
-  // Apply animation transformations based on time
-  if (element.animation && element.animation !== 'none') {
-    const progress = calculateAnimationProgress(element, time);
+  // Compute animation progress (0..1)
+  const hasAnim = element.animation && element.animation !== 'none';
+  const progress = hasAnim ? calculateAnimationProgress(element, time) : 1;
+
+  // Compute effective opacity (normalize 0..1), include fade effects
+  const normalizeOpacity = (val: number | undefined) => {
+    if (val === undefined || val === null) return 1;
+    return val > 1 ? Math.max(0, Math.min(1, val / 100)) : Math.max(0, Math.min(1, val));
+  };
+  const baseOpacity = normalizeOpacity(element.opacity);
+  let fadeAlpha = 1;
+  switch (element.animation) {
+    case 'fade-in':
+      fadeAlpha = progress;
+      break;
+    case 'fade-out':
+      fadeAlpha = 1 - progress;
+      break;
+    default:
+      fadeAlpha = 1;
+  }
+  const effectiveOpacity = Math.max(0, Math.min(1, baseOpacity * fadeAlpha));
+
+  // Apply transform for animations
+  if (hasAnim) {
     applyAnimationTransform(ctx, element, x, y, progress);
   }
 
-  // Draw the element
+  // Draw the element with effectiveOpacity
   if (element.type === "text") {
-    drawText(ctx, element, x, y);
+    const el = { ...element, opacity: effectiveOpacity } as Element;
+    drawText(ctx, el, x, y);
   } else if (element.type === "image" && (element.imageUrl || (element as any).src)) {
     const imgSrc = element.imageUrl || (element as any).src;
     const img = await loadImage(imgSrc);
-    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    ctx.globalAlpha = effectiveOpacity;
     drawFittedImage(ctx, img, x, y, element.width, element.height, element.imageFit || "cover");
   } else if (element.type === "shape") {
-    await drawShape(ctx, element, x, y, element.width, element.height);
+    const el = { ...element, opacity: effectiveOpacity } as Element;
+    await drawShape(ctx, el, x, y, element.width, element.height);
   } else if (element.type === "icon" && element.iconName) {
-    // Draw icon placeholder
     ctx.fillStyle = element.fill || element.iconColor || "#000000";
-    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    ctx.globalAlpha = effectiveOpacity;
     ctx.font = `${element.width}px Arial`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("★", x + element.width/2, y + element.height/2);
   } else if (element.type === "drawing" && element.pathData) {
     ctx.translate(-frame.x, -frame.y);
-    drawPenPath(ctx, element);
+    const el = { ...element, opacity: effectiveOpacity } as Element;
+    drawPenPath(ctx, el);
     ctx.translate(frame.x, frame.y);
   }
 
@@ -434,39 +458,56 @@ function applyAnimationTransform(
   y: number,
   progress: number
 ) {
-  const animation = element.animation;
-  if (!animation || animation === 'none') return;
+  const anim = element.animation;
+  if (!anim || anim === 'none') return;
 
+  // Move origin to element center
   ctx.translate(x + element.width / 2, y + element.height / 2);
 
-  if (animation.includes('fade')) {
-    const fadeProgress = animation.includes('in') ? progress : 1 - progress;
-    ctx.globalAlpha = (element.opacity ?? 1) * fadeProgress;
+  // Opacity is handled separately; this block is only for transforms
+  const distance = 120; // px
+
+  // Slides
+  if (anim === 'slide-in-from-left') {
+    ctx.translate(-(distance * (1 - progress)), 0);
+  } else if (anim === 'slide-in-from-right') {
+    ctx.translate(distance * (1 - progress), 0);
+  } else if (anim === 'slide-in-from-top') {
+    ctx.translate(0, -(distance * (1 - progress)));
+  } else if (anim === 'slide-in-from-bottom') {
+    ctx.translate(0, distance * (1 - progress));
+  } else if (anim === 'slide-out-to-left') {
+    ctx.translate(-distance * progress, 0);
+  } else if (anim === 'slide-out-to-right') {
+    ctx.translate(distance * progress, 0);
+  } else if (anim === 'slide-out-to-top') {
+    ctx.translate(0, -distance * progress);
+  } else if (anim === 'slide-out-to-bottom') {
+    ctx.translate(0, distance * progress);
   }
 
-  if (animation.includes('scale')) {
-    const scaleProgress = animation.includes('in') ? progress : 1 - progress;
-    const scale = 0.5 + scaleProgress * 0.5;
-    ctx.scale(scale, scale);
+  // Zoom
+  if (anim === 'zoom-in') {
+    const s = 0.6 + 0.4 * progress;
+    ctx.scale(s, s);
+  } else if (anim === 'zoom-out') {
+    const s = 1 - 0.4 * progress;
+    ctx.scale(Math.max(0.01, s), Math.max(0.01, s));
   }
 
-  if (animation.includes('slide')) {
-    let offsetX = 0, offsetY = 0;
-    const distance = 100;
-    
-    if (animation.includes('right')) {
-      offsetX = animation.includes('in') ? -distance * (1 - progress) : distance * progress;
-    } else if (animation.includes('left')) {
-      offsetX = animation.includes('in') ? distance * (1 - progress) : -distance * progress;
-    } else if (animation.includes('up')) {
-      offsetY = animation.includes('in') ? distance * (1 - progress) : -distance * progress;
-    } else if (animation.includes('down')) {
-      offsetY = animation.includes('in') ? -distance * (1 - progress) : distance * progress;
-    }
-    
-    ctx.translate(offsetX, offsetY);
+  // Spin
+  if (anim === 'spin') {
+    const angle = progress * 2 * Math.PI; // 1 rotation
+    ctx.rotate(angle);
   }
 
+  // Pulse / Ping / Bounce (approximate)
+  if (anim === 'pulse' || anim === 'ping' || anim === 'bounce') {
+    const pulse = 1 + 0.08 * Math.sin(progress * Math.PI * 2);
+    ctx.scale(pulse, pulse);
+  }
+
+  // Move origin back
   ctx.translate(-(x + element.width / 2), -(y + element.height / 2));
 }
 
@@ -486,7 +527,7 @@ async function exportFrameAsGIF(frame: Frame, config: ExportConfig): Promise<voi
   for (let i = 0; i < totalFrames; i++) {
     const time = (i / totalFrames) * duration;
     const canvas = await captureFrameAtTime(frame, time, config.scale);
-    gif.addFrame(canvas, { delay: 1000 / fps });
+    gif.addFrame(canvas, { delay: 1000 / fps, copy: true });
   }
 
   return new Promise((resolve, reject) => {
