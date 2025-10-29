@@ -62,6 +62,7 @@ export default function AIGeneratorPanel({
   const [selectedPalette, setSelectedPalette] = useState<string>("auto");
   const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
   const [accordionValue, setAccordionValue] = useState<string>("");
+  const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null);
 
   const colorPalettes = [
     { id: "auto", name: "Auto Select", colors: [] },
@@ -157,6 +158,26 @@ export default function AIGeneratorPanel({
     if (customColors.length > 1) {
       setCustomColors(customColors.filter((_, i) => i !== index));
     }
+  };
+
+  const handlePaletteColorClick = (colorIndex: number) => {
+    // Convert preset palette to custom if needed
+    if (selectedPalette !== "custom" && selectedPalette !== "auto") {
+      const currentPalette = colorPalettes.find(p => p.id === selectedPalette);
+      if (currentPalette && currentPalette.colors.length > 0) {
+        setCustomColors(currentPalette.colors);
+        setSelectedPalette("custom");
+      }
+    }
+    setEditingColorIndex(colorIndex);
+  };
+
+  const getCurrentColors = () => {
+    if (selectedPalette === "custom") {
+      return customColors;
+    }
+    const palette = colorPalettes.find(p => p.id === selectedPalette);
+    return palette?.colors || [];
   };
 
   const handleRestore = (conversation: Conversation) => {
@@ -340,29 +361,43 @@ export default function AIGeneratorPanel({
                 <div className="p-2 rounded-lg border border-primary bg-primary/10">
                   <div className="text-xs font-medium mb-1.5">
                     {colorPalettes.find(p => p.id === selectedPalette)?.name || "Custom"}
+                    {selectedPalette !== "auto" && (
+                      <span className="text-[10px] text-muted-foreground ml-1">(click colors to edit)</span>
+                    )}
                   </div>
-                  {selectedPalette === "custom" ? (
-                    <div className="flex gap-1">
-                      {customColors.filter(c => c.trim() !== "").map((color, idx) => (
-                        <div
-                          key={idx}
-                          className="flex-1 h-6 rounded border border-border"
-                          style={{ backgroundColor: color }}
-                        />
-                      ))}
-                    </div>
+                  {selectedPalette === "auto" ? (
+                    <div className="h-4 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 w-full" />
                   ) : (
-                    <div className="flex gap-1">
-                      {colorPalettes.find(p => p.id === selectedPalette)?.colors.length ? (
-                        colorPalettes.find(p => p.id === selectedPalette)?.colors.map((color, idx) => (
-                          <div
+                    <div className="space-y-2">
+                      <div className="flex gap-1">
+                        {getCurrentColors().map((color, idx) => (
+                          <button
                             key={idx}
-                            className="flex-1 h-6 rounded"
+                            onClick={() => handlePaletteColorClick(idx)}
+                            className="flex-1 h-4 rounded border border-border hover:ring-2 hover:ring-primary transition-all cursor-pointer"
                             style={{ backgroundColor: color }}
+                            title={`Click to edit ${color}`}
                           />
-                        ))
-                      ) : (
-                        <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 w-full" />
+                        ))}
+                      </div>
+                      {editingColorIndex !== null && (
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            value={customColors[editingColorIndex] || ""}
+                            onChange={(e) => handleCustomColorChange(editingColorIndex, e.target.value)}
+                            placeholder="#FFFFFF"
+                            className="h-7 text-xs"
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 w-7 p-0"
+                            onClick={() => setEditingColorIndex(null)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
                       )}
                     </div>
                   )}
@@ -383,6 +418,7 @@ export default function AIGeneratorPanel({
                           onClick={() => {
                             setSelectedPalette(palette.id);
                             setAccordionValue("");
+                            setEditingColorIndex(null);
                           }}
                           className={`p-2 rounded-lg border transition-all ${
                             selectedPalette === palette.id
@@ -396,13 +432,13 @@ export default function AIGeneratorPanel({
                               {palette.colors.map((color, idx) => (
                                 <div
                                   key={idx}
-                                  className="flex-1 h-6 rounded"
+                                  className="flex-1 h-4 rounded"
                                   style={{ backgroundColor: color }}
                                 />
                               ))}
                             </div>
                           ) : (
-                            <div className="h-6 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
+                            <div className="h-4 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
                           )}
                         </button>
                       ))}
@@ -412,6 +448,7 @@ export default function AIGeneratorPanel({
                         onClick={() => {
                           setSelectedPalette("custom");
                           setAccordionValue("");
+                          setEditingColorIndex(null);
                         }}
                         className={`p-2 rounded-lg border transition-all ${
                           selectedPalette === "custom"
@@ -420,7 +457,7 @@ export default function AIGeneratorPanel({
                         }`}
                       >
                         <div className="text-xs font-medium mb-1.5">Custom</div>
-                        <div className="h-6 rounded bg-gradient-to-r from-gray-300 to-gray-600" />
+                        <div className="h-4 rounded bg-gradient-to-r from-gray-300 to-gray-600" />
                       </button>
                     </div>
                     
