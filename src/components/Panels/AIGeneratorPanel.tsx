@@ -24,7 +24,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationType: string, model: string, colorPalette?: string) => Promise<void>;
+  onGenerate: (generationTypes: string[], model: string, colorPalette?: string) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -54,7 +54,7 @@ export default function AIGeneratorPanel({
 }: AIGeneratorPanelProps) {
   const [activeTab, setActiveTab] = useState("generator");
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedGenerationType, setSelectedGenerationType] = useState("freeform");
+  const [selectedGenerationTypes, setSelectedGenerationTypes] = useState<string[]>(["freeform"]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
     return localStorage.getItem('ai-poster-model') || 'gemini-2.5-flash';
@@ -135,11 +135,30 @@ export default function AIGeneratorPanel({
       }
     }
     
-    await onGenerate(selectedGenerationType, selectedModel, paletteToUse);
+    // Pass all selected generation types
+    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse);
     // Reload conversations after generation
     if (projectId) {
       loadConversations();
     }
+  };
+
+  const toggleGenerationType = (typeId: string) => {
+    if (typeId === "freeform") {
+      // Freeform is always selected
+      return;
+    }
+    
+    setSelectedGenerationTypes(prev => {
+      if (prev.includes(typeId)) {
+        // Remove if already selected (but keep at least freeform)
+        const filtered = prev.filter(t => t !== typeId);
+        return filtered.length === 0 ? ["freeform"] : filtered;
+      } else {
+        // Add to selection
+        return [...prev, typeId];
+      }
+    });
   };
 
   const handleCustomColorChange = (index: number, value: string) => {
@@ -491,28 +510,6 @@ export default function AIGeneratorPanel({
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
-            </div>
-
-            {/* Generation Preferences */}
-            <div>
-              <Label className="text-xs mb-2 block text-muted-foreground">Generation Preferences</Label>
-              <div className="flex flex-wrap gap-2">
-                {generationTypes.map((type) => (
-                  <Button
-                    key={type.id}
-                    variant={selectedGenerationType === type.id ? "default" : "outline"}
-                    size="sm"
-                    className={`h-8 text-xs rounded-full ${type.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-                    disabled={type.disabled}
-                    onClick={() => !type.disabled && setSelectedGenerationType(type.id)}
-                  >
-                    {type.label}
-                  </Button>
-                ))}
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-2">
-                Select Multiple to produce multi-modal agents
-              </p>
             </div>
 
             {/* Progress indicator */}

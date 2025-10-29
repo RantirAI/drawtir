@@ -24,6 +24,7 @@ import { exportFrames } from "@/lib/exportUtils";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
+import GenerationProgressOverlay from "./GenerationProgressOverlay";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -172,6 +173,12 @@ export default function CanvasContainerNew({
   const [captionImage, setCaptionImage] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationProgress, setGenerationProgress] = useState("");
+  const [generationSteps, setGenerationSteps] = useState<Array<{
+    id: string;
+    label: string;
+    status: 'pending' | 'active' | 'complete';
+  }>>([]);
+  const [generationProgressPercent, setGenerationProgressPercent] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -429,7 +436,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationType: string = "freeform", model: string = "claude-sonnet-4-5", colorPalette?: string) => {
+  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -438,18 +445,41 @@ export default function CanvasContainerNew({
 
     setIsGenerating(true);
     setGenerationProgress(`Starting generation with ${model}...`);
+    setGenerationProgressPercent(0);
+    
+    // Initialize generation steps based on selected types
+    const steps = [];
+    const shouldGenerateImage = generationTypes.includes("generate-image");
+    const shouldReplicate = generationTypes.includes("replicate");
+    
+    if (shouldGenerateImage) {
+      steps.push({ id: 'image', label: 'Generate Image with AI', status: 'pending' as const });
+    }
+    if (shouldReplicate) {
+      steps.push({ id: 'replicate', label: 'Analyze & Replicate Design', status: 'pending' as const });
+    }
+    steps.push({ id: 'design', label: 'Create Poster Design', status: 'pending' as const });
+    setGenerationSteps(steps);
+    
     try {
       // Handle image generation first if selected
       let imagesToUse = [...imgs];
+      const shouldGenerateImage = generationTypes.includes("generate-image");
+      const shouldReplicate = generationTypes.includes("replicate");
       
-      if (generationType === "generate-image") {
+      if (shouldGenerateImage) {
         if (!description.trim()) {
           toast.error("Please provide a description for image generation");
           setIsGenerating(false);
           return;
         }
 
+        // Update step to active
+        setGenerationSteps(prev => prev.map(s => 
+          s.id === 'image' ? { ...s, status: 'active' as const } : s
+        ));
         setGenerationProgress("Generating image with AI...");
+        setGenerationProgressPercent(10);
         
         try {
           const imageResponse = await fetch(
@@ -477,6 +507,10 @@ export default function CanvasContainerNew({
           const imageData = await imageResponse.json();
           if (imageData.image) {
             imagesToUse = [imageData.image];
+            setGenerationSteps(prev => prev.map(s => 
+              s.id === 'image' ? { ...s, status: 'complete' as const } : s
+            ));
+            setGenerationProgressPercent(33);
             toast.success("Image generated! Now creating poster...");
             setGenerationProgress("Creating poster design...");
           } else {
@@ -492,13 +526,21 @@ export default function CanvasContainerNew({
       }
 
       // Intelligently determine analysisType based on context
-      let analysisType = generationType === "replicate" ? "replicate" : "create";
+      let analysisType = shouldReplicate ? "replicate" : "create";
       
-      if (imagesToUse.length === 0 && analysisType === "replicate") {
+      if (imagesToUse.length === 0 && shouldReplicate) {
         toast.error("Please upload an image to replicate");
         setIsGenerating(false);
         return;
       }
+
+      // Update design step to active
+      const designStepId = shouldReplicate ? 'replicate' : 'design';
+      setGenerationSteps(prev => prev.map(s => 
+        s.id === designStepId ? { ...s, status: 'active' as const } : s
+      ));
+      setGenerationProgressPercent(shouldGenerateImage ? 40 : 20);
+      setGenerationProgress(shouldReplicate ? "Analyzing image..." : "Designing poster layout...");
 
       // Get current frame dimensions to tell AI the canvas size
       const selectedFrame = frames.find(f => f.id === selectedFrameId);
@@ -563,12 +605,18 @@ export default function CanvasContainerNew({
               if (data.type === 'status') {
                 // Show friendly status message
                 setGenerationProgress(data.message);
+                // Increment progress gradually
+                setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
                 console.log('Status:', data.message);
               } else if (data.type === 'progress') {
                 // Log raw progress for debugging
                 console.log('Generating:', data.text);
               } else if (data.type === 'complete') {
                 setGenerationProgress('Finalizing design...');
+                setGenerationProgressPercent(95);
+                setGenerationSteps(prev => prev.map(s => 
+                  s.id === designStepId ? { ...s, status: 'complete' as const } : s
+                ));
                 designSpec = data.designSpec;
               }
             } catch (e) {
@@ -705,7 +753,7 @@ export default function CanvasContainerNew({
               user_id: user.id,
               title: description.substring(0, 50) || "AI Generation",
               description: description,
-              generation_type: generationType,
+              generation_type: generationTypes.join(", "),
               input_data: { prompt: description, hasImage: (captionImage?.length ?? 0) > 0 },
               output_snapshot: snapshot as any
             });
@@ -2570,6 +2618,15 @@ export default function CanvasContainerNew({
         open={showPreviewDialog}
         onOpenChange={setShowPreviewDialog}
         frame={selectedFrame}
+      />
+
+      {/* Generation Progress Overlay */}
+      <GenerationProgressOverlay
+        isVisible={isGenerating}
+        currentStep={generationProgress}
+        progress={generationProgressPercent}
+        totalSteps={generationSteps.length}
+        steps={generationSteps}
       />
 
       <DrawtirFooter />
