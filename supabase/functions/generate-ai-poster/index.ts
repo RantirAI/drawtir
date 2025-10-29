@@ -77,79 +77,58 @@ const COLOR_PALETTES: Record<string, string[]> = {
 };
 
 // Enhanced design system prompt with professional design principles
-const DESIGN_SYSTEM_PROMPT = `You are a world-class poster designer creating magazine-quality, award-winning designs.
+const DESIGN_SYSTEM_PROMPT = `You are an award-winning poster designer with 20 years of experience creating magazine-quality, visually stunning designs.
 
-🎨 ADVANCED COLOR THEORY:
-- Complementary colors (opposite on wheel): High energy, maximum contrast
-- Analogous colors (adjacent): Harmonious, cohesive feel
-- Triadic schemes (120° apart): Bold, balanced vibrancy
-- 60-30-10 rule: 60% dominant, 30% secondary, 10% accent pop
-- WCAG AAA contrast: 7:1 for body text, 4.5:1 for large text
-- Color psychology: Red=energy, Blue=trust, Yellow=optimism, Purple=luxury
+🎨 COLOR MASTERY:
+- Use bold, high-contrast color combinations for impact
+- Apply 60-30-10 rule: 60% dominant, 30% secondary, 10% accent
+- Ensure WCAG AAA contrast (7:1 minimum for readability)
+- Color psychology: Red=energy/urgency, Blue=trust/calm, Yellow=optimism/warmth, Purple=luxury/creativity, Green=growth/nature
 
-CURATED COLOR PALETTES:
+CURATED COLOR PALETTES (use these!):
 ${Object.entries(COLOR_PALETTES).map(([mood, colors]) => `- ${mood}: ${colors.join(', ')}`).join('\n')}
 
-📐 LAYOUT MASTERY:
-- Rule of thirds: Place key elements at intersection points (33%, 66%)
-- Golden ratio (1.618): Natural, aesthetically pleasing proportions
-- Z-pattern reading: Top-left → Top-right → Bottom-left → Bottom-right
-- F-pattern reading: Titles left, body text flowing right
-- Visual weight balance: Heavy top-left needs light bottom-right
-- Negative space as design element: Whitespace guides the eye
-- 8pt grid system: All spacing in multiples of 8 (16, 24, 32, 48, 64, 80)
+📐 LAYOUT PRINCIPLES:
+- Rule of thirds: Place key elements at 33% or 66% positions
+- Golden ratio (1.618): Create naturally pleasing proportions
+- Visual hierarchy: Largest → Medium → Smallest elements guide the eye
+- Whitespace: Minimum 60-80px margins, generous breathing room
+- Grid system: Use 8pt grid (16, 24, 32, 48, 64, 80px spacing)
+- Balance: Asymmetric layouts with intentional weight distribution
 
-✍️ TYPOGRAPHY EXCELLENCE:
-- Display titles: 80-120px, ExtraBold (800-900), tight tracking (-0.03em)
-- Headlines: 56-72px, Bold (700), tight tracking (-0.02em)
-- Subheadings: 36-48px, SemiBold (600), normal tracking
-- Body text: 24-32px, Regular (400-500), relaxed line-height (1.6-1.8)
-- Captions: 18-24px, Regular (400), slightly loose tracking (0.01em)
-- Never use more than 2 font families
-- Pair geometric sans (modern) with serif (elegant) OR monospace (tech)
+✍️ TYPOGRAPHY RULES:
+- Display titles: 80-120px, weight 800-900, tight letter-spacing (-0.03em)
+- Headlines: 56-80px, weight 700-800, tight letter-spacing (-0.02em)
+- Subheadings: 36-56px, weight 600-700, normal spacing
+- Body text: 24-36px, weight 400-500, relaxed line-height (1.6)
+- Use maximum 2 font families per design
+- Create clear size hierarchy (minimum 2:1 ratio between levels)
 
-🎯 VISUAL HIERARCHY:
-1. Primary focus (largest, highest contrast, top-third)
-2. Secondary elements (medium size, support primary)
-3. Tertiary details (smaller, subtle, bottom-third)
-- Size contrast ratio: Minimum 2:1 between levels
-- Use color, size, AND position to establish hierarchy
+🎯 DESIGN ELEMENTS:
+- Strategic shapes: Circles for focus/softness, rectangles for structure/stability
+- Icons from lucide-react: Use sparingly for visual interest (music, star, heart, trophy, sparkles, zap, award, crown)
+- Layering: Overlap shapes and text for depth
+- Alignment: Everything must snap to grid - no random positioning
+- Contrast: High contrast between text and background (never gray on gray)
 
-📏 SPACING & RHYTHM:
-- Micro: 8px (tight grouping)
-- Small: 16px (related items)
-- Medium: 24-32px (section spacing)
-- Large: 48-64px (major divisions)
-- XLarge: 80-120px (canvas margins, dramatic space)
-- Consistent rhythm creates professional feel
+💡 PROFESSIONAL TECHNIQUES:
+1. Create immediate focal point (viewer's eye lands in <0.5 seconds)
+2. Use diagonal elements for energy and movement
+3. Strategic color blocking for visual impact
+4. Large bold numbers/dates as design elements
+5. Decorative shapes frame important content
+6. Overlap elements for depth and sophistication
+7. Generous whitespace makes designs breathe
+8. Consistent visual rhythm throughout
 
-🎭 DESIGN STYLES:
-- Modern Minimal: 90% whitespace, 1-2 bold colors, geometric shapes, sans-serif
-- Swiss International: Grid-based, flush-left text, limited colors, helvetica-style fonts
-- Brutalist: Oversized bold typography, asymmetric layouts, raw geometric shapes
-- Art Deco: Luxurious golds, geometric patterns, elegant symmetry, sophisticated
-- Contemporary: Vibrant gradients, overlapping elements, mixed typography, experimental
-
-🏆 PROFESSIONAL QUALITY STANDARDS:
-✓ Immediate focal point (eye lands in <0.5 seconds)
-✓ Clear visual path (guides viewer through content)
-✓ High contrast (WCAG AAA: 7:1 minimum)
-✓ Harmonious palette (3-4 colors maximum)
-✓ Perfect alignment (every element grid-snapped)
-✓ Generous whitespace (minimum 60px margins)
-✓ Intentional asymmetry (not accidental imbalance)
-✓ Typography scale (clear size differences)
-✓ Professional polish (no amateurish mistakes)
-
-💡 CREATIVE TECHNIQUES:
-- Overlap shapes for depth and dimension
-- Use circles for focus, rectangles for structure
-- Diagonal elements add energy and movement
-- Icons reinforce message (lucide-react library)
-- Strategic color blocking creates impact
-- Gradients add modern sophistication
-- Large numbers/dates as design elements
-- Decorative shapes (circles, lines) frame content`;
+🏆 QUALITY CHECKLIST:
+✓ Clear visual hierarchy (obvious what to read first)
+✓ High contrast text (easily readable)
+✓ Harmonious color palette (3-4 colors max)
+✓ Perfect alignment (grid-snapped positioning)
+✓ Generous whitespace (not cramped)
+✓ Professional polish (no amateur mistakes)
+✓ Intentional composition (every element has purpose)`;
 
 // Few-shot learning with professional examples
 const DESIGN_EXAMPLES = `
@@ -227,10 +206,11 @@ serve(async (req) => {
       canvasWidth = 800, 
       canvasHeight = 1200,
       model = 'gemini-2.5-flash', // Default model
-      colorPalette // Optional color palette preference
+      colorPalette, // Optional color palette preference
+      generationTypes = [] // Array of generation types (e.g., ["generate-image", "create"])
     } = await req.json();
     
-    console.log('AI Poster Generation with Lovable AI - Model:', model, 'Type:', analysisType);
+    console.log('AI Poster Generation - Model:', model, 'Type:', analysisType, 'Generation types:', generationTypes);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
     
     // Validate model
@@ -245,7 +225,50 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Handle images
+    // Step 1: Generate image if "generate-image" type is selected
+    let generatedImageBase64: string | null = null;
+    if (generationTypes.includes('generate-image') && prompt) {
+      console.log('Generating image with AI first...');
+      
+      const imageGenResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image-preview',
+          messages: [
+            {
+              role: 'user',
+              content: `Create a high-quality, professional image for a poster with this theme: ${prompt}. 
+              
+Style it appropriately for a poster - vibrant, eye-catching, and visually appealing. 
+The image should be suitable as a main visual element in a poster design.
+Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/canvasHeight).toFixed(2)}:1).`
+            }
+          ],
+          modalities: ['image', 'text']
+        })
+      });
+
+      if (!imageGenResponse.ok) {
+        console.error('Image generation failed:', imageGenResponse.status);
+        throw new Error('Failed to generate image with AI');
+      }
+
+      const imageData = await imageGenResponse.json();
+      const generatedImage = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      
+      if (generatedImage) {
+        generatedImageBase64 = generatedImage;
+        console.log('Successfully generated image with AI');
+      } else {
+        console.warn('No image returned from AI generation');
+      }
+    }
+
+    // Handle images (uploaded + generated)
     let images: string[] = [];
     if (imageBase64) {
       if (Array.isArray(imageBase64)) {
@@ -254,7 +277,13 @@ serve(async (req) => {
         images = [imageBase64];
       }
     }
-    console.log('Processed images count:', images.length);
+    
+    // Add generated image if exists
+    if (generatedImageBase64) {
+      images = [generatedImageBase64, ...images];
+    }
+    
+    console.log('Total images for poster design:', images.length, '(generated:', generatedImageBase64 ? 1 : 0, ', uploaded:', images.length - (generatedImageBase64 ? 1 : 0), ')');
 
     // Detect media type
     const getMediaType = (base64: string): string => {
@@ -327,62 +356,87 @@ Return JSON:
 
 ${DESIGN_EXAMPLES}
 
-TASK: Create a professional poster using ${images.length > 1 ? `these ${images.length} images` : 'this image'}.
-USER REQUEST: "${prompt || 'Create an eye-catching poster'}"
+TASK: Create a stunning poster featuring ${images.length > 1 ? `these ${images.length} images` : 'this image'}.
+USER REQUEST: "${prompt || 'Create an eye-catching poster with great visual impact'}"
 
-CANVAS: ${canvasWidth}px × ${canvasHeight}px
+CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${paletteGuidance}
 
-DESIGN REQUIREMENTS:
-- Choose a mood-based color palette that complements the image
-- Create clear typography hierarchy (title 72-96px, body 24-32px)
-- Use 8pt grid spacing (16, 24, 32, 48px)
-- Add relevant lucide icons (heart, star, sparkles, trophy, etc.)
-- Ensure adequate whitespace (min 40px margins)
-- Apply quality checklist principles
+CRITICAL SIZING GUIDELINES:
+- Display Title: ${Math.floor(canvasHeight * 0.08)}-${Math.floor(canvasHeight * 0.10)}px, weight 800-900
+- Headline: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.07)}px, weight 700
+- Body Text: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.025)}px, weight 400
+- Icons: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
+- Margins: ${Math.floor(canvasWidth * 0.08)}px minimum
 
-Return JSON:
+DESIGN REQUIREMENTS FOR IMAGE POSTERS:
+1. Position the image prominently (consider full-bleed or feature placement)
+2. Overlay text with high contrast (use solid color shapes behind text if needed)
+3. Choose colors that complement the image
+4. Add 2-3 strategic shapes for visual interest
+5. Include 1-2 relevant icons
+6. Create clear visual hierarchy
+7. Use generous spacing
+8. Ensure all text is readable with 7:1 contrast
+
+IMAGE POSITIONING STRATEGIES:
+- Full-bleed: Image spans entire canvas (x: 0, y: 0, width: ${canvasWidth}, height: ${canvasHeight})
+- Hero: Image in top 60% (y: 0, height: ${Math.floor(canvasHeight * 0.6)})
+- Feature: Image positioned strategically with text overlay
+
+Return complete JSON:
 {
   "title": "Poster title",
   "backgroundColor": "#hex",
   "elements": [
-    {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 0, "height": 0},
-    {"type": "text", "content": "text", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "fontSize": 0, "fontWeight": "normal|bold"},
-    {"type": "icon", "content": "desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "iconName": "heart", "iconFamily": "lucide"},
-    {"type": "shape", "content": "desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "borderRadius": "0|16px|50%", "shape": "rectangle|circle"}
+    {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": ${canvasWidth}, "height": ${Math.floor(canvasHeight * 0.6)}},
+    {"type": "text", "content": "BOLD TITLE", "x": 64, "y": ${Math.floor(canvasHeight * 0.65)}, "width": ${canvasWidth - 128}, "height": 100, "color": "#FFFFFF", "fontSize": 96, "fontWeight": "900"},
+    {"type": "shape", ...},
+    {"type": "icon", ...}
   ],
-  "style": "description",
-  "mood": "mood"
+  "style": "Modern with striking visuals",
+  "mood": "Bold and engaging"
 }`;
     } else {
       userPrompt = `${DESIGN_SYSTEM_PROMPT}
 
 ${DESIGN_EXAMPLES}
 
-TASK: Create a professional poster design.
+TASK: Create a stunning, professional poster design that stands out.
 USER REQUEST: "${prompt}"
 
-CANVAS: ${canvasWidth}px × ${canvasHeight}px
+CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${paletteGuidance}
 
-SIZING GUIDELINES:
-- Titles: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
-- Subtitles: ${Math.floor(canvasHeight * 0.04)}-${Math.floor(canvasHeight * 0.05)}px
-- Body: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.03)}px
-- Icons: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.08)}px
-- Margins: ${Math.floor(canvasHeight * 0.04)}px minimum
+CRITICAL SIZING GUIDELINES (follow exactly):
+- Display Title: ${Math.floor(canvasHeight * 0.08)}-${Math.floor(canvasHeight * 0.10)}px, weight 800-900
+- Headline: ${Math.floor(canvasHeight * 0.05)}-${Math.floor(canvasHeight * 0.07)}px, weight 700
+- Subheading: ${Math.floor(canvasHeight * 0.03)}-${Math.floor(canvasHeight * 0.04)}px, weight 600
+- Body Text: ${Math.floor(canvasHeight * 0.02)}-${Math.floor(canvasHeight * 0.025)}px, weight 400
+- Icons: ${Math.floor(canvasHeight * 0.06)}-${Math.floor(canvasHeight * 0.08)}px
+- Canvas Margins: ${Math.floor(canvasWidth * 0.08)}px (left/right), ${Math.floor(canvasHeight * 0.06)}px (top/bottom)
+- Element Spacing: 32-48px between major sections, 16-24px between related items
 
-DESIGN REQUIREMENTS:
-- Select a mood-based palette (energetic, calm, professional, etc.)
-- Create visual hierarchy with typography sizes
-- Use 8pt grid spacing throughout
-- Add strategic icons from lucide-react (music, star, award, trophy, heart, sparkles, etc.)
-- Balance elements using rule of thirds
-- Ensure whitespace and breathing room
+MANDATORY DESIGN REQUIREMENTS:
+1. Choose ONE curated color palette that matches the mood (${Object.keys(COLOR_PALETTES).join(', ')})
+2. Create dramatic visual hierarchy (title must be 2-3x larger than body)
+3. Use 8pt grid spacing (all x, y, width, height must be multiples of 8 or 16)
+4. Add 2-4 strategic shapes for visual interest (circles, rectangles with borderRadius)
+5. Include 1-3 relevant icons from lucide-react library
+6. Follow rule of thirds for element placement (33%, 66% positions)
+7. Ensure high contrast (7:1 minimum) between text and background
+8. Use generous whitespace - don't crowd elements
 
-AVAILABLE ICONS: heart, star, circle, square, triangle, sparkles, zap, flame, sun, moon, cloud, music, crown, gift, award, trophy, facebook, twitter, instagram, bell, bookmark, calendar, camera, clock, mail, phone, share, thumbs-up
+POPULAR ICONS (use these): sparkles, star, heart, trophy, award, crown, zap, flame, music, gift, calendar, camera, sun, moon, circle-dot, square-check, triangle
 
-Return JSON (flat structure, NO nested frames):
+COMPOSITION TIPS:
+- Main title: Top third (y around ${Math.floor(canvasHeight * 0.2)})
+- Supporting content: Middle third
+- Details/footer: Bottom third (y around ${Math.floor(canvasHeight * 0.75)})
+- Background shapes: Can span full canvas for impact
+- Text must always be readable with proper contrast
+
+Return JSON (COMPLETE structure, NO nested frames):
 {
   "title": "Poster title",
   "backgroundColor": "#hex",

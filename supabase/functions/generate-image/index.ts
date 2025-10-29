@@ -22,7 +22,7 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    console.log('Generating image with Lovable AI (Nano banana):', prompt);
+    console.log('Generating image with Lovable AI (Nano banana) for poster:', prompt);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -35,7 +35,19 @@ serve(async (req) => {
         messages: [
           {
             role: 'user',
-            content: prompt
+            content: `Create a high-quality, professional, visually stunning image suitable for a poster with this theme:
+
+${prompt}
+
+REQUIREMENTS:
+- High visual impact and professional quality
+- Vibrant colors and strong composition
+- Suitable as a main visual element in a poster design
+- Eye-catching and visually appealing
+- Sharp details and good contrast
+- Modern and polished aesthetic
+
+Style: Professional poster-quality imagery with strong visual appeal.`
           }
         ],
         modalities: ['image', 'text'],

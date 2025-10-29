@@ -443,15 +443,23 @@ export default function CanvasContainerNew({
     }
 
     setIsGenerating(true);
-    setGenerationProgress(`Starting generation with ${model}...`);
-    setGenerationProgressPercent(0);
     
-    // Notify user that new elements will be added to existing design
-    const currentFrame = frames.find(f => f.id === selectedFrameId);
-    const existingElementCount = currentFrame?.elements?.length || 0;
-    if (existingElementCount > 0) {
-      toast.success(`Adding new elements to your design (${existingElementCount} existing elements will be preserved)`);
+    // Check if image generation is requested
+    const willGenerateImage = generationTypes.includes('generate-image');
+    
+    if (willGenerateImage) {
+      setGenerationProgress("🎨 Generating AI image...");
+      toast.info("Creating custom AI image for your poster...");
+    } else {
+      setGenerationProgress(`Starting generation with ${model}...`);
+      // Notify user that new elements will be added to existing design
+      const currentFrame = frames.find(f => f.id === selectedFrameId);
+      const existingElementCount = currentFrame?.elements?.length || 0;
+      if (existingElementCount > 0) {
+        toast.success(`Adding new elements to your design (${existingElementCount} existing elements will be preserved)`);
+      }
     }
+    setGenerationProgressPercent(0);
     
     // Initialize generation steps based on selected types
     const steps = [];
@@ -571,6 +579,7 @@ export default function CanvasContainerNew({
             canvasHeight,
             model,
             colorPalette,
+            generationTypes, // Pass generation types to backend
           }),
         }
       );
