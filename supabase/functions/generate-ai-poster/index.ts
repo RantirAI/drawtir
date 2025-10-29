@@ -534,6 +534,7 @@ Return JSON (COMPLETE structure, NO nested frames):
             let backgroundColor = '';
             let hasContent = false;
             
+            let streamComplete = false;
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
@@ -545,7 +546,10 @@ Return JSON (COMPLETE structure, NO nested frames):
                 if (!line.startsWith('data: ')) continue;
                 
                 const data = line.slice(6);
-                if (data === '[DONE]') continue;
+                if (data === '[DONE]') {
+                  streamComplete = true;
+                  break;
+                }
 
                 try {
                   const parsed = JSON.parse(data);
@@ -625,13 +629,20 @@ Return JSON (COMPLETE structure, NO nested frames):
                   // Skip invalid JSON
                 }
               }
+              
+              // Break out of while loop if stream is complete
+              if (streamComplete) break;
             }
 
             // Ensure we have content before parsing
             if (!hasContent || fullContent.length < 50) {
               console.error('Insufficient content received from AI');
+              console.error('Full content received:', fullContent);
               throw new Error('AI did not generate enough content');
             }
+            
+            console.log('Stream complete, full content length:', fullContent.length);
+            console.log('Content preview (first 500 chars):', fullContent.substring(0, 500));
 
             // Parse final result with robust error handling
             let designSpec;
