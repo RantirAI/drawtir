@@ -87,7 +87,7 @@ export default function TemplatesPanel({
   return (
     <DraggablePanel
       title="Templates"
-      defaultPosition={{ x: 50, y: 150 }}
+      defaultPosition={{ x: 120, y: 150 }}
       onClose={onClose}
     >
       <div className="w-[380px] bg-card rounded-lg">

@@ -223,7 +223,7 @@ export default function AIGeneratorPanel({
   return (
     <DraggablePanel
       title="AI Generator"
-      defaultPosition={{ x: 50, y: 150 }}
+      defaultPosition={{ x: 120, y: 150 }}
       onClose={onClose}
     >
       <div className="w-[380px] bg-background border border-border rounded-lg">

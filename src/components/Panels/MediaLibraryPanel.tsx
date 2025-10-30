@@ -278,7 +278,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
   return (
     <DraggablePanel
       title="Media Library"
-      defaultPosition={{ x: 100, y: 100 }}
+      defaultPosition={{ x: 120, y: 100 }}
       onClose={onClose || (() => {})}
     >
       <div className="w-[580px] bg-card rounded-lg">
