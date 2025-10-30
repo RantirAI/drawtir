@@ -212,7 +212,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
               {media.map((item) => (
                 <div
                   key={item.id}
-                  className="relative group aspect-square rounded-lg overflow-hidden border bg-card shadow-sm cursor-pointer hover:shadow-md hover:border-primary/50 transition-all hover:scale-[1.02]"
+                  className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all hover:scale-[1.02]"
                   onClick={() => onSelectImage?.(item.file_url)}
                 >
                   <img
