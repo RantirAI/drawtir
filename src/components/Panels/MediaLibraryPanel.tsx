@@ -169,7 +169,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
   const content = (
     <>
       {/* Header */}
-      <div className="p-6 border-b">
+      <div className="p-6">
         <h2 className="text-xl font-semibold mb-1">Media Library</h2>
         <p className="text-sm text-muted-foreground">Upload and manage your images</p>
       </div>
@@ -267,7 +267,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   if (inline) {
     return (
-      <div className="absolute left-20 top-0 bottom-0 w-96 bg-background/98 backdrop-blur-sm animate-in fade-in slide-in-from-left duration-300 z-30 shadow-2xl">
+      <div className="absolute left-20 top-0 bottom-0 w-96 animate-in fade-in slide-in-from-left duration-300 z-30">
         <div className="h-full flex flex-col">
           {content}
         </div>
