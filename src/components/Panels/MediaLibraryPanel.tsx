@@ -29,9 +29,10 @@ interface MediaItem {
 interface MediaLibraryPanelProps {
   onSelectImage?: (url: string) => void;
   onClose?: () => void;
+  inline?: boolean;
 }
 
-export const MediaLibraryPanel = ({ onSelectImage, onClose }: MediaLibraryPanelProps) => {
+export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: MediaLibraryPanelProps) => {
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -165,14 +166,9 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose }: MediaLibraryPanelP
     }
   };
 
-  return (
-    <DraggablePanel
-      title="Media Library"
-      defaultPosition={{ x: 100, y: 100 }}
-      onClose={onClose || (() => {})}
-    >
-      <div className="w-[580px] bg-card rounded-lg">
-        <div className="p-4 border-b flex items-center justify-between">
+  const content = (
+    <>
+      <div className={inline ? "p-4 flex items-center justify-between" : "p-4 border-b flex items-center justify-between"}>
           <label>
             <input
               type="file"
@@ -194,7 +190,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose }: MediaLibraryPanelP
           </label>
         </div>
 
-        <ScrollArea className="h-[600px]">
+        <ScrollArea className={inline ? "h-[calc(100vh-200px)]" : "h-[600px]"}>
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -206,7 +202,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose }: MediaLibraryPanelP
               <p className="text-xs">Upload images or generate with AI</p>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-3 p-4">
+            <div className={inline ? "grid grid-cols-4 gap-4 p-6" : "grid grid-cols-3 gap-3 p-4"}>
               {media.map((item) => (
                 <div
                   key={item.id}
@@ -260,6 +256,27 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose }: MediaLibraryPanelP
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+    </>
+  );
+
+  if (inline) {
+    return (
+      <div className="absolute inset-0 bg-background/95 backdrop-blur-sm animate-in fade-in duration-300 z-20">
+        <div className="h-full flex flex-col">
+          {content}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <DraggablePanel
+      title="Media Library"
+      defaultPosition={{ x: 100, y: 100 }}
+      onClose={onClose || (() => {})}
+    >
+      <div className="w-[580px] bg-card rounded-lg">
+        {content}
       </div>
     </DraggablePanel>
   );
