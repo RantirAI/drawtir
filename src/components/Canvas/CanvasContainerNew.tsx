@@ -677,7 +677,7 @@ export default function CanvasContainerNew({
                   } else if (el.type === "image") {
                     newElement = {
                       ...baseElement,
-                      imageUrl: el.imageUrl || el.src || "",
+                      imageUrl: el.content || el.imageUrl || el.src || "",
                       imageFit: "cover",
                       brightness: 100,
                       contrast: 100,
@@ -796,10 +796,16 @@ export default function CanvasContainerNew({
                 fill: el.color || "#000000",
               };
             } else if (el.type === "image") {
-              // For images, use generated or uploaded images
+              // For images, use the content from AI (which includes generated or uploaded images)
               return {
                 ...baseElement,
-                imageData: imagesToUse.length > 0 ? imagesToUse[0] : undefined,
+                imageUrl: el.content || (imagesToUse.length > 0 ? imagesToUse[0] : ""),
+                imageFit: "cover",
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                blur: 0,
+                cornerRadius: borderRadius,
               };
             } else {
               // shape

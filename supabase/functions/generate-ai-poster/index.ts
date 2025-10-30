@@ -245,10 +245,12 @@ serve(async (req) => {
           messages: [
             {
               role: 'user',
-              content: `Create a high-quality, professional image for a poster with this theme: ${prompt}. 
-              
-Style it appropriately for a poster - vibrant, eye-catching, and visually appealing. 
-The image should be suitable as a main visual element in a poster design.
+              content: `Create a high-quality background image or photo element for a poster with this theme: ${prompt}. 
+
+IMPORTANT: Generate ONLY the image/photo element, NOT a complete poster with text or graphics overlaid.
+Style it as a clean background image or main visual element that can have text and graphics added on top of it.
+The image should be suitable as a foundational visual element in a poster design.
+Focus on creating an eye-catching visual that complements the theme: ${prompt}.
 Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/canvasHeight).toFixed(2)}:1).`
             }
           ],
@@ -580,6 +582,7 @@ Return JSON (COMPLETE structure, NO nested frames):
         messages: messages,
         max_tokens: modelConfig.maxTokens,
         stream: true, // Enable streaming for all Lovable AI models
+        response_format: { type: "json_object" } // Force JSON mode
       }),
     });
 
@@ -792,22 +795,42 @@ Return JSON (COMPLETE structure, NO nested frames):
                 throw new Error('AI did not return a valid JSON object');
               }
 
-              // Attempt parse; if it fails, try a light sanitization (trailing commas)
+              // Attempt parse; if it fails, try aggressive sanitization
               const tryParse = (s: string) => {
                 try { return JSON.parse(s); } catch { return null; }
               };
 
               designSpec = tryParse(jsonStr);
               if (!designSpec) {
+                // Aggressive sanitization
                 const sanitized = jsonStr
                   // remove trailing commas in objects/arrays
                   .replace(/,\s*(\}|\])/g, '$1')
+                  // fix missing quotes around property names
+                  .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
+                  // fix incomplete strings at the end
+                  .replace(/,\s*$/g, '')
+                  // ensure closing brackets
                   .trim();
-                designSpec = tryParse(sanitized);
+                
+                // Count braces to see if we need to close the JSON
+                const openBraces = (sanitized.match(/\{/g) || []).length;
+                const closeBraces = (sanitized.match(/\}/g) || []).length;
+                const openBrackets = (sanitized.match(/\[/g) || []).length;
+                const closeBrackets = (sanitized.match(/\]/g) || []).length;
+                
+                let fixed = sanitized;
+                // Close missing brackets/braces
+                for (let i = 0; i < (openBrackets - closeBrackets); i++) fixed += ']';
+                for (let i = 0; i < (openBraces - closeBraces); i++) fixed += '}';
+                
+                designSpec = tryParse(fixed);
                 if (!designSpec) {
                   console.error('Sanitized JSON still failed to parse');
-                  console.error('JSON snippet (first 300):', jsonStr.substring(0, 300));
-                  console.error('JSON snippet (last 300):', jsonStr.substring(Math.max(0, jsonStr.length - 300)));
+                  console.error('Original JSON snippet (first 500):', jsonStr.substring(0, 500));
+                  console.error('Original JSON snippet (last 500):', jsonStr.substring(Math.max(0, jsonStr.length - 500)));
+                  console.error('Fixed JSON snippet (first 500):', fixed.substring(0, 500));
+                  console.error('Fixed JSON snippet (last 500):', fixed.substring(Math.max(0, fixed.length - 500)));
                   throw new Error('Unable to parse JSON even after sanitization');
                 }
               }
@@ -815,6 +838,29 @@ Return JSON (COMPLETE structure, NO nested frames):
               // Validate required fields
               if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
                 throw new Error('Invalid design spec: missing elements array');
+              }
+
+              // Update image elements to use generated image if available
+              if (generatedImageBase64) {
+                // Find or add image element for generated image
+                const imageElements = designSpec.elements.filter((el: any) => el.type === 'image');
+                if (imageElements.length > 0) {
+                  // Update first image element to use generated image
+                  imageElements[0].content = generatedImageBase64;
+                  imageElements[0].isGenerated = true;
+                } else {
+                  // Add image element if none exists
+                  designSpec.elements.unshift({
+                    type: 'image',
+                    content: generatedImageBase64,
+                    x: 0,
+                    y: 0,
+                    width: canvasWidth,
+                    height: Math.floor(canvasHeight * 0.6),
+                    opacity: 1,
+                    isGenerated: true
+                  });
+                }
               }
 
               console.log('Successfully parsed design with', designSpec.elements.length, 'elements');
