@@ -686,56 +686,85 @@ Return JSON (COMPLETE structure, NO nested frames):
             // Parse final result with robust error handling
             let designSpec;
             try {
-              // Remove any markdown code blocks and extra text
+              // Remove code fences and trim obvious wrappers
               let cleanContent = fullContent
                 .replace(/```json\n?/g, '')
                 .replace(/```\n?/g, '')
-                .replace(/^[^{]*/, '') // Remove everything before the first {
-                .replace(/\}[^}]*$/, '}') // Remove everything after the last }
                 .trim();
-              
-              console.log('Cleaned content length:', cleanContent.length);
-              console.log('Cleaned content preview (first 200 chars):', cleanContent.substring(0, 200));
-              
-              // Find the first complete JSON object by tracking braces
-              let braceCount = 0;
-              let jsonStart = -1;
-              let jsonEnd = -1;
-              
-              for (let i = 0; i < cleanContent.length; i++) {
-                if (cleanContent[i] === '{') {
-                  if (jsonStart === -1) jsonStart = i;
-                  braceCount++;
-                } else if (cleanContent[i] === '}') {
-                  braceCount--;
-                  if (braceCount === 0 && jsonStart !== -1) {
-                    jsonEnd = i + 1;
-                    break;
+
+              // Extract the first complete JSON object while ignoring braces inside strings
+              const extractFirstJsonObject = (text: string): string | null => {
+                let inString = false;
+                let escaped = false;
+                let depth = 0;
+                let start = -1;
+                for (let i = 0; i < text.length; i++) {
+                  const ch = text[i];
+                  if (inString) {
+                    if (escaped) {
+                      escaped = false;
+                    } else if (ch === '\\') {
+                      escaped = true;
+                    } else if (ch === '"') {
+                      inString = false;
+                    }
+                    continue;
+                  }
+                  if (ch === '"') {
+                    inString = true;
+                    continue;
+                  }
+                  if (ch === '{') {
+                    if (depth === 0) start = i;
+                    depth++;
+                  } else if (ch === '}') {
+                    depth--;
+                    if (depth === 0 && start !== -1) {
+                      return text.slice(start, i + 1);
+                    }
                   }
                 }
-              }
-              
-              if (jsonStart === -1 || jsonEnd === -1) {
+                return null;
+              };
+
+              // Narrow down to content starting at first '{' to reduce noise
+              const firstBrace = cleanContent.indexOf('{');
+              if (firstBrace > 0) cleanContent = cleanContent.slice(firstBrace);
+
+              let jsonStr = extractFirstJsonObject(cleanContent) ?? '';
+              if (!jsonStr) {
                 console.error('Could not find complete JSON object');
-                console.error('Full content:', fullContent.substring(0, 1000));
+                console.error('Full content (first 1000):', fullContent.substring(0, 1000));
                 throw new Error('AI did not return a valid JSON object');
               }
-              
-              let jsonStr = cleanContent.substring(jsonStart, jsonEnd);
-              
-              console.log('Extracted JSON string length:', jsonStr.length);
-              console.log('JSON preview (first 300 chars):', jsonStr.substring(0, 300));
-              console.log('JSON preview (last 300 chars):', jsonStr.substring(jsonStr.length - 300));
-              
-              designSpec = JSON.parse(jsonStr);
-              
+
+              // Attempt parse; if it fails, try a light sanitization (trailing commas)
+              const tryParse = (s: string) => {
+                try { return JSON.parse(s); } catch { return null; }
+              };
+
+              designSpec = tryParse(jsonStr);
+              if (!designSpec) {
+                const sanitized = jsonStr
+                  // remove trailing commas in objects/arrays
+                  .replace(/,\s*(\}|\])/g, '$1')
+                  .trim();
+                designSpec = tryParse(sanitized);
+                if (!designSpec) {
+                  console.error('Sanitized JSON still failed to parse');
+                  console.error('JSON snippet (first 300):', jsonStr.substring(0, 300));
+                  console.error('JSON snippet (last 300):', jsonStr.substring(Math.max(0, jsonStr.length - 300)));
+                  throw new Error('Unable to parse JSON even after sanitization');
+                }
+              }
+
               // Validate required fields
               if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
                 throw new Error('Invalid design spec: missing elements array');
               }
-              
+
               console.log('Successfully parsed design with', designSpec.elements.length, 'elements');
-              
+
             } catch (e) {
               console.error('Failed to parse AI response:', e);
               console.error('Full response length:', fullContent.length);

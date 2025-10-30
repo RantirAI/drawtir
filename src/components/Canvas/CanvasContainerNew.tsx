@@ -498,30 +498,19 @@ export default function CanvasContainerNew({
         setGenerationProgressPercent(10);
         
         try {
-          const imageResponse = await fetch(
-            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-image`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-              },
-              body: JSON.stringify({
-                prompt: description,
-                size: "1024x1024",
-                quality: "high",
-              }),
+          const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image', {
+            body: {
+              prompt: description,
+              size: "1024x1024",
+              quality: "high",
             }
-          );
+          });
 
-          if (!imageResponse.ok) {
-            const errorData = await imageResponse.json();
-            throw new Error(errorData.error || "Failed to generate image");
+          if (imageError) {
+            throw new Error(imageError.message || "Failed to generate image");
           }
 
-          const imageData = await imageResponse.json();
-          if (imageData.image) {
+          if (imageData?.image) {
             imagesToUse = [imageData.image];
             setGenerationSteps(prev => prev.map(s => 
               s.id === 'image' ? { ...s, status: 'complete' as const } : s
@@ -564,13 +553,15 @@ export default function CanvasContainerNew({
       const canvasHeight = selectedFrame?.height || 1200;
 
       // Full AI poster generation with streaming
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ai-poster`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${authToken}`,
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
