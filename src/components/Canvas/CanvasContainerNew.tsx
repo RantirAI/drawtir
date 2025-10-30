@@ -177,7 +177,7 @@ export default function CanvasContainerNew({
   const [generationSteps, setGenerationSteps] = useState<Array<{
     id: string;
     label: string;
-    status: 'pending' | 'active' | 'complete';
+    status: 'pending' | 'active' | 'complete' | 'error';
   }>>([]);
   const [generationProgressPercent, setGenerationProgressPercent] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -523,9 +523,26 @@ export default function CanvasContainerNew({
           }
         } catch (imageError: any) {
           console.error("Image generation error:", imageError);
-          toast.error(imageError.message || "Failed to generate image");
+          const errorMessage = imageError.message || "Failed to generate image";
+          
+          // Check if it's a credits exhaustion error
+          if (errorMessage.includes("Credits exhausted") || errorMessage.includes("402")) {
+            toast.error("AI credits exhausted! Please add credits in Settings → Workspace → Usage to continue generating images.", {
+              duration: 6000,
+            });
+          } else if (errorMessage.includes("Rate limit") || errorMessage.includes("429")) {
+            toast.error("Rate limit exceeded. Please wait a moment and try again.", {
+              duration: 5000,
+            });
+          } else {
+            toast.error(errorMessage);
+          }
+          
           setIsGenerating(false);
           setGenerationProgress("");
+          setGenerationSteps(prev => prev.map(s => 
+            s.id === 'image' ? { ...s, status: 'error' as const } : s
+          ));
           return;
         }
       }
