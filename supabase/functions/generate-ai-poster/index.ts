@@ -351,10 +351,10 @@ Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/ca
                   console.error('Error saving to media library:', insertError);
                 }
               }
-            
-           } catch (error) {
-             console.error('Exception saving to media library:', error);
-           }
+            }
+          } catch (error) {
+            console.error('Exception saving to media library:', error);
+          }
         }
       } else {
         console.warn('No image returned from AI generation');
