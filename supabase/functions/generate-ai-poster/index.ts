@@ -279,28 +279,82 @@ Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/ca
               { global: { headers: { Authorization: authHeader } } }
             );
 
-            const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-            
-            if (!userError && user) {
-              const fileName = `ai-generated-poster-${Date.now()}.png`;
-              const { error: insertError } = await supabaseClient.from('media_library').insert({
-                user_id: user.id,
-                file_name: fileName,
-                file_url: generatedImage,
-                file_type: 'image/png',
-                source: 'ai-generated',
-                metadata: { prompt, context: 'poster-generation' }
-              });
-              
-              if (!insertError) {
-                console.log('✅ Saved generated poster image to media library');
-              } else {
-                console.error('Error saving to media library:', insertError);
+            let userId: string | null = null;
+            try {
+              const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+              if (!userError && user) {
+                userId = user.id;
+              } else if (userError) {
+                console.error('Error getting user:', userError);
+              }
+            } catch (e) {
+              console.error('auth.getUser() failed, attempting JWT decode fallback:', e);
+            }
+
+            if (!userId) {
+              try {
+                const token = authHeader.replace('Bearer ', '').trim();
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                userId = payload?.sub || null;
+              } catch (jwtErr) {
+                console.error('Failed to decode JWT payload:', jwtErr);
               }
             }
-          } catch (error) {
-            console.error('Exception saving to media library:', error);
-          }
+
+            if (userId) {
+              const fileName = `ai-generated-poster-${Date.now()}.png`;
+
+              // Convert base64 data URL to Blob
+              let contentType = 'image/png';
+              let blob: Blob;
+              if (generatedImage.startsWith('data:')) {
+                const [header, base64Data] = generatedImage.split(',');
+                const mimeMatch = header.match(/data:(.*?);base64/);
+                if (mimeMatch) contentType = mimeMatch[1];
+                const binaryString = atob(base64Data);
+                const bytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+                blob = new Blob([bytes], { type: contentType });
+              } else {
+                const fetched = await fetch(generatedImage);
+                blob = await fetched.blob();
+                contentType = blob.type || contentType;
+              }
+
+              const extension = (contentType.split('/')[1] || 'png').split(';')[0];
+              const finalFileName = fileName.replace('.png', `.${extension}`);
+              const path = `${userId}/${finalFileName}`;
+
+              const { error: uploadError } = await supabaseClient.storage
+                .from('media')
+                .upload(path, blob, { contentType, upsert: true });
+
+              if (uploadError) {
+                console.error('Error uploading generated image to storage:', uploadError);
+              } else {
+                const { data: pub } = supabaseClient.storage.from('media').getPublicUrl(path);
+                const publicUrl = pub?.publicUrl ?? '';
+
+                const { error: insertError } = await supabaseClient.from('media_library').insert({
+                  user_id: userId,
+                  file_name: finalFileName,
+                  file_url: publicUrl || path,
+                  file_type: contentType,
+                  file_size: blob.size ?? null,
+                  source: 'ai-generated',
+                  metadata: { prompt, context: 'poster-generation' }
+                });
+                
+                if (!insertError) {
+                  console.log('✅ Uploaded and saved generated poster image to media library');
+                } else {
+                  console.error('Error saving to media library:', insertError);
+                }
+              }
+            
+           } catch (error) {
+             console.error('Exception saving to media library:', error);
+           }
         }
       } else {
         console.warn('No image returned from AI generation');

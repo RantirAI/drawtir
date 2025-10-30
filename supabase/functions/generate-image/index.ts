@@ -114,26 +114,80 @@ Style: Professional poster-quality imagery with strong visual appeal.`
         );
 
         console.log('Attempting to get user...');
-        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
-        
-        if (userError) {
-          console.error('Error getting user:', userError);
-        } else if (user) {
-          console.log('User authenticated, saving to media library...');
-          const fileName = `ai-generated-${Date.now()}.png`;
-          const { error: insertError } = await supabaseClient.from('media_library').insert({
-            user_id: user.id,
-            file_name: fileName,
-            file_url: imageUrl,
-            file_type: 'image/png',
-            source: 'ai-generated',
-            metadata: { prompt }
-          });
-          
-          if (insertError) {
-            console.error('Error inserting to media library:', insertError);
+        let userId: string | null = null;
+        try {
+          const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+          if (userError) {
+            console.error('Error getting user via auth.getUser():', userError);
+          } else if (user) {
+            userId = user.id;
+          }
+        } catch (e) {
+          console.error('auth.getUser() threw, attempting JWT decode fallback:', e);
+        }
+
+        // Fallback: decode JWT to extract user id when getUser fails
+        if (!userId) {
+          try {
+            const token = authHeader.replace('Bearer ', '').trim();
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            userId = payload?.sub || null;
+          } catch (jwtErr) {
+            console.error('Failed to decode JWT payload:', jwtErr);
+          }
+        }
+
+        if (userId) {
+          console.log('User authenticated, uploading image to storage...');
+
+          // Prepare image blob
+          let contentType = 'image/png';
+          let blob: Blob;
+
+          if (imageUrl.startsWith('data:')) {
+            const [header, base64Data] = imageUrl.split(',');
+            const mimeMatch = header.match(/data:(.*?);base64/);
+            if (mimeMatch) contentType = mimeMatch[1];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+            blob = new Blob([bytes], { type: contentType });
           } else {
-            console.log('✅ Successfully saved to media library for user:', user.id);
+            // If the AI ever returns a remote URL
+            const fetched = await fetch(imageUrl);
+            blob = await fetched.blob();
+            contentType = blob.type || contentType;
+          }
+
+          const extension = (contentType.split('/')[1] || 'png').split(';')[0];
+          const fileName = `ai-generated-${Date.now()}.${extension}`;
+          const path = `${userId}/${fileName}`;
+
+          const { error: uploadError } = await supabaseClient.storage
+            .from('media')
+            .upload(path, blob, { contentType, upsert: true });
+
+          if (uploadError) {
+            console.error('Error uploading image to storage:', uploadError);
+          } else {
+            const { data: pub } = supabaseClient.storage.from('media').getPublicUrl(path);
+            const publicUrl = pub?.publicUrl ?? '';
+
+            const { error: insertError } = await supabaseClient.from('media_library').insert({
+              user_id: userId,
+              file_name: fileName,
+              file_url: publicUrl || path,
+              file_type: contentType,
+              file_size: blob.size ?? null,
+              source: 'ai-generated',
+              metadata: { prompt }
+            });
+
+            if (insertError) {
+              console.error('Error inserting to media library:', insertError);
+            } else {
+              console.log('✅ Uploaded and saved to media library for user:', userId);
+            }
           }
         } else {
           console.log('No user found from auth header');
