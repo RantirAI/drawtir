@@ -100,17 +100,8 @@ export default function TemplatesPanel({
                 {starterTemplates.map((template) => (
                   <button
                     key={template.id}
-                    onClick={() => handleTemplateClick(template.snapshot, template.name)}
                     className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                   >
-                    {/* Preview Button */}
-                    <button
-                      onClick={(e) => handlePreview(template.snapshot, e)}
-                      className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Preview template"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                    </button>
                     {/* Preview */}
                     <div className="absolute inset-0 p-3">
                       <div 
@@ -127,6 +118,23 @@ export default function TemplatesPanel({
                         <div className="text-center text-[6px] opacity-50">Preview</div>
                       </div>
                     </div>
+
+                    {/* Centered Action Buttons - shown on hover */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => handlePreview(template.snapshot, e)}
+                        className="bg-white/90 hover:bg-white text-black px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                      >
+                        Preview
+                      </button>
+                      <button
+                        onClick={() => handleTemplateClick(template.snapshot, template.name)}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                      >
+                        Use Template
+                      </button>
+                    </div>
+
                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
                       <p className="text-xs font-medium text-foreground truncate">{template.name}</p>
                       <p className="text-[10px] text-muted-foreground truncate">{template.category}</p>
@@ -152,17 +160,8 @@ export default function TemplatesPanel({
                   {templates.map((template) => (
                     <button
                       key={template.id}
-                      onClick={() => handleTemplateClick(template.canvas_data, template.project_name)}
                       className="group relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary/50 hover:bg-secondary transition-all hover:scale-105 border border-border/50"
                     >
-                      {/* Preview Button */}
-                      <button
-                        onClick={(e) => handlePreview(template.canvas_data, e)}
-                        className="absolute top-2 right-2 z-10 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Preview template"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
                       {/* Preview */}
                       {template.thumbnail_url ? (
                         <img 
@@ -185,6 +184,23 @@ export default function TemplatesPanel({
                           </div>
                         </div>
                       )}
+
+                      {/* Centered Action Buttons - shown on hover */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => handlePreview(template.canvas_data, e)}
+                          className="bg-white/90 hover:bg-white text-black px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => handleTemplateClick(template.canvas_data, template.project_name)}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                        >
+                          Use Template
+                        </button>
+                      </div>
+
                       <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
                         <p className="text-xs font-medium text-foreground truncate">{template.project_name}</p>
                         {template.template_category && (
