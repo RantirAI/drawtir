@@ -1768,6 +1768,12 @@ export default function CanvasContainerNew({
     toast.success("Wrapped into nested frame!");
   };
 
+  const handleProjectNameChange = (newName: string) => {
+    setProjectTitle(newName);
+    // Trigger save after title change
+    setTimeout(() => forceSave(), 100);
+  };
+
   // Main canvas container component
   return (
     <div className="w-full h-screen relative overflow-hidden flex flex-col">
@@ -1775,7 +1781,7 @@ export default function CanvasContainerNew({
 
       <EditorTopBar
         projectName={projectTitle}
-        onProjectNameChange={setProjectTitle}
+        onProjectNameChange={handleProjectNameChange}
         onSave={forceSave}
         onDownload={downloadPoster}
         onExport={() => setShowExportDialog(true)}
