@@ -267,7 +267,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   if (inline) {
     return (
-      <div className="absolute left-20 top-0 bottom-0 w-96 animate-in fade-in slide-in-from-left duration-300 z-30">
+      <div className="absolute left-16 top-0 bottom-0 w-80 animate-in fade-in slide-in-from-left duration-300 z-30">
         <div className="h-full flex flex-col">
           {content}
         </div>
