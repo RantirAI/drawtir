@@ -394,8 +394,8 @@ export default function CanvasContainerNew({
   };
 
   const handleImageUpload = () => {
-    // Now creates an image element instead of setting frame image
-    imageInputRef.current?.click();
+    // Open media library panel first instead of directly opening file picker
+    setShowMediaLibrary(true);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

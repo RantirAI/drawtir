@@ -218,7 +218,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
                   <img
                     src={item.file_url}
                     alt={item.file_name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-muted/30"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Button
