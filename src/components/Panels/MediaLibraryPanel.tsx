@@ -168,7 +168,13 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   const content = (
     <>
-      <ScrollArea className={inline ? "h-[calc(100vh-80px)]" : "h-[600px]"}>
+      {/* Header */}
+      <div className="p-6 border-b">
+        <h2 className="text-xl font-semibold mb-1">Media Library</h2>
+        <p className="text-sm text-muted-foreground">Upload and manage your images</p>
+      </div>
+
+      <ScrollArea className={inline ? "h-[calc(100vh-140px)]" : "h-[600px]"}>
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -182,7 +188,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
           ) : (
             <div className={inline ? "grid grid-cols-2 gap-3 p-4" : "grid grid-cols-3 gap-3 p-4"}>
               {/* Upload tile as first item */}
-              <label className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group">
+              <label className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 border-dashed border-muted-foreground/30 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all">
                 <input
                   type="file"
                   accept="image/*"
@@ -190,7 +196,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
                   className="hidden"
                   disabled={uploading}
                 />
-                <div className="w-full h-full border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                <div className="w-full h-full flex flex-col items-center justify-center gap-2">
                   {uploading ? (
                     <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                   ) : (
@@ -206,7 +212,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
               {media.map((item) => (
                 <div
                   key={item.id}
-                  className="relative group aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition-all hover:scale-105"
+                  className="relative group aspect-square rounded-lg overflow-hidden border bg-card shadow-sm cursor-pointer hover:shadow-md hover:border-primary/50 transition-all hover:scale-[1.02]"
                   onClick={() => onSelectImage?.(item.file_url)}
                 >
                   <img
