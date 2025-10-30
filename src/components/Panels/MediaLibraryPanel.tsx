@@ -168,7 +168,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   const content = (
     <>
-      <div className={inline ? "p-4 flex items-center justify-between" : "p-4 border-b flex items-center justify-between"}>
+      <div className={inline ? "p-4 flex items-center justify-between border-b bg-background/50" : "p-4 border-b flex items-center justify-between"}>
           <label>
             <input
               type="file"
@@ -190,7 +190,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
           </label>
         </div>
 
-        <ScrollArea className={inline ? "h-[calc(100vh-200px)]" : "h-[600px]"}>
+        <ScrollArea className={inline ? "h-[calc(100vh-80px)]" : "h-[600px]"}>
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -202,7 +202,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
               <p className="text-xs">Upload images or generate with AI</p>
             </div>
           ) : (
-            <div className={inline ? "grid grid-cols-4 gap-4 p-6" : "grid grid-cols-3 gap-3 p-4"}>
+            <div className={inline ? "grid grid-cols-2 gap-3 p-4" : "grid grid-cols-3 gap-3 p-4"}>
               {media.map((item) => (
                 <div
                   key={item.id}
@@ -261,7 +261,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   if (inline) {
     return (
-      <div className="absolute inset-0 bg-background/95 backdrop-blur-sm animate-in fade-in duration-300 z-20">
+      <div className="absolute left-20 top-0 bottom-0 w-96 bg-background/98 backdrop-blur-sm animate-in fade-in slide-in-from-left duration-300 z-30 border-r shadow-2xl">
         <div className="h-full flex flex-col">
           {content}
         </div>
