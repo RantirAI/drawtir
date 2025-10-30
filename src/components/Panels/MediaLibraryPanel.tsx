@@ -168,29 +168,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   const content = (
     <>
-      <div className={inline ? "p-4 flex items-center justify-between border-b bg-background/50" : "p-4 border-b flex items-center justify-between"}>
-          <label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleUpload}
-              className="hidden"
-              disabled={uploading}
-            />
-            <Button size="sm" disabled={uploading} asChild>
-              <span className="cursor-pointer flex items-center gap-2">
-                {uploading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
-                Upload Image
-              </span>
-            </Button>
-          </label>
-        </div>
-
-        <ScrollArea className={inline ? "h-[calc(100vh-80px)]" : "h-[600px]"}>
+      <ScrollArea className={inline ? "h-[calc(100vh-80px)]" : "h-[600px]"}>
           {loading ? (
             <div className="flex items-center justify-center h-32">
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -203,10 +181,32 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
             </div>
           ) : (
             <div className={inline ? "grid grid-cols-2 gap-3 p-4" : "grid grid-cols-3 gap-3 p-4"}>
+              {/* Upload tile as first item */}
+              <label className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+                <div className="w-full h-full border-2 border-dashed border-muted-foreground/30 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                  {uploading ? (
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  ) : (
+                    <>
+                      <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">Upload</span>
+                    </>
+                  )}
+                </div>
+              </label>
+
+              {/* Existing images */}
               {media.map((item) => (
                 <div
                   key={item.id}
-                  className="relative group aspect-square rounded-lg overflow-hidden border bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition-all hover:scale-105"
+                  className="relative group aspect-square rounded-lg overflow-hidden bg-muted cursor-pointer hover:ring-2 hover:ring-primary transition-all hover:scale-105"
                   onClick={() => onSelectImage?.(item.file_url)}
                 >
                   <img
@@ -261,7 +261,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, inline = false }: Me
 
   if (inline) {
     return (
-      <div className="absolute left-20 top-0 bottom-0 w-96 bg-background/98 backdrop-blur-sm animate-in fade-in slide-in-from-left duration-300 z-30 border-r shadow-2xl">
+      <div className="absolute left-20 top-0 bottom-0 w-96 bg-background/98 backdrop-blur-sm animate-in fade-in slide-in-from-left duration-300 z-30 shadow-2xl">
         <div className="h-full flex flex-col">
           {content}
         </div>
