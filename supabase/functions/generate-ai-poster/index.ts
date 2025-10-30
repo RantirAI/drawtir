@@ -245,13 +245,28 @@ serve(async (req) => {
           messages: [
             {
               role: 'user',
-              content: `Create a high-quality background image or photo element for a poster with this theme: ${prompt}. 
+              content: `CRITICAL: Generate ONLY a plain background image or photo - NO TEXT, NO LOGOS, NO GRAPHICS, NO WORDS of any kind.
 
-IMPORTANT: Generate ONLY the image/photo element, NOT a complete poster with text or graphics overlaid.
-Style it as a clean background image or main visual element that can have text and graphics added on top of it.
-The image should be suitable as a foundational visual element in a poster design.
-Focus on creating an eye-catching visual that complements the theme: ${prompt}.
-Aspect ratio should be roughly ${canvasWidth}x${canvasHeight} (${(canvasWidth/canvasHeight).toFixed(2)}:1).`
+Theme: ${prompt}
+
+Requirements:
+- Pure background image ONLY (photo, gradient, texture, scene, etc.)
+- ABSOLUTELY NO text, titles, dates, event names, or any words
+- NO logos, badges, or branding elements
+- NO graphic overlays or design elements
+- Think of this as a blank canvas background that will have text added on top later
+- Focus on creating an atmospheric, visually appealing background scene
+- Aspect ratio: ${canvasWidth}x${canvasHeight} (${(canvasWidth/canvasHeight).toFixed(2)}:1)
+
+Examples of what to generate:
+- Beach sunset scene (just the scenery)
+- Abstract gradient background
+- City skyline silhouette
+- Nature landscape
+- Textured background
+- Color wash or bokeh effect
+
+DO NOT generate: posters, flyers, event graphics, or anything with text/words.`
             }
           ],
           modalities: ['image', 'text']
@@ -842,24 +857,32 @@ Return JSON (COMPLETE structure, NO nested frames):
 
               // Update image elements to use generated image if available
               if (generatedImageBase64) {
+                console.log('Adding generated image to design spec');
                 // Find or add image element for generated image
                 const imageElements = designSpec.elements.filter((el: any) => el.type === 'image');
                 if (imageElements.length > 0) {
-                  // Update first image element to use generated image
+                  // Update first image element to use generated image with full base64 URL
                   imageElements[0].content = generatedImageBase64;
+                  imageElements[0].imageUrl = generatedImageBase64;
+                  imageElements[0].src = generatedImageBase64;
                   imageElements[0].isGenerated = true;
+                  console.log('Updated existing image element with generated image');
                 } else {
                   // Add image element if none exists
-                  designSpec.elements.unshift({
+                  const newImageElement = {
                     type: 'image',
                     content: generatedImageBase64,
+                    imageUrl: generatedImageBase64,
+                    src: generatedImageBase64,
                     x: 0,
                     y: 0,
                     width: canvasWidth,
                     height: Math.floor(canvasHeight * 0.6),
                     opacity: 1,
                     isGenerated: true
-                  });
+                  };
+                  designSpec.elements.unshift(newImageElement);
+                  console.log('Added new image element with generated image');
                 }
               }
 
