@@ -120,6 +120,7 @@ interface ShapeSettingsPanelProps {
   cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
   imageFit?: "fill" | "contain" | "cover" | "crop";
+  imageUrl?: string;
   brightness?: number;
   contrast?: number;
   saturation?: number;
@@ -162,6 +163,7 @@ interface ShapeSettingsPanelProps {
   onCornerRadiusChange?: (radius: number) => void;
   onBlendModeChange?: (mode: string) => void;
   onImageFitChange?: (fit: "fill" | "contain" | "cover" | "crop") => void;
+  onImageUrlChange?: (url: string) => void;
   onBrightnessChange?: (brightness: number) => void;
   onContrastChange?: (contrast: number) => void;
   onSaturationChange?: (saturation: number) => void;
@@ -246,6 +248,7 @@ export default function ShapeSettingsPanel({
   cornerRadiusUnit = "px",
   blendMode = "normal",
   imageFit = "cover",
+  imageUrl,
   brightness = 100,
   contrast = 100,
   saturation = 100,
@@ -288,6 +291,7 @@ export default function ShapeSettingsPanel({
   onCornerRadiusChange,
   onBlendModeChange,
   onImageFitChange,
+  onImageUrlChange,
   onBrightnessChange,
   onContrastChange,
   onSaturationChange,
@@ -1188,23 +1192,43 @@ export default function ShapeSettingsPanel({
         {/* Image Fit (for image elements) */}
         {elementType === "image" && onImageFitChange && (
           <AccordionItem value="image-fit" className="border-b-0">
-            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Image Fit</AccordionTrigger>
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">Image</AccordionTrigger>
             <AccordionContent className="space-y-1.5 pb-2">
-              <div className="grid grid-cols-4 gap-0.5">
-                {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
-                  <Button
-                    key={fit}
-                    variant="outline"
-                    size="sm"
-                    className={cn(
-                      "h-6 text-[9px] capitalize px-0.5 rounded",
-                      imageFit === fit && "border-primary text-primary"
-                    )}
-                    onClick={() => onImageFitChange(fit)}
-                  >
-                    {fit}
-                  </Button>
-                ))}
+              {/* Image URL Input */}
+              {onImageUrlChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Image URL</Label>
+                  <Input
+                    value={imageUrl || ""}
+                    onChange={(e) => onImageUrlChange(e.target.value)}
+                    placeholder="https://... or paste base64"
+                    className="h-7 text-xs"
+                  />
+                  <p className="text-[9px] text-muted-foreground mt-0.5">
+                    Paste URL or base64 data URL
+                  </p>
+                </div>
+              )}
+              
+              {/* Image Fit Buttons */}
+              <div>
+                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Fit</Label>
+                <div className="grid grid-cols-4 gap-0.5">
+                  {(["fill", "contain", "cover", "crop"] as const).map((fit) => (
+                    <Button
+                      key={fit}
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-6 text-[9px] capitalize px-0.5 rounded",
+                        imageFit === fit && "border-primary text-primary"
+                      )}
+                      onClick={() => onImageFitChange(fit)}
+                    >
+                      {fit}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>

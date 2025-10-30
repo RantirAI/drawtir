@@ -2311,6 +2311,7 @@ export default function CanvasContainerNew({
           fontSize={selectedElement?.fontSize}
           color={selectedElement?.color}
           imageFit={selectedElement?.imageFit}
+          imageUrl={selectedElement?.imageUrl}
           brightness={selectedElement?.brightness}
           contrast={selectedElement?.contrast}
           saturation={selectedElement?.saturation}
@@ -2411,6 +2412,7 @@ export default function CanvasContainerNew({
           onFontSizeChange={(size) => selectedElement && handleElementUpdate(selectedElement.id, { fontSize: size })}
           onColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { color })}
           onImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { imageFit: fit })}
+          onImageUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { imageUrl: url })}
           onBrightnessChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { brightness: val })}
           onContrastChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { contrast: val })}
           onSaturationChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { saturation: val })}
