@@ -4,11 +4,12 @@ import DynamicIcon from "./DynamicIcon";
 import { ShaderElement } from "./ShaderElement";
 import { BendableLine } from "./BendableLine";
 import RichTextEditor from "./RichTextEditor";
+import { QRCodeSVG } from 'qrcode.react';
 import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
   id: string;
-  type: "image" | "shape" | "text" | "shader" | "richtext";
+  type: "image" | "shape" | "text" | "shader" | "richtext" | "qrcode";
   x: number;
   y: number;
   width: number;
@@ -61,6 +62,11 @@ interface ResizableElementProps {
     color2?: string;
     color3?: string;
   };
+  // QR Code properties
+  qrValue?: string;
+  qrFgColor?: string;
+  qrBgColor?: string;
+  qrLevel?: "L" | "M" | "Q" | "H";
   // Line properties
   lineStyle?: "solid" | "dashed" | "dotted" | "dashdot";
   lineCap?: "butt" | "round" | "square";
@@ -895,6 +901,21 @@ export default function ResizableElement({
               const currentBlocks = (rest as any).richTextBlocks || [];
               const filteredBlocks = currentBlocks.filter((b: any) => b.id !== blockId);
               onUpdate(id, { richTextBlocks: filteredBlocks } as any);
+            }}
+          />
+        </div>
+      ) : type === "qrcode" ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <QRCodeSVG
+            value={(rest as any).qrValue || "https://example.com"}
+            size={Math.min(width, height)}
+            bgColor={(rest as any).qrBgColor || "#ffffff"}
+            fgColor={(rest as any).qrFgColor || "#000000"}
+            level={(rest as any).qrLevel || "M"}
+            includeMargin={false}
+            style={{
+              width: '100%',
+              height: '100%',
             }}
           />
         </div>

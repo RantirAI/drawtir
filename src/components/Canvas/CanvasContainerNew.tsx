@@ -1980,14 +1980,7 @@ export default function CanvasContainerNew({
                       setAnimatingElementId(element.id);
                       setShowAnimationsPanel(true);
                     }}
-                  >
-                   {element.type === "qrcode" ? (
-                     <QRCodeElement
-                       element={element}
-                       isSelected={selectedElementIds.includes(element.id)}
-                       onClick={() => handleElementSelect(element.id, false)}
-                     />
-                   ) : (
+                   >
                      <ResizableElement
                       id={element.id}
                        type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
@@ -2049,10 +2042,13 @@ export default function CanvasContainerNew({
                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
                       onDelete={() => handleElementDelete(element.id)}
                       onDuplicate={() => handleElementDuplicate(element.id)}
-                      globalAnimationTrigger={animationGlobalKey as any}
-                    />
-                   )}
-                   </CanvasContextMenu>
+                       globalAnimationTrigger={animationGlobalKey as any}
+                       qrValue={element.qrValue}
+                       qrFgColor={element.qrFgColor}
+                       qrBgColor={element.qrBgColor}
+                       qrLevel={element.qrLevel}
+                     />
+                    </CanvasContextMenu>
                 )})}
                 
                 {/* Nested frames inside parent frame */}
