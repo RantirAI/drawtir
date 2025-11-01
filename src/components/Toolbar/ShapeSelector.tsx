@@ -1,4 +1,4 @@
-import { Square, Minus, ArrowRight, Circle, Hexagon, Star, QrCode } from "lucide-react";
+import { Square, Minus, ArrowRight, Circle, Hexagon, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -19,7 +19,6 @@ export default function ShapeSelector({ children, onShapeSelect }: ShapeSelector
     { type: "ellipse", icon: Circle, label: "Ellipse", shortcut: "O" },
     { type: "polygon", icon: Hexagon, label: "Polygon", shortcut: "" },
     { type: "star", icon: Star, label: "Star", shortcut: "" },
-    { type: "qrcode", icon: QrCode, label: "QR Code", shortcut: "" },
   ];
 
   return (

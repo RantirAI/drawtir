@@ -1303,43 +1303,6 @@ export default function CanvasContainerNew({
     }
     console.log("✅ Frame found:", frame.id);
 
-    // Handle QR Code type
-    if (shapeType === "qrcode") {
-      const defaultSize = Math.min(150, Math.floor(frame.width * 0.3));
-      const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
-      const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
-
-      const newElement: Element = {
-        id: `element-${Date.now()}`,
-        type: "qrcode",
-        x,
-        y,
-        width: defaultSize,
-        height: defaultSize,
-        qrValue: "https://example.com",
-        qrFgColor: "#000000",
-        qrBgColor: "#ffffff",
-        qrLevel: "M",
-        opacity: 100,
-        cornerRadius: 0,
-        blendMode: "normal",
-      };
-
-      setFrames(prevFrames => prevFrames.map(f => {
-        if (f.id === targetFrameId) {
-          const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
-          console.log("✅ Updated frame with QR code. Total elements:", updatedFrame.elements?.length);
-          return updatedFrame;
-        }
-        return f;
-      }));
-      setSelectedElementIds([newElement.id]);
-      setShowShapeSettings(true);
-      setActiveTool("select");
-      toast.success("QR Code added");
-      return;
-    }
-
     const defaultWidth = shapeType === "line" || shapeType === "arrow" 
       ? Math.max(150, Math.floor(frame.width * 0.5)) 
       : shapeType === "rectangle"
@@ -1386,6 +1349,47 @@ export default function CanvasContainerNew({
     setActiveTool("select");
     console.log(`✅ ${shapeType} shape added successfully!`);
     toast.success(`${shapeType} added!`);
+  };
+
+  const handleQRCodeAdd = () => {
+    const targetFrameId = selectedFrameId || frames[0]?.id;
+    if (!targetFrameId) {
+      toast.error("Please add a frame first");
+      return;
+    }
+    const frame = frames.find(f => f.id === targetFrameId);
+    if (!frame) return;
+
+    const defaultSize = Math.min(150, Math.floor(frame.width * 0.3));
+    const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
+    const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
+
+    const newElement: Element = {
+      id: `element-${Date.now()}`,
+      type: "qrcode",
+      x,
+      y,
+      width: defaultSize,
+      height: defaultSize,
+      qrValue: "https://example.com",
+      qrFgColor: "#000000",
+      qrBgColor: "#ffffff",
+      qrLevel: "M",
+      opacity: 100,
+      cornerRadius: 0,
+      blendMode: "normal",
+    };
+
+    setFrames(prevFrames => prevFrames.map(f => {
+      if (f.id === targetFrameId) {
+        return { ...f, elements: [...(f.elements || []), newElement] };
+      }
+      return f;
+    }));
+    setSelectedElementIds([newElement.id]);
+    setShowShapeSettings(true);
+    setActiveTool("select");
+    toast.success("QR Code added");
   };
 
   const handleIconSelect = (iconName: string, iconFamily: string) => {
@@ -2710,6 +2714,7 @@ export default function CanvasContainerNew({
         }}
         onShapeSelect={handleShapeSelect}
         onIconSelect={handleIconSelect}
+        onQRCodeAdd={handleQRCodeAdd}
         timelinePanelOpen={showTimelinePanel}
         onShaderAdd={handleShaderAdd}
         onLineAdd={handleLineAdd}
