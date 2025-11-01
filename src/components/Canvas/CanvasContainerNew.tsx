@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from "react";
+import QRCodeElement from "./QRCodeElement";
+import BrandKitPanel from "@/components/Panels/BrandKitPanel";
+import RulerOverlay from "./RulerOverlay";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Film, Image as ImageIcon } from "lucide-react";
+import { Film, Image as ImageIcon, Palette, Ruler, Play } from "lucide-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
@@ -165,6 +168,8 @@ export default function CanvasContainerNew({
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
+  const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
+  const [showRulers, setShowRulers] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
@@ -1299,6 +1304,43 @@ export default function CanvasContainerNew({
     }
     console.log("✅ Frame found:", frame.id);
 
+    // Handle QR Code type
+    if (shapeType === "qrcode") {
+      const defaultSize = Math.min(150, Math.floor(frame.width * 0.3));
+      const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
+      const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
+
+      const newElement: Element = {
+        id: `element-${Date.now()}`,
+        type: "qrcode",
+        x,
+        y,
+        width: defaultSize,
+        height: defaultSize,
+        qrValue: "https://example.com",
+        qrFgColor: "#000000",
+        qrBgColor: "#ffffff",
+        qrLevel: "M",
+        opacity: 100,
+        cornerRadius: 0,
+        blendMode: "normal",
+      };
+
+      setFrames(prevFrames => prevFrames.map(f => {
+        if (f.id === targetFrameId) {
+          const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
+          console.log("✅ Updated frame with QR code. Total elements:", updatedFrame.elements?.length);
+          return updatedFrame;
+        }
+        return f;
+      }));
+      setSelectedElementIds([newElement.id]);
+      setShowShapeSettings(true);
+      setActiveTool("select");
+      toast.success("QR Code added");
+      return;
+    }
+
     const defaultWidth = shapeType === "line" || shapeType === "arrow" 
       ? Math.max(150, Math.floor(frame.width * 0.5)) 
       : shapeType === "rectangle"
@@ -1936,6 +1978,13 @@ export default function CanvasContainerNew({
                       setShowAnimationsPanel(true);
                     }}
                   >
+                   {element.type === "qrcode" ? (
+                     <QRCodeElement
+                       element={element}
+                       isSelected={selectedElementIds.includes(element.id)}
+                       onClick={() => handleElementSelect(element.id, false)}
+                     />
+                   ) : (
                      <ResizableElement
                       id={element.id}
                        type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
@@ -1999,6 +2048,7 @@ export default function CanvasContainerNew({
                       onDuplicate={() => handleElementDuplicate(element.id)}
                       globalAnimationTrigger={animationGlobalKey as any}
                     />
+                   )}
                    </CanvasContextMenu>
                 )})}
                 
@@ -2093,7 +2143,7 @@ export default function CanvasContainerNew({
                           <ResizableElement
                             key={element.id}
                             id={element.id}
-                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
+                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "qrcode" ? "shape" : element.type}
                             x={element.x}
                             y={element.y}
                             width={element.width}
@@ -2280,7 +2330,7 @@ export default function CanvasContainerNew({
 
       {showShapeSettings && (selectedElement?.type !== "shader") && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
-          elementType={selectedElement ? selectedElement.type : "frame"}
+          elementType={selectedElement ? (selectedElement.type === "qrcode" ? "shape" : selectedElement.type) : "frame"}
           elementName={
             selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType
@@ -2605,6 +2655,24 @@ export default function CanvasContainerNew({
           <Film className="h-4 w-4" />
         </Button>
         <Button
+          variant={showBrandKitPanel ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full hover:scale-105 transition-transform"
+          onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
+          title="Brand Kit"
+        >
+          <Palette className="h-4 w-4" />
+        </Button>
+        <Button
+          variant={showRulers ? "default" : "outline"}
+          size="icon"
+          className="h-10 w-10 rounded-full hover:scale-105 transition-transform"
+          onClick={() => setShowRulers(!showRulers)}
+          title="Toggle Rulers"
+        >
+          <Ruler className="h-4 w-4" />
+        </Button>
+        <Button
           variant="default"
           size="icon"
           className="h-10 w-10 rounded-full bg-primary hover:scale-105 transition-transform shadow-lg"
@@ -2799,6 +2867,23 @@ export default function CanvasContainerNew({
         onOpenChange={setShowPreviewDialog}
         frame={selectedFrame}
       />
+
+      <BrandKitPanel
+        isOpen={showBrandKitPanel}
+        onClose={() => setShowBrandKitPanel(false)}
+        onApplyColor={(color) => {
+          if (selectedElement) {
+            handleElementUpdate(selectedElement.id, { fill: color });
+          }
+        }}
+        onApplyFont={(font) => {
+          if (selectedElement) {
+            handleElementUpdate(selectedElement.id, { fontFamily: font });
+          }
+        }}
+      />
+
+      <RulerOverlay zoom={zoom} showRulers={showRulers} />
 
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
 

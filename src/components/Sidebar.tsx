@@ -1,4 +1,4 @@
-import { Home, Image, Settings, LogOut } from "lucide-react";
+import { Home, Image, Settings, LogOut, Palette, Ruler } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";

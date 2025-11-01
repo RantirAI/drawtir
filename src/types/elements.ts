@@ -1,4 +1,4 @@
-export type ElementType = "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader";
+export type ElementType = "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode";
 export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
 export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 
@@ -76,6 +76,12 @@ export interface Element {
   iconFamily?: string; // fa, md, hi, ai, bs, etc.
   iconColor?: string;
   iconSize?: number;
+  
+  // QR Code properties
+  qrValue?: string;
+  qrFgColor?: string;
+  qrBgColor?: string;
+  qrLevel?: "L" | "M" | "Q" | "H";
   
   // Shader properties
   shader?: {
