@@ -4,7 +4,7 @@ import BrandKitPanel from "@/components/Panels/BrandKitPanel";
 import RulerOverlay from "./RulerOverlay";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Film, Image as ImageIcon, Palette, Ruler, Play } from "lucide-react";
+import { Film, Image as ImageIcon, Palette, Ruler } from "lucide-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
