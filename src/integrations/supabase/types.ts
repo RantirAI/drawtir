@@ -50,6 +50,42 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_kits: {
+        Row: {
+          colors: string[] | null
+          created_at: string
+          fonts: string[] | null
+          id: string
+          is_default: boolean | null
+          logo_urls: string[] | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          colors?: string[] | null
+          created_at?: string
+          fonts?: string[] | null
+          id?: string
+          is_default?: boolean | null
+          logo_urls?: string[] | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          colors?: string[] | null
+          created_at?: string
+          fonts?: string[] | null
+          id?: string
+          is_default?: boolean | null
+          logo_urls?: string[] | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           created_at: string
