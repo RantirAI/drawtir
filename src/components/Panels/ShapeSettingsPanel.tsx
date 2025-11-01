@@ -79,7 +79,7 @@ const GOOGLE_FONTS = [
 ];
 
 interface ShapeSettingsPanelProps {
-  elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | null;
+  elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null;
   elementName?: string;
   shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
   iconName?: string;
@@ -87,6 +87,15 @@ interface ShapeSettingsPanelProps {
   backgroundColor?: string;
   backgroundType?: "solid" | "image" | "gradient" | "pattern" | "video";
   fillType?: "solid" | "image" | "gradient" | "pattern" | "video";
+  // QR code properties
+  qrValue?: string;
+  qrFgColor?: string;
+  qrBgColor?: string;
+  qrLevel?: "L" | "M" | "Q" | "H";
+  onQrValueChange?: (value: string) => void;
+  onQrFgColorChange?: (color: string) => void;
+  onQrBgColorChange?: (color: string) => void;
+  onQrLevelChange?: (level: "L" | "M" | "Q" | "H") => void;
   fill?: string;
   fillImage?: string;
   fillImageFit?: "fill" | "contain" | "cover" | "crop";
@@ -189,7 +198,7 @@ interface ShapeSettingsPanelProps {
   onClose?: () => void;
 }
 
-const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | null) => {
+const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null) => {
   switch (type) {
     case "frame": return Box;
     case "shape": return Square;
@@ -199,6 +208,7 @@ const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image"
     case "drawing": return Pen;
     case "icon": return Smile;
     case "shader": return Sparkles;
+    case "qrcode": return Square; // Using Square for QR code icon
     default: return Square;
   }
 };
@@ -213,6 +223,15 @@ export default function ShapeSettingsPanel({
   backgroundType = "solid",
   fillType = "solid",
   fill = "#000000",
+  // QR code props
+  qrValue = "https://example.com",
+  qrFgColor = "#000000",
+  qrBgColor = "#ffffff",
+  qrLevel = "M",
+  onQrValueChange,
+  onQrFgColorChange,
+  onQrBgColorChange,
+  onQrLevelChange,
   fillImage,
   fillImageFit = "cover",
   gradientType = "linear",
@@ -344,7 +363,96 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon"]} className="w-full space-y-0 [&>div]:space-y-0">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon", "qrcode"]} className="w-full space-y-0 [&>div]:space-y-0">
+        {/* QR Code Section - Only for QR codes */}
+        {elementType === "qrcode" && (
+          <AccordionItem value="qrcode" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">QR Code</AccordionTrigger>
+            <AccordionContent className="space-y-1.5 pb-1.5">
+              {/* QR Value */}
+              {onQrValueChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Content (URL or Text)</Label>
+                  <Input
+                    type="text"
+                    value={qrValue}
+                    onChange={(e) => onQrValueChange(e.target.value)}
+                    className="h-7 text-[11px] px-1.5 rounded"
+                    placeholder="https://example.com"
+                  />
+                </div>
+              )}
+
+              {/* QR Colors */}
+              <div className="grid grid-cols-2 gap-2">
+                {onQrFgColorChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Foreground</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="h-7 w-full rounded border border-border hover:border-primary transition-colors flex items-center justify-center"
+                          style={{ backgroundColor: qrFgColor }}
+                        >
+                          <span className="sr-only">QR Foreground Color</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right" className="w-80 p-3">
+                        <ColorPicker
+                          color={qrFgColor}
+                          onChange={onQrFgColorChange}
+                          showOpacity={false}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                {onQrBgColorChange && (
+                  <div>
+                    <Label className="text-[10px] mb-0.5 block text-muted-foreground">Background</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          className="h-7 w-full rounded border border-border hover:border-primary transition-colors flex items-center justify-center"
+                          style={{ backgroundColor: qrBgColor }}
+                        >
+                          <span className="sr-only">QR Background Color</span>
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right" className="w-80 p-3">
+                        <ColorPicker
+                          color={qrBgColor}
+                          onChange={onQrBgColorChange}
+                          showOpacity={false}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+              </div>
+
+              {/* Error Correction Level */}
+              {onQrLevelChange && (
+                <div>
+                  <Label className="text-[10px] mb-0.5 block text-muted-foreground">Error Correction</Label>
+                  <Select value={qrLevel} onValueChange={onQrLevelChange}>
+                    <SelectTrigger className="h-7 text-[11px] rounded">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="L" className="text-[11px]">Low (7%)</SelectItem>
+                      <SelectItem value="M" className="text-[11px]">Medium (15%)</SelectItem>
+                      <SelectItem value="Q" className="text-[11px]">Quartile (25%)</SelectItem>
+                      <SelectItem value="H" className="text-[11px]">High (30%)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+
         {/* Auto Layout Section - Only for Frames */}
         {elementType === "frame" && (
           <AccordionItem value="layout" className="border-b-0">

@@ -2329,7 +2329,7 @@ export default function CanvasContainerNew({
 
       {showShapeSettings && (selectedElement?.type !== "shader") && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
-          elementType={selectedElement ? (selectedElement.type === "qrcode" ? "shape" : selectedElement.type) : "frame"}
+          elementType={selectedElement?.type === "qrcode" ? "qrcode" : selectedElement ? selectedElement.type : "frame"}
           elementName={
             selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType
@@ -2507,6 +2507,15 @@ export default function CanvasContainerNew({
           onLineArrowStartChange={(arrow) => selectedElement && handleElementUpdate(selectedElement.id, { lineArrowStart: arrow })}
           onLineArrowEndChange={(arrow) => selectedElement && handleElementUpdate(selectedElement.id, { lineArrowEnd: arrow })}
           onControlPointsChange={(points) => selectedElement && handleElementUpdate(selectedElement.id, { controlPoints: points })}
+          // QR Code props
+          qrValue={selectedElement?.qrValue}
+          qrFgColor={selectedElement?.qrFgColor}
+          qrBgColor={selectedElement?.qrBgColor}
+          qrLevel={selectedElement?.qrLevel}
+          onQrValueChange={(value) => selectedElement && handleElementUpdate(selectedElement.id, { qrValue: value })}
+          onQrFgColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { qrFgColor: color })}
+          onQrBgColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { qrBgColor: color })}
+          onQrLevelChange={(level) => selectedElement && handleElementUpdate(selectedElement.id, { qrLevel: level })}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);
