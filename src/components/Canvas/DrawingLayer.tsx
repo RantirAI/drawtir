@@ -12,6 +12,8 @@ interface DrawingLayerProps {
   zoom?: number;
   panOffsetX?: number;
   panOffsetY?: number;
+  guideLines?: Array<{ id: string; x: number; y: number; width: number; height: number; shapeType: string }>;
+  snapThreshold?: number;
   onPathComplete?: (pathData: string, color: string, strokeWidth: number, bounds: { x: number; y: number; width: number; height: number }) => void;
 }
 
@@ -27,12 +29,41 @@ export default function DrawingLayer({
   zoom = 1,
   panOffsetX = 0,
   panOffsetY = 0,
+  guideLines = [],
+  snapThreshold = 10,
   onPathComplete 
 }: DrawingLayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [currentPath, setCurrentPath] = useState<string>("");
   const [pathPoints, setPathPoints] = useState<{x: number, y: number}[]>([]);
+
+  // Snap point to nearby guide lines
+  const snapToGuides = (x: number, y: number): { x: number; y: number } => {
+    let snappedX = x;
+    let snappedY = y;
+
+    for (const guide of guideLines) {
+      if (guide.shapeType === "line") {
+        // Horizontal guide line (small height, full width)
+        if (guide.height <= 5) {
+          const guideY = guide.y + guide.height / 2;
+          if (Math.abs(y - guideY) < snapThreshold) {
+            snappedY = guideY;
+          }
+        }
+        // Vertical guide line (small width, full height)
+        else if (guide.width <= 5) {
+          const guideX = guide.x + guide.width / 2;
+          if (Math.abs(x - guideX) < snapThreshold) {
+            snappedX = guideX;
+          }
+        }
+      }
+    }
+
+    return { x: snappedX, y: snappedY };
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -74,8 +105,14 @@ export default function DrawingLayer({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / zoom;
-    const y = (e.clientY - rect.top) / zoom;
+    let x = (e.clientX - rect.left) / zoom;
+    let y = (e.clientY - rect.top) / zoom;
+    
+    // Apply snapping to guide lines
+    const snapped = snapToGuides(x, y);
+    x = snapped.x;
+    y = snapped.y;
+    
     setCurrentPath(prev => `${prev} L ${x} ${y}`);
     setPathPoints(prev => [...prev, {x, y}]);
   };

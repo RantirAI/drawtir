@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import QRCodeElement from "./QRCodeElement";
 import BrandKitPanel from "@/components/Panels/BrandKitPanel";
-import RulerOverlay from "./RulerOverlay";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Film, Image as ImageIcon, Palette, Ruler } from "lucide-react";
@@ -101,6 +100,7 @@ export default function CanvasContainerNew({
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
   const [penColor, setPenColor] = useState("#3b82f6");
   const [strokeWidth, setStrokeWidth] = useState(2);
+  const [snapThreshold] = useState(10); // Pixels threshold for snapping to guides
   const [zoom, setZoom] = useState(1);
   // Calculate initial pan offset to center the first frame
   const calculateCenterOffset = () => {
@@ -169,7 +169,7 @@ export default function CanvasContainerNew({
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
-  const [showRulers, setShowRulers] = useState(false);
+  const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
@@ -2217,6 +2217,11 @@ export default function CanvasContainerNew({
             zoom={zoom}
             panOffsetX={panOffset.x}
             panOffsetY={panOffset.y}
+            guideLines={(selectedFrame.elements || [])
+              .filter(el => el.name === "Guide Line" || (el.type === "shape" && el.shapeType === "line"))
+              .map(el => ({ id: el.id, x: el.x, y: el.y, width: el.width, height: el.height, shapeType: el.shapeType || "line" }))
+            }
+            snapThreshold={snapThreshold}
             onPathComplete={(pathData, color, strokeW, bounds) => {
               if (!selectedFrameId) return;
               const newElement: Element = {
@@ -2664,11 +2669,44 @@ export default function CanvasContainerNew({
           <Palette className="h-4 w-4" />
         </Button>
         <Button
-          variant={showRulers ? "default" : "outline"}
+          variant="outline"
           size="icon"
           className="h-10 w-10 rounded-full hover:scale-105 transition-transform"
-          onClick={() => setShowRulers(!showRulers)}
-          title="Toggle Rulers"
+          onClick={() => {
+            const targetFrameId = selectedFrameId || frames[0]?.id;
+            if (!targetFrameId) {
+              toast.error("Please add a frame first");
+              return;
+            }
+            const frame = frames.find(f => f.id === targetFrameId);
+            if (!frame) return;
+
+            // Add a horizontal guide line
+            const newGuide: Element = {
+              id: `guide-${Date.now()}`,
+              type: "shape",
+              name: "Guide Line",
+              x: 0,
+              y: Math.floor(frame.height / 2),
+              width: frame.width,
+              height: 2,
+              shapeType: "line",
+              fill: "transparent",
+              stroke: "#3b82f6",
+              strokeWidth: 2,
+              opacity: 50,
+              isLocked: false,
+            };
+
+            setFrames(prevFrames => prevFrames.map(f => {
+              if (f.id === targetFrameId) {
+                return { ...f, elements: [...(f.elements || []), newGuide] };
+              }
+              return f;
+            }));
+            toast.success("Guide line added - drag to position, use for snapping");
+          }}
+          title="Add Guide Line"
         >
           <Ruler className="h-4 w-4" />
         </Button>
@@ -2882,8 +2920,6 @@ export default function CanvasContainerNew({
           }
         }}
       />
-
-      <RulerOverlay zoom={zoom} showRulers={showRulers} />
 
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
 
