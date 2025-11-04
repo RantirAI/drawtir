@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
-import { Trash2, Loader2, Edit, FolderOpen, Globe, Lock } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
+import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
 import PageFooter from "@/components/Footer/PageFooter";
-import { generateThumbnail, validateSnapshot } from "@/lib/snapshot";
+import { generateThumbnail } from "@/lib/snapshot";
+import { useTemplates } from "@/hooks/useTemplates";
 import type { CanvasSnapshot } from "@/types/snapshot";
 
 interface Project {
@@ -25,6 +29,10 @@ export default function Gallery() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"date" | "name">("date");
+  const [filterBy, setFilterBy] = useState<"all" | "public" | "private">("all");
+  const { templates, isLoading: templatesLoading } = useTemplates();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -121,103 +129,208 @@ export default function Gallery() {
     }
   };
 
+  const openTemplate = (templateId: string) => {
+    navigate(`/?template=${templateId}`);
+  };
+
+  const filteredAndSortedProjects = useMemo(() => {
+    let filtered = [...projects];
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(p => 
+        p.project_name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Filter by public/private
+    if (filterBy === "public") {
+      filtered = filtered.filter(p => p.is_public);
+    } else if (filterBy === "private") {
+      filtered = filtered.filter(p => !p.is_public);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      if (sortBy === "name") {
+        return a.project_name.localeCompare(b.project_name);
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    return filtered;
+  }, [projects, searchQuery, sortBy, filterBy]);
+
+  const renderProjectCard = (project: Project, isTemplate = false) => (
+    <Card 
+      key={project.id} 
+      className="group overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50"
+      onClick={() => isTemplate ? openTemplate(project.id) : openProject(project.id)}
+    >
+      <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+        {project.thumbnail_url ? (
+          <img
+            src={project.thumbnail_url}
+            alt={project.project_name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-muted">
+            <FolderOpen className="w-8 h-8 text-muted-foreground/50" />
+          </div>
+        )}
+        {project.is_public && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-[10px] font-medium flex items-center gap-1 shadow-sm">
+            <Globe className="w-3 h-3" />
+            Public
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              isTemplate ? openTemplate(project.id) : openProject(project.id);
+            }}
+            size="sm"
+            className="bg-white/95 hover:bg-white text-foreground h-8 text-xs shadow-lg"
+          >
+            {isTemplate ? "Use Template" : "Open"}
+          </Button>
+          {!isTemplate && (
+            <>
+              <Button
+                onClick={(e) => togglePublic(project.id, project.is_public, e)}
+                size="sm"
+                className="bg-white/95 hover:bg-primary hover:text-primary-foreground text-foreground h-8 w-8 p-0 shadow-lg"
+                title={project.is_public ? "Make Private" : "Make Public Template"}
+              >
+                {project.is_public ? (
+                  <Lock className="w-4 h-4" />
+                ) : (
+                  <Globe className="w-4 h-4" />
+                )}
+              </Button>
+              <Button
+                onClick={(e) => deleteProject(project.id, e)}
+                disabled={deletingId === project.id}
+                size="sm"
+                variant="destructive"
+                className="h-8 w-8 p-0 shadow-lg"
+              >
+                {deletingId === project.id ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="p-3 bg-card border-t border-border/50">
+        <h3 className="font-medium text-sm text-foreground truncate mb-1">
+          {project.project_name}
+        </h3>
+        <p className="text-xs text-muted-foreground">
+          {new Date(project.created_at).toLocaleDateString()}
+        </p>
+      </div>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
-      <main className="container mx-auto px-4 py-4">
-        <div className="max-w-6xl mx-auto rounded-xl p-4" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
-          <h1 className="text-lg font-semibold mb-4">Projects</h1>
+      <main className="container mx-auto px-4 py-6">
+        <div className="max-w-7xl mx-auto rounded-xl p-6 shadow-sm" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
+          <Tabs defaultValue="projects" className="w-full">
+            <div className="flex items-center justify-between mb-6">
+              <TabsList className="bg-muted">
+                <TabsTrigger value="projects" className="data-[state=active]:bg-background">
+                  My Projects ({projects.length})
+                </TabsTrigger>
+                <TabsTrigger value="templates" className="data-[state=active]:bg-background">
+                  Templates ({templates.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
 
-          <div>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : projects.length === 0 ? (
-            <div className="text-center py-8">
-              <FolderOpen className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-              <p className="text-sm text-muted-foreground mb-3">No projects yet</p>
-              <Button onClick={() => navigate("/")} size="sm" className="h-7 text-xs">
-                Create your first project
-              </Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-              {projects.map((project) => (
-                <Card 
-                  key={project.id} 
-                  className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => openProject(project.id)}
-                >
-                  <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                    {project.thumbnail_url ? (
-                      <img
-                        src={project.thumbnail_url}
-                        alt={project.project_name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <FolderOpen className="w-8 h-8 text-muted-foreground/50" />
-                      </div>
-                    )}
-                    {project.is_public && (
-                      <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-[10px] font-medium flex items-center gap-1">
-                        <Globe className="w-3 h-3" />
-                        Public
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openProject(project.id);
-                        }}
-                        size="sm"
-                        className="bg-white/90 hover:bg-white text-foreground h-6 text-xs"
-                      >
-                        Open
-                      </Button>
-                      <Button
-                        onClick={(e) => togglePublic(project.id, project.is_public, e)}
-                        size="sm"
-                        className="bg-white/90 hover:bg-blue-500 text-blue-600 hover:text-white h-6"
-                        title={project.is_public ? "Make Private" : "Make Public Template"}
-                      >
-                        {project.is_public ? (
-                          <Lock className="w-3 h-3" />
-                        ) : (
-                          <Globe className="w-3 h-3" />
-                        )}
-                      </Button>
-                      <Button
-                        onClick={(e) => deleteProject(project.id, e)}
-                        disabled={deletingId === project.id}
-                        size="sm"
-                        variant="destructive"
-                        className="bg-white/90 hover:bg-red-500 text-red-600 hover:text-white h-6"
-                      >
-                        {deletingId === project.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3 h-3" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="p-2 bg-card">
-                    <h3 className="font-medium text-sm text-foreground truncate mb-0.5">
-                      {project.project_name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(project.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-          </div>
+            <TabsContent value="projects" className="space-y-4">
+              {/* Search and Filter Bar */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search projects..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="date">Date Created</SelectItem>
+                      <SelectItem value="name">Name</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={filterBy} onValueChange={(v: any) => setFilterBy(v)}>
+                    <SelectTrigger className="w-[120px]">
+                      <Filter className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="public">Public</SelectItem>
+                      <SelectItem value="private">Private</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Projects Grid */}
+              {isLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                </div>
+              ) : filteredAndSortedProjects.length === 0 ? (
+                <div className="text-center py-16 bg-muted/30 rounded-lg">
+                  <FolderOpen className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-base text-muted-foreground mb-4">
+                    {searchQuery || filterBy !== "all" ? "No projects match your filters" : "No projects yet"}
+                  </p>
+                  <Button onClick={() => navigate("/")} variant="default">
+                    Create your first project
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {filteredAndSortedProjects.map((project) => renderProjectCard(project))}
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="templates" className="space-y-4">
+              {templatesLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="text-center py-16 bg-muted/30 rounded-lg">
+                  <Globe className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-base text-muted-foreground mb-2">No public templates yet</p>
+                  <p className="text-sm text-muted-foreground">Make one of your projects public to share it as a template!</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {templates.map((template) => renderProjectCard(template as Project, true))}
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
       <PageFooter />
