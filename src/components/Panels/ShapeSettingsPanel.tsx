@@ -418,27 +418,33 @@ export default function ShapeSettingsPanel({
                 {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
                   <div>
                     <Label className="text-[10px] mb-2 block text-muted-foreground">
-                      Colors ({activeBrandKit.colors.length})
+                      Colors
                     </Label>
-                    <div className="grid grid-cols-5 gap-2">
+                    <div className="space-y-1.5">
                       {activeBrandKit.colors.map((color, index) => (
-                        <button
-                          key={index}
-                          className="w-full aspect-square rounded-md border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm relative group"
-                          style={{ backgroundColor: color }}
-                          onClick={() => {
-                            if (elementType === "text" || elementType === "richtext") {
-                              onColorChange?.(color);
-                            } else {
-                              onFillChange?.(color);
-                            }
-                          }}
-                          title={`Click to apply ${color}`}
-                        >
-                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-sm">
-                            <Check className="w-3 h-3 text-white drop-shadow" />
-                          </div>
-                        </button>
+                        <div key={index} className="flex items-center gap-2">
+                          <div
+                            className="w-8 h-8 rounded border-2 border-border flex-shrink-0"
+                            style={{ backgroundColor: color }}
+                          />
+                          <code className="text-[9px] font-mono text-muted-foreground flex-1">
+                            {color}
+                          </code>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[9px]"
+                            onClick={() => {
+                              if (elementType === "text" || elementType === "richtext") {
+                                onColorChange?.(color);
+                              } else {
+                                onFillChange?.(color);
+                              }
+                            }}
+                          >
+                            Apply
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -448,20 +454,26 @@ export default function ShapeSettingsPanel({
                 {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
                   <div>
                     <Label className="text-[10px] mb-2 block text-muted-foreground">
-                      Fonts ({activeBrandKit.fonts.length})
+                      Fonts
                     </Label>
-                    <div className="space-y-1">
+                    <div className="space-y-1.5">
                       {activeBrandKit.fonts.map((font, index) => (
-                        <button
-                          key={index}
-                          className="w-full p-2 rounded border bg-card hover:bg-accent text-left text-[11px] transition-all group flex items-center justify-between"
-                          style={{ fontFamily: font }}
-                          onClick={() => onFontFamilyChange(font)}
-                          title={`Click to apply ${font}`}
-                        >
-                          <span>{font}</span>
-                          <Check className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
+                        <div key={index} className="flex items-center gap-2">
+                          <span
+                            className="text-[11px] flex-1 truncate"
+                            style={{ fontFamily: font }}
+                          >
+                            {font}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-6 px-2 text-[9px] flex-shrink-0"
+                            onClick={() => onFontFamilyChange(font)}
+                          >
+                            Apply
+                          </Button>
+                        </div>
                       ))}
                     </div>
                   </div>
