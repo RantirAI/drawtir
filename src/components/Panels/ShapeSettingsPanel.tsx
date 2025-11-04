@@ -30,7 +30,7 @@ import {
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box, RotateCcw,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
-  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1, Palette
+  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1, Palette, Check
 } from "lucide-react";
 import IconSelector from "../Toolbar/IconSelector";
 import { useState } from "react";
@@ -393,130 +393,95 @@ export default function ShapeSettingsPanel({
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center justify-between p-2 rounded-lg border bg-card cursor-pointer hover:bg-accent/50 transition-colors">
-                      <div className="flex-1">
-                        <p className="text-[11px] font-medium">{activeBrandKit.name}</p>
-                        <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
-                          <span>{activeBrandKit.colors.length} colors</span>
-                          <span>•</span>
-                          <span>{activeBrandKit.fonts.length} fonts</span>
-                        </div>
-                      </div>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="h-7 px-2 text-[10px]"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenBrandKit?.();
-                        }}
-                      >
-                        Edit
-                      </Button>
+              <div className="space-y-3">
+                {/* Brand Kit Header */}
+                <div className="flex items-center justify-between p-2 rounded-lg border bg-card">
+                  <div className="flex-1">
+                    <p className="text-[11px] font-medium">{activeBrandKit.name}</p>
+                    <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
+                      <span>{activeBrandKit.colors.length} colors</span>
+                      <span>•</span>
+                      <span>{activeBrandKit.fonts.length} fonts</span>
                     </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-3" align="start">
-                    <div className="space-y-3">
-                      {/* Colors */}
-                      {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
-                        <div>
-                          <Label className="text-[10px] mb-2 block text-muted-foreground">
-                            Colors ({activeBrandKit.colors.length})
-                          </Label>
-                          <div className="grid grid-cols-5 gap-2">
-                            {activeBrandKit.colors.map((color, index) => (
-                              <button
-                                key={index}
-                                className="w-full aspect-square rounded border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm"
-                                style={{ backgroundColor: color }}
-                                onClick={() => {
-                                  if (elementType === "text" || elementType === "richtext") {
-                                    onColorChange?.(color);
-                                  } else {
-                                    onFillChange?.(color);
-                                  }
-                                }}
-                                title={`Apply ${color}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Fonts */}
-                      {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
-                        <div>
-                          <Label className="text-[10px] mb-2 block text-muted-foreground">
-                            Fonts ({activeBrandKit.fonts.length})
-                          </Label>
-                          <div className="space-y-1">
-                            {activeBrandKit.fonts.map((font, index) => (
-                              <button
-                                key={index}
-                                className="w-full p-2 rounded border bg-card hover:bg-accent text-left text-[11px] transition-colors"
-                                style={{ fontFamily: font }}
-                                onClick={() => onFontFamilyChange(font)}
-                                title={`Apply ${font}`}
-                              >
-                                {font}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      
-                      {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
-                        <p className="text-[10px] text-muted-foreground text-center py-2">
-                          No brand assets yet
-                        </p>
-                      )}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                
-                {/* Quick apply buttons */}
-                <div className="grid grid-cols-2 gap-1">
-                  {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-[10px] justify-start"
-                      onClick={() => {
-                        const firstColor = activeBrandKit.colors[0];
-                        if (elementType === "text" || elementType === "richtext") {
-                          onColorChange?.(firstColor);
-                        } else {
-                          onFillChange?.(firstColor);
-                        }
-                      }}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <div 
-                          className="w-3 h-3 rounded border"
-                          style={{ backgroundColor: activeBrandKit.colors[0] }}
-                        />
-                        <span>Apply Color</span>
-                      </div>
-                    </Button>
-                  )}
-                  {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-7 text-[10px] justify-start"
-                      onClick={() => {
-                        const firstFont = activeBrandKit.fonts[0];
-                        onFontFamilyChange(firstFont);
-                      }}
-                    >
-                      <Type className="h-3 w-3 mr-1" />
-                      Apply Font
-                    </Button>
-                  )}
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-7 px-2 text-[10px]"
+                    onClick={onOpenBrandKit}
+                  >
+                    Edit
+                  </Button>
                 </div>
+                
+                {/* Colors */}
+                {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
+                  <div>
+                    <Label className="text-[10px] mb-2 block text-muted-foreground">
+                      Colors ({activeBrandKit.colors.length})
+                    </Label>
+                    <div className="grid grid-cols-5 gap-2">
+                      {activeBrandKit.colors.map((color, index) => (
+                        <button
+                          key={index}
+                          className="w-full aspect-square rounded-md border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm relative group"
+                          style={{ backgroundColor: color }}
+                          onClick={() => {
+                            if (elementType === "text" || elementType === "richtext") {
+                              onColorChange?.(color);
+                            } else {
+                              onFillChange?.(color);
+                            }
+                          }}
+                          title={`Click to apply ${color}`}
+                        >
+                          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-sm">
+                            <Check className="w-3 h-3 text-white drop-shadow" />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Fonts */}
+                {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
+                  <div>
+                    <Label className="text-[10px] mb-2 block text-muted-foreground">
+                      Fonts ({activeBrandKit.fonts.length})
+                    </Label>
+                    <div className="space-y-1">
+                      {activeBrandKit.fonts.map((font, index) => (
+                        <button
+                          key={index}
+                          className="w-full p-2 rounded border bg-card hover:bg-accent text-left text-[11px] transition-all group flex items-center justify-between"
+                          style={{ fontFamily: font }}
+                          onClick={() => onFontFamilyChange(font)}
+                          title={`Click to apply ${font}`}
+                        >
+                          <span>{font}</span>
+                          <Check className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
+                  <div className="text-center py-3">
+                    <p className="text-[10px] text-muted-foreground">
+                      No brand assets yet
+                    </p>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="h-7 text-[10px] mt-2"
+                      onClick={onOpenBrandKit}
+                    >
+                      Add Assets
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </AccordionContent>
