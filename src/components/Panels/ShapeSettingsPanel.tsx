@@ -368,63 +368,87 @@ export default function ShapeSettingsPanel({
 
       <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon", "qrcode", "brand-kit"]} className="w-full space-y-0 [&>div]:space-y-0">
         {/* Brand Kit Quick Access */}
-        {activeBrandKit && (onFillChange || onColorChange || onFontFamilyChange) && (
+        {(onFillChange || onColorChange || onFontFamilyChange) && (
           <AccordionItem value="brand-kit" className="border-b-0">
             <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">
               <div className="flex items-center gap-1.5">
                 <Palette className="h-3 w-3" />
                 <span>Brand Kit</span>
+                {activeBrandKit && (
+                  <span className="text-[9px] px-1 py-0.5 bg-primary/10 text-primary rounded">
+                    {activeBrandKit.name}
+                  </span>
+                )}
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-2 pb-2">
-              {/* Brand Colors */}
-              {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
-                <div>
-                  <Label className="text-[10px] mb-1 block text-muted-foreground">Colors</Label>
-                  <div className="grid grid-cols-5 gap-1.5">
-                    {activeBrandKit.colors.map((color, index) => (
-                      <button
-                        key={index}
-                        className="w-full aspect-square rounded border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm"
-                        style={{ backgroundColor: color }}
-                        onClick={() => {
-                          if (elementType === "text" || elementType === "richtext") {
-                            onColorChange?.(color);
-                          } else {
-                            onFillChange?.(color);
-                          }
-                        }}
-                        title={`Apply ${color}`}
-                      />
-                    ))}
-                  </div>
+              {!activeBrandKit ? (
+                <div className="text-center py-3 space-y-2">
+                  <Palette className="h-6 w-6 mx-auto text-muted-foreground opacity-50" />
+                  <p className="text-[10px] text-muted-foreground">
+                    No brand kit selected
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">
+                    Click the <Palette className="h-3 w-3 inline" /> button in the toolbar to create and manage brand kits
+                  </p>
                 </div>
-              )}
-              
-              {/* Brand Fonts */}
-              {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
-                <div>
-                  <Label className="text-[10px] mb-1 block text-muted-foreground">Fonts</Label>
-                  <div className="space-y-1">
-                    {activeBrandKit.fonts.map((font, index) => (
-                      <button
-                        key={index}
-                        className="w-full p-1.5 rounded border bg-card hover:bg-accent/50 text-left text-[11px] transition-colors"
-                        style={{ fontFamily: font }}
-                        onClick={() => onFontFamilyChange(font)}
-                        title={`Apply ${font}`}
-                      >
-                        {font}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
-                <p className="text-[10px] text-muted-foreground text-center py-2">
-                  No brand assets yet. Add colors and fonts in the Brand Kit panel.
-                </p>
+              ) : (
+                <>
+                  {/* Brand Colors */}
+                  {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
+                    <div>
+                      <Label className="text-[10px] mb-1 block text-muted-foreground">Colors ({activeBrandKit.colors.length})</Label>
+                      <div className="grid grid-cols-5 gap-1.5">
+                        {activeBrandKit.colors.map((color, index) => (
+                          <button
+                            key={index}
+                            className="w-full aspect-square rounded border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm"
+                            style={{ backgroundColor: color }}
+                            onClick={() => {
+                              if (elementType === "text" || elementType === "richtext") {
+                                onColorChange?.(color);
+                              } else {
+                                onFillChange?.(color);
+                              }
+                            }}
+                            title={`Apply ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Brand Fonts */}
+                  {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
+                    <div>
+                      <Label className="text-[10px] mb-1 block text-muted-foreground">Fonts ({activeBrandKit.fonts.length})</Label>
+                      <div className="space-y-1">
+                        {activeBrandKit.fonts.map((font, index) => (
+                          <button
+                            key={index}
+                            className="w-full p-1.5 rounded border bg-card hover:bg-accent/50 text-left text-[11px] transition-colors"
+                            style={{ fontFamily: font }}
+                            onClick={() => onFontFamilyChange(font)}
+                            title={`Apply ${font}`}
+                          >
+                            {font}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
+                    <div className="text-center py-3">
+                      <p className="text-[10px] text-muted-foreground">
+                        No brand assets in "{activeBrandKit.name}"
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-1">
+                        Click the <Palette className="h-3 w-3 inline" /> button to add colors and fonts
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </AccordionContent>
           </AccordionItem>
