@@ -254,17 +254,17 @@ export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFo
                             </div>
                           </div>
                         </PopoverTrigger>
-                        <PopoverContent className="w-48">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs">Color</Label>
-                              <code className="text-xs font-mono">{color}</code>
+                        <PopoverContent className="w-56 p-3">
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between pb-2 border-b">
+                              <Label className="text-xs font-medium">Color</Label>
+                              <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{color}</code>
                             </div>
-                            <div className="flex gap-2">
+                            <div className="grid grid-cols-2 gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="flex-1"
+                                className="w-full h-8"
                                 onClick={() => copyToClipboard(color)}
                               >
                                 <Copy className="w-3 h-3 mr-1" />
@@ -272,8 +272,8 @@ export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFo
                               </Button>
                               <Button
                                 size="sm"
-                                variant="outline"
-                                className="flex-1"
+                                variant="default"
+                                className="w-full h-8"
                                 onClick={() => onApplyColor?.(color)}
                               >
                                 <Check className="w-3 h-3 mr-1" />
@@ -283,7 +283,7 @@ export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFo
                             <Button
                               size="sm"
                               variant="destructive"
-                              className="w-full"
+                              className="w-full h-8"
                               onClick={() => handleRemoveColor(color)}
                             >
                               <Trash2 className="w-3 h-3 mr-1" />
