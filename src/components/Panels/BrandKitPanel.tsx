@@ -10,6 +10,7 @@ import { useBrandKit } from "@/hooks/useBrandKit";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface BrandKitPanelProps {
   isOpen: boolean;
@@ -18,12 +19,19 @@ interface BrandKitPanelProps {
   onApplyFont?: (font: string) => void;
 }
 
+const COMMON_FONTS = [
+  "Inter", "Roboto", "Open Sans", "Lato", "Montserrat", "Raleway",
+  "Poppins", "Oswald", "Merriweather", "Ubuntu", "Playfair Display",
+  "Source Sans Pro", "Nunito", "PT Sans", "Work Sans", "Archivo",
+  "Bebas Neue", "Crimson Text", "DM Sans", "IBM Plex Sans"
+];
+
 export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFont }: BrandKitPanelProps) {
   const { brandKits, activeBrandKit, setActiveBrandKit, saveBrandKit, deleteBrandKit, updateBrandKit } = useBrandKit();
   const [isCreating, setIsCreating] = useState(false);
   const [newKitName, setNewKitName] = useState("");
   const [newColor, setNewColor] = useState("#6366f1");
-  const [newFont, setNewFont] = useState("");
+  const [newFont, setNewFont] = useState("Inter");
   const [logoUrl, setLogoUrl] = useState("");
 
   const handleCreateKit = async () => {
@@ -61,14 +69,19 @@ export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFo
   };
 
   const handleAddFont = async () => {
-    if (!activeBrandKit || !newFont.trim()) {
-      toast.error("Please enter a font name");
+    if (!activeBrandKit || !newFont) {
+      toast.error("Please select a font");
+      return;
+    }
+
+    if (activeBrandKit.fonts.includes(newFont)) {
+      toast.error("Font already added");
       return;
     }
 
     const updatedFonts = [...activeBrandKit.fonts, newFont];
     await updateBrandKit(activeBrandKit.id, { fonts: updatedFonts });
-    setNewFont("");
+    setNewFont("Inter");
   };
 
   const handleRemoveFont = async (font: string) => {
@@ -310,13 +323,22 @@ export default function BrandKitPanel({ isOpen, onClose, onApplyColor, onApplyFo
                 </div>
 
                 <div className="flex gap-2">
-                  <Input
-                    placeholder="Font name (e.g., Inter, Roboto)"
-                    value={newFont}
-                    onChange={(e) => setNewFont(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleAddFont()}
-                    className="flex-1"
-                  />
+                  <Select value={newFont} onValueChange={setNewFont}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select a font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMMON_FONTS.map((font) => (
+                        <SelectItem 
+                          key={font} 
+                          value={font}
+                          style={{ fontFamily: font }}
+                        >
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button size="sm" onClick={handleAddFont}>
                     <Plus className="w-4 h-4 mr-1" />
                     Add
