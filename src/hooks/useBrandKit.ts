@@ -22,19 +22,42 @@ export const useBrandKit = () => {
   const loadBrandKits = async () => {
     setIsLoading(true);
     try {
+      // Get the current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.log('No user authenticated, cannot load brand kits');
+        setBrandKits([]);
+        setActiveBrandKit(null);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log('Loading brand kits for user:', user.id);
+
       const { data, error } = await supabase
         .from('brand_kits')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading brand kits:', error);
+        throw error;
+      }
       
+      console.log('Loaded brand kits:', data?.length || 0);
       setBrandKits(data || []);
       
-      // Set the default brand kit as active
+      // Set the default brand kit as active, or the first one if no default
       const defaultKit = data?.find(kit => kit.is_default);
-      if (defaultKit) {
-        setActiveBrandKit(defaultKit);
+      const firstKit = data?.[0];
+      const activeKit = defaultKit || firstKit;
+      
+      if (activeKit) {
+        console.log('Setting active brand kit:', activeKit.name);
+        setActiveBrandKit(activeKit);
+      } else {
+        setActiveBrandKit(null);
       }
     } catch (error: any) {
       console.error('Error loading brand kits:', error);
