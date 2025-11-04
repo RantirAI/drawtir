@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { InputWithUnit } from "@/components/ui/input-with-unit";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useBrandKit } from "@/hooks/useBrandKit";
+import { Palette } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -338,6 +340,7 @@ export default function ShapeSettingsPanel({
   const ElementIcon = getElementIcon(elementType);
   const [fillModalOpen, setFillModalOpen] = useState(false);
   const [strokeModalOpen, setStrokeModalOpen] = useState(false);
+  const { activeBrandKit } = useBrandKit();
   
   return (
     <DraggablePanel
@@ -363,7 +366,70 @@ export default function ShapeSettingsPanel({
         )}
       </div>
 
-      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon", "qrcode"]} className="w-full space-y-0 [&>div]:space-y-0">
+      <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon", "qrcode", "brand-kit"]} className="w-full space-y-0 [&>div]:space-y-0">
+        {/* Brand Kit Quick Access */}
+        {activeBrandKit && (onFillChange || onColorChange || onFontFamilyChange) && (
+          <AccordionItem value="brand-kit" className="border-b-0">
+            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">
+              <div className="flex items-center gap-1.5">
+                <Palette className="h-3 w-3" />
+                <span>Brand Kit</span>
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-2 pb-2">
+              {/* Brand Colors */}
+              {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
+                <div>
+                  <Label className="text-[10px] mb-1 block text-muted-foreground">Colors</Label>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {activeBrandKit.colors.map((color, index) => (
+                      <button
+                        key={index}
+                        className="w-full aspect-square rounded border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm"
+                        style={{ backgroundColor: color }}
+                        onClick={() => {
+                          if (elementType === "text" || elementType === "richtext") {
+                            onColorChange?.(color);
+                          } else {
+                            onFillChange?.(color);
+                          }
+                        }}
+                        title={`Apply ${color}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Brand Fonts */}
+              {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
+                <div>
+                  <Label className="text-[10px] mb-1 block text-muted-foreground">Fonts</Label>
+                  <div className="space-y-1">
+                    {activeBrandKit.fonts.map((font, index) => (
+                      <button
+                        key={index}
+                        className="w-full p-1.5 rounded border bg-card hover:bg-accent/50 text-left text-[11px] transition-colors"
+                        style={{ fontFamily: font }}
+                        onClick={() => onFontFamilyChange(font)}
+                        title={`Apply ${font}`}
+                      >
+                        {font}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
+                <p className="text-[10px] text-muted-foreground text-center py-2">
+                  No brand assets yet. Add colors and fonts in the Brand Kit panel.
+                </p>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )}
+        
         {/* QR Code Section - Only for QR codes */}
         {elementType === "qrcode" && (
           <AccordionItem value="qrcode" className="border-b-0">
