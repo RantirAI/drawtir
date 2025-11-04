@@ -341,7 +341,8 @@ export default function ShapeSettingsPanel({
   const ElementIcon = getElementIcon(elementType);
   const [fillModalOpen, setFillModalOpen] = useState(false);
   const [strokeModalOpen, setStrokeModalOpen] = useState(false);
-  const { activeBrandKit } = useBrandKit();
+  const { brandKits, activeBrandKit } = useBrandKit();
+  const [expandedBrandKit, setExpandedBrandKit] = useState<string | null>(null);
   
   return (
     <DraggablePanel
@@ -377,11 +378,11 @@ export default function ShapeSettingsPanel({
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-2 pb-2">
-            {!activeBrandKit ? (
+            {brandKits.length === 0 ? (
               <div className="text-center py-3 space-y-2">
                 <Palette className="h-6 w-6 mx-auto text-muted-foreground opacity-50" />
                 <p className="text-[10px] text-muted-foreground">
-                  No brand kit selected
+                  No brand kits available
                 </p>
                 <Button 
                   size="sm" 
@@ -393,107 +394,107 @@ export default function ShapeSettingsPanel({
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
-                {/* Brand Kit Header */}
-                <div className="flex items-center justify-between p-2 rounded-lg border bg-card">
-                  <div className="flex-1">
-                    <p className="text-[11px] font-medium">{activeBrandKit.name}</p>
-                    <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
-                      <span>{activeBrandKit.colors.length} colors</span>
-                      <span>•</span>
-                      <span>{activeBrandKit.fonts.length} fonts</span>
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    variant="ghost" 
-                    className="h-7 px-2 text-[10px]"
-                    onClick={onOpenBrandKit}
-                  >
-                    Edit
-                  </Button>
-                </div>
-                
-                {/* Colors */}
-                {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
-                  <div>
-                    <Label className="text-[10px] mb-2 block text-muted-foreground">
-                      Colors
-                    </Label>
-                    <div className="space-y-1.5">
-                      {activeBrandKit.colors.map((color, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <div
-                            className="w-8 h-8 rounded border-2 border-border flex-shrink-0"
-                            style={{ backgroundColor: color }}
-                          />
-                          <code className="text-[9px] font-mono text-muted-foreground flex-1">
-                            {color}
-                          </code>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[9px]"
-                            onClick={() => {
-                              if (elementType === "text" || elementType === "richtext") {
-                                onColorChange?.(color);
-                              } else {
-                                onFillChange?.(color);
-                              }
-                            }}
-                          >
-                            Apply
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {/* Fonts */}
-                {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
-                  <div>
-                    <Label className="text-[10px] mb-2 block text-muted-foreground">
-                      Fonts
-                    </Label>
-                    <div className="space-y-1.5">
-                      {activeBrandKit.fonts.map((font, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <span
-                            className="text-[11px] flex-1 truncate"
-                            style={{ fontFamily: font }}
-                          >
-                            {font}
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-6 px-2 text-[9px] flex-shrink-0"
-                            onClick={() => onFontFamilyChange(font)}
-                          >
-                            Apply
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
-                  <div className="text-center py-3">
-                    <p className="text-[10px] text-muted-foreground">
-                      No brand assets yet
-                    </p>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="h-7 text-[10px] mt-2"
-                      onClick={onOpenBrandKit}
+              <div className="space-y-2">
+                {/* List all brand kits */}
+                {brandKits.map((brandKit) => (
+                  <div key={brandKit.id} className="border rounded-lg overflow-hidden">
+                    {/* Brand Kit Header - Clickable to expand */}
+                    <button
+                      className="w-full flex items-center justify-between p-2 bg-card hover:bg-accent transition-colors"
+                      onClick={() => setExpandedBrandKit(expandedBrandKit === brandKit.id ? null : brandKit.id)}
                     >
-                      Add Assets
-                    </Button>
+                      <div className="flex-1 text-left">
+                        <p className="text-[11px] font-medium">{brandKit.name}</p>
+                        <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
+                          <span>{brandKit.colors.length} colors</span>
+                          <span>•</span>
+                          <span>{brandKit.fonts.length} fonts</span>
+                        </div>
+                      </div>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 text-[10px]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenBrandKit?.();
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </button>
+                    
+                    {/* Expandable content */}
+                    {expandedBrandKit === brandKit.id && (
+                      <div className="p-2 space-y-3 border-t bg-background/50">
+                        {/* Colors */}
+                        {(onFillChange || onColorChange) && brandKit.colors.length > 0 && (
+                          <div>
+                            <Label className="text-[10px] mb-2 block text-muted-foreground">
+                              Colors
+                            </Label>
+                            <div className="space-y-1.5">
+                              {brandKit.colors.map((color, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <div
+                                    className="w-8 h-8 rounded border-2 border-border flex-shrink-0"
+                                    style={{ backgroundColor: color }}
+                                  />
+                                  <code className="text-[9px] font-mono text-muted-foreground flex-1">
+                                    {color}
+                                  </code>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[9px]"
+                                    onClick={() => {
+                                      if (elementType === "text" || elementType === "richtext") {
+                                        onColorChange?.(color);
+                                      } else {
+                                        onFillChange?.(color);
+                                      }
+                                    }}
+                                  >
+                                    Apply
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Fonts */}
+                        {onFontFamilyChange && brandKit.fonts.length > 0 && (
+                          <div>
+                            <Label className="text-[10px] mb-2 block text-muted-foreground">
+                              Fonts
+                            </Label>
+                            <div className="space-y-1.5">
+                              {brandKit.fonts.map((font, index) => (
+                                <div key={index} className="flex items-center gap-2">
+                                  <span
+                                    className="text-[11px] flex-1 truncate"
+                                    style={{ fontFamily: font }}
+                                  >
+                                    {font}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-6 px-2 text-[9px] flex-shrink-0"
+                                    onClick={() => onFontFamilyChange(font)}
+                                  >
+                                    Apply
+                                  </Button>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
             )}
           </AccordionContent>
