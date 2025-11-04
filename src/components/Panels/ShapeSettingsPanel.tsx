@@ -7,7 +7,6 @@ import { InputWithUnit } from "@/components/ui/input-with-unit";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useBrandKit } from "@/hooks/useBrandKit";
-import { Palette } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -31,7 +30,7 @@ import {
   ArrowUp, ArrowDown, Square, Type, Image, Pen, Box, RotateCcw,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
-  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1
+  AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1, Palette
 } from "lucide-react";
 import IconSelector from "../Toolbar/IconSelector";
 import { useState } from "react";
@@ -198,6 +197,7 @@ interface ShapeSettingsPanelProps {
   availableFrames?: Array<{id: string, name: string}>;
   onIconChange?: (iconName: string, iconFamily: string) => void;
   onClose?: () => void;
+  onOpenBrandKit?: () => void;
 }
 
 const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null) => {
@@ -336,6 +336,7 @@ export default function ShapeSettingsPanel({
   availableFrames = [],
   onIconChange,
   onClose,
+  onOpenBrandKit,
 }: ShapeSettingsPanelProps) {
   const ElementIcon = getElementIcon(elementType);
   const [fillModalOpen, setFillModalOpen] = useState(false);
@@ -368,91 +369,84 @@ export default function ShapeSettingsPanel({
 
       <Accordion type="multiple" defaultValue={["position", "layout", "appearance", "fill", "stroke", "type", "image-fit", "image-filters", "icon", "qrcode", "brand-kit"]} className="w-full space-y-0 [&>div]:space-y-0">
         {/* Brand Kit Quick Access */}
-        {(onFillChange || onColorChange || onFontFamilyChange) && (
-          <AccordionItem value="brand-kit" className="border-b-0">
-            <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">
-              <div className="flex items-center gap-1.5">
-                <Palette className="h-3 w-3" />
-                <span>Brand Kit</span>
-                {activeBrandKit && (
-                  <span className="text-[9px] px-1 py-0.5 bg-primary/10 text-primary rounded">
-                    {activeBrandKit.name}
-                  </span>
-                )}
+        <AccordionItem value="brand-kit" className="border-b-0">
+          <AccordionTrigger className="text-[11px] font-medium py-1.5 h-7">
+            <div className="flex items-center gap-1.5">
+              <Palette className="h-3 w-3" />
+              <span>Brand Kit</span>
+            </div>
+          </AccordionTrigger>
+          <AccordionContent className="space-y-2 pb-2">
+            {!activeBrandKit ? (
+              <div className="text-center py-3 space-y-2">
+                <Palette className="h-6 w-6 mx-auto text-muted-foreground opacity-50" />
+                <p className="text-[10px] text-muted-foreground">
+                  No brand kit selected
+                </p>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-7 text-[10px]"
+                  onClick={onOpenBrandKit}
+                >
+                  Create Brand Kit
+                </Button>
               </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-2 pb-2">
-              {!activeBrandKit ? (
-                <div className="text-center py-3 space-y-2">
-                  <Palette className="h-6 w-6 mx-auto text-muted-foreground opacity-50" />
-                  <p className="text-[10px] text-muted-foreground">
-                    No brand kit selected
-                  </p>
-                  <p className="text-[9px] text-muted-foreground">
-                    Click the <Palette className="h-3 w-3 inline" /> button in the toolbar to create and manage brand kits
-                  </p>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2 rounded-lg border bg-card">
+                  <div className="flex-1">
+                    <p className="text-[11px] font-medium">{activeBrandKit.name}</p>
+                    <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
+                      <span>{activeBrandKit.colors.length} colors</span>
+                      <span>•</span>
+                      <span>{activeBrandKit.fonts.length} fonts</span>
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-7 px-2 text-[10px]"
+                    onClick={onOpenBrandKit}
+                  >
+                    Edit
+                  </Button>
                 </div>
-              ) : (
-                <>
-                  {/* Brand Colors */}
+                
+                {/* Quick apply buttons */}
+                <div className="grid grid-cols-2 gap-1">
                   {(onFillChange || onColorChange) && activeBrandKit.colors.length > 0 && (
-                    <div>
-                      <Label className="text-[10px] mb-1 block text-muted-foreground">Colors ({activeBrandKit.colors.length})</Label>
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {activeBrandKit.colors.map((color, index) => (
-                          <button
-                            key={index}
-                            className="w-full aspect-square rounded border-2 border-border hover:border-primary hover:scale-110 transition-all shadow-sm"
-                            style={{ backgroundColor: color }}
-                            onClick={() => {
-                              if (elementType === "text" || elementType === "richtext") {
-                                onColorChange?.(color);
-                              } else {
-                                onFillChange?.(color);
-                              }
-                            }}
-                            title={`Apply ${color}`}
-                          />
-                        ))}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[10px] justify-start"
+                      onClick={onOpenBrandKit}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <div 
+                          className="w-3 h-3 rounded border"
+                          style={{ backgroundColor: activeBrandKit.colors[0] }}
+                        />
+                        <span>Apply Color</span>
                       </div>
-                    </div>
+                    </Button>
                   )}
-                  
-                  {/* Brand Fonts */}
                   {onFontFamilyChange && activeBrandKit.fonts.length > 0 && (
-                    <div>
-                      <Label className="text-[10px] mb-1 block text-muted-foreground">Fonts ({activeBrandKit.fonts.length})</Label>
-                      <div className="space-y-1">
-                        {activeBrandKit.fonts.map((font, index) => (
-                          <button
-                            key={index}
-                            className="w-full p-1.5 rounded border bg-card hover:bg-accent/50 text-left text-[11px] transition-colors"
-                            style={{ fontFamily: font }}
-                            onClick={() => onFontFamilyChange(font)}
-                            title={`Apply ${font}`}
-                          >
-                            {font}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-[10px] justify-start"
+                      onClick={onOpenBrandKit}
+                    >
+                      <Type className="h-3 w-3 mr-1" />
+                      Apply Font
+                    </Button>
                   )}
-                  
-                  {activeBrandKit.colors.length === 0 && activeBrandKit.fonts.length === 0 && (
-                    <div className="text-center py-3">
-                      <p className="text-[10px] text-muted-foreground">
-                        No brand assets in "{activeBrandKit.name}"
-                      </p>
-                      <p className="text-[9px] text-muted-foreground mt-1">
-                        Click the <Palette className="h-3 w-3 inline" /> button to add colors and fonts
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        )}
+                </div>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
         
         {/* QR Code Section - Only for QR codes */}
         {elementType === "qrcode" && (

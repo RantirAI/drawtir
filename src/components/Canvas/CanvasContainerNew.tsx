@@ -2516,6 +2516,10 @@ export default function CanvasContainerNew({
           onQrFgColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { qrFgColor: color })}
           onQrBgColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { qrBgColor: color })}
           onQrLevelChange={(level) => selectedElement && handleElementUpdate(selectedElement.id, { qrLevel: level })}
+          onOpenBrandKit={() => {
+            setShowBrandKitPanel(true);
+            setShowShapeSettings(false);
+          }}
           onClose={() => {
             setShowShapeSettings(false);
             setSelectedElementIds([]);
