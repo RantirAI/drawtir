@@ -246,9 +246,9 @@ export default function AIGeneratorPanel({
             </TabsList>
           </div>
 
-          <TabsContent value="generator" className="p-4 space-y-4 mt-0">
+          <TabsContent value="generator" className="p-3 space-y-3 mt-0">
             {/* Description Section */}
-            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+            <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
               {/* Description Label and AI Model Selector Row */}
               <div className="flex items-center justify-between gap-3">
                 <Label className="text-xs text-muted-foreground">Description</Label>
@@ -341,10 +341,10 @@ export default function AIGeneratorPanel({
 
             {/* Uploaded Images Preview */}
             {captionImage && captionImage.length > 0 && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {captionImage.map((img, idx) => (
                   <div key={idx} className="relative bg-muted rounded border border-border">
-                    <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-20 object-cover rounded" />
+                    <img src={img} alt={`Upload ${idx + 1}`} className="w-full h-16 object-cover rounded" />
                     <Button
                       size="sm"
                       variant="ghost"
@@ -416,11 +416,11 @@ export default function AIGeneratorPanel({
               {/* Palette Accordion */}
               <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue}>
                 <AccordionItem value="palettes" className="border-border">
-                  <AccordionTrigger className="text-xs py-2 hover:no-underline">
+                  <AccordionTrigger className="text-xs py-1.5 hover:no-underline">
                     Change Palette
                   </AccordionTrigger>
-                  <AccordionContent className="pb-2 max-h-[400px] overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                  <AccordionContent className="pb-1.5 max-h-[300px] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-1.5 mt-1.5">
                       {colorPalettes.map((palette) => (
                         <button
                           key={palette.id}
@@ -429,25 +429,25 @@ export default function AIGeneratorPanel({
                             setAccordionValue("");
                             setEditingColorIndex(null);
                           }}
-                          className={`p-2 rounded-lg border transition-all ${
+                          className={`p-1.5 rounded-lg border transition-all ${
                             selectedPalette === palette.id
                               ? "border-primary bg-primary/10"
                               : "border-border bg-background hover:bg-muted"
                           }`}
                         >
-                          <div className="text-xs font-medium mb-1.5">{palette.name}</div>
+                          <div className="text-[10px] font-medium mb-1">{palette.name}</div>
                           {palette.colors.length > 0 ? (
-                            <div className="flex gap-1">
+                            <div className="flex gap-0.5">
                               {palette.colors.map((color, idx) => (
                                 <div
                                   key={idx}
-                                  className="flex-1 h-4 rounded"
+                                  className="flex-1 h-3 rounded-sm"
                                   style={{ backgroundColor: color }}
                                 />
                               ))}
                             </div>
                           ) : (
-                            <div className="h-4 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
+                            <div className="h-3 rounded-sm bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
                           )}
                         </button>
                       ))}
@@ -513,7 +513,7 @@ export default function AIGeneratorPanel({
             </div>
 
             {/* Generation Preferences */}
-            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+            <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
               <Label className="text-xs text-muted-foreground">Generation Preferences</Label>
               
               <div className="flex flex-wrap gap-2">

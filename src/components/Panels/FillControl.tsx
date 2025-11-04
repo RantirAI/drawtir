@@ -59,6 +59,7 @@ interface FillControlProps {
   onVideoUrlChange?: (url: string) => void;
   onOpacityChange?: (opacity: number) => void;
   availableFrames?: Array<{id: string, name: string}>;
+  brandColors?: string[];
 }
 
 export default function FillControl({
@@ -78,6 +79,7 @@ export default function FillControl({
   onFillTypeChange,
   onFillChange,
   onFillImageChange,
+  brandColors = [],
   onFillImageFitChange,
   onGradientTypeChange,
   onGradientAngleChange,
@@ -194,6 +196,7 @@ export default function FillControl({
                   opacity={opacity}
                   onOpacityChange={onOpacityChange}
                   showOpacity={!!onOpacityChange}
+                  brandColors={brandColors}
                 />
               </PopoverContent>
             </Popover>

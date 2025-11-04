@@ -11,6 +11,7 @@ interface ColorPickerProps {
   opacity?: number;
   onOpacityChange?: (opacity: number) => void;
   showOpacity?: boolean;
+  brandColors?: string[];
 }
 
 export default function ColorPicker({
@@ -19,6 +20,7 @@ export default function ColorPicker({
   opacity = 100,
   onOpacityChange,
   showOpacity = true,
+  brandColors = [],
 }: ColorPickerProps) {
   const [hue, setHue] = useState(0);
   const [saturation, setSaturation] = useState(100);
@@ -195,6 +197,21 @@ export default function ColorPicker({
               transform: "translate(-50%, -50%)",
             }}
           />
+        </div>
+      )}
+
+      {/* Brand Colors Quick Access */}
+      {brandColors.length > 0 && (
+        <div className="flex gap-1 flex-wrap pt-1">
+          {brandColors.map((brandColor, idx) => (
+            <button
+              key={idx}
+              className="w-6 h-6 rounded border border-border hover:border-primary hover:scale-110 transition-all"
+              style={{ backgroundColor: brandColor }}
+              onClick={() => onChange(brandColor)}
+              title={brandColor}
+            />
+          ))}
         </div>
       )}
 

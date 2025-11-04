@@ -397,24 +397,20 @@ export default function ShapeSettingsPanel({
               <div className="space-y-2">
                 {/* List all brand kits */}
                 {brandKits.map((brandKit) => (
-                  <div key={brandKit.id} className="border rounded-lg overflow-hidden">
+                  <div key={brandKit.id} className="rounded-lg overflow-hidden">
                     {/* Brand Kit Header - Clickable to expand */}
                     <button
-                      className="w-full flex items-center justify-between p-2 bg-card hover:bg-accent transition-colors"
+                      className="w-full flex items-center justify-between px-2 py-1.5 bg-card hover:bg-accent transition-colors"
                       onClick={() => setExpandedBrandKit(expandedBrandKit === brandKit.id ? null : brandKit.id)}
                     >
-                      <div className="flex-1 text-left">
-                        <p className="text-[11px] font-medium">{brandKit.name}</p>
-                        <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
-                          <span>{brandKit.colors.length} colors</span>
-                          <span>•</span>
-                          <span>{brandKit.fonts.length} fonts</span>
-                        </div>
+                      <div className="flex items-center gap-2 flex-1">
+                        <p className="text-[10px] font-medium">{brandKit.name}</p>
+                        <span className="text-[9px] text-muted-foreground">{brandKit.colors.length}c • {brandKit.fonts.length}f</span>
                       </div>
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="h-7 px-2 text-[10px]"
+                        className="h-5 px-1.5 text-[9px]"
                         onClick={(e) => {
                           e.stopPropagation();
                           onOpenBrandKit?.();
@@ -426,27 +422,27 @@ export default function ShapeSettingsPanel({
                     
                     {/* Expandable content */}
                     {expandedBrandKit === brandKit.id && (
-                      <div className="p-2 space-y-3 border-t bg-background/50">
+                      <div className="p-1.5 space-y-2 border-t bg-background/50">
                         {/* Colors */}
                         {(onFillChange || onColorChange) && brandKit.colors.length > 0 && (
                           <div>
-                            <Label className="text-[10px] mb-2 block text-muted-foreground">
+                            <Label className="text-[9px] mb-1 block text-muted-foreground">
                               Colors
                             </Label>
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               {brandKit.colors.map((color, index) => (
-                                <div key={index} className="flex items-center gap-2">
+                                <div key={index} className="flex items-center gap-1.5">
                                   <div
-                                    className="w-8 h-8 rounded border-2 border-border flex-shrink-0"
+                                    className="w-6 h-6 rounded border border-border flex-shrink-0"
                                     style={{ backgroundColor: color }}
                                   />
-                                  <code className="text-[9px] font-mono text-muted-foreground flex-1">
+                                  <code className="text-[9px] font-mono text-muted-foreground flex-1 truncate">
                                     {color}
                                   </code>
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-6 px-2 text-[9px]"
+                                    className="h-5 px-1.5 text-[9px]"
                                     onClick={() => {
                                       if (elementType === "text" || elementType === "richtext") {
                                         onColorChange?.(color);
@@ -466,14 +462,14 @@ export default function ShapeSettingsPanel({
                         {/* Fonts */}
                         {onFontFamilyChange && brandKit.fonts.length > 0 && (
                           <div>
-                            <Label className="text-[10px] mb-2 block text-muted-foreground">
+                            <Label className="text-[9px] mb-1 block text-muted-foreground">
                               Fonts
                             </Label>
-                            <div className="space-y-1.5">
+                            <div className="space-y-1">
                               {brandKit.fonts.map((font, index) => (
-                                <div key={index} className="flex items-center gap-2">
+                                <div key={index} className="flex items-center gap-1.5">
                                   <span
-                                    className="text-[11px] flex-1 truncate"
+                                    className="text-[10px] flex-1 truncate"
                                     style={{ fontFamily: font }}
                                   >
                                     {font}
@@ -481,7 +477,7 @@ export default function ShapeSettingsPanel({
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-6 px-2 text-[9px] flex-shrink-0"
+                                    className="h-5 px-1.5 text-[9px] flex-shrink-0"
                                     onClick={() => onFontFamilyChange(font)}
                                   >
                                     Apply
@@ -538,6 +534,7 @@ export default function ShapeSettingsPanel({
                           color={qrFgColor}
                           onChange={onQrFgColorChange}
                           showOpacity={false}
+                          brandColors={activeBrandKit?.colors || []}
                         />
                       </PopoverContent>
                     </Popover>
@@ -561,6 +558,7 @@ export default function ShapeSettingsPanel({
                           color={qrBgColor}
                           onChange={onQrBgColorChange}
                           showOpacity={false}
+                          brandColors={activeBrandKit?.colors || []}
                         />
                       </PopoverContent>
                     </Popover>
@@ -994,6 +992,7 @@ export default function ShapeSettingsPanel({
                           opacity={opacity}
                           onOpacityChange={onOpacityChange}
                           showOpacity={false}
+                          brandColors={activeBrandKit?.colors || []}
                         />
                       </PopoverContent>
                     </Popover>
@@ -1207,6 +1206,7 @@ export default function ShapeSettingsPanel({
                       opacity={strokeOpacity}
                       onOpacityChange={onStrokeOpacityChange}
                       showOpacity={true}
+                      brandColors={activeBrandKit?.colors || []}
                     />
                   </PopoverContent>
                 </Popover>
