@@ -8,17 +8,20 @@ export interface DrawtirSDKOptions {
   readOnly?: boolean;
   autoSave?: boolean;
   autoSaveDelay?: number;
+  hideToolbar?: boolean;
 }
 
 export interface DrawtirSDKInstance {
   getSnapshot: () => CanvasSnapshot;
   loadSnapshot: (snapshot: CanvasSnapshot) => void;
-  exportPNG: () => Promise<Blob>;
-  exportSVG: () => Promise<string>;
+  exportPNG: (frameId?: string) => Promise<Blob>;
+  exportSVG: (frameId?: string) => Promise<string>;
+  exportJSON: () => Promise<CanvasSnapshot>;
+  addFrame: (config?: { width: number; height: number; name?: string }) => void;
   clear: () => void;
   destroy: () => void;
   on: (event: string, callback: Function) => void;
   off: (event: string, callback: Function) => void;
 }
 
-export type DrawtirEventType = "change" | "save" | "load" | "clear" | "elementAdd" | "elementRemove";
+export type DrawtirEventType = "change" | "save" | "load" | "clear" | "frameAdd" | "frameRemove" | "elementAdd" | "elementRemove";

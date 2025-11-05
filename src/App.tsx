@@ -10,6 +10,7 @@ import Editor from "./pages/Editor";
 import Documentation from "./pages/Documentation";
 import Settings from "./pages/Settings";
 import PublicPoster from "./pages/PublicPoster";
+import SDKDemo from "./pages/SDKDemo";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/documentation" element={<Documentation />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/public/:id" element={<PublicPoster />} />
+          <Route path="/sdk-demo" element={<SDKDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

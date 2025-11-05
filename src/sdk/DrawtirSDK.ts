@@ -1,14 +1,26 @@
-import type { DrawtirSDKOptions, DrawtirSDKInstance, DrawtirEventType } from "./types";
+import type { DrawtirSDKOptions, DrawtirSDKInstance } from "./types";
 import type { CanvasSnapshot } from "@/types/snapshot";
+import { createRoot, Root } from 'react-dom/client';
+import { createElement } from 'react';
+import { DrawtirEmbed } from './DrawtirEmbed';
+import type { DrawtirEmbedRef } from './DrawtirEmbed';
 
 export class DrawtirSDK implements DrawtirSDKInstance {
   private container: HTMLElement;
   private options: DrawtirSDKOptions;
   private eventListeners: Map<string, Set<Function>> = new Map();
   private currentSnapshot: CanvasSnapshot | null = null;
+  private root: Root | null = null;
+  private embedRef: DrawtirEmbedRef | null = null;
 
   constructor(options: DrawtirSDKOptions) {
-    this.options = options;
+    this.options = {
+      readOnly: false,
+      autoSave: false,
+      autoSaveDelay: 2000,
+      hideToolbar: false,
+      ...options
+    };
     
     if (typeof options.container === "string") {
       const element = document.querySelector(options.container);
@@ -24,18 +36,45 @@ export class DrawtirSDK implements DrawtirSDKInstance {
   }
 
   private initialize() {
-    // Create iframe or mount React component
-    this.container.innerHTML = `
-      <div id="drawtir-root" style="width: 100%; height: 100%;"></div>
-    `;
+    // Mount React component
+    const rootElement = document.createElement('div');
+    rootElement.style.width = '100%';
+    rootElement.style.height = '100%';
+    this.container.appendChild(rootElement);
+    
+    this.root = createRoot(rootElement);
+    
+    const embedElement = createElement(DrawtirEmbed, {
+      ref: (ref: DrawtirEmbedRef) => {
+        this.embedRef = ref;
+      },
+      snapshot: this.options.snapshot,
+      onSave: this.options.onSave,
+      onChange: (snapshot: CanvasSnapshot) => {
+        this.currentSnapshot = snapshot;
+        this.emit('change', snapshot);
+        if (this.options.onChange) {
+          this.options.onChange(snapshot);
+        }
+      },
+      readOnly: this.options.readOnly,
+      hideCloudFeatures: true,
+      hideToolbar: this.options.hideToolbar,
+      className: "w-full h-full"
+    });
+    
+    this.root.render(embedElement);
     
     if (this.options.snapshot) {
-      this.loadSnapshot(this.options.snapshot);
+      this.currentSnapshot = this.options.snapshot;
     }
   }
 
   getSnapshot(): CanvasSnapshot {
-    // This will be called by the embedded component
+    if (this.embedRef) {
+      return this.embedRef.getSnapshot();
+    }
+    
     if (!this.currentSnapshot) {
       return {
         version: "1.0.0",
@@ -57,27 +96,52 @@ export class DrawtirSDK implements DrawtirSDKInstance {
 
   loadSnapshot(snapshot: CanvasSnapshot): void {
     this.currentSnapshot = snapshot;
+    if (this.embedRef) {
+      this.embedRef.loadSnapshot(snapshot);
+    }
     this.emit("load", snapshot);
   }
 
-  async exportPNG(): Promise<Blob> {
-    // Will trigger canvas export
-    return new Blob();
+  async exportPNG(frameId?: string): Promise<Blob> {
+    if (!this.embedRef) {
+      throw new Error("Canvas not initialized");
+    }
+    return this.embedRef.exportPNG(frameId);
   }
 
-  async exportSVG(): Promise<string> {
-    // Will trigger SVG export
-    return "";
+  async exportSVG(frameId?: string): Promise<string> {
+    if (!this.embedRef) {
+      throw new Error("Canvas not initialized");
+    }
+    return this.embedRef.exportSVG(frameId);
+  }
+
+  async exportJSON(): Promise<CanvasSnapshot> {
+    return this.getSnapshot();
+  }
+
+  addFrame(config?: { width: number; height: number; name?: string }): void {
+    if (this.embedRef) {
+      this.embedRef.addFrame(config);
+    }
   }
 
   clear(): void {
+    if (this.embedRef) {
+      this.embedRef.clear();
+    }
     this.currentSnapshot = null;
     this.emit("clear");
   }
 
   destroy(): void {
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
+    }
     this.container.innerHTML = "";
     this.eventListeners.clear();
+    this.embedRef = null;
   }
 
   on(event: string, callback: Function): void {
