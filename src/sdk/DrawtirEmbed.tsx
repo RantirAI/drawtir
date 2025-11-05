@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState, useEffect } from "react";
 import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 import type { CanvasSnapshot } from "@/types/snapshot";
 
@@ -56,10 +56,19 @@ export interface DrawtirEmbedRef {
 export const DrawtirEmbed = forwardRef<DrawtirEmbedRef, DrawtirEmbedProps>(
   ({ snapshot, onSave, onChange, readOnly = false, hideCloudFeatures = true, hideToolbar = false, className }, ref) => {
     const [currentSnapshot, setCurrentSnapshot] = useState<CanvasSnapshot | undefined>(snapshot);
+    const latestSnapshotRef = useRef<CanvasSnapshot | undefined>(snapshot);
+
+    // Sync when external snapshot prop changes (e.g., load from parent)
+    useEffect(() => {
+      if (snapshot) {
+        setCurrentSnapshot(snapshot);
+        latestSnapshotRef.current = snapshot;
+      }
+    }, [snapshot]);
 
     useImperativeHandle(ref, () => ({
       getSnapshot: () => {
-        return currentSnapshot || {
+        return latestSnapshotRef.current || {
           version: "1.0.0",
           metadata: {
             title: "Untitled",
@@ -76,46 +85,43 @@ export const DrawtirEmbed = forwardRef<DrawtirEmbedRef, DrawtirEmbedProps>(
       },
       loadSnapshot: (newSnapshot: CanvasSnapshot) => {
         setCurrentSnapshot(newSnapshot);
+        latestSnapshotRef.current = newSnapshot;
       },
       exportPNG: async (frameId?: string) => {
-        if (!currentSnapshot?.frames?.length) {
+        const snap = latestSnapshotRef.current;
+        if (!snap?.frames?.length) {
           throw new Error("No frames to export");
         }
-        
         const frame = frameId
-          ? currentSnapshot.frames.find(f => f.id === frameId)
-          : currentSnapshot.frames[0];
-        
+          ? snap.frames.find(f => f.id === frameId)
+          : snap.frames[0];
         if (!frame) {
           throw new Error("Frame not found");
         }
-
         return renderFrameToBlob(frame, 'png');
       },
       exportSVG: async (frameId?: string) => {
-        if (!currentSnapshot?.frames?.length) {
+        const snap = latestSnapshotRef.current;
+        if (!snap?.frames?.length) {
           throw new Error("No frames to export");
         }
-        
         const frame = frameId
-          ? currentSnapshot.frames.find(f => f.id === frameId)
-          : currentSnapshot.frames[0];
-        
+          ? snap.frames.find(f => f.id === frameId)
+          : snap.frames[0];
         if (!frame) {
           throw new Error("Frame not found");
         }
-        
         // Basic SVG export
         let svg = `<svg width="${frame.width}" height="${frame.height}" xmlns="http://www.w3.org/2000/svg">`;
         svg += `<rect width="100%" height="100%" fill="${frame.backgroundColor || '#ffffff'}"/>`;
         svg += "</svg>";
-        
         return svg;
       },
       addFrame: (config?: { width: number; height: number; name?: string }) => {
+        const base = latestSnapshotRef.current;
         const newFrame = {
           id: `frame-${Date.now()}`,
-          name: config?.name || `Frame ${(currentSnapshot?.frames?.length || 0) + 1}`,
+          name: config?.name || `Frame ${(base?.frames?.length || 0) + 1}`,
           x: 100,
           y: 100,
           width: config?.width || 800,
@@ -124,12 +130,11 @@ export const DrawtirEmbed = forwardRef<DrawtirEmbedRef, DrawtirEmbedProps>(
           backgroundColor: '#ffffff',
           elements: []
         };
-        
         const newSnapshot = {
-          ...currentSnapshot,
-          frames: [...(currentSnapshot?.frames || []), newFrame]
+          ...base,
+          frames: [...(base?.frames || []), newFrame]
         } as CanvasSnapshot;
-        
+        latestSnapshotRef.current = newSnapshot;
         setCurrentSnapshot(newSnapshot);
         onChange?.(newSnapshot);
       },
@@ -149,12 +154,13 @@ export const DrawtirEmbed = forwardRef<DrawtirEmbedRef, DrawtirEmbedProps>(
           frames: []
         };
         setCurrentSnapshot(clearedSnapshot);
+        latestSnapshotRef.current = clearedSnapshot;
         onChange?.(clearedSnapshot);
       },
     }));
 
     const handleSnapshotChange = (newSnapshot: CanvasSnapshot) => {
-      setCurrentSnapshot(newSnapshot);
+      latestSnapshotRef.current = newSnapshot;
       onChange?.(newSnapshot);
     };
 

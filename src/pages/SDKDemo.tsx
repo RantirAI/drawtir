@@ -295,7 +295,6 @@ function App() {
               <div className="border-t h-full">
                 <DrawtirEmbed
                   ref={drawtirRef}
-                  snapshot={savedSnapshot}
                   onSave={handleSave}
                   onChange={(snapshot) => setSavedSnapshot(snapshot)}
                   hideCloudFeatures={true}
