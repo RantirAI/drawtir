@@ -963,14 +963,25 @@ export default function CanvasContainerNew({
   }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange]);
 
   // Load initial snapshot
+  // Load or update from provided snapshot (supports prop changes)
   useEffect(() => {
     if (initialSnapshot && validateSnapshot(initialSnapshot)) {
-      setProjectTitle(initialSnapshot.metadata.title);
+      setProjectTitle(initialSnapshot.metadata.title || "Untitled Poster");
       setFrames(initialSnapshot.frames);
-      setZoom(initialSnapshot.canvas.zoom);
-      setPanOffset(initialSnapshot.canvas.panOffset);
+
+      const firstId = initialSnapshot.frames?.[0]?.id;
+      if (firstId) {
+        setSelectedFrameId(firstId);
+        requestAnimationFrame(() => {
+          try { fitFrameToView(firstId); } catch {}
+        });
+      }
+
+      // Apply canvas view if provided
+      if (initialSnapshot.canvas?.zoom !== undefined) setZoom(initialSnapshot.canvas.zoom);
+      if (initialSnapshot.canvas?.panOffset) setPanOffset(initialSnapshot.canvas.panOffset);
     }
-  }, []);
+  }, [initialSnapshot]);
 
   // Load project from URL on mount
   useEffect(() => {
