@@ -5,6 +5,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to determine if a color is light or dark
+function isLightColor(color: string): boolean {
+  // Convert color to RGB
+  let r = 0, g = 0, b = 0;
+  
+  if (color.startsWith('#')) {
+    const hex = color.replace('#', '');
+    if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    }
+  } else if (color.startsWith('rgb')) {
+    const matches = color.match(/\d+/g);
+    if (matches && matches.length >= 3) {
+      r = parseInt(matches[0]);
+      g = parseInt(matches[1]);
+      b = parseInt(matches[2]);
+    }
+  }
+  
+  // Calculate relative luminance using standard formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5; // Light if luminance > 50%
+}
+
 // Minimal JSON schema for OpenAI JSON mode
 const DESIGN_JSON_SCHEMA = {
   name: 'design_spec',
@@ -760,8 +790,14 @@ MANDATORY DESIGN REQUIREMENTS:
 4. Add 2-4 strategic shapes for visual interest (circles, rectangles with borderRadius)
 5. Include 1-3 relevant icons from lucide-react library
 6. Follow rule of thirds for element placement (33%, 66% positions)
-7. Ensure high contrast (7:1 minimum) between text and background
+7. 🚨 CRITICAL COLOR CONTRAST: NEVER use white text (#FFFFFF, #FFF, rgb(255,255,255)) on white backgrounds OR black text (#000000, #000, rgb(0,0,0)) on black backgrounds. Text must be clearly visible!
 8. Use generous whitespace - don't crowd elements
+
+🚨 COLOR CONTRAST RULES (STRICTLY ENFORCE):
+- If background is light (white, cream, light gray), text MUST be dark (#000000, #1A1A1A, dark colors)
+- If background is dark (black, navy, dark gray), text MUST be light (#FFFFFF, bright colors)
+- For colored backgrounds, choose contrasting text colors from the palette
+- When in doubt: Dark text on light backgrounds, Light text on dark backgrounds
 
 POPULAR ICONS (use these): sparkles, star, heart, trophy, award, crown, zap, flame, music, gift, calendar, camera, sun, moon, circle-dot, square-check, triangle
 
@@ -1127,6 +1163,27 @@ Here's the design: {"title":"Example"}
               if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
                 throw new Error('Invalid design spec: missing elements array');
               }
+
+              // Fix color contrast issues
+              const bgColor = designSpec.backgroundColor || '#FFFFFF';
+              const isLightBackground = isLightColor(bgColor);
+              
+              console.log('Background color:', bgColor, 'Is light:', isLightBackground);
+              
+              // Fix text elements with poor contrast
+              designSpec.elements.forEach((el: any, idx: number) => {
+                if (el.type === 'text' && el.color) {
+                  const textIsLight = isLightColor(el.color);
+                  
+                  // Check for poor contrast: light text on light bg OR dark text on dark bg
+                  if ((isLightBackground && textIsLight) || (!isLightBackground && !textIsLight)) {
+                    const oldColor = el.color;
+                    // Fix: Use contrasting color
+                    el.color = isLightBackground ? '#000000' : '#FFFFFF';
+                    console.log(`Fixed text element ${idx}: ${oldColor} -> ${el.color} (background is ${isLightBackground ? 'light' : 'dark'})`);
+                  }
+                }
+              });
 
               // Update image elements to use generated image if available
               if (generatedImageBase64) {
