@@ -281,113 +281,111 @@ function App() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Canvas Embed */}
-          <div className="lg:col-span-2">
-            <Card className="h-full">
-              <CardHeader>
-                <CardTitle>Live Canvas Editor</CardTitle>
-                <CardDescription>
-                  This is the actual DrawtirEmbed component running live
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="border-t" style={{ height: '700px' }}>
-                  <DrawtirEmbed
-                    ref={drawtirRef}
-                    snapshot={savedSnapshot}
-                    onSave={handleSave}
-                    onChange={(snapshot) => setSavedSnapshot(snapshot)}
-                    hideCloudFeatures={true}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="flex gap-4 px-4 py-6 h-[calc(100vh-80px)]">
+        {/* Canvas Embed - Takes most of the space */}
+        <div className="flex-1 min-w-0">
+          <Card className="h-full flex flex-col">
+            <CardHeader className="flex-shrink-0">
+              <CardTitle>Live Canvas Editor</CardTitle>
+              <CardDescription>
+                This is the actual DrawtirEmbed component running live
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 p-0 min-h-0">
+              <div className="border-t h-full">
+                <DrawtirEmbed
+                  ref={drawtirRef}
+                  snapshot={savedSnapshot}
+                  onSave={handleSave}
+                  onChange={(snapshot) => setSavedSnapshot(snapshot)}
+                  hideCloudFeatures={true}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-          {/* Info & Code */}
-          <div className="space-y-6">
-            {/* Features */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Features</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="font-medium">Full Editor Embedded</p>
-                    <p className="text-muted-foreground">Complete canvas with all tools</p>
-                  </div>
+        {/* Info & Code - Fixed width sidebar on the right */}
+        <div className="w-[380px] flex-shrink-0 overflow-y-auto space-y-4">
+          {/* Features */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Features</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                <div>
+                  <p className="font-medium">Full Editor Embedded</p>
+                  <p className="text-muted-foreground text-xs">Complete canvas with all tools</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="font-medium">Export PNG/JSON</p>
-                    <p className="text-muted-foreground">Download designs in multiple formats</p>
-                  </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                <div>
+                  <p className="font-medium">Export PNG/JSON</p>
+                  <p className="text-muted-foreground text-xs">Download designs in multiple formats</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="font-medium">Custom Storage</p>
-                    <p className="text-muted-foreground">Save to your own backend</p>
-                  </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                <div>
+                  <p className="font-medium">Custom Storage</p>
+                  <p className="text-muted-foreground text-xs">Save to your own backend</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                  <div>
-                    <p className="font-medium">TypeScript Support</p>
-                    <p className="text-muted-foreground">Full type definitions included</p>
-                  </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
+                <div>
+                  <p className="font-medium">TypeScript Support</p>
+                  <p className="text-muted-foreground text-xs">Full type definitions included</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
 
-            {/* Code Examples */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code className="w-4 h-4" />
-                  Code Examples
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={showCode} onValueChange={(v) => setShowCode(v as any)}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="react">React</TabsTrigger>
-                    <TabsTrigger value="vanilla">Vanilla JS</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="react" className="mt-4">
-                    <pre className="text-xs bg-secondary/50 p-4 rounded-lg overflow-x-auto">
-                      <code>{reactCode}</code>
-                    </pre>
-                  </TabsContent>
-                  <TabsContent value="vanilla" className="mt-4">
-                    <pre className="text-xs bg-secondary/50 p-4 rounded-lg overflow-x-auto">
-                      <code>{vanillaCode}</code>
-                    </pre>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+          {/* Code Examples */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Code className="w-4 h-4" />
+                Code Examples
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={showCode} onValueChange={(v) => setShowCode(v as any)}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="react">React</TabsTrigger>
+                  <TabsTrigger value="vanilla">Vanilla JS</TabsTrigger>
+                </TabsList>
+                <TabsContent value="react" className="mt-4">
+                  <pre className="text-[10px] bg-secondary/50 p-3 rounded-lg overflow-x-auto max-h-[300px]">
+                    <code>{reactCode}</code>
+                  </pre>
+                </TabsContent>
+                <TabsContent value="vanilla" className="mt-4">
+                  <pre className="text-[10px] bg-secondary/50 p-3 rounded-lg overflow-x-auto max-h-[300px]">
+                    <code>{vanillaCode}</code>
+                  </pre>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
 
-            {/* Installation */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Installation</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="text-xs bg-secondary/50 p-4 rounded-lg">
-                  <code>npm install drawtir-sdk</code>
-                </pre>
-                <p className="text-xs text-muted-foreground mt-3">
-                  Or import directly from this app's bundle
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Installation */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Installation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="text-xs bg-secondary/50 p-3 rounded-lg">
+                <code>npm install drawtir-sdk</code>
+              </pre>
+              <p className="text-xs text-muted-foreground mt-3">
+                Or import directly from this app's bundle
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
