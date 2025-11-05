@@ -8,9 +8,66 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Download, Save, Trash2, FileJson, Code, Rocket } from "lucide-react";
 
+// Default initial snapshot with a welcome frame
+const getInitialSnapshot = (): CanvasSnapshot => {
+  // Try to load from localStorage first
+  const saved = localStorage.getItem('sdk-demo-canvas');
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      console.error('Failed to parse saved snapshot', e);
+    }
+  }
+  
+  // Return default welcome frame
+  return {
+    version: "1.0.0",
+    metadata: {
+      title: "SDK Demo Canvas",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    },
+    canvas: {
+      backgroundColor: "#f8f9fa",
+      zoom: 1,
+      panOffset: { x: 0, y: 0 }
+    },
+    frames: [
+      {
+        id: 'welcome-frame',
+        name: 'Welcome Frame',
+        x: 100,
+        y: 100,
+        width: 800,
+        height: 1200,
+        rotation: 0,
+        backgroundColor: '#ffffff',
+        elements: [
+          {
+            id: 'welcome-text',
+            type: 'text',
+            x: 50,
+            y: 500,
+            width: 700,
+            height: 200,
+            rotation: 0,
+            text: '🎨 Start Creating!\n\nClick "Load Sample" or use the toolbar to add elements',
+            fontSize: 48,
+            fontFamily: 'Inter',
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: '#1a1a1a'
+          }
+        ]
+      }
+    ]
+  };
+};
+
 export default function SDKDemo() {
   const drawtirRef = useRef<DrawtirEmbedRef>(null);
-  const [savedSnapshot, setSavedSnapshot] = useState<CanvasSnapshot | null>(null);
+  const [savedSnapshot, setSavedSnapshot] = useState<CanvasSnapshot>(getInitialSnapshot());
   const [showCode, setShowCode] = useState<'react' | 'vanilla'>('react');
 
   const handleSave = (snapshot: CanvasSnapshot) => {
@@ -50,10 +107,11 @@ export default function SDKDemo() {
   };
 
   const handleClear = () => {
-    drawtirRef.current?.clear();
-    setSavedSnapshot(null);
+    const welcomeSnapshot = getInitialSnapshot();
+    drawtirRef.current?.loadSnapshot(welcomeSnapshot);
+    setSavedSnapshot(welcomeSnapshot);
     localStorage.removeItem('sdk-demo-canvas');
-    toast.success("Canvas cleared!");
+    toast.success("Canvas reset to welcome screen!");
   };
 
   const handleLoadSample = () => {
@@ -238,6 +296,7 @@ function App() {
                 <div className="border-t" style={{ height: '700px' }}>
                   <DrawtirEmbed
                     ref={drawtirRef}
+                    snapshot={savedSnapshot}
                     onSave={handleSave}
                     onChange={(snapshot) => setSavedSnapshot(snapshot)}
                     hideCloudFeatures={true}
