@@ -788,7 +788,30 @@ Return JSON (COMPLETE structure, NO nested frames):
     const messages: any[] = [
       { 
         role: 'system', 
-        content: DESIGN_SYSTEM_PROMPT + '\n\nIMPORTANT: Return ONLY valid JSON without any markdown formatting or code blocks. Your entire response must be a single JSON object.' 
+        content: DESIGN_SYSTEM_PROMPT + `
+
+🚨 CRITICAL JSON FORMAT REQUIREMENTS - FOLLOW EXACTLY:
+1. Your response MUST start with { (opening brace) as the VERY FIRST CHARACTER
+2. Your response MUST end with } (closing brace) as the VERY LAST CHARACTER
+3. Return ONLY the JSON object - absolutely NO text before or after
+4. NO markdown code blocks (no \`\`\`json or \`\`\`)
+5. NO explanatory text, comments, or notes
+6. ALL property names in double quotes ("title", "elements", etc.)
+7. ALL string values in double quotes
+8. NO trailing commas anywhere in the JSON
+9. Ensure all brackets [ ] and braces { } are perfectly balanced
+10. The response must be directly parseable by JSON.parse() with ZERO preprocessing
+
+Example of CORRECT format:
+{"title":"Example","backgroundColor":"#FFFFFF","elements":[{"type":"text","content":"Hello"}],"style":"Modern","mood":"Professional"}
+
+Example of WRONG format (DO NOT DO THIS):
+\`\`\`json
+{"title":"Example"}
+\`\`\`
+or
+Here's the design: {"title":"Example"}
+`
       }
     ];
     
@@ -984,11 +1007,25 @@ Return JSON (COMPLETE structure, NO nested frames):
             // Parse final result with robust error handling
             let designSpec;
             try {
+              // Log the full content for debugging
+              console.log('Raw fullContent (first 200 chars):', fullContent.substring(0, 200));
+              console.log('Raw fullContent (last 200 chars):', fullContent.substring(Math.max(0, fullContent.length - 200)));
+              
               // Remove code fences and trim obvious wrappers
               let cleanContent = fullContent
                 .replace(/```json\n?/g, '')
                 .replace(/```\n?/g, '')
                 .trim();
+
+              // If content doesn't start with {, try to find the start of JSON
+              if (!cleanContent.startsWith('{')) {
+                const firstBraceIdx = cleanContent.indexOf('{');
+                if (firstBraceIdx > 0) {
+                  console.log('Content did not start with {, found at index:', firstBraceIdx);
+                  console.log('Skipped prefix:', cleanContent.substring(0, Math.min(100, firstBraceIdx)));
+                  cleanContent = cleanContent.substring(firstBraceIdx);
+                }
+              }
 
               // Extract the first complete JSON object while ignoring braces inside strings
               const extractFirstJsonObject = (text: string): string | null => {
@@ -1026,8 +1063,18 @@ Return JSON (COMPLETE structure, NO nested frames):
               };
 
               // Narrow down to content starting at first '{' to reduce noise
-              const firstBrace = cleanContent.indexOf('{');
-              if (firstBrace > 0) cleanContent = cleanContent.slice(firstBrace);
+              let firstBraceIdx = cleanContent.indexOf('{');
+              if (firstBraceIdx === -1) {
+                console.error('No opening brace found in entire response');
+                console.error('Full content:', fullContent);
+                throw new Error('AI response does not contain a JSON object');
+              }
+              
+              if (firstBraceIdx > 0) {
+                console.log('Skipped', firstBraceIdx, 'characters before first {');
+                console.log('Skipped content:', cleanContent.substring(0, Math.min(200, firstBraceIdx)));
+                cleanContent = cleanContent.substring(firstBraceIdx);
+              }
 
               let jsonStr = extractFirstJsonObject(cleanContent) ?? '';
               if (!jsonStr) {
