@@ -84,6 +84,14 @@ export default function Documentation() {
                     SDK Overview
                   </Button>
                   <Button
+                    variant={activeSection === "sdk-demo" ? "secondary" : "ghost"}
+                    className="w-full justify-start h-7 text-xs px-2"
+                    onClick={() => setActiveSection("sdk-demo")}
+                  >
+                    <Layers className="h-3 w-3 mr-1.5" />
+                    Live SDK Demo
+                  </Button>
+                  <Button
                     variant={activeSection === "embed-example" ? "secondary" : "ghost"}
                     className="w-full justify-start h-7 text-xs px-2"
                     onClick={() => setActiveSection("embed-example")}
@@ -302,6 +310,67 @@ const editor = new DrawtirSDK({
     console.log('Changed:', snapshot);
   }
 });`}</code>
+                    </pre>
+                  </div>
+                )}
+
+                {activeSection === "sdk-demo" && (
+                  <div className="prose prose-sm max-w-none">
+                    <h1 className="text-2xl font-bold mb-4">Live SDK Demo</h1>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Experience the full Drawtir SDK in action. This is a live, interactive demo showing the canvas editor embedded in a page.
+                    </p>
+
+                    <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-6 mb-6 border border-primary/20">
+                      <h2 className="text-lg font-semibold mb-3">Interactive Demo</h2>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        The demo includes a fully functional canvas editor with export capabilities, event handling, and programmatic controls.
+                      </p>
+                      <Button
+                        onClick={() => window.open('/sdk-demo', '_blank')}
+                        className="w-full"
+                      >
+                        Open Full SDK Demo →
+                      </Button>
+                    </div>
+
+                    <h2 className="text-lg font-semibold mt-6 mb-3">What's Included</h2>
+                    <ul className="text-sm space-y-2 list-disc list-inside mb-6">
+                      <li><strong>Live Canvas Editor</strong> - Full-featured editor embedded in the page</li>
+                      <li><strong>Export Functions</strong> - Download designs as PNG or JSON</li>
+                      <li><strong>Sample Templates</strong> - Load pre-designed posters instantly</li>
+                      <li><strong>Code Examples</strong> - See React and Vanilla JS implementations</li>
+                      <li><strong>Event Handling</strong> - Real-time canvas change detection</li>
+                      <li><strong>Programmatic Control</strong> - Clear, save, and manipulate canvas via API</li>
+                    </ul>
+
+                    <h2 className="text-lg font-semibold mt-6 mb-3">Quick Integration</h2>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Copy this code to add the same functionality to your app:
+                    </p>
+                    <pre className="bg-muted p-3 rounded-lg text-xs overflow-x-auto">
+                      <code>{`import { DrawtirEmbed } from 'drawtir-sdk';
+import { useRef } from 'react';
+
+function App() {
+  const drawtirRef = useRef(null);
+
+  const handleExportPNG = async () => {
+    const blob = await drawtirRef.current?.exportPNG();
+    // Download blob
+  };
+
+  return (
+    <div style={{ height: '700px' }}>
+      <DrawtirEmbed
+        ref={drawtirRef}
+        onSave={(snapshot) => console.log('Saved')}
+        onChange={(snapshot) => console.log('Changed')}
+      />
+      <button onClick={handleExportPNG}>Export</button>
+    </div>
+  );
+}`}</code>
                     </pre>
                   </div>
                 )}

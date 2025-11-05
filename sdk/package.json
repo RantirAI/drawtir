@@ -1,0 +1,53 @@
+{
+  "name": "drawtir-sdk",
+  "version": "1.0.0",
+  "description": "Embed the Drawtir canvas editor in your applications",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/sdk/index.ts --format cjs,esm --dts --external react --external react-dom",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "canvas",
+    "editor",
+    "design",
+    "poster",
+    "embed",
+    "sdk",
+    "react",
+    "typescript"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/drawtir-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/drawtir-sdk/issues"
+  },
+  "homepage": "https://github.com/yourusername/drawtir-sdk#readme",
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}
