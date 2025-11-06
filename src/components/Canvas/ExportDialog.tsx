@@ -23,7 +23,26 @@ export interface ExportConfig {
   scale: number;
   duration?: number;
   fps?: number;
+  socialMediaSizes?: SocialMediaSize[];
 }
+
+export interface SocialMediaSize {
+  name: string;
+  width: number;
+  height: number;
+  platform: string;
+}
+
+const SOCIAL_MEDIA_PRESETS: SocialMediaSize[] = [
+  { name: "Instagram Post", width: 1080, height: 1080, platform: "Instagram" },
+  { name: "Instagram Story", width: 1080, height: 1920, platform: "Instagram" },
+  { name: "Facebook Post", width: 1200, height: 630, platform: "Facebook" },
+  { name: "Twitter/X Post", width: 1200, height: 675, platform: "Twitter/X" },
+  { name: "LinkedIn Post", width: 1200, height: 627, platform: "LinkedIn" },
+  { name: "Pinterest Pin", width: 1000, height: 1500, platform: "Pinterest" },
+  { name: "YouTube Thumbnail", width: 1280, height: 720, platform: "YouTube" },
+  { name: "TikTok Cover", width: 1080, height: 1920, platform: "TikTok" },
+];
 
 export default function ExportDialog({ open, onOpenChange, frames, onExport, defaultSelectedFrameIds }: ExportDialogProps) {
   const [selectedFrameIds, setSelectedFrameIds] = useState<string[]>(defaultSelectedFrameIds || []);
@@ -32,6 +51,8 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
   const [duration, setDuration] = useState<number>(3);
   const [fps, setFps] = useState<number>(30);
   const [isExporting, setIsExporting] = useState(false);
+  const [exportMode, setExportMode] = useState<"single" | "social-media">("single");
+  const [selectedSocialSizes, setSelectedSocialSizes] = useState<string[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -60,17 +81,38 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
     }
   };
 
+  const handleSocialSizeToggle = (sizeName: string) => {
+    setSelectedSocialSizes(prev =>
+      prev.includes(sizeName)
+        ? prev.filter(n => n !== sizeName)
+        : [...prev, sizeName]
+    );
+  };
+
+  const handleSelectAllSocialSizes = () => {
+    if (selectedSocialSizes.length === SOCIAL_MEDIA_PRESETS.length) {
+      setSelectedSocialSizes([]);
+    } else {
+      setSelectedSocialSizes(SOCIAL_MEDIA_PRESETS.map(s => s.name));
+    }
+  };
+
   const handleExport = async () => {
     if (selectedFrameIds.length === 0) return;
     
     setIsExporting(true);
     try {
+      const socialMediaSizes = exportMode === "social-media" 
+        ? SOCIAL_MEDIA_PRESETS.filter(s => selectedSocialSizes.includes(s.name))
+        : undefined;
+
       await onExport({
         frameIds: selectedFrameIds,
         format,
         scale,
         duration: isAnimatedFormat ? duration : undefined,
         fps: isAnimatedFormat ? fps : undefined,
+        socialMediaSizes,
       });
       onOpenChange(false);
     } finally {
@@ -86,6 +128,27 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
         </DialogHeader>
 
         <div className="grid gap-6">
+          {/* Export Mode Selection */}
+          <div className="space-y-3">
+            <Label>Export Mode</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant={exportMode === "single" ? "default" : "outline"}
+                onClick={() => setExportMode("single")}
+                className="w-full"
+              >
+                Single Size
+              </Button>
+              <Button
+                variant={exportMode === "social-media" ? "default" : "outline"}
+                onClick={() => setExportMode("social-media")}
+                className="w-full"
+              >
+                Social Media Sizes
+              </Button>
+            </div>
+          </div>
+
           {/* Frame Selection */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
@@ -119,6 +182,42 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
           </div>
 
           <Separator />
+
+          {/* Social Media Sizes Selection */}
+          {exportMode === "social-media" && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Social Media Sizes ({selectedSocialSizes.length} selected)</Label>
+                <Button variant="ghost" size="sm" onClick={handleSelectAllSocialSizes}>
+                  {selectedSocialSizes.length === SOCIAL_MEDIA_PRESETS.length ? "Deselect All" : "Select All"}
+                </Button>
+              </div>
+              <ScrollArea className="h-48 rounded-md border p-4">
+                <div className="space-y-2">
+                  {SOCIAL_MEDIA_PRESETS.map((size) => (
+                    <div key={size.name} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={size.name}
+                        checked={selectedSocialSizes.includes(size.name)}
+                        onCheckedChange={() => handleSocialSizeToggle(size.name)}
+                      />
+                      <label
+                        htmlFor={size.name}
+                        className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {size.name}
+                      </label>
+                      <span className="text-xs text-muted-foreground">
+                        {size.width}×{size.height}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+
+          {exportMode === "social-media" && <Separator />}
 
           {/* Export Settings */}
           <div className="grid grid-cols-2 gap-4">
@@ -220,6 +319,11 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
           )}
 
           {/* Info */}
+          {exportMode === "social-media" && selectedSocialSizes.length > 0 && (
+            <div className="rounded-md bg-primary/10 border border-primary p-3 text-sm">
+              <strong>Multi-Size Export:</strong> Will generate {selectedSocialSizes.length} optimized versions for different social media platforms.
+            </div>
+          )}
           {format === "PDF" && selectedFrameIds.length > 1 && (
             <div className="rounded-md bg-muted p-3 text-sm">
               All selected frames will be combined into a single PDF file.
@@ -238,10 +342,19 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
             </Button>
             <Button 
               onClick={handleExport} 
-              disabled={selectedFrameIds.length === 0 || isExporting}
+              disabled={
+                selectedFrameIds.length === 0 || 
+                isExporting || 
+                (exportMode === "social-media" && selectedSocialSizes.length === 0)
+              }
             >
               <Download className="mr-2 h-4 w-4" />
-              {isExporting ? "Exporting..." : "Export"}
+              {isExporting 
+                ? "Exporting..." 
+                : exportMode === "social-media" 
+                  ? `Export ${selectedSocialSizes.length} Size${selectedSocialSizes.length !== 1 ? 's' : ''}`
+                  : "Export"
+              }
             </Button>
           </div>
         </div>

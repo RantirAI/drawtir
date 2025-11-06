@@ -251,6 +251,16 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function exportFrames(frames: Frame[], config: ExportConfig): Promise<void> {
   const selectedFrames = frames.filter(f => config.frameIds.includes(f.id));
 
+  // Handle social media multi-size export
+  if (config.socialMediaSizes && config.socialMediaSizes.length > 0) {
+    for (const frame of selectedFrames) {
+      for (const size of config.socialMediaSizes) {
+        await exportFrameForSocialMedia(frame, size, config);
+      }
+    }
+    return;
+  }
+
   if (config.format === "PDF") {
     await exportAsPDF(selectedFrames, config);
   } else if (config.format === "SVG") {
@@ -271,6 +281,73 @@ export async function exportFrames(frames: Frame[], config: ExportConfig): Promi
       await exportFrameAsImage(frame, config);
     }
   }
+}
+
+async function exportFrameForSocialMedia(
+  frame: Frame,
+  socialSize: { name: string; width: number; height: number; platform: string },
+  config: ExportConfig
+): Promise<void> {
+  // Create a canvas with the social media dimensions
+  const canvas = document.createElement("canvas");
+  canvas.width = socialSize.width;
+  canvas.height = socialSize.height;
+  const ctx = canvas.getContext("2d");
+  
+  if (!ctx) throw new Error("Failed to get canvas context");
+
+  // Calculate scaling to fit the frame into the social media size while maintaining aspect ratio
+  const frameAspect = frame.width / frame.height;
+  const targetAspect = socialSize.width / socialSize.height;
+  
+  let scale: number;
+  let offsetX = 0;
+  let offsetY = 0;
+  
+  if (frameAspect > targetAspect) {
+    // Frame is wider - fit to width
+    scale = socialSize.width / frame.width;
+    offsetY = (socialSize.height - (frame.height * scale)) / 2;
+  } else {
+    // Frame is taller - fit to height
+    scale = socialSize.height / frame.height;
+    offsetX = (socialSize.width - (frame.width * scale)) / 2;
+  }
+
+  // Fill background (white or frame background)
+  ctx.fillStyle = frame.backgroundColor || "#ffffff";
+  ctx.fillRect(0, 0, socialSize.width, socialSize.height);
+
+  // Render the frame at the calculated position and scale
+  ctx.save();
+  ctx.translate(offsetX, offsetY);
+  ctx.scale(scale, scale);
+  
+  // Draw frame background
+  await drawFrameBackground(ctx, frame);
+
+  // Draw elements
+  for (const element of frame.elements) {
+    await drawElement(ctx, element, frame);
+  }
+  
+  ctx.restore();
+
+  // Export the canvas
+  const mimeType = config.format === "JPEG" ? "image/jpeg" : "image/png";
+  const extension = config.format.toLowerCase();
+  const frameName = frame.name || "frame";
+  const fileName = `${frameName}_${socialSize.name.replace(/\s+/g, '_')}.${extension}`;
+
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  }, mimeType);
 }
 
 async function exportFrameAsImage(frame: Frame, config: ExportConfig): Promise<void> {
