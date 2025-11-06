@@ -6,7 +6,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy, Trash2, Sparkles, RefreshCw, Layers, Box, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Palette, PenTool, Wand2 } from "lucide-react";
+import { Copy, Trash2, Sparkles, RefreshCw, Layers, Box, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Palette, PenTool, Wand2, Eye } from "lucide-react";
 
 interface CanvasContextMenuProps {
   children: ReactNode;
@@ -23,6 +23,7 @@ interface CanvasContextMenuProps {
   onEditFill?: () => void;
   onEditStroke?: () => void;
   onEditAnimations?: () => void;
+  onMakeEditable?: () => void;
 }
 
 export default function CanvasContextMenu({
@@ -40,6 +41,7 @@ export default function CanvasContextMenu({
   onEditFill,
   onEditStroke,
   onEditAnimations,
+  onMakeEditable,
 }: CanvasContextMenuProps) {
   return (
     <ContextMenu>
@@ -104,9 +106,15 @@ export default function CanvasContextMenu({
         )}
         
         {/* Edit options */}
-        {(onEditFill || onEditStroke || onEditAnimations) && (
+        {(onEditFill || onEditStroke || onEditAnimations || onMakeEditable) && (
           <>
             <ContextMenuSeparator />
+            {onMakeEditable && (
+              <ContextMenuItem onClick={onMakeEditable} className="text-xs">
+                <Eye className="h-3 w-3 mr-2" />
+                Make Editable
+              </ContextMenuItem>
+            )}
             {onEditFill && (
               <ContextMenuItem onClick={onEditFill} className="text-xs">
                 <Palette className="h-3 w-3 mr-2" />

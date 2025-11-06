@@ -1781,6 +1781,72 @@ export default function CanvasContainerNew({
     toast.success("Element duplicated!");
   };
 
+  const handleMakeEditable = async (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element || element.type !== "image" || !element.imageUrl) {
+      toast.error("Can only make image elements editable");
+      return;
+    }
+
+    toast.info("Analyzing image structure...");
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-image-structure', {
+        body: { imageUrl: element.imageUrl }
+      });
+
+      if (error) throw error;
+
+      // Convert the AI-parsed structure into canvas elements
+      const newElements: Element[] = data.elements.map((el: any) => ({
+        id: `element-${Date.now()}-${Math.random()}`,
+        type: el.type,
+        name: el.type === "text" ? el.content : el.type,
+        x: el.x,
+        y: el.y,
+        width: el.width,
+        height: el.height,
+        // Text properties
+        ...(el.type === "text" && {
+          text: el.content,
+          fontSize: el.fontSize || 16,
+          fontWeight: el.fontWeight || "400",
+          color: el.color || "#000000",
+          textAlign: el.textAlign || "left",
+        }),
+        // Shape properties
+        ...(el.type === "shape" && {
+          shapeType: el.shapeType || "rectangle",
+          fill: el.fill || el.backgroundColor || "#000000",
+          fillOpacity: (el.opacity || 1) * 100,
+        }),
+        opacity: (el.opacity || 1) * 100,
+      }));
+
+      // Remove the original image element and add the new editable elements
+      setFrames(frames.map(f => {
+        if (f.id === selectedFrameId) {
+          return {
+            ...f,
+            // Update background if specified
+            backgroundColor: data.frame?.backgroundColor || f.backgroundColor,
+            // Remove original image and add new elements
+            elements: [
+              ...(f.elements || []).filter(e => e.id !== elementId),
+              ...newElements
+            ]
+          };
+        }
+        return f;
+      }));
+
+      toast.success("Image converted to editable elements!");
+    } catch (error) {
+      console.error("Error making image editable:", error);
+      toast.error("Failed to analyze image");
+    }
+  };
+
   const handleWrapInFrame = () => {
     if (selectedElementIds.length === 0) return;
     
@@ -1979,6 +2045,7 @@ export default function CanvasContainerNew({
                     onSendToBack={() => handleArrange('toBack', [element.id], frame.id)}
                     onBringForward={() => handleArrange('forward', [element.id], frame.id)}
                     onSendBackward={() => handleArrange('backward', [element.id], frame.id)}
+                    onMakeEditable={element.type === "image" ? () => handleMakeEditable(element.id) : undefined}
                     onEditFill={() => {
                       setSelectedElementIds([element.id]);
                       setShowShapeSettings(true);
