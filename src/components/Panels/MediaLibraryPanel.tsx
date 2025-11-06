@@ -63,11 +63,19 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
   const [unsplashImages, setUnsplashImages] = useState<UnsplashImage[]>([]);
   const [unsplashLoading, setUnsplashLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [hasLoadedDefault, setHasLoadedDefault] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadMedia();
   }, []);
+
+  useEffect(() => {
+    if (open && !hasLoadedDefault) {
+      searchUnsplash("trending");
+      setHasLoadedDefault(true);
+    }
+  }, [open]);
 
   const loadMedia = async () => {
     try {
@@ -193,15 +201,12 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
   };
 
   const searchUnsplash = async (query: string) => {
-    if (!query.trim()) {
-      setUnsplashImages([]);
-      return;
-    }
+    const searchTerm = query.trim() || "trending";
 
     setUnsplashLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('search-unsplash', {
-        body: { query, page: 1, perPage: 30 },
+        body: { query: searchTerm, page: 1, perPage: 30 },
       });
 
       if (error) throw error;
@@ -347,7 +352,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                 />
                 <Button
                   onClick={() => searchUnsplash(searchQuery)}
-                  disabled={unsplashLoading || !searchQuery.trim()}
+                  disabled={unsplashLoading}
                 >
                   {unsplashLoading ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
