@@ -2601,7 +2601,7 @@ export default function CanvasContainerNew({
             toast.success("Image added to canvas");
           }}
           onClose={() => setShowMediaLibrary(false)}
-          inline={true}
+          open={showMediaLibrary}
         />
       )}
 
