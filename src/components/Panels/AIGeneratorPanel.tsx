@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, Upload, Clock, RotateCcw, Code, Plus, X } from "lucide-react";
+import { Sparkles, Upload, Clock, RotateCcw, Code, Plus, X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -203,6 +203,85 @@ export default function AIGeneratorPanel({
     onRestoreConversation(conversation.output_snapshot);
     toast.success(`Restored: ${conversation.title}`);
     setActiveTab("generator");
+  };
+
+  const handleMakeEditable = async (imageUrl: string) => {
+    try {
+      setIsLoadingConversations(true);
+      toast("Analyzing image...", {
+        description: "Converting AI-generated poster to editable elements",
+      });
+
+      const { data, error } = await supabase.functions.invoke('analyze-image-structure', {
+        body: { imageUrl }
+      });
+
+      if (error) throw error;
+
+      // Convert the analyzed structure into canvas elements
+      const { frame: frameData, elements } = data;
+      
+      const newFrame: Frame = {
+        id: `frame-${Date.now()}`,
+        name: "Editable Poster",
+        x: 100,
+        y: 100,
+        width: frameData.width,
+        height: frameData.height,
+        backgroundColor: frameData.backgroundColor,
+        elements: elements.map((el: any, idx: number) => {
+          const baseElement = {
+            id: `element-${Date.now()}-${idx}`,
+            type: el.type as any,
+            x: el.x,
+            y: el.y,
+            width: el.width,
+            height: el.height,
+            opacity: el.opacity || 1,
+          };
+
+          if (el.type === 'text') {
+            return {
+              ...baseElement,
+              text: el.content,
+              fontSize: el.fontSize || 16,
+              fontWeight: el.fontWeight || 'normal',
+              color: el.color || '#000000',
+              textAlign: el.textAlign || 'left',
+            };
+          } else if (el.type === 'shape') {
+            return {
+              ...baseElement,
+              shapeType: el.shapeType || 'rectangle',
+              fill: el.fill || el.backgroundColor || '#cccccc',
+              fillType: 'solid' as const,
+            };
+          }
+
+          return baseElement;
+        }),
+      };
+
+      // Add the new editable frame to the canvas
+      const updatedSnapshot = {
+        ...currentSnapshot,
+        frames: [...currentSnapshot.frames, newFrame],
+      };
+      
+      onRestoreConversation(updatedSnapshot);
+
+      toast.success("Success!", {
+        description: "Poster converted to editable elements. You can now move and edit each element!",
+      });
+      setActiveTab("generator");
+    } catch (error) {
+      console.error('Error making editable:', error);
+      toast.error("Conversion failed", {
+        description: "Failed to convert image to editable elements",
+      });
+    } finally {
+      setIsLoadingConversations(false);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -633,6 +712,18 @@ export default function AIGeneratorPanel({
                           <RotateCcw className="h-3 w-3 mr-1" />
                           Restore
                         </Button>
+                        {conv.output_snapshot?.frames?.[0]?.image && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="flex-1 h-8 text-xs"
+                            onClick={() => handleMakeEditable(conv.output_snapshot.frames[0].image!)}
+                            disabled={isLoadingConversations}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Make Editable
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           variant="ghost"

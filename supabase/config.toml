@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.search-unsplash]
 verify_jwt = false
+
+[functions.analyze-image-structure]
+verify_jwt = false
