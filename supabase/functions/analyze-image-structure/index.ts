@@ -42,34 +42,33 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `Analyze this poster/image and extract all its visual elements. Return a JSON object with this structure:
+                text: `Convert this image into SVG vector format. Trace all visual elements (shapes, text, images) and return them as SVG paths and elements. Return a JSON object with this structure:
 {
   "frame": {
     "width": number (in pixels),
     "height": number (in pixels),
     "backgroundColor": "hex color"
   },
-  "elements": [
+  "svgElements": [
     {
-      "type": "text" | "shape" | "image",
-      "content": "text content if type is text",
-      "x": number (position from left in pixels),
-      "y": number (position from top in pixels),
+      "type": "path" | "rect" | "ellipse" | "text" | "polygon",
+      "svgData": "SVG path data string (e.g. 'M 10 10 L 20 20 Z') or shape attributes",
+      "x": number,
+      "y": number,
       "width": number,
       "height": number,
+      "fill": "hex color",
+      "stroke": "hex color",
+      "strokeWidth": number,
+      "opacity": number (0-1),
+      "content": "text content if type is text",
       "fontSize": number (if text),
-      "fontWeight": "normal" | "bold" | "bolder",
-      "color": "hex color",
-      "textAlign": "left" | "center" | "right",
-      "backgroundColor": "hex color" (if applicable),
-      "shapeType": "rectangle" | "ellipse" (if shape),
-      "fill": "hex color" (if shape),
-      "opacity": number (0-1)
+      "fontWeight": string (if text)
     }
   ]
 }
 
-Be accurate with positioning and sizes. Extract all text elements, shapes, and notable visual components.`
+Trace the image accurately and convert all visual elements to SVG vectors. Include paths for shapes, text elements, and any visual components.`
               },
               {
                 type: "image_url",
@@ -84,8 +83,8 @@ Be accurate with positioning and sizes. Extract all text elements, shapes, and n
           {
             type: "function",
             function: {
-              name: "extract_image_elements",
-              description: "Extract visual elements from an image",
+              name: "vectorize_image",
+              description: "Convert image to SVG vectors",
               parameters: {
                 type: "object",
                 properties: {
@@ -98,36 +97,35 @@ Be accurate with positioning and sizes. Extract all text elements, shapes, and n
                     },
                     required: ["width", "height", "backgroundColor"]
                   },
-                  elements: {
+                  svgElements: {
                     type: "array",
                     items: {
                       type: "object",
                       properties: {
-                        type: { type: "string", enum: ["text", "shape", "image"] },
-                        content: { type: "string" },
+                        type: { type: "string", enum: ["path", "rect", "ellipse", "text", "polygon"] },
+                        svgData: { type: "string" },
                         x: { type: "number" },
                         y: { type: "number" },
                         width: { type: "number" },
                         height: { type: "number" },
-                        fontSize: { type: "number" },
-                        fontWeight: { type: "string" },
-                        color: { type: "string" },
-                        textAlign: { type: "string" },
-                        backgroundColor: { type: "string" },
-                        shapeType: { type: "string" },
                         fill: { type: "string" },
-                        opacity: { type: "number" }
+                        stroke: { type: "string" },
+                        strokeWidth: { type: "number" },
+                        opacity: { type: "number" },
+                        content: { type: "string" },
+                        fontSize: { type: "number" },
+                        fontWeight: { type: "string" }
                       },
-                      required: ["type", "x", "y", "width", "height"]
+                      required: ["type", "x", "y"]
                     }
                   }
                 },
-                required: ["frame", "elements"]
+                required: ["frame", "svgElements"]
               }
             }
           }
         ],
-        tool_choice: { type: "function", function: { name: "extract_image_elements" } }
+        tool_choice: { type: "function", function: { name: "vectorize_image" } }
       }),
     });
 

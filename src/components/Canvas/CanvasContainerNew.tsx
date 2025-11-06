@@ -1797,31 +1797,74 @@ export default function CanvasContainerNew({
 
       if (error) throw error;
 
-      // Convert the AI-parsed structure into canvas elements
-      const newElements: Element[] = data.elements.map((el: any) => ({
-        id: `element-${Date.now()}-${Math.random()}`,
-        type: el.type,
-        name: el.type === "text" ? el.content : el.type,
-        x: el.x,
-        y: el.y,
-        width: el.width,
-        height: el.height,
-        // Text properties
-        ...(el.type === "text" && {
-          text: el.content,
-          fontSize: el.fontSize || 16,
-          fontWeight: el.fontWeight || "400",
-          color: el.color || "#000000",
-          textAlign: el.textAlign || "left",
-        }),
-        // Shape properties
-        ...(el.type === "shape" && {
-          shapeType: el.shapeType || "rectangle",
-          fill: el.fill || el.backgroundColor || "#000000",
-          fillOpacity: (el.opacity || 1) * 100,
-        }),
-        opacity: (el.opacity || 1) * 100,
-      }));
+      // Convert the AI-vectorized SVG elements into canvas elements
+      const newElements: Element[] = data.svgElements.map((el: any) => {
+        const baseElement = {
+          id: `element-${Date.now()}-${Math.random()}`,
+          x: el.x,
+          y: el.y,
+          width: el.width || 100,
+          height: el.height || 100,
+          opacity: (el.opacity || 1) * 100,
+        };
+
+        // Convert SVG text to canvas text
+        if (el.type === "text") {
+          return {
+            ...baseElement,
+            type: "text" as const,
+            name: el.content || "Text",
+            text: el.content || "",
+            fontSize: el.fontSize || 16,
+            fontWeight: el.fontWeight || "400",
+            color: el.fill || "#000000",
+            textAlign: "left" as const,
+          };
+        }
+
+        // Convert SVG shapes to canvas shapes
+        if (el.type === "path" || el.type === "polygon") {
+          return {
+            ...baseElement,
+            type: "shape" as const,
+            name: "Vector Shape",
+            shapeType: "custom" as const,
+            pathData: el.svgData,
+            fill: el.fill || "#000000",
+            fillOpacity: (el.opacity || 1) * 100,
+            stroke: el.stroke || "transparent",
+            strokeWidth: el.strokeWidth || 0,
+          };
+        }
+
+        if (el.type === "rect") {
+          return {
+            ...baseElement,
+            type: "shape" as const,
+            name: "Rectangle",
+            shapeType: "rectangle" as const,
+            fill: el.fill || "#000000",
+            fillOpacity: (el.opacity || 1) * 100,
+            stroke: el.stroke || "transparent",
+            strokeWidth: el.strokeWidth || 0,
+          };
+        }
+
+        if (el.type === "ellipse") {
+          return {
+            ...baseElement,
+            type: "shape" as const,
+            name: "Ellipse",
+            shapeType: "ellipse" as const,
+            fill: el.fill || "#000000",
+            fillOpacity: (el.opacity || 1) * 100,
+            stroke: el.stroke || "transparent",
+            strokeWidth: el.strokeWidth || 0,
+          };
+        }
+
+        return baseElement as Element;
+      });
 
       // Remove the original image element and add the new editable elements
       setFrames(frames.map(f => {
