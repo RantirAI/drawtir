@@ -42,33 +42,33 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `Convert this image into SVG vector format. Trace all visual elements (shapes, text, images) and return them as SVG paths and elements. Return a JSON object with this structure:
+                text: `Analyze this image and extract ALL visual elements with precise positioning. For each element, provide SVG-compatible information. Return a JSON object:
 {
   "frame": {
-    "width": number (in pixels),
-    "height": number (in pixels),
-    "backgroundColor": "hex color"
+    "width": number (exact image width in pixels),
+    "height": number (exact image height in pixels),
+    "backgroundColor": "hex color of dominant background"
   },
   "svgElements": [
     {
-      "type": "path" | "rect" | "ellipse" | "text" | "polygon",
-      "svgData": "SVG path data string (e.g. 'M 10 10 L 20 20 Z') or shape attributes",
-      "x": number,
-      "y": number,
-      "width": number,
-      "height": number,
+      "type": "text" | "rect" | "ellipse" | "path",
+      "x": number (exact left position in pixels),
+      "y": number (exact top position in pixels),
+      "width": number (exact width in pixels),
+      "height": number (exact height in pixels),
       "fill": "hex color",
-      "stroke": "hex color",
-      "strokeWidth": number,
+      "stroke": "hex color or transparent",
+      "strokeWidth": number (0 if no stroke),
       "opacity": number (0-1),
-      "content": "text content if type is text",
+      "content": "exact text content if type is text",
       "fontSize": number (if text),
-      "fontWeight": string (if text)
+      "fontWeight": "normal" | "bold" | "lighter" | "bolder" (if text),
+      "svgData": "SVG path data if complex shape, e.g. 'M 10 10 L 20 20 Z'"
     }
   ]
 }
 
-Trace the image accurately and convert all visual elements to SVG vectors. Include paths for shapes, text elements, and any visual components.`
+Extract EVERY visible element: all text blocks, shapes, graphic elements, logos. Be precise with colors, positions, and sizes. Treat each distinct visual component as a separate element.`
               },
               {
                 type: "image_url",

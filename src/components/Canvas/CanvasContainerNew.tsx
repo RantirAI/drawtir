@@ -1797,8 +1797,18 @@ export default function CanvasContainerNew({
 
       if (error) throw error;
 
-      // Convert the AI-vectorized SVG elements into canvas elements
-      const newElements: Element[] = data.svgElements.map((el: any) => {
+      console.log("Received data from AI:", data);
+
+      // Handle both old and new response formats
+      const elementsArray = data.svgElements || data.elements || [];
+      
+      if (elementsArray.length === 0) {
+        toast.error("No elements found in image");
+        return;
+      }
+
+      // Convert the AI-analyzed elements into canvas elements
+      const newElements: Element[] = elementsArray.map((el: any) => {
         const baseElement = {
           id: `element-${Date.now()}-${Math.random()}`,
           x: el.x,
