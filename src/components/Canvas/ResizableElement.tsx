@@ -943,10 +943,17 @@ export default function ResizableElement({
           {/* Resize handles in blue - hidden when locked */}
           {!isLocked && (
             <>
+              {/* Corner handles */}
               <div data-resize-handle className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "nw")} onTouchStart={(e) => handleResizeTouchStart(e, "nw")} />
               <div data-resize-handle className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "ne")} onTouchStart={(e) => handleResizeTouchStart(e, "ne")} />
               <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} onTouchStart={(e) => handleResizeTouchStart(e, "sw")} />
               <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} onTouchStart={(e) => handleResizeTouchStart(e, "se")} />
+              
+              {/* Side handles - invisible but functional */}
+              <div data-resize-handle className="absolute -top-1 left-1/2 -translate-x-1/2 w-12 h-3 opacity-0 cursor-n-resize" onMouseDown={(e) => handleResizeStart(e, "n")} onTouchStart={(e) => handleResizeTouchStart(e, "n")} />
+              <div data-resize-handle className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-3 opacity-0 cursor-s-resize" onMouseDown={(e) => handleResizeStart(e, "s")} onTouchStart={(e) => handleResizeTouchStart(e, "s")} />
+              <div data-resize-handle className="absolute top-1/2 -translate-y-1/2 -right-1 w-3 h-12 opacity-0 cursor-e-resize" onMouseDown={(e) => handleResizeStart(e, "e")} onTouchStart={(e) => handleResizeTouchStart(e, "e")} />
+              <div data-resize-handle className="absolute top-1/2 -translate-y-1/2 -left-1 w-3 h-12 opacity-0 cursor-w-resize" onMouseDown={(e) => handleResizeStart(e, "w")} onTouchStart={(e) => handleResizeTouchStart(e, "w")} />
               
               {/* Rotation handle */}
               <div 
