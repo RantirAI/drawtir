@@ -271,7 +271,7 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "outline outline-[0.5px] outline-blue-500" : ""}`}
+      className={`absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -421,22 +421,22 @@ export default function ResizableFrame({
           
           {/* Corner handles */}
           <div
-            className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white"
+            className="resize-handle absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-nw-resize border border-blue-500"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
             onTouchStart={(e) => handleResizeTouchStart(e, "nw")}
           />
           <div
-            className="resize-handle absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-ne-resize border border-white"
+            className="resize-handle absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-ne-resize border border-blue-500"
             onMouseDown={(e) => handleResizeStart(e, "ne")}
             onTouchStart={(e) => handleResizeTouchStart(e, "ne")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white"
+            className="resize-handle absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-sw-resize border border-blue-500"
             onMouseDown={(e) => handleResizeStart(e, "sw")}
             onTouchStart={(e) => handleResizeTouchStart(e, "sw")}
           />
           <div
-            className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white"
+            className="resize-handle absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-se-resize border border-blue-500"
             onMouseDown={(e) => handleResizeStart(e, "se")}
             onTouchStart={(e) => handleResizeTouchStart(e, "se")}
           />
