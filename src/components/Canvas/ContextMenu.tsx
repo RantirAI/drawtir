@@ -6,7 +6,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Copy, Trash2, Sparkles, RefreshCw, Layers, Box, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Palette, PenTool, Wand2, Eye } from "lucide-react";
+import { Copy, Trash2, Sparkles, RefreshCw, Layers, Box, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, Palette, PenTool, Wand2, Eye, Maximize2, Scissors } from "lucide-react";
 
 interface CanvasContextMenuProps {
   children: ReactNode;
@@ -24,6 +24,8 @@ interface CanvasContextMenuProps {
   onEditStroke?: () => void;
   onEditAnimations?: () => void;
   onMakeEditable?: () => void;
+  onFitToFrame?: () => void;
+  onRemoveBackground?: () => void;
 }
 
 export default function CanvasContextMenu({
@@ -42,6 +44,8 @@ export default function CanvasContextMenu({
   onEditStroke,
   onEditAnimations,
   onMakeEditable,
+  onFitToFrame,
+  onRemoveBackground,
 }: CanvasContextMenuProps) {
   return (
     <ContextMenu>
@@ -106,13 +110,25 @@ export default function CanvasContextMenu({
         )}
         
         {/* Edit options */}
-        {(onEditFill || onEditStroke || onEditAnimations || onMakeEditable) && (
+        {(onEditFill || onEditStroke || onEditAnimations || onMakeEditable || onFitToFrame || onRemoveBackground) && (
           <>
             <ContextMenuSeparator />
             {onMakeEditable && (
               <ContextMenuItem onClick={onMakeEditable} className="text-xs">
                 <Eye className="h-3 w-3 mr-2" />
                 Make Editable
+              </ContextMenuItem>
+            )}
+            {onFitToFrame && (
+              <ContextMenuItem onClick={onFitToFrame} className="text-xs">
+                <Maximize2 className="h-3 w-3 mr-2" />
+                Fit to Frame
+              </ContextMenuItem>
+            )}
+            {onRemoveBackground && (
+              <ContextMenuItem onClick={onRemoveBackground} className="text-xs">
+                <Scissors className="h-3 w-3 mr-2" />
+                Remove Background
               </ContextMenuItem>
             )}
             {onEditFill && (

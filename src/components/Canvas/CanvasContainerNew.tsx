@@ -1906,6 +1906,69 @@ export default function CanvasContainerNew({
     toast.success("Wrapped into nested frame!");
   };
 
+  const handleFitToFrame = (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element || !selectedFrame) return;
+
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return {
+          ...f,
+          elements: (f.elements || []).map(e => 
+            e.id === elementId 
+              ? { ...e, x: 0, y: 0, width: selectedFrame.width, height: selectedFrame.height }
+              : e
+          ),
+        };
+      }
+      return f;
+    }));
+    
+    toast.success("Element fitted to frame!");
+  };
+
+  const handleRemoveBackground = async (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element || element.type !== "image" || !element.imageUrl) {
+      toast.error("Can only remove background from image elements");
+      return;
+    }
+
+    const toastId = toast.loading("Removing background...");
+    
+    try {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = element.imageUrl!;
+      });
+
+      const { removeBackground } = await import("@/lib/backgroundRemoval");
+      const resultDataUrl = await removeBackground(element.imageUrl!);
+
+      setFrames(frames.map(f => {
+        if (f.id === selectedFrameId) {
+          return {
+            ...f,
+            elements: (f.elements || []).map(e => 
+              e.id === elementId 
+                ? { ...e, imageUrl: resultDataUrl }
+                : e
+            ),
+          };
+        }
+        return f;
+      }));
+
+      toast.success("Background removed!", { id: toastId });
+    } catch (error) {
+      console.error("Error removing background:", error);
+      toast.error("Failed to remove background", { id: toastId });
+    }
+  };
+
   const handleProjectNameChange = (newName: string) => {
     setProjectTitle(newName);
     // Trigger save after title change
@@ -2029,29 +2092,31 @@ export default function CanvasContainerNew({
                 {(frame.elements || []).map((element) => {
                   console.log("🔷 Rendering element:", element.id, "type:", element.type, "shapeType:", element.shapeType);
                   return (
-                  <CanvasContextMenu
-                    key={element.id}
-                    onDelete={() => handleElementDelete(element.id)}
-                    onDuplicate={() => handleElementDuplicate(element.id)}
-                    onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
-                    onBringToFront={() => handleArrange('toFront', [element.id], frame.id)}
-                    onSendToBack={() => handleArrange('toBack', [element.id], frame.id)}
-                    onBringForward={() => handleArrange('forward', [element.id], frame.id)}
-                    onSendBackward={() => handleArrange('backward', [element.id], frame.id)}
-                    onMakeEditable={element.type === "image" ? () => handleMakeEditable(element.id) : undefined}
-                    onEditFill={() => {
-                      setSelectedElementIds([element.id]);
-                      setShowShapeSettings(true);
-                    }}
-                    onEditStroke={() => {
-                      setSelectedElementIds([element.id]);
-                      setShowShapeSettings(true);
-                    }}
-                    onEditAnimations={() => {
-                      setAnimatingElementId(element.id);
-                      setShowAnimationsPanel(true);
-                    }}
-                   >
+                   <CanvasContextMenu
+                     key={element.id}
+                     onDelete={() => handleElementDelete(element.id)}
+                     onDuplicate={() => handleElementDuplicate(element.id)}
+                     onWrapInFrame={selectedElementIds.length > 0 ? handleWrapInFrame : undefined}
+                     onBringToFront={() => handleArrange('toFront', [element.id], frame.id)}
+                     onSendToBack={() => handleArrange('toBack', [element.id], frame.id)}
+                     onBringForward={() => handleArrange('forward', [element.id], frame.id)}
+                     onSendBackward={() => handleArrange('backward', [element.id], frame.id)}
+                     onMakeEditable={element.type === "image" ? () => handleMakeEditable(element.id) : undefined}
+                     onFitToFrame={() => handleFitToFrame(element.id)}
+                     onRemoveBackground={element.type === "image" ? () => handleRemoveBackground(element.id) : undefined}
+                     onEditFill={() => {
+                       setSelectedElementIds([element.id]);
+                       setShowShapeSettings(true);
+                     }}
+                     onEditStroke={() => {
+                       setSelectedElementIds([element.id]);
+                       setShowShapeSettings(true);
+                     }}
+                     onEditAnimations={() => {
+                       setAnimatingElementId(element.id);
+                       setShowAnimationsPanel(true);
+                     }}
+                    >
                      <ResizableElement
                       id={element.id}
                        type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
