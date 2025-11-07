@@ -949,11 +949,11 @@ export default function ResizableElement({
               <div data-resize-handle className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-sw-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "sw")} onTouchStart={(e) => handleResizeTouchStart(e, "sw")} />
               <div data-resize-handle className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white" onMouseDown={(e) => handleResizeStart(e, "se")} onTouchStart={(e) => handleResizeTouchStart(e, "se")} />
               
-              {/* Side handles - invisible but functional with larger hit areas */}
-              <div data-resize-handle className="absolute left-1/2 -translate-x-1/2 opacity-0 cursor-n-resize" style={{ top: '-4px', width: '80px', height: '8px' }} onMouseDown={(e) => handleResizeStart(e, "n")} onTouchStart={(e) => handleResizeTouchStart(e, "n")} />
-              <div data-resize-handle className="absolute left-1/2 -translate-x-1/2 opacity-0 cursor-s-resize" style={{ bottom: '-4px', width: '80px', height: '8px' }} onMouseDown={(e) => handleResizeStart(e, "s")} onTouchStart={(e) => handleResizeTouchStart(e, "s")} />
-              <div data-resize-handle className="absolute top-1/2 -translate-y-1/2 opacity-0 cursor-e-resize" style={{ right: '-4px', width: '8px', height: '80px' }} onMouseDown={(e) => handleResizeStart(e, "e")} onTouchStart={(e) => handleResizeTouchStart(e, "e")} />
-              <div data-resize-handle className="absolute top-1/2 -translate-y-1/2 opacity-0 cursor-w-resize" style={{ left: '-4px', width: '8px', height: '80px' }} onMouseDown={(e) => handleResizeStart(e, "w")} onTouchStart={(e) => handleResizeTouchStart(e, "w")} />
+              {/* Side handles - invisible but functional spanning entire edges */}
+              <div data-resize-handle className="absolute left-0 w-full opacity-0 cursor-n-resize" style={{ top: '-4px', height: '8px' }} onMouseDown={(e) => handleResizeStart(e, "n")} onTouchStart={(e) => handleResizeTouchStart(e, "n")} />
+              <div data-resize-handle className="absolute left-0 w-full opacity-0 cursor-s-resize" style={{ bottom: '-4px', height: '8px' }} onMouseDown={(e) => handleResizeStart(e, "s")} onTouchStart={(e) => handleResizeTouchStart(e, "s")} />
+              <div data-resize-handle className="absolute top-0 h-full opacity-0 cursor-e-resize" style={{ right: '-4px', width: '8px' }} onMouseDown={(e) => handleResizeStart(e, "e")} onTouchStart={(e) => handleResizeTouchStart(e, "e")} />
+              <div data-resize-handle className="absolute top-0 h-full opacity-0 cursor-w-resize" style={{ left: '-4px', width: '8px' }} onMouseDown={(e) => handleResizeStart(e, "w")} onTouchStart={(e) => handleResizeTouchStart(e, "w")} />
               
               {/* Rotation handle */}
               <div 
