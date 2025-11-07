@@ -99,7 +99,7 @@ export default function CanvasContainerNew({
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
-  const [penColor, setPenColor] = useState("#3b82f6");
+  const [penColor, setPenColor] = useState("#9ca3af");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [zoom, setZoom] = useState(1);
   // Calculate initial pan offset to center the first frame
