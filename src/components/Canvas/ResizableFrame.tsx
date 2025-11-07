@@ -362,24 +362,28 @@ export default function ResizableFrame({
             onTouchStart={(e) => handleResizeTouchStart(e, "se")}
           />
           
-          {/* Side handles - invisible but functional */}
+          {/* Side handles - invisible but functional with larger hit areas */}
           <div
-            className="resize-handle absolute -top-1 left-1/2 -translate-x-1/2 w-12 h-3 opacity-0 cursor-n-resize"
+            className="resize-handle absolute left-1/2 -translate-x-1/2 opacity-0 cursor-n-resize"
+            style={{ top: '-4px', width: '80px', height: '8px' }}
             onMouseDown={(e) => handleResizeStart(e, "n")}
             onTouchStart={(e) => handleResizeTouchStart(e, "n")}
           />
           <div
-            className="resize-handle absolute -bottom-1 left-1/2 -translate-x-1/2 w-12 h-3 opacity-0 cursor-s-resize"
+            className="resize-handle absolute left-1/2 -translate-x-1/2 opacity-0 cursor-s-resize"
+            style={{ bottom: '-4px', width: '80px', height: '8px' }}
             onMouseDown={(e) => handleResizeStart(e, "s")}
             onTouchStart={(e) => handleResizeTouchStart(e, "s")}
           />
           <div
-            className="resize-handle absolute top-1/2 -translate-y-1/2 -right-1 w-3 h-12 opacity-0 cursor-e-resize"
+            className="resize-handle absolute top-1/2 -translate-y-1/2 opacity-0 cursor-e-resize"
+            style={{ right: '-4px', width: '8px', height: '80px' }}
             onMouseDown={(e) => handleResizeStart(e, "e")}
             onTouchStart={(e) => handleResizeTouchStart(e, "e")}
           />
           <div
-            className="resize-handle absolute top-1/2 -translate-y-1/2 -left-1 w-3 h-12 opacity-0 cursor-w-resize"
+            className="resize-handle absolute top-1/2 -translate-y-1/2 opacity-0 cursor-w-resize"
+            style={{ left: '-4px', width: '8px', height: '80px' }}
             onMouseDown={(e) => handleResizeStart(e, "w")}
             onTouchStart={(e) => handleResizeTouchStart(e, "w")}
           />
