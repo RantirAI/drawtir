@@ -37,6 +37,7 @@ import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
 import { useAutoSave } from "@/hooks/useAutoSave";
+import { segmentImageToLayers } from "@/lib/objectSegmentation";
 
 interface CanvasContainerNewProps {
   isEmbedded?: boolean;
@@ -1803,7 +1804,45 @@ export default function CanvasContainerNew({
       const elementsArray = data.svgElements || data.elements || [];
       
       if (elementsArray.length === 0) {
-        toast.error("No elements found in image");
+        // Fallback: do object-level segmentation and create movable raster layers
+        toast.info("Separating objects into layers...");
+        const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
+        if (!layers.length) {
+          toast.error("No distinct objects detected");
+          return;
+        }
+
+        const newImageElements: Element[] = layers.map((layer) => {
+          const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
+          const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
+          return {
+            id: `element-${Date.now()}-${Math.random()}`,
+            type: "image",
+            name: layer.label ? layer.label.charAt(0).toUpperCase() + layer.label.slice(1) : "Object",
+            imageUrl: layer.dataUrl,
+            x: element.x + layer.bbox.x * scaleX,
+            y: element.y + layer.bbox.y * scaleY,
+            width: layer.bbox.width * scaleX,
+            height: layer.bbox.height * scaleY,
+            opacity: 100,
+            imageFit: "contain",
+          } as Element;
+        });
+
+        setFrames(frames.map(f => {
+          if (f.id === selectedFrameId) {
+            return {
+              ...f,
+              elements: [
+                ...(f.elements || []).filter(e => e.id !== elementId),
+                ...newImageElements,
+              ],
+            };
+          }
+          return f;
+        }));
+
+        toast.success("Separated objects into movable layers");
         return;
       }
 
@@ -1896,7 +1935,52 @@ export default function CanvasContainerNew({
       toast.success("Image converted to editable elements!");
     } catch (error) {
       console.error("Error making image editable:", error);
-      toast.error("Failed to analyze image");
+
+      // On failure, try object-level segmentation as a robust fallback
+      try {
+        if (!element?.imageUrl) throw new Error("No image to segment");
+        toast.info("Analyzing objects...");
+        const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
+        if (!layers.length) {
+          toast.error("No distinct objects detected");
+          return;
+        }
+
+        const newImageElements: Element[] = layers.map((layer) => {
+          const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
+          const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
+          return {
+            id: `element-${Date.now()}-${Math.random()}`,
+            type: "image",
+            name: layer.label ? layer.label.charAt(0).toUpperCase() + layer.label.slice(1) : "Object",
+            imageUrl: layer.dataUrl,
+            x: element.x + layer.bbox.x * scaleX,
+            y: element.y + layer.bbox.y * scaleY,
+            width: layer.bbox.width * scaleX,
+            height: layer.bbox.height * scaleY,
+            opacity: 100,
+            imageFit: "contain",
+          } as Element;
+        });
+
+        setFrames(frames.map(f => {
+          if (f.id === selectedFrameId) {
+            return {
+              ...f,
+              elements: [
+                ...(f.elements || []).filter(e => e.id !== elementId),
+                ...newImageElements,
+              ],
+            };
+          }
+          return f;
+        }));
+
+        toast.success("Separated objects into movable layers");
+      } catch (segErr) {
+        console.error("Segmentation fallback failed:", segErr);
+        toast.error("Failed to analyze image");
+      }
     }
   };
 
