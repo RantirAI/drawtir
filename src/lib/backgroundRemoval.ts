@@ -78,6 +78,45 @@ function cleanupMask(mask: Float32Array, width: number, height: number, minSize:
   return cleaned;
 }
 
+// Erode mask to shrink edges slightly (removes noise on edges)
+function erodeMask(mask: Float32Array, width: number, height: number, radius: number = 1): Float32Array {
+  const eroded = new Float32Array(mask);
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      
+      if (mask[idx] < 0.5) {
+        // Already background, keep it
+        continue;
+      }
+      
+      // Check if all neighbors are foreground
+      let allNeighborsForeground = true;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const nIdx = ny * width + nx;
+            if (mask[nIdx] < 0.5) {
+              allNeighborsForeground = false;
+              break;
+            }
+          }
+        }
+        if (!allNeighborsForeground) break;
+      }
+      
+      if (!allNeighborsForeground) {
+        eroded[idx] = 0;
+      }
+    }
+  }
+  
+  return eroded;
+}
+
 // Dilate mask to expand edges slightly
 function dilateMask(mask: Float32Array, width: number, height: number, radius: number = 1): Float32Array {
   const dilated = new Float32Array(mask);
@@ -182,11 +221,14 @@ export const removeBackground = async (imageUrl: string): Promise<string> => {
       }
     }
     
-    // Clean up mask - remove small isolated regions (noise)
-    const cleanMask = cleanupMask(foregroundMask, width, height);
+    // Clean up mask - remove small isolated regions (noise) with more aggressive threshold
+    const cleanMask = cleanupMask(foregroundMask, width, height, 200);
     
-    // Dilate slightly to include edges
-    const dilatedMask = dilateMask(cleanMask, width, height, 2);
+    // Erode first to remove edge noise and shrink slightly
+    const erodedMask = erodeMask(cleanMask, width, height, 1);
+    
+    // Then dilate more to expand back and include edges smoothly
+    const dilatedMask = dilateMask(erodedMask, width, height, 3);
     
     console.log('Processed foreground mask');
     
