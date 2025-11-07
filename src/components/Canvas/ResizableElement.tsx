@@ -771,7 +771,7 @@ export default function ResizableElement({
       {...rest}
       ref={containerRef}
       key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-cyan-400' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
@@ -949,10 +949,10 @@ export default function ResizableElement({
           {!isLocked && (
             <>
               {/* Corner handles */}
-              <div data-resize-handle className="absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-nw-resize border border-cyan-400" onMouseDown={(e) => handleResizeStart(e, "nw")} onTouchStart={(e) => handleResizeTouchStart(e, "nw")} />
-              <div data-resize-handle className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-ne-resize border border-cyan-400" onMouseDown={(e) => handleResizeStart(e, "ne")} onTouchStart={(e) => handleResizeTouchStart(e, "ne")} />
-              <div data-resize-handle className="absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-sw-resize border border-cyan-400" onMouseDown={(e) => handleResizeStart(e, "sw")} onTouchStart={(e) => handleResizeTouchStart(e, "sw")} />
-              <div data-resize-handle className="absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-se-resize border border-cyan-400" onMouseDown={(e) => handleResizeStart(e, "se")} onTouchStart={(e) => handleResizeTouchStart(e, "se")} />
+              <div data-resize-handle className="absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-nw-resize border border-blue-500" onMouseDown={(e) => handleResizeStart(e, "nw")} onTouchStart={(e) => handleResizeTouchStart(e, "nw")} />
+              <div data-resize-handle className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-ne-resize border border-blue-500" onMouseDown={(e) => handleResizeStart(e, "ne")} onTouchStart={(e) => handleResizeTouchStart(e, "ne")} />
+              <div data-resize-handle className="absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-sw-resize border border-blue-500" onMouseDown={(e) => handleResizeStart(e, "sw")} onTouchStart={(e) => handleResizeTouchStart(e, "sw")} />
+              <div data-resize-handle className="absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-se-resize border border-blue-500" onMouseDown={(e) => handleResizeStart(e, "se")} onTouchStart={(e) => handleResizeTouchStart(e, "se")} />
               
               {/* Side handles - invisible but functional spanning entire edges */}
               <div data-resize-handle className="absolute left-0 w-full opacity-0 cursor-n-resize" style={{ top: '-4px', height: '8px' }} onMouseDown={(e) => handleResizeStart(e, "n")} onTouchStart={(e) => handleResizeTouchStart(e, "n")} />
