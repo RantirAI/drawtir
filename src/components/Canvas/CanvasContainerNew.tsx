@@ -38,6 +38,7 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { segmentImageToLayers } from "@/lib/objectSegmentation";
+import { parseSVGToElements } from "@/lib/svgParser";
 
 interface CanvasContainerNewProps {
   isEmbedded?: boolean;
@@ -1789,57 +1790,37 @@ export default function CanvasContainerNew({
       return;
     }
 
-    toast.info("Analyzing image structure...");
+    toast.info("Vectorizing image...");
     
     try {
-      const { data, error } = await supabase.functions.invoke('analyze-image-structure', {
+      // First try true vectorization with @neplex/vectorizer
+      const { data, error } = await supabase.functions.invoke('vectorize-image', {
         body: { imageUrl: element.imageUrl }
       });
 
       if (error) throw error;
 
-      console.log("Received data from AI:", data);
-
-      // Handle both old and new response formats
-      const elementsArray = data.svgElements || data.elements || [];
-
-      // Heuristic: if analysis returns only a few big rectangles with no paths/text,
-      // it's likely not useful for editing — use object segmentation instead.
-      const frameW = data.frame?.width || element.width || 0;
-      const frameH = data.frame?.height || element.height || 0;
-      const hasVectorDetail = elementsArray.some((el: any) =>
-        ["path", "text", "ellipse"].includes(el.type)
-      );
-      const rects = elementsArray.filter((el: any) => el.type === "rect");
-      const totalRectArea = rects.reduce((s: number, r: any) => s + (r.width || 0) * (r.height || 0), 0);
-      const coverage = frameW && frameH ? totalRectArea / (frameW * frameH) : 0;
-      const isLikelyBackgroundRects = rects.length > 0 && elementsArray.length <= 5 && !hasVectorDetail && coverage > 0.3;
-
-      if (elementsArray.length === 0 || isLikelyBackgroundRects) {
-        // Fallback: do object-level segmentation and create movable raster layers
-        toast.info(isLikelyBackgroundRects ? "Vector analysis not useful, separating objects..." : "Separating objects into layers...");
-        const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
-        if (!layers.length) {
-          toast.error("No distinct objects detected");
-          return;
+      if (data?.svg) {
+        console.log("Received SVG from vectorizer");
+        
+        // Parse SVG to canvas elements
+        const parsed = parseSVGToElements(data.svg);
+        
+        if (parsed.elements.length === 0) {
+          throw new Error("No elements parsed from SVG");
         }
 
-        const newImageElements: Element[] = layers.map((layer) => {
-          const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
-          const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
-          return {
-            id: `element-${Date.now()}-${Math.random()}`,
-            type: "image",
-            name: layer.label ? layer.label.charAt(0).toUpperCase() + layer.label.slice(1) : "Object",
-            imageUrl: layer.dataUrl,
-            x: element.x + layer.bbox.x * scaleX,
-            y: element.y + layer.bbox.y * scaleY,
-            width: layer.bbox.width * scaleX,
-            height: layer.bbox.height * scaleY,
-            opacity: 100,
-            imageFit: "contain",
-          } as Element;
-        });
+        // Scale elements to match original image size
+        const scaleX = element.width / parsed.width;
+        const scaleY = element.height / parsed.height;
+
+        const scaledElements = parsed.elements.map(el => ({
+          ...el,
+          x: element.x + el.x * scaleX,
+          y: element.y + el.y * scaleY,
+          width: el.width * scaleX,
+          height: el.height * scaleY,
+        }));
 
         setFrames(frames.map(f => {
           if (f.id === selectedFrameId) {
@@ -1847,111 +1828,25 @@ export default function CanvasContainerNew({
               ...f,
               elements: [
                 ...(f.elements || []).filter(e => e.id !== elementId),
-                ...newImageElements,
+                ...scaledElements,
               ],
             };
           }
           return f;
         }));
 
-        toast.success("Separated objects into movable layers");
+        toast.success(`Vectorized into ${scaledElements.length} editable elements!`);
         return;
       }
 
-      // Convert the AI-analyzed elements into canvas elements
-      const newElements: Element[] = elementsArray.map((el: any) => {
-        const baseElement = {
-          id: `element-${Date.now()}-${Math.random()}`,
-          x: el.x,
-          y: el.y,
-          width: el.width || 100,
-          height: el.height || 100,
-          opacity: (el.opacity || 1) * 100,
-        };
-
-        // Convert SVG text to canvas text
-        if (el.type === "text") {
-          return {
-            ...baseElement,
-            type: "text" as const,
-            name: el.content || "Text",
-            text: el.content || "",
-            fontSize: el.fontSize || 16,
-            fontWeight: el.fontWeight || "400",
-            color: el.fill || "#000000",
-            textAlign: "left" as const,
-          };
-        }
-
-        // Convert SVG shapes to canvas shapes
-        if (el.type === "path" || el.type === "polygon") {
-          return {
-            ...baseElement,
-            type: "shape" as const,
-            name: "Vector Shape",
-            shapeType: "custom" as const,
-            pathData: el.svgData,
-            fill: el.fill || "#000000",
-            fillOpacity: (el.opacity || 1) * 100,
-            stroke: el.stroke || "transparent",
-            strokeWidth: el.strokeWidth || 0,
-          };
-        }
-
-        if (el.type === "rect") {
-          return {
-            ...baseElement,
-            type: "shape" as const,
-            name: "Rectangle",
-            shapeType: "rectangle" as const,
-            fill: el.fill || "#000000",
-            fillOpacity: (el.opacity || 1) * 100,
-            stroke: el.stroke || "transparent",
-            strokeWidth: el.strokeWidth || 0,
-          };
-        }
-
-        if (el.type === "ellipse") {
-          return {
-            ...baseElement,
-            type: "shape" as const,
-            name: "Ellipse",
-            shapeType: "ellipse" as const,
-            fill: el.fill || "#000000",
-            fillOpacity: (el.opacity || 1) * 100,
-            stroke: el.stroke || "transparent",
-            strokeWidth: el.strokeWidth || 0,
-          };
-        }
-
-        return baseElement as Element;
-      });
-
-      // Remove the original image element and add the new editable elements
-      setFrames(frames.map(f => {
-        if (f.id === selectedFrameId) {
-          return {
-            ...f,
-            // Update background if specified
-            backgroundColor: data.frame?.backgroundColor || f.backgroundColor,
-            // Remove original image and add new elements
-            elements: [
-              ...(f.elements || []).filter(e => e.id !== elementId),
-              ...newElements
-            ]
-          };
-        }
-        return f;
-      }));
-
-      toast.success("Image converted to editable elements!");
+      throw new Error("No SVG returned from vectorizer");
     } catch (error) {
-      console.error("Error making image editable:", error);
+      console.error("Error vectorizing image:", error);
 
       // On failure, try object-level segmentation as a robust fallback
       try {
         if (!element?.imageUrl) throw new Error("No image to segment");
-        toast.info("Analyzing objects...");
+        toast.info("Falling back to object separation...");
         const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
         if (!layers.length) {
           toast.error("No distinct objects detected");
@@ -1991,7 +1886,7 @@ export default function CanvasContainerNew({
         toast.success("Separated objects into movable layers");
       } catch (segErr) {
         console.error("Segmentation fallback failed:", segErr);
-        toast.error("Failed to analyze image");
+        toast.error("Failed to process image");
       }
     }
   };

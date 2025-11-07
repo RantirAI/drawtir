@@ -17,7 +17,7 @@ interface ResizableElementProps {
   src?: string;
   text?: string;
   richTextHtml?: string;
-  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "icon";
+  shapeType?: "rectangle" | "circle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "icon" | "custom";
   pathData?: string; // For pen drawings
   strokeWidth?: number;
   fill?: string;

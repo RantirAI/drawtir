@@ -82,7 +82,7 @@ const GOOGLE_FONTS = [
 interface ShapeSettingsPanelProps {
   elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null;
   elementName?: string;
-  shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+  shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "custom";
   iconName?: string;
   iconFamily?: string;
   backgroundColor?: string;

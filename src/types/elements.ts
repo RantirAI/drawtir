@@ -1,5 +1,5 @@
 export type ElementType = "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode";
-export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star";
+export type ShapeType = "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "custom";
 export type ToolType = "select" | "pen" | "shape" | "text" | "image" | "icon";
 
 export interface Element {

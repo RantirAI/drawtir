@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.analyze-image-structure]
 verify_jwt = false
+
+[functions.vectorize-image]
+verify_jwt = false
