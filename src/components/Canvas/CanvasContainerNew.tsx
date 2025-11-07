@@ -1979,16 +1979,12 @@ export default function CanvasContainerNew({
     const toastId = toast.loading("Removing background...");
     
     try {
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = element.imageUrl!;
+      const { data, error } = await supabase.functions.invoke('remove-background', {
+        body: { imageUrl: element.imageUrl }
       });
 
-      const { removeBackground } = await import("@/lib/backgroundRemoval");
-      const resultDataUrl = await removeBackground(element.imageUrl!);
+      if (error) throw error;
+      if (!data?.image) throw new Error('No image returned from API');
 
       setFrames(frames.map(f => {
         if (f.id === selectedFrameId) {
@@ -1996,7 +1992,7 @@ export default function CanvasContainerNew({
             ...f,
             elements: (f.elements || []).map(e => 
               e.id === elementId 
-                ? { ...e, imageUrl: resultDataUrl }
+                ? { ...e, imageUrl: data.image }
                 : e
             ),
           };
