@@ -115,6 +115,7 @@ export default function CanvasContainerNew({
   const [panOffset, setPanOffset] = useState(calculateCenterOffset());
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [showGrid, setShowGrid] = useState(false);
 
   // Auto-fit frame to viewport
   const fitFrameToView = (frameId: string) => {
@@ -2034,6 +2035,8 @@ export default function CanvasContainerNew({
         projectId={projectId}
         isPanMode={isPanning}
         onTogglePanMode={() => setIsPanning(!isPanning)}
+        showGrid={showGrid}
+        onToggleGrid={() => setShowGrid(!showGrid)}
         isGenerating={isGenerating}
         generationProgress={generationProgressPercent}
         generationMessage={generationProgress}
@@ -2119,6 +2122,7 @@ export default function CanvasContainerNew({
                 initialHeight={frame.initialHeight}
                 enableDynamicScale={frame.enableDynamicScale}
                 isSelected={frame.id === selectedFrameId}
+                showGrid={showGrid}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);

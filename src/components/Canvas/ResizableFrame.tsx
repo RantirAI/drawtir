@@ -42,6 +42,7 @@ interface ResizableFrameProps {
   initialWidth?: number; // For dynamic scaling
   initialHeight?: number; // For dynamic scaling
   enableDynamicScale?: boolean; // Enable/disable dynamic scaling
+  showGrid?: boolean; // Show alignment grid
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -86,6 +87,7 @@ export default function ResizableFrame({
   initialWidth,
   initialHeight,
   enableDynamicScale = true,
+  showGrid = false,
   onUpdate,
   isSelected,
   onSelect,
@@ -291,6 +293,32 @@ export default function ResizableFrame({
         >
           <source src={videoUrl} type="video/mp4" />
         </video>
+      )}
+
+      {/* Grid overlay */}
+      {showGrid && (
+        <svg
+          className="absolute inset-0 w-full h-full pointer-events-none"
+          style={{ borderRadius: `${cornerRadius}px` }}
+        >
+          <defs>
+            <pattern
+              id={`grid-${id}`}
+              width="20"
+              height="20"
+              patternUnits="userSpaceOnUse"
+            >
+              <path
+                d="M 20 0 L 0 0 0 20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="0.5"
+                className="text-primary/20"
+              />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill={`url(#grid-${id})`} />
+        </svg>
       )}
 
       {/* Legacy poster preview (only if image is set) */}

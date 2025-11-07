@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles, Grid3x3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -32,6 +32,8 @@ interface EditorTopBarProps {
   projectId?: string;
   isPanMode?: boolean;
   onTogglePanMode?: () => void;
+  showGrid?: boolean;
+  onToggleGrid?: () => void;
   isGenerating?: boolean;
   generationProgress?: number;
   generationMessage?: string;
@@ -54,6 +56,8 @@ export default function EditorTopBar({
   projectId,
   isPanMode = false,
   onTogglePanMode,
+  showGrid = false,
+  onToggleGrid,
   isGenerating = false,
   generationProgress = 0,
   generationMessage = "Generating...",
@@ -187,6 +191,18 @@ export default function EditorTopBar({
             <Hand className="h-3 w-3" />
           </Button>
         )}
+
+        {onToggleGrid && (
+          <Button 
+            variant={showGrid ? "default" : "ghost"} 
+            size="icon" 
+            className="h-6 w-6" 
+            onClick={onToggleGrid}
+            title="Toggle Grid"
+          >
+            <Grid3x3 className="h-3 w-3" />
+          </Button>
+        )}
         
         <ThemeToggle />
         </div>
@@ -255,6 +271,18 @@ export default function EditorTopBar({
             title="Hand Tool (Space)"
           >
             <Hand className="h-3 w-3" />
+          </Button>
+        )}
+
+        {onToggleGrid && (
+          <Button 
+            variant={showGrid ? "default" : "ghost"} 
+            size="icon" 
+            className="h-6 w-6 text-white hover:text-white" 
+            onClick={onToggleGrid}
+            title="Toggle Grid"
+          >
+            <Grid3x3 className="h-3 w-3" />
           </Button>
         )}
         
