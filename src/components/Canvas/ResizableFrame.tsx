@@ -271,7 +271,7 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
+      className={`absolute ${isSelected ? "ring-1 ring-cyan-400" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -414,29 +414,29 @@ export default function ResizableFrame({
       
       {isSelected && (
         <>
-          {/* Dimension label at bottom in blue */}
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium z-50">
+          {/* Dimension label at bottom in cyan */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-cyan-400 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium z-50">
             {Math.round(width)} × {Math.round(height)}
           </div>
           
           {/* Corner handles */}
           <div
-            className="resize-handle absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-nw-resize border border-blue-500"
+            className="resize-handle absolute -top-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-nw-resize border border-cyan-400"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
             onTouchStart={(e) => handleResizeTouchStart(e, "nw")}
           />
           <div
-            className="resize-handle absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-ne-resize border border-blue-500"
+            className="resize-handle absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-ne-resize border border-cyan-400"
             onMouseDown={(e) => handleResizeStart(e, "ne")}
             onTouchStart={(e) => handleResizeTouchStart(e, "ne")}
           />
           <div
-            className="resize-handle absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-sw-resize border border-blue-500"
+            className="resize-handle absolute -bottom-1.5 -left-1.5 w-2.5 h-2.5 bg-white cursor-sw-resize border border-cyan-400"
             onMouseDown={(e) => handleResizeStart(e, "sw")}
             onTouchStart={(e) => handleResizeTouchStart(e, "sw")}
           />
           <div
-            className="resize-handle absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-se-resize border border-blue-500"
+            className="resize-handle absolute -bottom-1.5 -right-1.5 w-2.5 h-2.5 bg-white cursor-se-resize border border-cyan-400"
             onMouseDown={(e) => handleResizeStart(e, "se")}
             onTouchStart={(e) => handleResizeTouchStart(e, "se")}
           />
