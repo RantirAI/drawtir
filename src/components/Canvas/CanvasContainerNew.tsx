@@ -28,7 +28,6 @@ import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
 import DrawtirFooter from "../Footer/DrawtirFooter";
-import ObjectSegmentationDialog from "./ObjectSegmentationDialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -170,8 +169,6 @@ export default function CanvasContainerNew({
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
-  const [showSegmentationDialog, setShowSegmentationDialog] = useState(false);
-  const [segmentationImageUrl, setSegmentationImageUrl] = useState("");
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
@@ -1972,51 +1969,6 @@ export default function CanvasContainerNew({
     }
   };
 
-  const handleSeparateObjects = (elementId: string) => {
-    const element = selectedFrame?.elements?.find(e => e.id === elementId);
-    if (!element || element.type !== "image" || !element.imageUrl) {
-      toast.error("Can only separate objects from image elements");
-      return;
-    }
-    
-    setSegmentationImageUrl(element.imageUrl);
-    setShowSegmentationDialog(true);
-  };
-
-  const handleSegmentedLayerSelect = (layer: any) => {
-    if (!selectedFrameId) return;
-    
-    // Add the segmented layer as a new image element
-    const newElement: Element = {
-      id: `element-${Date.now()}`,
-      type: "image",
-      name: layer.label,
-      x: layer.bbox.x,
-      y: layer.bbox.y,
-      width: layer.bbox.width,
-      height: layer.bbox.height,
-      imageUrl: layer.dataUrl,
-      imageFit: "contain",
-      opacity: 100,
-      rotation: 0,
-      brightness: 100,
-      contrast: 100,
-      saturation: 100,
-      blur: 0,
-      blendMode: "normal",
-    };
-    
-    setFrames(frames.map(f => {
-      if (f.id === selectedFrameId) {
-        return {
-          ...f,
-          elements: [...(f.elements || []), newElement],
-        };
-      }
-      return f;
-    }));
-  };
-
   const handleProjectNameChange = (newName: string) => {
     setProjectTitle(newName);
     // Trigger save after title change
@@ -2152,7 +2104,6 @@ export default function CanvasContainerNew({
                      onMakeEditable={element.type === "image" ? () => handleMakeEditable(element.id) : undefined}
                      onFitToFrame={() => handleFitToFrame(element.id)}
                      onRemoveBackground={element.type === "image" ? () => handleRemoveBackground(element.id) : undefined}
-                     onSeparateObjects={element.type === "image" ? () => handleSeparateObjects(element.id) : undefined}
                      onEditFill={() => {
                        setSelectedElementIds([element.id]);
                        setShowShapeSettings(true);
@@ -3070,14 +3021,6 @@ export default function CanvasContainerNew({
             handleElementUpdate(selectedElement.id, { fontFamily: font });
           }
         }}
-      />
-
-      {/* Object Segmentation Dialog */}
-      <ObjectSegmentationDialog
-        open={showSegmentationDialog}
-        onOpenChange={setShowSegmentationDialog}
-        imageUrl={segmentationImageUrl}
-        onSelectLayer={handleSegmentedLayerSelect}
       />
 
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
