@@ -1802,10 +1802,22 @@ export default function CanvasContainerNew({
 
       // Handle both old and new response formats
       const elementsArray = data.svgElements || data.elements || [];
-      
-      if (elementsArray.length === 0) {
+
+      // Heuristic: if analysis returns only a few big rectangles with no paths/text,
+      // it's likely not useful for editing — use object segmentation instead.
+      const frameW = data.frame?.width || element.width || 0;
+      const frameH = data.frame?.height || element.height || 0;
+      const hasVectorDetail = elementsArray.some((el: any) =>
+        ["path", "text", "ellipse"].includes(el.type)
+      );
+      const rects = elementsArray.filter((el: any) => el.type === "rect");
+      const totalRectArea = rects.reduce((s: number, r: any) => s + (r.width || 0) * (r.height || 0), 0);
+      const coverage = frameW && frameH ? totalRectArea / (frameW * frameH) : 0;
+      const isLikelyBackgroundRects = rects.length > 0 && elementsArray.length <= 5 && !hasVectorDetail && coverage > 0.3;
+
+      if (elementsArray.length === 0 || isLikelyBackgroundRects) {
         // Fallback: do object-level segmentation and create movable raster layers
-        toast.info("Separating objects into layers...");
+        toast.info(isLikelyBackgroundRects ? "Vector analysis not useful, separating objects..." : "Separating objects into layers...");
         const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
         if (!layers.length) {
           toast.error("No distinct objects detected");
