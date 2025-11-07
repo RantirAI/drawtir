@@ -119,6 +119,14 @@ export default function ResizableFrame({
           onUpdate(id, { y: y + dy, width: Math.max(200, width + dx), height: Math.max(200, height - dy) });
         } else if (isResizing === "nw") {
           onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(200, width - dx), height: Math.max(200, height - dy) });
+        } else if (isResizing === "n") {
+          onUpdate(id, { y: y + dy, height: Math.max(200, height - dy) });
+        } else if (isResizing === "s") {
+          onUpdate(id, { height: Math.max(200, height + dy) });
+        } else if (isResizing === "e") {
+          onUpdate(id, { width: Math.max(200, width + dx) });
+        } else if (isResizing === "w") {
+          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx) });
         }
         
         setDragStart({ x: e.clientX, y: e.clientY });
@@ -147,6 +155,14 @@ export default function ResizableFrame({
           onUpdate(id, { y: y + dy, width: Math.max(200, width + dx), height: Math.max(200, height - dy) });
         } else if (isResizing === "nw") {
           onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(200, width - dx), height: Math.max(200, height - dy) });
+        } else if (isResizing === "n") {
+          onUpdate(id, { y: y + dy, height: Math.max(200, height - dy) });
+        } else if (isResizing === "s") {
+          onUpdate(id, { height: Math.max(200, height + dy) });
+        } else if (isResizing === "e") {
+          onUpdate(id, { width: Math.max(200, width + dx) });
+        } else if (isResizing === "w") {
+          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx) });
         }
         
         setDragStart({ x: touch.clientX, y: touch.clientY });
@@ -324,6 +340,7 @@ export default function ResizableFrame({
             {Math.round(width)} × {Math.round(height)}
           </div>
           
+          {/* Corner handles */}
           <div
             className="resize-handle absolute -top-1 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-nw-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "nw")}
@@ -343,6 +360,28 @@ export default function ResizableFrame({
             className="resize-handle absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-se-resize border border-white"
             onMouseDown={(e) => handleResizeStart(e, "se")}
             onTouchStart={(e) => handleResizeTouchStart(e, "se")}
+          />
+          
+          {/* Side handles */}
+          <div
+            className="resize-handle absolute -top-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-sm cursor-n-resize border border-white"
+            onMouseDown={(e) => handleResizeStart(e, "n")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "n")}
+          />
+          <div
+            className="resize-handle absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-sm cursor-s-resize border border-white"
+            onMouseDown={(e) => handleResizeStart(e, "s")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "s")}
+          />
+          <div
+            className="resize-handle absolute top-1/2 -translate-y-1/2 -right-1 w-3 h-3 bg-blue-500 rounded-sm cursor-e-resize border border-white"
+            onMouseDown={(e) => handleResizeStart(e, "e")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "e")}
+          />
+          <div
+            className="resize-handle absolute top-1/2 -translate-y-1/2 -left-1 w-3 h-3 bg-blue-500 rounded-sm cursor-w-resize border border-white"
+            onMouseDown={(e) => handleResizeStart(e, "w")}
+            onTouchStart={(e) => handleResizeTouchStart(e, "w")}
           />
         </>
       )}
