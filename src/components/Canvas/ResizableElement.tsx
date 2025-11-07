@@ -820,7 +820,7 @@ export default function ResizableElement({
             }}
           />
           {imageFit === "crop" && (
-            <div className="absolute inset-0 border border-dashed border-cyan-400 pointer-events-none" />
+            <div className="absolute inset-0 border border-dashed border-blue-500 pointer-events-none" />
           )}
         </div>
       ) : type === "text" ? (
@@ -940,12 +940,12 @@ export default function ResizableElement({
             </div>
           )}
           
-          {/* Dimension label at bottom in cyan */}
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-cyan-400 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium">
+          {/* Dimension label at bottom in blue */}
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium">
             {Math.round(width)} × {Math.round(height)}
           </div>
           
-          {/* Resize handles in cyan - hidden when locked */}
+          {/* Resize handles in blue - hidden when locked */}
           {!isLocked && (
             <>
               {/* Corner handles */}
