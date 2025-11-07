@@ -31,6 +31,92 @@ function resizeImageIfNeeded(canvas: HTMLCanvasElement, ctx: CanvasRenderingCont
   return false;
 }
 
+// Clean up mask by removing small isolated regions
+function cleanupMask(mask: Float32Array, width: number, height: number, minSize: number = 100): Float32Array {
+  const cleaned = new Float32Array(mask);
+  const visited = new Uint8Array(width * height);
+  
+  const getIndex = (x: number, y: number) => y * width + x;
+  
+  // Flood fill to find connected regions
+  const floodFill = (startX: number, startY: number): number[] => {
+    const stack = [[startX, startY]];
+    const region: number[] = [];
+    
+    while (stack.length > 0) {
+      const [x, y] = stack.pop()!;
+      const idx = getIndex(x, y);
+      
+      if (x < 0 || x >= width || y < 0 || y >= height) continue;
+      if (visited[idx]) continue;
+      if (mask[idx] < 0.5) continue;
+      
+      visited[idx] = 1;
+      region.push(idx);
+      
+      // Check 4-connected neighbors
+      stack.push([x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]);
+    }
+    
+    return region;
+  };
+  
+  // Find all regions and remove small ones
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = getIndex(x, y);
+      if (!visited[idx] && mask[idx] >= 0.5) {
+        const region = floodFill(x, y);
+        if (region.length < minSize) {
+          // Remove small region
+          region.forEach(i => cleaned[i] = 0);
+        }
+      }
+    }
+  }
+  
+  return cleaned;
+}
+
+// Dilate mask to expand edges slightly
+function dilateMask(mask: Float32Array, width: number, height: number, radius: number = 1): Float32Array {
+  const dilated = new Float32Array(mask);
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = y * width + x;
+      
+      if (mask[idx] >= 0.5) {
+        // Already foreground, keep it
+        continue;
+      }
+      
+      // Check if any neighbor is foreground
+      let hasNeighbor = false;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const nx = x + dx;
+          const ny = y + dy;
+          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+            const nIdx = ny * width + nx;
+            if (mask[nIdx] >= 0.5) {
+              hasNeighbor = true;
+              break;
+            }
+          }
+        }
+        if (hasNeighbor) break;
+      }
+      
+      if (hasNeighbor) {
+        dilated[idx] = 1;
+      }
+    }
+  }
+  
+  return dilated;
+}
+
 export const removeBackground = async (imageUrl: string): Promise<string> => {
   try {
     console.log('Starting background removal process...');
@@ -72,38 +158,37 @@ export const removeBackground = async (imageUrl: string): Promise<string> => {
       throw new Error('Invalid segmentation result');
     }
     
-    // Find the mask with the most coverage (likely the background/sky)
-    let backgroundMask = null;
-    let maxCoverage = 0;
+    // Find foreground objects (car, person, etc.) and combine their masks
+    const foregroundLabels = ['car', 'truck', 'person', 'bus', 'bicycle', 'motorcycle', 'dog', 'cat', 'bird', 'horse', 'boat', 'airplane'];
+    const width = canvas.width;
+    const height = canvas.height;
+    
+    // Create combined foreground mask
+    const foregroundMask = new Float32Array(width * height);
+    foregroundMask.fill(0); // Start with all transparent
     
     for (const segment of result) {
       if (!segment.mask || !segment.mask.data) continue;
       
-      // Calculate how much of the image this mask covers
-      let coverage = 0;
-      for (let i = 0; i < segment.mask.data.length; i++) {
-        coverage += segment.mask.data[i];
-      }
+      const label = segment.label?.toLowerCase() || '';
+      const isForeground = foregroundLabels.some(fl => label.includes(fl));
       
-      // Labels that typically represent background
-      const isBackgroundLabel = ['sky', 'wall', 'floor', 'ceiling', 'background'].includes(
-        segment.label?.toLowerCase() || ''
-      );
-      
-      // Prefer background labels with high coverage
-      const score = coverage * (isBackgroundLabel ? 1.5 : 1);
-      
-      if (score > maxCoverage) {
-        maxCoverage = score;
-        backgroundMask = segment.mask;
+      if (isForeground) {
+        console.log('Found foreground object:', label);
+        // Add this segment to the foreground mask
+        for (let i = 0; i < segment.mask.data.length; i++) {
+          foregroundMask[i] = Math.max(foregroundMask[i], segment.mask.data[i]);
+        }
       }
     }
     
-    if (!backgroundMask) {
-      throw new Error('Could not find background mask');
-    }
+    // Clean up mask - remove small isolated regions (noise)
+    const cleanMask = cleanupMask(foregroundMask, width, height);
     
-    console.log('Using background mask with coverage:', maxCoverage);
+    // Dilate slightly to include edges
+    const dilatedMask = dilateMask(cleanMask, width, height, 2);
+    
+    console.log('Processed foreground mask');
     
     // Create a new canvas for the masked image
     const outputCanvas = document.createElement('canvas');
@@ -124,12 +209,11 @@ export const removeBackground = async (imageUrl: string): Promise<string> => {
     );
     const data = outputImageData.data;
     
-    // Make background transparent: where mask is 255 (background), set alpha to 0
-    for (let i = 0; i < backgroundMask.data.length; i++) {
-      const maskValue = backgroundMask.data[i];
-      // If this pixel is detected as background (high mask value), make it transparent
-      const alpha = 255 - maskValue; // Invert: 255 becomes 0 (transparent), 0 becomes 255 (opaque)
-      data[i * 4 + 3] = alpha;
+    // Apply foreground mask - keep foreground opaque, make background transparent
+    for (let i = 0; i < dilatedMask.length; i++) {
+      const maskValue = dilatedMask[i];
+      // maskValue: 1 = foreground (keep), 0 = background (remove)
+      data[i * 4 + 3] = Math.round(maskValue * 255);
     }
     
     outputCtx.putImageData(outputImageData, 0, 0);
