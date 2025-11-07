@@ -2173,75 +2173,76 @@ export default function CanvasContainerNew({
                        setShowAnimationsPanel(true);
                      }}
                     >
-                     <ResizableElement
-                      id={element.id}
-                       type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
-                      x={element.x}
-                      y={element.y}
-                      width={element.width}
-                      height={element.height}
-                      src={element.imageUrl}
-                      text={element.text}
-                      shapeType={element.shapeType}
-                      fill={element.fill}
-                      stroke={element.stroke}
-                      pathData={element.pathData}
-                      strokeWidth={element.strokeWidth}
-                      strokeOpacity={element.strokeOpacity}
-                      strokePosition={element.strokePosition}
-                      fillOpacity={element.fillOpacity}
-                      opacity={element.opacity}
-                      cornerRadius={element.cornerRadius}
-                      brightness={element.brightness}
-                      contrast={element.contrast}
-                      saturation={element.saturation}
-                      blur={element.blur}
-                      imageFit={element.imageFit}
-                      fontSize={element.fontSize}
-                      fontFamily={element.fontFamily}
-                      fontWeight={element.fontWeight}
-                      textAlign={element.textAlign}
-                      color={element.color}
-                      fillType={element.fillType}
-                      fillImage={element.fillImage}
-                      fillImageFit={element.fillImageFit}
-                      gradientType={element.gradientType}
-                      gradientAngle={element.gradientAngle}
-                      gradientStops={element.gradientStops}
-                      patternFrameId={element.patternFrameId}
-                      videoUrl={element.videoUrl}
-                      iconName={element.iconName}
-                      iconFamily={element.iconFamily}
-                      shader={element.shader}
-                      lineStyle={element.lineStyle}
-                      lineCap={element.lineCap}
-                      lineJoin={element.lineJoin}
-                      dashArray={element.dashArray}
-                      controlPoints={element.controlPoints}
-                      rotation={element.rotation}
-                      animation={element.animation}
-                      animationDuration={element.animationDuration}
-                      animationDelay={element.animationDelay}
-                      animationTimingFunction={element.animationTimingFunction}
-                      animationIterationCount={element.animationIterationCount}
-                      useFlexLayout={false}
-                      isLocked={element.isLocked}
-                      isSelected={selectedElementIds.includes(element.id)}
-                      zoom={zoom}
-                      currentTime={currentTime}
-                       isPlaying={isPlayingAnimation}
-                       onUpdate={handleElementUpdate}
-                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
-                       onDelete={() => handleElementDelete(element.id)}
-                       onDuplicate={() => handleElementDuplicate(element.id)}
-                        globalAnimationTrigger={animationGlobalKey as any}
-                        snapToGrid={snapToGrid}
-                        gridSize={gridSize}
-                        qrValue={element.qrValue}
-                        qrFgColor={element.qrFgColor}
-                        qrBgColor={element.qrBgColor}
-                        qrLevel={element.qrLevel}
-                     />
+                      <ResizableElement
+                       id={element.id}
+                        type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
+                       x={element.x}
+                       y={element.y}
+                       width={element.width}
+                       height={element.height}
+                       src={element.imageUrl}
+                       text={element.text}
+                       shapeType={element.shapeType}
+                       fill={element.fill}
+                       stroke={element.stroke}
+                       pathData={element.pathData}
+                       strokeWidth={element.strokeWidth}
+                       strokeOpacity={element.strokeOpacity}
+                       strokePosition={element.strokePosition}
+                       fillOpacity={element.fillOpacity}
+                       opacity={element.opacity}
+                       blendMode={element.blendMode}
+                       cornerRadius={element.cornerRadius}
+                       brightness={element.brightness}
+                       contrast={element.contrast}
+                       saturation={element.saturation}
+                       blur={element.blur}
+                       imageFit={element.imageFit}
+                       fontSize={element.fontSize}
+                       fontFamily={element.fontFamily}
+                       fontWeight={element.fontWeight}
+                       textAlign={element.textAlign}
+                       color={element.color}
+                       fillType={element.fillType}
+                       fillImage={element.fillImage}
+                       fillImageFit={element.fillImageFit}
+                       gradientType={element.gradientType}
+                       gradientAngle={element.gradientAngle}
+                       gradientStops={element.gradientStops}
+                       patternFrameId={element.patternFrameId}
+                       videoUrl={element.videoUrl}
+                       iconName={element.iconName}
+                       iconFamily={element.iconFamily}
+                       shader={element.shader}
+                       lineStyle={element.lineStyle}
+                       lineCap={element.lineCap}
+                       lineJoin={element.lineJoin}
+                       dashArray={element.dashArray}
+                       controlPoints={element.controlPoints}
+                       rotation={element.rotation}
+                       animation={element.animation}
+                       animationDuration={element.animationDuration}
+                       animationDelay={element.animationDelay}
+                       animationTimingFunction={element.animationTimingFunction}
+                       animationIterationCount={element.animationIterationCount}
+                       useFlexLayout={false}
+                       isLocked={element.isLocked}
+                       isSelected={selectedElementIds.includes(element.id)}
+                       zoom={zoom}
+                       currentTime={currentTime}
+                        isPlaying={isPlayingAnimation}
+                        onUpdate={handleElementUpdate}
+                        onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
+                        onDelete={() => handleElementDelete(element.id)}
+                        onDuplicate={() => handleElementDuplicate(element.id)}
+                         globalAnimationTrigger={animationGlobalKey as any}
+                         snapToGrid={snapToGrid}
+                         gridSize={gridSize}
+                         qrValue={element.qrValue}
+                         qrFgColor={element.qrFgColor}
+                         qrBgColor={element.qrBgColor}
+                         qrLevel={element.qrLevel}
+                      />
                     </CanvasContextMenu>
                 )})}
                 
