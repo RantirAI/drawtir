@@ -270,19 +270,19 @@ export default function ResizableElement({
         let newY = resizeStart.elementY;
 
         if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(20, snapToGrid(resizeStart.width + (dx * multiplier)));
+          newWidth = Math.max(1, snapToGrid(resizeStart.width + (dx * multiplier)));
         }
         if (resizeStart.corner.includes("w")) {
           const widthDelta = (dx * multiplier);
-          newWidth = Math.max(20, snapToGrid(resizeStart.width - widthDelta));
+          newWidth = Math.max(1, snapToGrid(resizeStart.width - widthDelta));
           newX = snapToGrid(resizeStart.elementX + widthDelta);
         }
         if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(20, snapToGrid(resizeStart.height + (dy * multiplier)));
+          newHeight = Math.max(1, snapToGrid(resizeStart.height + (dy * multiplier)));
         }
         if (resizeStart.corner.includes("n")) {
           const heightDelta = (dy * multiplier);
-          newHeight = Math.max(20, snapToGrid(resizeStart.height - heightDelta));
+          newHeight = Math.max(1, snapToGrid(resizeStart.height - heightDelta));
           newY = snapToGrid(resizeStart.elementY + heightDelta);
         }
 
@@ -323,19 +323,19 @@ export default function ResizableElement({
         let newY = resizeStart.elementY;
 
         if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(20, snapToGrid(resizeStart.width + dx));
+          newWidth = Math.max(1, snapToGrid(resizeStart.width + dx));
         }
         if (resizeStart.corner.includes("w")) {
           const widthDelta = dx;
-          newWidth = Math.max(20, snapToGrid(resizeStart.width - widthDelta));
+          newWidth = Math.max(1, snapToGrid(resizeStart.width - widthDelta));
           newX = snapToGrid(resizeStart.elementX + widthDelta);
         }
         if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(20, snapToGrid(resizeStart.height + dy));
+          newHeight = Math.max(1, snapToGrid(resizeStart.height + dy));
         }
         if (resizeStart.corner.includes("n")) {
           const heightDelta = dy;
-          newHeight = Math.max(20, snapToGrid(resizeStart.height - heightDelta));
+          newHeight = Math.max(1, snapToGrid(resizeStart.height - heightDelta));
           newY = snapToGrid(resizeStart.elementY + heightDelta);
         }
 
@@ -958,12 +958,18 @@ export default function ResizableElement({
               {/* Rotation handle */}
               <div 
                 data-rotate-handle 
-                className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-green-500 rounded-full cursor-grab active:cursor-grabbing border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                className="absolute left-1/2 bg-accent rounded-full cursor-grab active:cursor-grabbing border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                style={{
+                  top: '-32px',
+                  width: '24px',
+                  height: '24px',
+                  transform: 'translateX(-50%)',
+                }}
                 onMouseDown={handleRotateStart}
                 onTouchStart={handleRotateTouchStart}
                 title="Rotate"
               >
-                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="text-white" style={{ width: '12px', height: '12px' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
               </div>

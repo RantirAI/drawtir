@@ -112,21 +112,21 @@ export default function ResizableFrame({
         const dy = e.clientY - dragStart.y;
         
         if (isResizing === "se") {
-          onUpdate(id, { width: Math.max(200, width + dx), height: Math.max(200, height + dy) });
+          onUpdate(id, { width: Math.max(1, width + dx), height: Math.max(1, height + dy) });
         } else if (isResizing === "sw") {
-          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx), height: Math.max(200, height + dy) });
+          onUpdate(id, { x: x + dx, width: Math.max(1, width - dx), height: Math.max(1, height + dy) });
         } else if (isResizing === "ne") {
-          onUpdate(id, { y: y + dy, width: Math.max(200, width + dx), height: Math.max(200, height - dy) });
+          onUpdate(id, { y: y + dy, width: Math.max(1, width + dx), height: Math.max(1, height - dy) });
         } else if (isResizing === "nw") {
-          onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(200, width - dx), height: Math.max(200, height - dy) });
+          onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(1, width - dx), height: Math.max(1, height - dy) });
         } else if (isResizing === "n") {
-          onUpdate(id, { y: y + dy, height: Math.max(200, height - dy) });
+          onUpdate(id, { y: y + dy, height: Math.max(1, height - dy) });
         } else if (isResizing === "s") {
-          onUpdate(id, { height: Math.max(200, height + dy) });
+          onUpdate(id, { height: Math.max(1, height + dy) });
         } else if (isResizing === "e") {
-          onUpdate(id, { width: Math.max(200, width + dx) });
+          onUpdate(id, { width: Math.max(1, width + dx) });
         } else if (isResizing === "w") {
-          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx) });
+          onUpdate(id, { x: x + dx, width: Math.max(1, width - dx) });
         }
         
         setDragStart({ x: e.clientX, y: e.clientY });
@@ -148,21 +148,21 @@ export default function ResizableFrame({
         const dy = touch.clientY - dragStart.y;
         
         if (isResizing === "se") {
-          onUpdate(id, { width: Math.max(200, width + dx), height: Math.max(200, height + dy) });
+          onUpdate(id, { width: Math.max(1, width + dx), height: Math.max(1, height + dy) });
         } else if (isResizing === "sw") {
-          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx), height: Math.max(200, height + dy) });
+          onUpdate(id, { x: x + dx, width: Math.max(1, width - dx), height: Math.max(1, height + dy) });
         } else if (isResizing === "ne") {
-          onUpdate(id, { y: y + dy, width: Math.max(200, width + dx), height: Math.max(200, height - dy) });
+          onUpdate(id, { y: y + dy, width: Math.max(1, width + dx), height: Math.max(1, height - dy) });
         } else if (isResizing === "nw") {
-          onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(200, width - dx), height: Math.max(200, height - dy) });
+          onUpdate(id, { x: x + dx, y: y + dy, width: Math.max(1, width - dx), height: Math.max(1, height - dy) });
         } else if (isResizing === "n") {
-          onUpdate(id, { y: y + dy, height: Math.max(200, height - dy) });
+          onUpdate(id, { y: y + dy, height: Math.max(1, height - dy) });
         } else if (isResizing === "s") {
-          onUpdate(id, { height: Math.max(200, height + dy) });
+          onUpdate(id, { height: Math.max(1, height + dy) });
         } else if (isResizing === "e") {
-          onUpdate(id, { width: Math.max(200, width + dx) });
+          onUpdate(id, { width: Math.max(1, width + dx) });
         } else if (isResizing === "w") {
-          onUpdate(id, { x: x + dx, width: Math.max(200, width - dx) });
+          onUpdate(id, { x: x + dx, width: Math.max(1, width - dx) });
         }
         
         setDragStart({ x: touch.clientX, y: touch.clientY });
