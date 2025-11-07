@@ -33,19 +33,19 @@ serve(async (req) => {
     
     console.log("Vectorizing image...");
     
-    // Vectorize the image with optimized settings
+    // Vectorize with smoother settings to reduce jagged edges
     const svg = await vectorizer.vectorize(new Uint8Array(imageBuffer), {
       colorMode: 'color',
-      colorPrecision: 6,
-      filterSpeckle: 4,
-      spliceThreshold: 45,
-      cornerThreshold: 60,
+      colorPrecision: 8,
+      filterSpeckle: 8,
+      spliceThreshold: 60,
+      cornerThreshold: 120,
       hierarchical: 'stacked',
       mode: 'spline',
-      layerDifference: 5,
-      lengthThreshold: 5,
-      maxIterations: 2,
-      pathPrecision: 5,
+      layerDifference: 8,
+      lengthThreshold: 2,
+      maxIterations: 4,
+      pathPrecision: 8,
     });
 
     console.log("Vectorization complete, SVG length:", svg.length);
