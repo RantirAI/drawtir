@@ -2130,7 +2130,7 @@ export default function CanvasContainerNew({
                 initialWidth={frame.initialWidth}
                 initialHeight={frame.initialHeight}
                 enableDynamicScale={frame.enableDynamicScale}
-                isSelected={frame.id === selectedFrameId}
+                isSelected={frame.id === selectedFrameId && selectedElementIds.length === 0}
                 showGrid={showGrid}
                 gridSize={gridSize}
                 gridStyle={gridStyle}
