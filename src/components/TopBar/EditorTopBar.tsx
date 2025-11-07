@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles, Grid3x3 } from "lucide-react";
+import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles, Grid3x3, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -7,7 +7,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
 } from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -34,6 +42,12 @@ interface EditorTopBarProps {
   onTogglePanMode?: () => void;
   showGrid?: boolean;
   onToggleGrid?: () => void;
+  gridSize?: number;
+  onGridSizeChange?: (size: number) => void;
+  gridStyle?: "lines" | "dots";
+  onGridStyleChange?: (style: "lines" | "dots") => void;
+  snapToGrid?: boolean;
+  onSnapToGridChange?: (snap: boolean) => void;
   isGenerating?: boolean;
   generationProgress?: number;
   generationMessage?: string;
@@ -58,6 +72,12 @@ export default function EditorTopBar({
   onTogglePanMode,
   showGrid = false,
   onToggleGrid,
+  gridSize = 20,
+  onGridSizeChange,
+  gridStyle = "lines",
+  onGridStyleChange,
+  snapToGrid = false,
+  onSnapToGridChange,
   isGenerating = false,
   generationProgress = 0,
   generationMessage = "Generating...",
@@ -193,15 +213,62 @@ export default function EditorTopBar({
         )}
 
         {onToggleGrid && (
-          <Button 
-            variant={showGrid ? "default" : "ghost"} 
-            size="icon" 
-            className="h-6 w-6" 
-            onClick={onToggleGrid}
-            title="Toggle Grid"
-          >
-            <Grid3x3 className="h-3 w-3" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={showGrid ? "default" : "ghost"} 
+                size="icon" 
+                className="h-6 w-6 relative" 
+                title="Grid Settings"
+              >
+                <Grid3x3 className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <Label htmlFor="grid-toggle" className="text-sm font-normal cursor-pointer">Show Grid</Label>
+                <Switch
+                  id="grid-toggle"
+                  checked={showGrid}
+                  onCheckedChange={onToggleGrid}
+                />
+              </div>
+              <Separator className="my-1" />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span className="text-sm">Grid Size: {gridSize}px</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={gridSize?.toString()} onValueChange={(v) => onGridSizeChange?.(parseInt(v))}>
+                    <DropdownMenuRadioItem value="10">10px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="20">20px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="50">50px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="100">100px</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span className="text-sm">Grid Style: {gridStyle}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={gridStyle} onValueChange={(v) => onGridStyleChange?.(v as "lines" | "dots")}>
+                    <DropdownMenuRadioItem value="lines">Lines</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dots">Dots</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <Separator className="my-1" />
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <Label htmlFor="snap-toggle" className="text-sm font-normal cursor-pointer">Snap to Grid</Label>
+                <Switch
+                  id="snap-toggle"
+                  checked={snapToGrid}
+                  onCheckedChange={onSnapToGridChange}
+                />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
         
         <ThemeToggle />
@@ -275,15 +342,62 @@ export default function EditorTopBar({
         )}
 
         {onToggleGrid && (
-          <Button 
-            variant={showGrid ? "default" : "ghost"} 
-            size="icon" 
-            className="h-6 w-6 text-white hover:text-white" 
-            onClick={onToggleGrid}
-            title="Toggle Grid"
-          >
-            <Grid3x3 className="h-3 w-3" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant={showGrid ? "default" : "ghost"} 
+                size="icon" 
+                className="h-6 w-6 text-white hover:text-white relative" 
+                title="Grid Settings"
+              >
+                <Grid3x3 className="h-3 w-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <Label htmlFor="grid-toggle-mobile" className="text-sm font-normal cursor-pointer">Show Grid</Label>
+                <Switch
+                  id="grid-toggle-mobile"
+                  checked={showGrid}
+                  onCheckedChange={onToggleGrid}
+                />
+              </div>
+              <Separator className="my-1" />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span className="text-sm">Grid Size: {gridSize}px</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={gridSize?.toString()} onValueChange={(v) => onGridSizeChange?.(parseInt(v))}>
+                    <DropdownMenuRadioItem value="10">10px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="20">20px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="50">50px</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="100">100px</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <span className="text-sm">Grid Style: {gridStyle}</span>
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup value={gridStyle} onValueChange={(v) => onGridStyleChange?.(v as "lines" | "dots")}>
+                    <DropdownMenuRadioItem value="lines">Lines</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="dots">Dots</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <Separator className="my-1" />
+              <div className="flex items-center justify-between px-2 py-1.5">
+                <Label htmlFor="snap-toggle-mobile" className="text-sm font-normal cursor-pointer">Snap to Grid</Label>
+                <Switch
+                  id="snap-toggle-mobile"
+                  checked={snapToGrid}
+                  onCheckedChange={onSnapToGridChange}
+                />
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
         
         <ThemeToggle />

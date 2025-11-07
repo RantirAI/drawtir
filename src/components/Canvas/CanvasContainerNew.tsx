@@ -116,6 +116,9 @@ export default function CanvasContainerNew({
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [showGrid, setShowGrid] = useState(false);
+  const [gridSize, setGridSize] = useState(20);
+  const [gridStyle, setGridStyle] = useState<"lines" | "dots">("lines");
+  const [snapToGrid, setSnapToGrid] = useState(false);
 
   // Auto-fit frame to viewport
   const fitFrameToView = (frameId: string) => {
@@ -2037,6 +2040,12 @@ export default function CanvasContainerNew({
         onTogglePanMode={() => setIsPanning(!isPanning)}
         showGrid={showGrid}
         onToggleGrid={() => setShowGrid(!showGrid)}
+        gridSize={gridSize}
+        onGridSizeChange={setGridSize}
+        gridStyle={gridStyle}
+        onGridStyleChange={setGridStyle}
+        snapToGrid={snapToGrid}
+        onSnapToGridChange={setSnapToGrid}
         isGenerating={isGenerating}
         generationProgress={generationProgressPercent}
         generationMessage={generationProgress}
@@ -2123,6 +2132,9 @@ export default function CanvasContainerNew({
                 enableDynamicScale={frame.enableDynamicScale}
                 isSelected={frame.id === selectedFrameId}
                 showGrid={showGrid}
+                gridSize={gridSize}
+                gridStyle={gridStyle}
+                snapToGrid={snapToGrid}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);
@@ -2217,16 +2229,18 @@ export default function CanvasContainerNew({
                       isSelected={selectedElementIds.includes(element.id)}
                       zoom={zoom}
                       currentTime={currentTime}
-                      isPlaying={isPlayingAnimation}
-                      onUpdate={handleElementUpdate}
-                      onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
-                      onDelete={() => handleElementDelete(element.id)}
-                      onDuplicate={() => handleElementDuplicate(element.id)}
-                       globalAnimationTrigger={animationGlobalKey as any}
-                       qrValue={element.qrValue}
-                       qrFgColor={element.qrFgColor}
-                       qrBgColor={element.qrBgColor}
-                       qrLevel={element.qrLevel}
+                       isPlaying={isPlayingAnimation}
+                       onUpdate={handleElementUpdate}
+                       onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
+                       onDelete={() => handleElementDelete(element.id)}
+                       onDuplicate={() => handleElementDuplicate(element.id)}
+                        globalAnimationTrigger={animationGlobalKey as any}
+                        snapToGrid={snapToGrid}
+                        gridSize={gridSize}
+                        qrValue={element.qrValue}
+                        qrFgColor={element.qrFgColor}
+                        qrBgColor={element.qrBgColor}
+                        qrLevel={element.qrLevel}
                      />
                     </CanvasContextMenu>
                 )})}

@@ -86,6 +86,8 @@ interface ResizableElementProps {
   currentTime?: number;
   globalAnimationTrigger?: any;
   isLocked?: boolean;
+  snapToGrid?: boolean;
+  gridSize?: number;
   onUpdate: (id: string, updates: Partial<Element>) => void;
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
@@ -150,6 +152,8 @@ export default function ResizableElement({
   zoom = 1,
   isPlaying = false,
   currentTime,
+  snapToGrid = false,
+  gridSize = 20,
   onUpdate,
   onSelect,
   onDelete,
@@ -231,8 +235,9 @@ export default function ResizableElement({
   useEffect(() => { setIsLocked(!!isLockedProp); }, [isLockedProp]);
 
   useEffect(() => {
-    const snapToGrid = (value: number, gridSize: number = 10) => {
-      return Math.round(value / gridSize) * gridSize;
+    const snapToGridHelper = (value: number, size: number = 10) => {
+      if (!snapToGrid) return value;
+      return Math.round(value / size) * size;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -243,8 +248,8 @@ export default function ResizableElement({
         // Hold Shift for fine control
         const multiplier = e.shiftKey ? 0.5 : 1;
         
-        const newX = snapToGrid(dragStart.elementX + (dx * multiplier));
-        const newY = snapToGrid(dragStart.elementY + (dy * multiplier));
+        const newX = snapToGridHelper(dragStart.elementX + (dx * multiplier), gridSize);
+        const newY = snapToGridHelper(dragStart.elementY + (dy * multiplier), gridSize);
         onUpdate(id, { x: newX, y: newY });
       } else if (isRotating) {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -270,20 +275,20 @@ export default function ResizableElement({
         let newY = resizeStart.elementY;
 
         if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(1, snapToGrid(resizeStart.width + (dx * multiplier)));
+          newWidth = Math.max(1, snapToGridHelper(resizeStart.width + (dx * multiplier), gridSize));
         }
         if (resizeStart.corner.includes("w")) {
           const widthDelta = (dx * multiplier);
-          newWidth = Math.max(1, snapToGrid(resizeStart.width - widthDelta));
-          newX = snapToGrid(resizeStart.elementX + widthDelta);
+          newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
+          newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
         }
         if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(1, snapToGrid(resizeStart.height + (dy * multiplier)));
+          newHeight = Math.max(1, snapToGridHelper(resizeStart.height + (dy * multiplier), gridSize));
         }
         if (resizeStart.corner.includes("n")) {
           const heightDelta = (dy * multiplier);
-          newHeight = Math.max(1, snapToGrid(resizeStart.height - heightDelta));
-          newY = snapToGrid(resizeStart.elementY + heightDelta);
+          newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
+          newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
@@ -299,8 +304,8 @@ export default function ResizableElement({
         const dx = (touch.clientX - dragStart.x) / zoom;
         const dy = (touch.clientY - dragStart.y) / zoom;
         
-        const newX = snapToGrid(dragStart.elementX + dx);
-        const newY = snapToGrid(dragStart.elementY + dy);
+        const newX = snapToGridHelper(dragStart.elementX + dx, gridSize);
+        const newY = snapToGridHelper(dragStart.elementY + dy, gridSize);
         onUpdate(id, { x: newX, y: newY });
       } else if (isRotating) {
         const rect = containerRef.current?.getBoundingClientRect();
@@ -323,20 +328,20 @@ export default function ResizableElement({
         let newY = resizeStart.elementY;
 
         if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(1, snapToGrid(resizeStart.width + dx));
+          newWidth = Math.max(1, snapToGridHelper(resizeStart.width + dx, gridSize));
         }
         if (resizeStart.corner.includes("w")) {
           const widthDelta = dx;
-          newWidth = Math.max(1, snapToGrid(resizeStart.width - widthDelta));
-          newX = snapToGrid(resizeStart.elementX + widthDelta);
+          newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
+          newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
         }
         if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(1, snapToGrid(resizeStart.height + dy));
+          newHeight = Math.max(1, snapToGridHelper(resizeStart.height + dy, gridSize));
         }
         if (resizeStart.corner.includes("n")) {
           const heightDelta = dy;
-          newHeight = Math.max(1, snapToGrid(resizeStart.height - heightDelta));
-          newY = snapToGrid(resizeStart.elementY + heightDelta);
+          newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
+          newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });

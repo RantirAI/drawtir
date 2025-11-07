@@ -43,6 +43,9 @@ interface ResizableFrameProps {
   initialHeight?: number; // For dynamic scaling
   enableDynamicScale?: boolean; // Enable/disable dynamic scaling
   showGrid?: boolean; // Show alignment grid
+  gridSize?: number; // Grid spacing in pixels
+  gridStyle?: "lines" | "dots"; // Grid visual style
+  snapToGrid?: boolean; // Snap positioning to grid
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -88,6 +91,9 @@ export default function ResizableFrame({
   initialHeight,
   enableDynamicScale = true,
   showGrid = false,
+  gridSize = 20,
+  gridStyle = "lines",
+  snapToGrid = false,
   onUpdate,
   isSelected,
   onSelect,
@@ -295,29 +301,74 @@ export default function ResizableFrame({
         </video>
       )}
 
-      {/* Grid overlay */}
+      {/* Enhanced Grid overlay */}
       {showGrid && (
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
           style={{ borderRadius: `${cornerRadius}px` }}
         >
           <defs>
-            <pattern
-              id={`grid-${id}`}
-              width="20"
-              height="20"
-              patternUnits="userSpaceOnUse"
-            >
-              <path
-                d="M 20 0 L 0 0 0 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                className="text-primary/20"
-              />
-            </pattern>
+            {gridStyle === "lines" ? (
+              <>
+                {/* Minor grid pattern */}
+                <pattern
+                  id={`grid-minor-${id}`}
+                  width={gridSize}
+                  height={gridSize}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="0.5"
+                    className="text-primary/20 dark:text-primary/15"
+                  />
+                </pattern>
+                {/* Major grid pattern (every 5th line) */}
+                <pattern
+                  id={`grid-major-${id}`}
+                  width={gridSize * 5}
+                  height={gridSize * 5}
+                  patternUnits="userSpaceOnUse"
+                >
+                  <path
+                    d={`M ${gridSize * 5} 0 L 0 0 0 ${gridSize * 5}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    className="text-primary/40 dark:text-primary/30"
+                  />
+                </pattern>
+              </>
+            ) : (
+              /* Dot grid pattern */
+              <pattern
+                id={`grid-dots-${id}`}
+                width={gridSize}
+                height={gridSize}
+                patternUnits="userSpaceOnUse"
+              >
+                <circle
+                  cx={gridSize / 2}
+                  cy={gridSize / 2}
+                  r="1"
+                  fill="currentColor"
+                  className="text-primary/30 dark:text-primary/25"
+                />
+              </pattern>
+            )}
           </defs>
-          <rect width="100%" height="100%" fill={`url(#grid-${id})`} />
+          {gridStyle === "lines" ? (
+            <>
+              {/* Draw minor grid first */}
+              <rect width="100%" height="100%" fill={`url(#grid-minor-${id})`} />
+              {/* Draw major grid on top */}
+              <rect width="100%" height="100%" fill={`url(#grid-major-${id})`} />
+            </>
+          ) : (
+            <rect width="100%" height="100%" fill={`url(#grid-dots-${id})`} />
+          )}
         </svg>
       )}
 
