@@ -98,6 +98,7 @@ export default function CanvasContainerNew({
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
   const [selectedElementIds, setSelectedElementIds] = useState<string[]>([]);
+  const [segmentationBounds, setSegmentationBounds] = useState<Array<{x: number, y: number, width: number, height: number}>>([]);
   const [activeTool, setActiveTool] = useState<"select" | "pen" | "shape" | "text" | "image">("select");
   const [penColor, setPenColor] = useState("#3b82f6");
   const [strokeWidth, setStrokeWidth] = useState(2);
@@ -1800,12 +1801,27 @@ export default function CanvasContainerNew({
       
       if (!layers.length) {
         toast.error("No distinct objects detected");
+        setSegmentationBounds([]);
         return;
       }
 
+      // Show blue boundaries for detected segments
+      const scaleX = (element.width || layers[0].sourceWidth) / layers[0].sourceWidth;
+      const scaleY = (element.height || layers[0].sourceHeight) / layers[0].sourceHeight;
+      
+      const bounds = layers.map(layer => ({
+        x: element.x + layer.bbox.x * scaleX,
+        y: element.y + layer.bbox.y * scaleY,
+        width: layer.bbox.width * scaleX,
+        height: layer.bbox.height * scaleY,
+      }));
+      
+      setSegmentationBounds(bounds);
+
+      // Wait a moment to show the bounds
+      await new Promise(resolve => setTimeout(resolve, 800));
+
       const newImageElements: Element[] = layers.map((layer) => {
-        const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
-        const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
         return {
           id: `element-${Date.now()}-${Math.random()}`,
           type: "image",
@@ -1833,10 +1849,12 @@ export default function CanvasContainerNew({
         return f;
       }));
 
+      setSegmentationBounds([]);
       toast.success(`Separated into ${newImageElements.length} movable layers`);
     } catch (error) {
       console.error("Error making image editable:", error);
       toast.error("Failed to process image");
+      setSegmentationBounds([]);
     }
   };
 
@@ -2273,6 +2291,27 @@ export default function CanvasContainerNew({
             </CanvasContextMenu>
           </div>
         ))}
+        
+        {/* Segmentation boundaries overlay - Sketch-style blue lines */}
+        {segmentationBounds.map((bound, idx) => (
+          <div
+            key={`seg-${idx}`}
+            style={{
+              position: 'absolute',
+              left: bound.x,
+              top: bound.y,
+              width: bound.width,
+              height: bound.height,
+              border: '2px solid hsl(var(--primary))',
+              backgroundColor: 'hsl(var(--primary) / 0.1)',
+              pointerEvents: 'none',
+              zIndex: 9999,
+              boxShadow: '0 0 0 1px rgba(255, 255, 255, 0.5), 0 0 12px hsl(var(--primary) / 0.4)',
+              animation: 'pulse 1.5s ease-in-out infinite',
+            }}
+          />
+        ))}
+        
         {/* Pen drawing overlay inside transformed canvas */}
         {selectedFrame && (
           <DrawingLayer
