@@ -38,7 +38,6 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { segmentImageToLayers } from "@/lib/objectSegmentation";
-import { parseSVGToElements } from "@/lib/svgParser";
 
 interface CanvasContainerNewProps {
   isEmbedded?: boolean;
@@ -1790,104 +1789,54 @@ export default function CanvasContainerNew({
       return;
     }
 
-    toast.info("Vectorizing image...");
+    toast.info("Separating objects into layers...");
     
     try {
-      // First try true vectorization with @neplex/vectorizer
-      const { data, error } = await supabase.functions.invoke('vectorize-image', {
-        body: { imageUrl: element.imageUrl }
+      const layers = await segmentImageToLayers(element.imageUrl, { 
+        maxObjects: 6, 
+        minAreaRatio: 0.008,
+        preferredLabels: ["person", "car", "bus", "truck", "bicycle", "motorcycle", "dog", "cat", "bird"]
       });
-
-      if (error) throw error;
-
-      if (data?.svg) {
-        console.log("Received SVG from vectorizer");
-        
-        // Parse SVG to canvas elements
-        const parsed = parseSVGToElements(data.svg);
-        
-        if (parsed.elements.length === 0) {
-          throw new Error("No elements parsed from SVG");
-        }
-
-        // Scale elements to match original image size
-        const scaleX = element.width / parsed.width;
-        const scaleY = element.height / parsed.height;
-
-        const scaledElements = parsed.elements.map(el => ({
-          ...el,
-          x: element.x + el.x * scaleX,
-          y: element.y + el.y * scaleY,
-          width: el.width * scaleX,
-          height: el.height * scaleY,
-        }));
-
-        setFrames(frames.map(f => {
-          if (f.id === selectedFrameId) {
-            return {
-              ...f,
-              elements: [
-                ...(f.elements || []).filter(e => e.id !== elementId),
-                ...scaledElements,
-              ],
-            };
-          }
-          return f;
-        }));
-
-        toast.success(`Vectorized into ${scaledElements.length} editable elements!`);
+      
+      if (!layers.length) {
+        toast.error("No distinct objects detected");
         return;
       }
 
-      throw new Error("No SVG returned from vectorizer");
-    } catch (error) {
-      console.error("Error vectorizing image:", error);
+      const newImageElements: Element[] = layers.map((layer) => {
+        const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
+        const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
+        return {
+          id: `element-${Date.now()}-${Math.random()}`,
+          type: "image",
+          name: layer.label ? layer.label.charAt(0).toUpperCase() + layer.label.slice(1) : "Object",
+          imageUrl: layer.dataUrl,
+          x: element.x + layer.bbox.x * scaleX,
+          y: element.y + layer.bbox.y * scaleY,
+          width: layer.bbox.width * scaleX,
+          height: layer.bbox.height * scaleY,
+          opacity: 100,
+          imageFit: "contain",
+        } as Element;
+      });
 
-      // On failure, try object-level segmentation as a robust fallback
-      try {
-        if (!element?.imageUrl) throw new Error("No image to segment");
-        toast.info("Falling back to object separation...");
-        const layers = await segmentImageToLayers(element.imageUrl, { maxObjects: 4, minAreaRatio: 0.01 });
-        if (!layers.length) {
-          toast.error("No distinct objects detected");
-          return;
-        }
-
-        const newImageElements: Element[] = layers.map((layer) => {
-          const scaleX = (element.width || layer.sourceWidth) / layer.sourceWidth;
-          const scaleY = (element.height || layer.sourceHeight) / layer.sourceHeight;
+      setFrames(frames.map(f => {
+        if (f.id === selectedFrameId) {
           return {
-            id: `element-${Date.now()}-${Math.random()}`,
-            type: "image",
-            name: layer.label ? layer.label.charAt(0).toUpperCase() + layer.label.slice(1) : "Object",
-            imageUrl: layer.dataUrl,
-            x: element.x + layer.bbox.x * scaleX,
-            y: element.y + layer.bbox.y * scaleY,
-            width: layer.bbox.width * scaleX,
-            height: layer.bbox.height * scaleY,
-            opacity: 100,
-            imageFit: "contain",
-          } as Element;
-        });
+            ...f,
+            elements: [
+              ...(f.elements || []).filter(e => e.id !== elementId),
+              ...newImageElements,
+            ],
+          };
+        }
+        return f;
+      }));
 
-        setFrames(frames.map(f => {
-          if (f.id === selectedFrameId) {
-            return {
-              ...f,
-              elements: [
-                ...(f.elements || []).filter(e => e.id !== elementId),
-                ...newImageElements,
-              ],
-            };
-          }
-          return f;
-        }));
-
-        toast.success("Separated objects into movable layers");
-      } catch (segErr) {
-        console.error("Segmentation fallback failed:", segErr);
-        toast.error("Failed to process image");
-      }
+      toast.success(`Separated into ${newImageElements.length} movable layers`);
+    } catch (error) {
+      console.error("Error making image editable:", error);
+      toast.error("Failed to process image");
     }
   };
 
