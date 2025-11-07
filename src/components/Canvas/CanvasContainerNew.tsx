@@ -1927,6 +1927,48 @@ export default function CanvasContainerNew({
     toast.success("Element fitted to frame!");
   };
 
+  const handleFitWidth = (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element || !selectedFrame) return;
+
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return {
+          ...f,
+          elements: (f.elements || []).map(e => 
+            e.id === elementId 
+              ? { ...e, x: 0, width: selectedFrame.width }
+              : e
+          ),
+        };
+      }
+      return f;
+    }));
+    
+    toast.success("Element width fitted to frame!");
+  };
+
+  const handleFitHeight = (elementId: string) => {
+    const element = selectedFrame?.elements?.find(e => e.id === elementId);
+    if (!element || !selectedFrame) return;
+
+    setFrames(frames.map(f => {
+      if (f.id === selectedFrameId) {
+        return {
+          ...f,
+          elements: (f.elements || []).map(e => 
+            e.id === elementId 
+              ? { ...e, y: 0, height: selectedFrame.height }
+              : e
+          ),
+        };
+      }
+      return f;
+    }));
+    
+    toast.success("Element height fitted to frame!");
+  };
+
   const handleRemoveBackground = async (elementId: string) => {
     const element = selectedFrame?.elements?.find(e => e.id === elementId);
     if (!element || element.type !== "image" || !element.imageUrl) {
@@ -2103,6 +2145,8 @@ export default function CanvasContainerNew({
                      onSendBackward={() => handleArrange('backward', [element.id], frame.id)}
                      onMakeEditable={element.type === "image" ? () => handleMakeEditable(element.id) : undefined}
                      onFitToFrame={() => handleFitToFrame(element.id)}
+                     onFitWidth={() => handleFitWidth(element.id)}
+                     onFitHeight={() => handleFitHeight(element.id)}
                      onRemoveBackground={element.type === "image" ? () => handleRemoveBackground(element.id) : undefined}
                      onEditFill={() => {
                        setSelectedElementIds([element.id]);

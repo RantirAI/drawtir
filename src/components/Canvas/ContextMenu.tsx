@@ -25,6 +25,8 @@ interface CanvasContextMenuProps {
   onEditAnimations?: () => void;
   onMakeEditable?: () => void;
   onFitToFrame?: () => void;
+  onFitWidth?: () => void;
+  onFitHeight?: () => void;
   onRemoveBackground?: () => void;
 }
 
@@ -45,6 +47,8 @@ export default function CanvasContextMenu({
   onEditAnimations,
   onMakeEditable,
   onFitToFrame,
+  onFitWidth,
+  onFitHeight,
   onRemoveBackground,
 }: CanvasContextMenuProps) {
   return (
@@ -110,7 +114,7 @@ export default function CanvasContextMenu({
         )}
         
         {/* Edit options */}
-        {(onEditFill || onEditStroke || onEditAnimations || onMakeEditable || onFitToFrame || onRemoveBackground) && (
+        {(onEditFill || onEditStroke || onEditAnimations || onMakeEditable || onFitToFrame || onFitWidth || onFitHeight || onRemoveBackground) && (
           <>
             <ContextMenuSeparator />
             {onMakeEditable && (
@@ -123,6 +127,18 @@ export default function CanvasContextMenu({
               <ContextMenuItem onClick={onFitToFrame} className="text-xs">
                 <Maximize2 className="h-3 w-3 mr-2" />
                 Fit to Frame
+              </ContextMenuItem>
+            )}
+            {onFitWidth && (
+              <ContextMenuItem onClick={onFitWidth} className="text-xs">
+                <Maximize2 className="h-3 w-3 mr-2 rotate-90" />
+                Fit Width
+              </ContextMenuItem>
+            )}
+            {onFitHeight && (
+              <ContextMenuItem onClick={onFitHeight} className="text-xs">
+                <Maximize2 className="h-3 w-3 mr-2" />
+                Fit Height
               </ContextMenuItem>
             )}
             {onRemoveBackground && (
