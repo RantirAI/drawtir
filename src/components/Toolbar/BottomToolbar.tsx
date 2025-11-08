@@ -1,6 +1,6 @@
 import { 
-  Mouse, Brush2, SquareShape, TextBlock, Gallery as GalleryIcon, Add,
-  Copy, Trash, EmojiHappy, Box1, BrushBig, Text, ScanBarcode
+  Mouse, Brush2, Box1, TextBlock, Gallery as GalleryIcon, Add,
+  Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2
 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -56,7 +56,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={() => onToolChange?.("select")}
               >
-                <MousePointer2 className="h-4 w-4" />
+                <Mouse size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Select</TooltipContent>
@@ -70,7 +70,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={() => onToolChange?.("pen")}
               >
-                <Paintbrush className="h-4 w-4" />
+                <Brush2 size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Draw</TooltipContent>
@@ -92,7 +92,7 @@ export default function BottomToolbar({
                     onShapeSelect?.("rectangle");
                   }}
                 >
-                  <Square className="h-4 w-4" />
+                  <Box1 size={16} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">Shape</TooltipContent>
@@ -107,7 +107,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={() => onToolChange?.("text")}
               >
-                <Type className="h-4 w-4" />
+                <TextBlock size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Text</TooltipContent>
@@ -116,7 +116,7 @@ export default function BottomToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onImageUpload}>
-                <ImageIcon className="h-4 w-4" />
+                <GalleryIcon size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Image</TooltipContent>
@@ -137,7 +137,7 @@ export default function BottomToolbar({
                     onIconSelect?.("heart", "lucide");
                   }}
                 >
-                  <Smile className="h-4 w-4" />
+                  <EmojiHappy size={16} />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">Icon</TooltipContent>
@@ -152,7 +152,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onLineAdd}
               >
-                <Pen className="h-4 w-4" />
+                <Edit2 size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Line</TooltipContent>
@@ -166,7 +166,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onAddRichText}
               >
-                <Heading1 className="h-4 w-4" />
+                <Text size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Rich Text</TooltipContent>
@@ -180,7 +180,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onShaderAdd}
               >
-                <Box className="h-4 w-4" />
+                <BrushBig size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Shader</TooltipContent>
@@ -194,7 +194,7 @@ export default function BottomToolbar({
                 className="h-8 w-8 rounded-full"
                 onClick={onQRCodeAdd}
               >
-                <QrCode className="h-4 w-4" />
+                <ScanBarcode size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add QR Code</TooltipContent>
@@ -206,7 +206,7 @@ export default function BottomToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onAddFrame}>
-                <Plus className="h-4 w-4" />
+                <Add size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Frame</TooltipContent>
@@ -215,7 +215,7 @@ export default function BottomToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onDuplicate}>
-                <Copy className="h-4 w-4" />
+                <Copy size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Duplicate</TooltipContent>
@@ -224,7 +224,7 @@ export default function BottomToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
+                <Trash size={16} />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Delete</TooltipContent>

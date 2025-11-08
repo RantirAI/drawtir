@@ -1,4 +1,4 @@
-import { HambergerMenu, Share, DocumentDownload, Save2, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2 } from "iconsax-react";
+import { HambergerMenu, Share, DocumentDownload, Save2, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Mouse } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -96,7 +96,7 @@ export default function EditorTopBar({
       {/* Floating generation message */}
       {isGenerating && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <Sparkles className="w-3 h-3 text-primary animate-pulse" />
+          <Magicpen size={12} className="text-primary animate-pulse" />
           <span className="text-xs font-medium text-foreground drop-shadow-lg whitespace-nowrap">
             {generationMessage}
           </span>
@@ -130,7 +130,7 @@ export default function EditorTopBar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6">
-              <Menu className="h-3 w-3" />
+              <HambergerMenu size={12} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
@@ -141,17 +141,17 @@ export default function EditorTopBar({
               Gallery
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setShowSettings(true)}>
-              <Settings className="h-3 w-3 mr-2" />
+              <Setting2 size={12} className="mr-2" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onExport}>
-              <FileDown className="h-3 w-3 mr-2" />
+              <ExportSquare size={12} className="mr-2" />
               Export Current Frame
             </DropdownMenuItem>
             {onExportAll && (
               <DropdownMenuItem onClick={onExportAll}>
-                <Download className="h-3 w-3 mr-2" />
+                <DocumentDownload size={12} className="mr-2" />
                 Export All Frames
               </DropdownMenuItem>
             )}
@@ -173,7 +173,7 @@ export default function EditorTopBar({
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
         >
-          <Undo className="h-3 w-3" />
+          <ArrowRotateLeft size={12} />
         </Button>
         <Button 
           variant="ghost" 
@@ -183,21 +183,21 @@ export default function EditorTopBar({
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
         >
-          <Redo className="h-3 w-3" />
+          <ArrowRotateRight size={12} />
         </Button>
 
         {onSave && !hideCloudFeatures && (
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
-            <Save className="h-3 w-3" />
+            <Save2 size={12} />
           </Button>
         )}
 
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onDownload}>
-          <Download className="h-3 w-3" />
+          <DocumentDownload size={12} />
         </Button>
 
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShare}>
-          <Share2 className="h-3 w-3" />
+          <Share size={12} />
         </Button>
 
         {onTogglePanMode && (
@@ -208,7 +208,7 @@ export default function EditorTopBar({
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Hand className="h-3 w-3" />
+            <Mouse size={12} />
           </Button>
         )}
 
@@ -221,7 +221,7 @@ export default function EditorTopBar({
                 className="h-6 w-6 relative" 
                 title="Grid Settings"
               >
-                <Grid3x3 className="h-3 w-3" />
+                <Grid1 size={12} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -286,7 +286,7 @@ export default function EditorTopBar({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white">
-              <Menu className="h-3 w-3" />
+              <HambergerMenu size={12} />
             </Button>
           </DropdownMenuTrigger>
         </DropdownMenu>
@@ -302,7 +302,7 @@ export default function EditorTopBar({
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
         >
-          <Undo className="h-3 w-3" />
+          <ArrowRotateLeft size={12} />
         </Button>
         <Button 
           variant="ghost" 
@@ -312,21 +312,21 @@ export default function EditorTopBar({
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
         >
-          <Redo className="h-3 w-3" />
+          <ArrowRotateRight size={12} />
         </Button>
 
         {onSave && !hideCloudFeatures && (
           <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onSave} disabled={isSaving}>
-            <Save className="h-3 w-3" />
+            <Save2 size={12} />
           </Button>
         )}
 
         <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onDownload}>
-          <Download className="h-3 w-3" />
+          <DocumentDownload size={12} />
         </Button>
 
         <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onShare}>
-          <Share2 className="h-3 w-3" />
+          <Share size={12} />
         </Button>
 
         {onTogglePanMode && (
@@ -337,7 +337,7 @@ export default function EditorTopBar({
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Hand className="h-3 w-3" />
+            <Mouse size={12} />
           </Button>
         )}
 
@@ -350,7 +350,7 @@ export default function EditorTopBar({
                 className="h-6 w-6 text-white hover:text-white relative" 
                 title="Grid Settings"
               >
-                <Grid3x3 className="h-3 w-3" />
+                <Grid1 size={12} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
