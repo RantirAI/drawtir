@@ -4,6 +4,7 @@ import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 
 interface ResizableFrameProps {
   id: string;
+  name: string;
   x: number;
   y: number;
   width: number;
@@ -54,6 +55,7 @@ interface ResizableFrameProps {
 
 export default function ResizableFrame({
   id,
+  name,
   x,
   y,
   width,
@@ -203,20 +205,28 @@ export default function ResizableFrame({
   }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Only allow dragging from the header, not the frame body
     if ((e.target as HTMLElement).closest(".resize-handle") || e.button === 2) return;
+    if (!(e.target as HTMLElement).closest(".frame-drag-header")) return;
     e.stopPropagation();
-    onSelect();
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if ((e.target as HTMLElement).closest(".resize-handle")) return;
+    if (!(e.target as HTMLElement).closest(".frame-drag-header")) return;
     e.stopPropagation();
-    onSelect();
     const touch = e.touches[0];
     setIsDragging(true);
     setDragStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleFrameClick = (e: React.MouseEvent) => {
+    // Allow selecting the frame by clicking anywhere on it
+    if ((e.target as HTMLElement).closest(".resize-handle")) return;
+    e.stopPropagation();
+    onSelect();
   };
 
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
@@ -277,16 +287,26 @@ export default function ResizableFrame({
         top: `${y}px`,
         width: `${width}px`,
         height: `${height}px`,
-        cursor: isDragging ? "grabbing" : "grab",
         overflow: "hidden",
         borderRadius: `${cornerRadius}px`,
         opacity: opacity / 100,
         mixBlendMode: (blendMode || 'normal') as any,
         ...backgroundStyle,
       }}
+      onClick={handleFrameClick}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
     >
+      {/* Draggable frame header - only visible when selected */}
+      {isSelected && (
+        <div 
+          className="frame-drag-header absolute -top-7 left-0 bg-blue-500 text-white text-xs px-3 py-1.5 rounded-t font-medium cursor-move z-50 select-none"
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
+          {name}
+        </div>
+      )}
       {/* Video background for frames */}
       {backgroundType === "video" && videoUrl && (
         <video

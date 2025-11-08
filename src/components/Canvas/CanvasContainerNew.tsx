@@ -2094,6 +2094,7 @@ export default function CanvasContainerNew({
             >
                 <ResizableFrame
                 id={frame.id}
+                name={frame.name}
                 x={frame.x}
                 y={frame.y}
                 opacity={frame.opacity}
@@ -2281,6 +2282,7 @@ export default function CanvasContainerNew({
                     >
                       <ResizableFrame
                         id={nestedFrame.id}
+                        name={nestedFrame.name}
                         x={0}
                         y={0}
                         width={nestedFrame.width}
