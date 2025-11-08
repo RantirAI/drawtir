@@ -2799,70 +2799,70 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showGeneratePanel 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
-          <Magicpen size={16} className={showGeneratePanel ? 'text-accent-warm' : ''} />
+          <Magicpen size={16} className={showGeneratePanel ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showTemplatesPanel 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
-          <Element2 size={16} className={showTemplatesPanel ? 'text-accent-warm' : ''} />
+          <Element2 size={16} className={showTemplatesPanel ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showLayersPanel 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
           }}
         >
-          <Layer size={16} className={showLayersPanel ? 'text-accent-warm' : ''} />
+          <Layer size={16} className={showLayersPanel ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showMediaLibrary 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
         >
-          <Gallery size={16} className={showMediaLibrary ? 'text-accent-warm' : ''} />
+          <Gallery size={16} className={showMediaLibrary ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showShapeSettings || selectedElementIds.length > 0 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
-          <Setting4 size={16} className={showShapeSettings || selectedElementIds.length > 0 ? 'text-accent-warm' : ''} />
+          <Setting4 size={16} className={showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showAnimationsPanel 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => {
@@ -2874,29 +2874,29 @@ export default function CanvasContainerNew({
           }}
           title="Animations"
         >
-          <Video size={16} className={showAnimationsPanel ? 'text-accent-warm' : ''} />
+          <Video size={16} className={showAnimationsPanel ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showBrandKitPanel 
-              ? 'bg-accent-warm/20 border-transparent' 
+              ? 'bg-primary/20 border-transparent' 
               : 'bg-card/80'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
         >
-          <Colorfilter size={16} className={showBrandKitPanel ? 'text-accent-warm' : ''} />
+          <Colorfilter size={16} className={showBrandKitPanel ? 'text-primary' : ''} />
         </Button>
         <Button
           variant="outline"
           size="icon"
-          className="h-10 w-10 rounded-full bg-accent-warm/30 border-transparent hover:bg-accent-warm/40 hover:scale-105 transition-all shadow-lg"
+          className="h-10 w-10 rounded-full bg-primary/30 border-transparent hover:bg-primary/40 hover:scale-105 transition-all shadow-lg"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
-          <PlayCircle size={16} className="text-accent-warm" />
+          <PlayCircle size={16} className="text-primary" />
         </Button>
       </div>
       
