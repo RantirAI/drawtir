@@ -48,6 +48,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
     "gif.js": "^0.2.0",
+    "iconsax-react": "^0.0.8",
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.462.0",

@@ -1,4 +1,4 @@
-import { Menu, Share2, Download, Save, FileDown, Undo, Redo, Settings, Hand, Sparkles, Grid3x3, ChevronDown } from "lucide-react";
+import { HambergerMenu, Share, DocumentDownload, Save2, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {

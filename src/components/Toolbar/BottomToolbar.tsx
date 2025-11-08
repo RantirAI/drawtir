@@ -1,7 +1,7 @@
 import { 
-  MousePointer2, Paintbrush, Square, Type, Image as ImageIcon, Plus,
-  Copy, Trash2, Smile, Box, Pen, Heading1, QrCode
-} from "lucide-react";
+  Mouse, Brush2, SquareShape, TextBlock, Gallery as GalleryIcon, Add,
+  Copy, Trash, EmojiHappy, Box1, BrushBig, Text, ScanBarcode
+} from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

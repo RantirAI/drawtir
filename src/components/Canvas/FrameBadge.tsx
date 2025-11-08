@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { GripVertical, Pencil } from "lucide-react";
+import { More2, Edit2 } from "iconsax-react";
 
 interface FrameBadgeProps {
   name: string;
@@ -109,8 +109,9 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange }: F
       style={{ left: x, top: y - 28 }}
       onDoubleClick={handleDoubleClick}
     >
-      <GripVertical 
-        className="w-3 h-3 text-muted-foreground cursor-grab active:cursor-grabbing" 
+      <More2 
+        size={12}
+        className="text-muted-foreground cursor-grab active:cursor-grabbing" 
         onMouseDown={handleDragStart}
       />
       <span className="cursor-text">{name}</span>
@@ -119,7 +120,7 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange }: F
         className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
         aria-label="Edit frame name"
       >
-        <Pencil className="w-3 h-3 text-muted-foreground" />
+        <Edit2 size={12} className="text-muted-foreground" />
       </button>
     </div>
   );

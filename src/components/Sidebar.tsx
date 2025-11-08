@@ -1,4 +1,4 @@
-import { Home, Image, Settings, LogOut, Palette, Ruler } from "lucide-react";
+import { Home2, Gallery, Setting2, Logout, Colorfilter, Ruler } from "iconsax-react";
 import { NavLink } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,15 +10,15 @@ export default function Sidebar() {
   };
   const navItems = [{
     to: "/",
-    icon: Home,
+    icon: Home2,
     label: "Create"
   }, {
     to: "/gallery",
-    icon: Image,
+    icon: Gallery,
     label: "Gallery"
   }, {
     to: "/settings",
-    icon: Settings,
+    icon: Setting2,
     label: "Settings"
   }];
   return <aside className="w-60 border-r bg-sidebar-background border-sidebar-border flex flex-col">
@@ -30,7 +30,7 @@ export default function Sidebar() {
         {navItems.map(item => <NavLink key={item.to} to={item.to} className={({
         isActive
       }) => `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${isActive ? "bg-secondary text-foreground font-medium" : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"}`}>
-            <item.icon className="w-4 h-4" />
+            <item.icon size={16} />
             {item.label}
           </NavLink>)}
       </nav>
@@ -41,7 +41,7 @@ export default function Sidebar() {
           <ThemeToggle />
         </div>
         <button onClick={handleSignOut} className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors w-full">
-          <LogOut className="w-4 h-4" />
+          <Logout size={16} />
           Sign Out
         </button>
       </div>
