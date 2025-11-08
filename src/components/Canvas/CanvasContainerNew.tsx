@@ -2075,7 +2075,7 @@ export default function CanvasContainerNew({
           <div key={frame.id}>
             <FrameBadge
               name={frame.name}
-              x={frame.x + frame.width / 2 - 40}
+              x={frame.x}
               y={frame.y}
               onChange={(name) => handleFrameUpdate(frame.id, { name })}
             />
