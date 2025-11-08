@@ -2797,10 +2797,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showGeneratePanel 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
@@ -2809,10 +2809,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showTemplatesPanel 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
@@ -2821,10 +2821,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showLayersPanel 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
@@ -2835,10 +2835,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showMediaLibrary 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
@@ -2848,10 +2848,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showShapeSettings || selectedElementIds.length > 0 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
@@ -2860,10 +2860,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showAnimationsPanel 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2879,10 +2879,10 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all ${
+          className={`h-10 w-10 rounded-full backdrop-blur-md border transition-all ${
             showBrandKitPanel 
-              ? 'bg-primary/20 text-primary shadow-inner' 
-              : 'bg-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.08)] hover:bg-primary/10'
+              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
+              : 'bg-background/40 border-border/20 hover:bg-primary/10 hover:border-primary/20'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
@@ -2892,7 +2892,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-primary/20 hover:bg-primary/30 transition-all shadow-inner"
+          className="h-10 w-10 rounded-full backdrop-blur-md bg-primary/25 border border-primary/30 hover:bg-primary/35 transition-all shadow-sm"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
