@@ -2800,11 +2800,11 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showGeneratePanel 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
-          <Magicpen size={16} className={showGeneratePanel ? 'text-primary' : ''} />
+          <Magicpen size={16} className={showGeneratePanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2812,11 +2812,11 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showTemplatesPanel 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
-          <Element2 size={16} className={showTemplatesPanel ? 'text-primary' : ''} />
+          <Element2 size={16} className={showTemplatesPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2824,13 +2824,13 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showLayersPanel 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
           }}
         >
-          <Layer size={16} className={showLayersPanel ? 'text-primary' : ''} />
+          <Layer size={16} className={showLayersPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2838,12 +2838,12 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showMediaLibrary 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
         >
-          <Gallery size={16} className={showMediaLibrary ? 'text-primary' : ''} />
+          <Gallery size={16} className={showMediaLibrary ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2851,11 +2851,11 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showShapeSettings || selectedElementIds.length > 0 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
-          <Setting4 size={16} className={showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''} />
+          <Setting4 size={16} className={showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2863,7 +2863,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showAnimationsPanel 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2874,7 +2874,7 @@ export default function CanvasContainerNew({
           }}
           title="Animations"
         >
-          <Video size={16} className={showAnimationsPanel ? 'text-primary' : ''} />
+          <Video size={16} className={showAnimationsPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
@@ -2882,12 +2882,12 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
             showBrandKitPanel 
               ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80'
+              : 'bg-card/80 hover:bg-primary/10'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
         >
-          <Colorfilter size={16} className={showBrandKitPanel ? 'text-primary' : ''} />
+          <Colorfilter size={16} className={showBrandKitPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
           variant="outline"
