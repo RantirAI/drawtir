@@ -155,22 +155,22 @@ export default function AnimationsPanel({
       className="w-[320px]"
     >
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AnimationCategory)} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 h-6 p-0 bg-transparent">
+        <TabsList className="w-full grid grid-cols-3 h-6 p-0 bg-muted/50">
           <TabsTrigger 
             value="in" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
           >
             IN
           </TabsTrigger>
           <TabsTrigger 
             value="out" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
           >
             OUT
           </TabsTrigger>
           <TabsTrigger 
             value="custom" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground rounded-sm"
+            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
           >
             CUSTOM
           </TabsTrigger>
