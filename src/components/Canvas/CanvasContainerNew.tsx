@@ -3,7 +3,7 @@ import QRCodeElement from "./QRCodeElement";
 import BrandKitPanel from "@/components/Panels/BrandKitPanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Film, Image as ImageIcon, Palette } from "lucide-react";
+import { Video, Gallery, Colorfilter } from "iconsax-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
@@ -32,7 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Layers, SlidersHorizontal, Upload, Layout, Play } from "lucide-react";
+import { Magicpen, Layer, Setting4, DocumentUpload, Element2, PlayCircle } from "iconsax-react";
 import { Frame, Element } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
@@ -2802,7 +2802,7 @@ export default function CanvasContainerNew({
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
-          <Sparkles className="h-4 w-4" />
+          <Magicpen size={16} />
         </Button>
         <Button
           variant="outline"
@@ -2812,7 +2812,7 @@ export default function CanvasContainerNew({
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
-          <Layout className="h-4 w-4" />
+          <Element2 size={16} />
         </Button>
         <Button
           variant="outline"
@@ -2824,7 +2824,7 @@ export default function CanvasContainerNew({
             setShowLayersPanel(!showLayersPanel);
           }}
         >
-          <Layers className="h-4 w-4" />
+          <Layer size={16} />
         </Button>
         <Button
           variant="outline"
@@ -2835,7 +2835,7 @@ export default function CanvasContainerNew({
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
         >
-          <ImageIcon className="h-4 w-4" />
+          <Gallery size={16} />
         </Button>
         <Button
           variant="outline"
@@ -2845,7 +2845,7 @@ export default function CanvasContainerNew({
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
-          <SlidersHorizontal className="h-4 w-4" />
+          <Setting4 size={16} />
         </Button>
         <Button
           variant="outline"
@@ -2862,7 +2862,7 @@ export default function CanvasContainerNew({
           }}
           title="Animations"
         >
-          <Film className="h-4 w-4" />
+          <Video size={16} />
         </Button>
         <Button
           variant={showBrandKitPanel ? "default" : "outline"}
@@ -2871,7 +2871,7 @@ export default function CanvasContainerNew({
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
         >
-          <Palette className="h-4 w-4" />
+          <Colorfilter size={16} />
         </Button>
         <Button
           variant="default"
@@ -2880,7 +2880,7 @@ export default function CanvasContainerNew({
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
-          <Play className="h-4 w-4" />
+          <PlayCircle size={16} />
         </Button>
       </div>
       
