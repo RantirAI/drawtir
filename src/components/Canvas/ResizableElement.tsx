@@ -771,7 +771,7 @@ export default function ResizableElement({
       {...rest}
       ref={containerRef}
       key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-blue-500' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-2 ring-primary' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
