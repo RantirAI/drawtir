@@ -4,7 +4,7 @@ export default function DrawtirFooter() {
     theme
   } = useTheme();
   const isDark = theme === "dark" || theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return <div className="fixed bottom-8 right-4 z-30 flex items-center gap-3 bg-background/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-xs my-[13px]">
+  return <div className="fixed bottom-2 right-4 z-30 flex items-center gap-3 bg-background/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-xs">
       <span className="text-muted-foreground">Made with</span>
       
       {/* Drawtir Logo */}
