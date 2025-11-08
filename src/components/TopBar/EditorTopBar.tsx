@@ -129,8 +129,8 @@ export default function EditorTopBar({
         <div className="relative z-10 flex items-center gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              <HambergerMenu size={12} />
+            <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white">
+              <HambergerMenu size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-48">
@@ -168,47 +168,47 @@ export default function EditorTopBar({
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6" 
+          className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" 
           onClick={onUndo} 
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
         >
-          <ArrowRotateLeft size={12} />
+          <ArrowRotateLeft size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
         </Button>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6" 
+          className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" 
           onClick={onRedo} 
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
         >
-          <ArrowRotateRight size={12} />
+          <ArrowRotateRight size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
         </Button>
 
         {onSave && !hideCloudFeatures && (
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onSave} disabled={isSaving}>
-            <Save2 size={12} />
+          <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" onClick={onSave} disabled={isSaving}>
+            <Save2 size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onDownload}>
-          <DocumentDownload size={12} />
+        <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" onClick={onDownload}>
+          <DocumentDownload size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
         </Button>
 
-        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onShare}>
-          <Share size={12} />
+        <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" onClick={onShare}>
+          <Share size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
         </Button>
 
         {onTogglePanMode && (
           <Button 
             variant={isPanMode ? "default" : "ghost"} 
             size="icon" 
-            className="h-6 w-6" 
+            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" 
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Mouse size={12} />
+            <Mouse size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
           </Button>
         )}
 
@@ -218,10 +218,10 @@ export default function EditorTopBar({
               <Button 
                 variant={showGrid ? "default" : "ghost"} 
                 size="icon" 
-                className="h-6 w-6 relative" 
+                className="h-6 w-6 relative transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group hover:text-white" 
                 title="Grid Settings"
               >
-                <Grid1 size={12} />
+                <Grid1 size={12} className="transition-transform duration-300 group-hover:rotate-6 group-hover:text-white" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -285,8 +285,8 @@ export default function EditorTopBar({
             <div className="flex items-center gap-1 text-white [&_svg]:text-white">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white">
-              <HambergerMenu size={12} />
+            <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group">
+              <HambergerMenu size={12} className="transition-transform duration-300 group-hover:rotate-6" />
             </Button>
           </DropdownMenuTrigger>
         </DropdownMenu>
@@ -297,47 +297,47 @@ export default function EditorTopBar({
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6 text-white hover:text-white" 
+          className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" 
           onClick={onUndo} 
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
         >
-          <ArrowRotateLeft size={12} />
+          <ArrowRotateLeft size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6 text-white hover:text-white" 
+          className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" 
           onClick={onRedo} 
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
         >
-          <ArrowRotateRight size={12} />
+          <ArrowRotateRight size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onSave && !hideCloudFeatures && (
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onSave} disabled={isSaving}>
-            <Save2 size={12} />
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onSave} disabled={isSaving}>
+            <Save2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onDownload}>
-          <DocumentDownload size={12} />
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onDownload}>
+          <DocumentDownload size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
-        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white" onClick={onShare}>
-          <Share size={12} />
+        <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onShare}>
+          <Share size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onTogglePanMode && (
           <Button 
             variant={isPanMode ? "default" : "ghost"} 
             size="icon" 
-            className="h-6 w-6 text-white hover:text-white" 
+            className="h-6 w-6 text-white hover:text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" 
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Mouse size={12} />
+            <Mouse size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -347,10 +347,10 @@ export default function EditorTopBar({
               <Button 
                 variant={showGrid ? "default" : "ghost"} 
                 size="icon" 
-                className="h-6 w-6 text-white hover:text-white relative" 
+                className="h-6 w-6 text-white hover:text-white relative transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] group" 
                 title="Grid Settings"
               >
-                <Grid1 size={12} />
+                <Grid1 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
