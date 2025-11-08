@@ -61,7 +61,7 @@ export default function IconLibraryModal({
       <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 p-4">
         {filtered.map((iconName) => {
           const Icon = IconComponent[iconName];
-          if (!Icon) return null;
+          if (!Icon || typeof Icon !== 'function') return null;
 
           return (
             <button
@@ -73,7 +73,7 @@ export default function IconLibraryModal({
               className="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/10 transition-all group"
               title={iconName}
             >
-              <Icon className="h-6 w-6 mb-1" />
+              <Icon size={24} className="mb-1" />
               <span className="text-[8px] text-muted-foreground truncate w-full text-center group-hover:text-primary">
                 {iconName.replace(/([A-Z])/g, " $1").trim()}
               </span>
@@ -95,6 +95,7 @@ export default function IconLibraryModal({
               placeholder="Search icons..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
               className="pl-9"
             />
           </div>
