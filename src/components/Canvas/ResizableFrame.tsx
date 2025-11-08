@@ -223,10 +223,24 @@ export default function ResizableFrame({
   };
 
   const handleFrameClick = (e: React.MouseEvent) => {
-    // Allow selecting the frame by clicking anywhere on it
-    if ((e.target as HTMLElement).closest(".resize-handle")) return;
-    e.stopPropagation();
-    onSelect();
+    // Only select frame if clicking directly on the frame background or header, not on elements
+    const target = e.target as HTMLElement;
+    if (target.closest(".resize-handle")) return;
+    
+    // Check if click is on an element (cursor-move indicates it's a ResizableElement)
+    if (target.classList.contains('cursor-move') || target.closest('.cursor-move')) {
+      return; // Don't select frame, let element handle it
+    }
+    
+    // Check if click is on frame UI elements (header or background), not children
+    const isFrameUI = target.classList.contains('frame-drag-header') || 
+                      target.closest('.frame-drag-header') ||
+                      e.currentTarget === target;
+    
+    if (isFrameUI) {
+      e.stopPropagation();
+      onSelect();
+    }
   };
 
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
