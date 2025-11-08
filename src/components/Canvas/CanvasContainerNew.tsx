@@ -2800,7 +2800,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showGeneratePanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
@@ -2812,7 +2812,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showTemplatesPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
@@ -2824,7 +2824,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showLayersPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
@@ -2838,7 +2838,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showMediaLibrary 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
@@ -2851,7 +2851,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showShapeSettings || selectedElementIds.length > 0 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
@@ -2863,7 +2863,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showAnimationsPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2882,7 +2882,7 @@ export default function CanvasContainerNew({
           className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:translate-x-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showBrandKitPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
-              : 'bg-card hover:bg-primary/10 hover:shadow-md'
+              : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
