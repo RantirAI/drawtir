@@ -103,7 +103,13 @@ export default function EditorTopBar({
         </div>
       )}
       
-      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-card/95 backdrop-blur-xl border border-border/60 dark:border-border/40 shadow-lg overflow-hidden">
+      {/* Subtle light source glow behind toolbar */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-radial from-blue-500/25 via-blue-400/15 to-transparent blur-3xl scale-150" />
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/20 via-blue-300/10 to-transparent blur-2xl scale-125" />
+      </div>
+      
+      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)] overflow-hidden">
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
