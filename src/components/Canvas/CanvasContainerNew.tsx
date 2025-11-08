@@ -2799,8 +2799,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showGeneratePanel 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
@@ -2811,8 +2811,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showTemplatesPanel 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
@@ -2823,8 +2823,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showLayersPanel 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
@@ -2837,8 +2837,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showMediaLibrary 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
@@ -2850,8 +2850,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showShapeSettings || selectedElementIds.length > 0 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
@@ -2862,8 +2862,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showAnimationsPanel 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2881,8 +2881,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full backdrop-blur-xl border transition-all ${
             showBrandKitPanel 
-              ? 'bg-primary/25 border-primary/30 text-primary shadow-sm' 
-              : 'bg-background/60 border-border/20 hover:bg-primary/10 hover:border-primary/20'
+              ? 'bg-primary/30 border-primary/40 text-primary shadow-sm' 
+              : 'bg-background/80 border-border/30 hover:bg-primary/15 hover:border-primary/25'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
@@ -2892,7 +2892,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full backdrop-blur-xl bg-primary/25 border border-primary/30 hover:bg-primary/35 transition-all shadow-sm"
+          className="h-10 w-10 rounded-full backdrop-blur-xl bg-primary/30 border border-primary/40 hover:bg-primary/40 transition-all shadow-sm"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
