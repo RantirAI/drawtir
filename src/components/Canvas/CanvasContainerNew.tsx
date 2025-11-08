@@ -2799,8 +2799,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showGeneratePanel 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
@@ -2811,8 +2811,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showTemplatesPanel 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
@@ -2823,8 +2823,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showLayersPanel 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
@@ -2837,8 +2837,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showMediaLibrary 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
@@ -2850,8 +2850,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showShapeSettings || selectedElementIds.length > 0 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
@@ -2862,8 +2862,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showAnimationsPanel 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2881,8 +2881,8 @@ export default function CanvasContainerNew({
           size="icon"
           className={`h-10 w-10 rounded-full transition-colors ${
             showBrandKitPanel 
-              ? 'bg-primary/15 text-primary' 
-              : 'bg-background/40 hover:bg-primary/10'
+              ? 'bg-primary/20 text-primary' 
+              : 'bg-muted hover:bg-primary/10'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
