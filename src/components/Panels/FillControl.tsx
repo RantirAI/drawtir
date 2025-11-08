@@ -18,15 +18,15 @@ import {
 } from "@/components/ui/popover";
 import ColorPicker from "./ColorPicker";
 import { 
-  Palette, 
-  Image as ImageIcon, 
-  GripHorizontal, 
-  Grid3x3, 
-  Video,
-  Plus,
-  Trash2,
-  RotateCw
-} from "lucide-react";
+  Colorfilter, 
+  Gallery, 
+  ColorSwatch, 
+  Grid4, 
+  VideoSquare,
+  Add,
+  Trash,
+  RotateRight
+} from "iconsax-react";
 import { generateGradientCSS, getFitStyle, cn } from "@/lib/utils";
 
 type FillType = "solid" | "image" | "gradient" | "pattern" | "video";
@@ -161,19 +161,19 @@ export default function FillControl({
       <Tabs value={fillType} onValueChange={(v) => onFillTypeChange?.(v as FillType)}>
         <TabsList className="grid grid-cols-5 w-full h-8 bg-muted/50">
           <TabsTrigger value="solid" className="h-6 px-1">
-            <Palette className="h-3 w-3" />
+            <Colorfilter size={12} />
           </TabsTrigger>
           <TabsTrigger value="image" className="h-6 px-1">
-            <ImageIcon className="h-3 w-3" />
+            <Gallery size={12} />
           </TabsTrigger>
           <TabsTrigger value="gradient" className="h-6 px-1">
-            <GripHorizontal className="h-3 w-3" />
+            <ColorSwatch size={12} />
           </TabsTrigger>
           <TabsTrigger value="pattern" className="h-6 px-1">
-            <Grid3x3 className="h-3 w-3" />
+            <Grid4 size={12} />
           </TabsTrigger>
           <TabsTrigger value="video" className="h-6 px-1">
-            <Video className="h-3 w-3" />
+            <VideoSquare size={12} />
           </TabsTrigger>
         </TabsList>
 
@@ -242,7 +242,7 @@ export default function FillControl({
               className="w-full h-7 text-[10px] rounded"
               onClick={() => document.getElementById('fill-image-upload')?.click()}
             >
-              <ImageIcon className="h-3 w-3 mr-1" />
+              <Gallery size={12} className="mr-1" />
               Upload Image
             </Button>
           )}
@@ -297,7 +297,7 @@ export default function FillControl({
                   className="h-5 w-5"
                   onClick={() => onGradientAngleChange?.((gradientAngle + 45) % 360)}
                 >
-                  <RotateCw className="h-3 w-3" />
+                  <RotateRight size={12} />
                 </Button>
               </div>
               <Slider
@@ -321,7 +321,7 @@ export default function FillControl({
                 className="h-5 w-5"
                 onClick={handleAddGradientStop}
               >
-                <Plus className="h-3 w-3" />
+                <Add size={12} />
               </Button>
             </div>
             <div className="space-y-1">
@@ -363,7 +363,7 @@ export default function FillControl({
                       className="h-5 w-5"
                       onClick={() => handleRemoveGradientStop(index)}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash size={12} />
                     </Button>
                   )}
                 </div>
