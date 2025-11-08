@@ -2078,6 +2078,7 @@ export default function CanvasContainerNew({
               x={frame.x}
               y={frame.y}
               onChange={(name) => handleFrameUpdate(frame.id, { name })}
+              onPositionChange={(newX, newY) => handleFrameUpdate(frame.id, { x: newX, y: newY })}
             />
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}

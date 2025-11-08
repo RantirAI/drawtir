@@ -7,11 +7,14 @@ interface FrameBadgeProps {
   x: number;
   y: number;
   onChange: (name: string) => void;
+  onPositionChange?: (x: number, y: number) => void;
 }
 
-export default function FrameBadge({ name, x, y, onChange }: FrameBadgeProps) {
+export default function FrameBadge({ name, x, y, onChange, onPositionChange }: FrameBadgeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(name);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -20,6 +23,31 @@ export default function FrameBadge({ name, x, y, onChange }: FrameBadgeProps) {
       inputRef.current.select();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging && onPositionChange) {
+        const dx = e.clientX - dragStart.x;
+        const dy = e.clientY - dragStart.y;
+        onPositionChange(x + dx, y + dy);
+        setDragStart({ x: e.clientX, y: e.clientY });
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, dragStart, x, y, onPositionChange]);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
@@ -50,6 +78,13 @@ export default function FrameBadge({ name, x, y, onChange }: FrameBadgeProps) {
     }
   };
 
+  const handleDragStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
   if (isEditing) {
     return (
       <div
@@ -74,7 +109,10 @@ export default function FrameBadge({ name, x, y, onChange }: FrameBadgeProps) {
       style={{ left: x, top: y - 28 }}
       onDoubleClick={handleDoubleClick}
     >
-      <GripVertical className="w-3 h-3 text-muted-foreground cursor-grab" />
+      <GripVertical 
+        className="w-3 h-3 text-muted-foreground cursor-grab active:cursor-grabbing" 
+        onMouseDown={handleDragStart}
+      />
       <span className="cursor-text">{name}</span>
       <button
         onClick={handleEditClick}
