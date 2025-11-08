@@ -2797,7 +2797,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showGeneratePanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2809,7 +2809,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showTemplatesPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2821,7 +2821,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showLayersPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2835,7 +2835,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showMediaLibrary 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2848,7 +2848,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showShapeSettings || selectedElementIds.length > 0 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2860,7 +2860,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showAnimationsPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2879,7 +2879,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] shadow-sm group hover:text-white ${
             showBrandKitPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:bg-primary/10 hover:shadow-md'
@@ -2892,7 +2892,7 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[inset_0_0_20px_rgba(59,130,246,0.6),0_8px_16px_rgba(59,130,246,0.4)] bg-primary/20 hover:bg-primary/30 shadow-sm shadow-primary/20 group hover:text-white"
+          className="h-10 w-10 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] bg-primary/20 hover:bg-primary/30 shadow-sm shadow-primary/20 group hover:text-white"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
