@@ -19,9 +19,7 @@ interface IconLibraryModalProps {
 const lucideIconNames = Object.keys(LucideIconMap);
 
 // Get iconsax icon names
-const iconsaxIconNames = Object.keys(IconsaxIcons).filter(
-  (key) => typeof (IconsaxIcons as any)[key] === "function"
-);
+const iconsaxIconNames = Object.keys(IconsaxIcons);
 
 // Get react-icons names (Font Awesome)
 const reactIconNames = Object.keys(ReactIcons);
