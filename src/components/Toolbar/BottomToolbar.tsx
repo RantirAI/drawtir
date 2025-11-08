@@ -46,7 +46,7 @@ export default function BottomToolbar({
           timelinePanelOpen ? 'bottom-[260px]' : 'bottom-12'
         }`}
       >
-        <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-card/80 backdrop-blur-xl border border-border/40 dark:border-border/25 shadow-lg">
+        <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-background/60 backdrop-blur-xl border border-border/30 shadow-lg shadow-black/5">
           {/* Basic Tools */}
           <Tooltip>
             <TooltipTrigger asChild>
