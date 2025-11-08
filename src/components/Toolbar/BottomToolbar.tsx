@@ -59,7 +59,7 @@ export default function BottomToolbar({
               <Button 
                 variant={activeTool === "select" ? "default" : "ghost"} 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={() => onToolChange?.("select")}
               >
                 <Mouse size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -73,7 +73,7 @@ export default function BottomToolbar({
               <Button 
                 variant={activeTool === "pen" ? "default" : "ghost"} 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={() => onToolChange?.("pen")}
               >
                 <Brush2 size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -91,7 +91,7 @@ export default function BottomToolbar({
                 <Button 
                   variant={activeTool === "shape" ? "default" : "ghost"} 
                   size="icon" 
-                  className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                  className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                   onClick={() => {
                     onToolChange?.("shape");
                     // Quick add: insert a default rectangle on click
@@ -110,7 +110,7 @@ export default function BottomToolbar({
               <Button 
                 variant={activeTool === "text" ? "default" : "ghost"} 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={() => onToolChange?.("text")}
               >
                 <TextBlock size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -121,7 +121,7 @@ export default function BottomToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onImageUpload}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onImageUpload}>
                 <GalleryIcon size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
@@ -137,7 +137,7 @@ export default function BottomToolbar({
                 <Button 
                   variant={activeTool === "icon" ? "default" : "ghost"} 
                   size="icon" 
-                  className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                  className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                   onClick={() => {
                     onToolChange?.("icon");
                     onIconSelect?.("heart", "lucide");
@@ -155,7 +155,7 @@ export default function BottomToolbar({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={onLineAdd}
               >
                 <Edit2 size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -169,7 +169,7 @@ export default function BottomToolbar({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={onAddRichText}
               >
                 <Text size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -183,7 +183,7 @@ export default function BottomToolbar({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={onShaderAdd}
               >
                 <BrushBig size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -197,7 +197,7 @@ export default function BottomToolbar({
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group"
+                className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={onQRCodeAdd}
               >
                 <ScanBarcode size={16} className="transition-transform duration-300 group-hover:rotate-6" />
@@ -211,7 +211,7 @@ export default function BottomToolbar({
           {/* Frame & Arrange */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onAddFrame}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onAddFrame}>
                 <Add size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
@@ -220,7 +220,7 @@ export default function BottomToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onDuplicate}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onDuplicate}>
                 <Copy size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
@@ -229,7 +229,7 @@ export default function BottomToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] group" onClick={onDelete}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onDelete}>
                 <Trash size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
