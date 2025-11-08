@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search } from "lucide-react";
-import * as LucideIcons from "lucide-react";
+import { Search, icons as LucideIconMap } from "lucide-react";
 import * as IconsaxIcons from "iconsax-react";
 import * as ReactIcons from "react-icons/fa";
 import * as MaterialIcons from "react-icons/md";
@@ -17,9 +16,7 @@ interface IconLibraryModalProps {
 }
 
 // Filter out non-icon exports from lucide-react
-const lucideIconNames = Object.keys(LucideIcons).filter(
-  (key) => key !== "createLucideIcon" && key !== "icons" && typeof (LucideIcons as any)[key] === "function"
-);
+const lucideIconNames = Object.keys(LucideIconMap);
 
 // Get iconsax icon names
 const iconsaxIconNames = Object.keys(IconsaxIcons).filter(
@@ -73,7 +70,7 @@ export default function IconLibraryModal({
               className="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/10 transition-all group"
               title={iconName}
             >
-              <Icon size={24} className="mb-1" />
+              <Icon size={24} className="mb-1 text-foreground" />
               <span className="text-[8px] text-muted-foreground truncate w-full text-center group-hover:text-primary">
                 {iconName.replace(/([A-Z])/g, " $1").trim()}
               </span>
@@ -87,19 +84,23 @@ export default function IconLibraryModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle>Icon Library</DialogTitle>
-          <div className="relative mt-4">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search icons..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()}
-              className="pl-9"
-            />
-          </div>
-        </DialogHeader>
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
+            <DialogTitle>Icon Library</DialogTitle>
+            <DialogDescription className="sr-only" id="icon-library-desc">
+              Browse and search icon libraries.
+            </DialogDescription>
+            <div className="relative mt-4">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search icons..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                onKeyDownCapture={(e) => e.stopPropagation()}
+                className="pl-9"
+              />
+            </div>
+          </DialogHeader>
 
         <Tabs
           value={activeTab}
@@ -141,7 +142,7 @@ export default function IconLibraryModal({
 
           <ScrollArea className="flex-1">
             <TabsContent value="lucide" className="m-0">
-              {renderIconGrid(lucideIconNames, "lucide", LucideIcons)}
+              {renderIconGrid(lucideIconNames, "lucide", LucideIconMap)}
             </TabsContent>
 
             <TabsContent value="iconsax" className="m-0">
