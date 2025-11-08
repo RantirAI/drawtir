@@ -46,12 +46,13 @@ export default function BottomToolbar({
           timelinePanelOpen ? 'bottom-[260px]' : 'bottom-12'
         }`}
       >
-        {/* Light source glow behind toolbar */}
-        <div className="absolute inset-0 -z-10 blur-3xl opacity-60">
-          <div className="absolute inset-0 bg-gradient-to-t from-blue-400/40 via-blue-300/20 to-transparent rounded-full scale-110" />
+        {/* Stronger light source glow behind toolbar */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-radial from-blue-500/60 via-blue-400/40 to-transparent blur-3xl scale-150" />
+          <div className="absolute inset-0 bg-gradient-to-t from-cyan-400/50 via-blue-300/30 to-transparent blur-2xl scale-125" />
         </div>
         
-        <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-background/30 backdrop-blur-2xl border border-foreground/10 shadow-xl shadow-black/10">
+        <div className="flex items-center gap-1 px-3 py-2 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.5)]">
           {/* Basic Tools */}
           <Tooltip>
             <TooltipTrigger asChild>
