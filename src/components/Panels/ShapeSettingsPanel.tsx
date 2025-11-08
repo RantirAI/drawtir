@@ -32,7 +32,7 @@ import {
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter,
   AlignHorizontalSpaceAround, AlignVerticalSpaceAround, Columns, Rows, Smile, Sparkles, Heading1, Palette, Check
 } from "lucide-react";
-import IconSelector from "../Toolbar/IconSelector";
+import IconLibraryModal from "../Canvas/IconLibraryModal";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -341,6 +341,7 @@ export default function ShapeSettingsPanel({
   const ElementIcon = getElementIcon(elementType);
   const [fillModalOpen, setFillModalOpen] = useState(false);
   const [strokeModalOpen, setStrokeModalOpen] = useState(false);
+  const [iconLibraryOpen, setIconLibraryOpen] = useState(false);
   const { brandKits, activeBrandKit } = useBrandKit();
   const [expandedBrandKit, setExpandedBrandKit] = useState<string | null>(null);
   
@@ -1119,16 +1120,15 @@ export default function ShapeSettingsPanel({
                 <Label className="text-[10px] mb-0.5 block text-muted-foreground">
                   Selected: {iconName || "None"} ({iconFamily || "N/A"})
                 </Label>
-                <IconSelector onIconSelect={onIconChange}>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full h-8 text-[11px] rounded"
-                  >
-                    <Smile className="h-3 w-3 mr-2" />
-                    Change Icon
-                  </Button>
-                </IconSelector>
+                <Button 
+                  onClick={() => setIconLibraryOpen(true)}
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full h-8 text-[11px] rounded"
+                >
+                  <Smile className="h-3 w-3 mr-2" />
+                  Change Icon
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -1559,6 +1559,17 @@ export default function ShapeSettingsPanel({
         )}
       </Accordion>
       </div>
+
+      {/* Icon Library Modal */}
+      {onIconChange && (
+        <IconLibraryModal
+          open={iconLibraryOpen}
+          onOpenChange={setIconLibraryOpen}
+          onSelectIcon={(iconName, library) => {
+            onIconChange(iconName, library);
+          }}
+        />
+      )}
     </DraggablePanel>
   );
 }
