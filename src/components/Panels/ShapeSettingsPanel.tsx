@@ -401,7 +401,7 @@ export default function ShapeSettingsPanel({
                   <div key={brandKit.id} className="rounded-lg overflow-hidden">
                     {/* Brand Kit Header - Clickable to expand */}
                     <button
-                      className="w-full flex items-center justify-between px-2 py-1.5 bg-card hover:bg-accent transition-colors"
+                      className="w-full flex items-center justify-between px-2 py-1.5 bg-card hover:bg-primary/10 transition-colors"
                       onClick={() => setExpandedBrandKit(expandedBrandKit === brandKit.id ? null : brandKit.id)}
                     >
                       <div className="flex items-center gap-2 flex-1">
