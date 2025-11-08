@@ -2795,36 +2795,36 @@ export default function CanvasContainerNew({
       {/* Quick Action Buttons */}
       <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showGeneratePanel 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
           <Magicpen size={16} className={showGeneratePanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showTemplatesPanel 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
           <Element2 size={16} className={showTemplatesPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showLayersPanel 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => {
             setShowLayersPanel(!showLayersPanel);
@@ -2833,12 +2833,12 @@ export default function CanvasContainerNew({
           <Layer size={16} className={showLayersPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showMediaLibrary 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
@@ -2846,24 +2846,24 @@ export default function CanvasContainerNew({
           <Gallery size={16} className={showMediaLibrary ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showShapeSettings || selectedElementIds.length > 0 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
           <Setting4 size={16} className={showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showAnimationsPanel 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => {
             // Set animatingElementId to first selected element when opening from sidebar
@@ -2877,12 +2877,12 @@ export default function CanvasContainerNew({
           <Video size={16} className={showAnimationsPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full backdrop-blur-xl hover:scale-105 transition-all ${
+          className={`h-10 w-10 rounded-full transition-colors ${
             showBrandKitPanel 
-              ? 'bg-primary/20 border-transparent' 
-              : 'bg-card/80 hover:bg-primary/10'
+              ? 'bg-primary/15 text-primary' 
+              : 'bg-background/40 hover:bg-primary/10'
           }`}
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
@@ -2890,9 +2890,9 @@ export default function CanvasContainerNew({
           <Colorfilter size={16} className={showBrandKitPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'} />
         </Button>
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full bg-primary/30 border-transparent hover:bg-primary/40 hover:scale-105 transition-all shadow-lg"
+          className="h-10 w-10 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
