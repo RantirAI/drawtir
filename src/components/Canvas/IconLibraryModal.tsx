@@ -70,7 +70,11 @@ export default function IconLibraryModal({
               className="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary hover:bg-primary/10 transition-all group"
               title={iconName}
             >
-              <Icon size={24} className="mb-1 text-foreground" />
+              {library === 'iconsax' ? (
+                <Icon size={24} color="currentColor" className="mb-1 text-foreground" />
+              ) : (
+                <Icon size={24} className="mb-1 text-foreground" />
+              )}
               <span className="text-[8px] text-muted-foreground truncate w-full text-center group-hover:text-primary">
                 {iconName.replace(/([A-Z])/g, " $1").trim()}
               </span>
