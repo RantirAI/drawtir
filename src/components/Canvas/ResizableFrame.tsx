@@ -300,7 +300,8 @@ export default function ResizableFrame({
       {/* Draggable frame header - only visible when selected */}
       {isSelected && (
         <div 
-          className="frame-drag-header absolute -top-6 left-0 bg-blue-500 text-white text-xs px-3 py-1 rounded-t font-medium cursor-move z-50 select-none whitespace-nowrap"
+          className="frame-drag-header absolute -top-6 left-0 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-tl rounded-tr font-medium cursor-move z-50 select-none whitespace-nowrap text-left"
+          style={{ left: 0 }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
