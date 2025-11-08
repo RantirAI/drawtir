@@ -117,10 +117,10 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange }: F
       <span className="cursor-text">{name}</span>
       <button
         onClick={handleEditClick}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 hover:bg-accent rounded"
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/edit"
         aria-label="Edit frame name"
       >
-        <Edit2 size={12} className="text-muted-foreground" />
+        <Edit2 size={12} className="text-muted-foreground group-hover/edit:text-primary transition-colors" />
       </button>
     </div>
   );
