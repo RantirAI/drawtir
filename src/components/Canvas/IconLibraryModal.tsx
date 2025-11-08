@@ -58,7 +58,7 @@ export default function IconLibraryModal({
       <div className="grid grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 p-4">
         {filtered.map((iconName) => {
           const Icon = IconComponent[iconName];
-          if (!Icon || typeof Icon !== 'function') return null;
+          if (!Icon) return null;
 
           return (
             <button
