@@ -117,8 +117,12 @@ export default function PreviewDialog({
                   <div
                     key={`${element.id}-${animationKey}`}
                     className={`absolute ${
-                      element.animation && element.animation !== "none"
-                        ? `animate-${element.animation}`
+                      element.animations && element.animations.length > 0 && element.animations.some(a => {
+                        const delay = parseFloat(a.delay) || 0;
+                        const duration = parseFloat(a.duration) || 0;
+                        return animationKey >= delay && animationKey < (delay + duration);
+                      })
+                        ? element.animations.map(a => `animate-${a.type}`).join(' ')
                         : ""
                     }`}
                     style={{
@@ -129,7 +133,7 @@ export default function PreviewDialog({
                       opacity: (element.opacity || 100) / 100,
                       transform: `rotate(${element.rotation || 0}deg)`,
                       transformOrigin: "center center",
-                      animationDuration: element.animationDuration,
+                      animationDuration: element.animations?.[0]?.duration,
                     }}
                   >
                     {element.type === "text" ? (

@@ -74,11 +74,15 @@ interface ResizableElementProps {
   dashArray?: string;
   controlPoints?: Array<{ x: number; y: number }>;
   rotation?: number;
-  animation?: string;
-  animationDuration?: string;
-  animationDelay?: string;
-  animationTimingFunction?: string;
-  animationIterationCount?: string;
+  animations?: Array<{
+    id: string;
+    type: string;
+    duration: string;
+    delay: string;
+    timingFunction: string;
+    iterationCount: string;
+    category: "in" | "out" | "custom";
+  }>;
   useFlexLayout?: boolean;
   isSelected: boolean;
   zoom?: number;
@@ -141,11 +145,7 @@ export default function ResizableElement({
   dashArray,
   controlPoints,
   rotation = 0,
-  animation = "none",
-  animationDuration,
-  animationDelay,
-  animationTimingFunction,
-  animationIterationCount,
+  animations = [],
   useFlexLayout = false,
   isLocked: isLockedProp = false,
   isSelected,
@@ -176,22 +176,6 @@ export default function ResizableElement({
   const prevIsPlayingRef = useRef(isPlaying);
   const frozenDelayRef = useRef<number>(0);
 
-  // Freeze effective delay on play start so animations don't restart every tick
-  useEffect(() => {
-    const delaySec = parseTimeSec(animationDelay);
-    if (!prevIsPlayingRef.current && isPlaying) {
-      const base = delaySec - (currentTime ?? 0);
-      frozenDelayRef.current = base;
-    }
-    prevIsPlayingRef.current = isPlaying;
-  }, [isPlaying, currentTime, animationDelay]);
-
-  const normalizeAnimation = (name?: string) => {
-    // Use the exact animation token configured in tailwind
-    return name || "none";
-  };
-  const normalizedAnimation = normalizeAnimation(animation);
-
   const parseTimeSec = (val?: string) => {
     if (!val) return 0;
     if (val.endsWith("ms")) return parseFloat(val) / 1000;
@@ -199,6 +183,26 @@ export default function ResizableElement({
     const n = parseFloat(val);
     return isNaN(n) ? 0 : n;
   };
+
+  // Get active animations based on current time
+  const getActiveAnimations = () => {
+    if (!animations || animations.length === 0 || currentTime === undefined) {
+      return [];
+    }
+
+    return animations.filter(anim => {
+      const delay = parseTimeSec(anim.delay);
+      const duration = parseTimeSec(anim.duration);
+      const endTime = delay + duration;
+      
+      // Animation is active if current time is within its time range
+      return currentTime >= delay && (currentTime < endTime || anim.iterationCount === 'infinite');
+    });
+  };
+
+  const activeAnimations = getActiveAnimations();
+  const animationClasses = activeAnimations.map(anim => `animate-${anim.type}`).join(' ');
+  const primaryAnimation = activeAnimations[0]; // Use first active animation for timing
 
   // Helper function to convert hex to rgba with opacity
   const hexToRgba = (hex: string, opacity: number): string => {
@@ -771,7 +775,7 @@ export default function ResizableElement({
       {...rest}
       ref={containerRef}
       key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-primary' : ''} ${animation && animation !== 'none' ? `animate-${normalizedAnimation}` : ''}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-primary' : ''} ${animationClasses}`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
@@ -781,12 +785,10 @@ export default function ResizableElement({
         mixBlendMode: (blendMode || 'normal') as any,
         transform: `rotate(${rotation}deg)`,
         transformOrigin: 'center center',
-        animationDuration: animationDuration,
-        animationDelay: currentTime !== undefined 
-          ? `${(isPlaying ? frozenDelayRef.current : (parseTimeSec(animationDelay) - (currentTime ?? 0)))}s`
-          : animationDelay,
-        animationTimingFunction: animationTimingFunction,
-        animationIterationCount: animationIterationCount,
+        animationDuration: primaryAnimation?.duration,
+        animationDelay: primaryAnimation?.delay,
+        animationTimingFunction: primaryAnimation?.timingFunction,
+        animationIterationCount: primaryAnimation?.iterationCount,
         animationFillMode: 'both',
         animationPlayState: currentTime !== undefined 
           ? (isPlaying ? 'running' : 'paused')
@@ -979,8 +981,8 @@ export default function ResizableElement({
                 </svg>
               </div>
 
-              {/* Play animation button - only show if animation is set */}
-              {animation && animation !== "none" && (
+              {/* Play animation button - only show if animations are set */}
+              {animations && animations.length > 0 && (
                 <div 
                   className="absolute -top-8 left-1/2 translate-x-4 w-6 h-6 bg-purple-500 rounded-full cursor-pointer border-2 border-white shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                   onClick={(e) => {

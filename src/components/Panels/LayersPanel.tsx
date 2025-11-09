@@ -32,7 +32,7 @@ const getElementIcon = (type: Element["type"], shapeType?: string) => {
 };
 
 const hasAnimation = (element: Element) => {
-  return element.animation && element.animation !== "none";
+  return element.animations && element.animations.length > 0;
 };
 
 export default function LayersPanel({
