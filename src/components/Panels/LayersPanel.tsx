@@ -245,34 +245,18 @@ export default function LayersPanel({
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
                         {hasAnimation(element) && (
                           <Film className="w-2.5 h-2.5 text-primary/60" />
                         )}
                         {element.isLocked && (
-                          <div className="flex items-center">
-                            <Lock className="w-2.5 h-2.5 text-muted-foreground/60" />
-                          </div>
+                          <Lock className="w-2.5 h-2.5 text-amber-500" />
                         )}
-                        {element.isLocked && onElementUpdate && (
+                        {onElementUpdate && (
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-4 w-4 p-0 hover:bg-secondary/50 opacity-0 group-hover:opacity-100"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onElementUpdate(frame.id, element.id, { isLocked: false });
-                            }}
-                            title="Unlock"
-                          >
-                            <Unlock className="w-2.5 h-2.5 text-muted-foreground" />
-                          </Button>
-                        )}
-                        {onElementUpdate && !element.isLocked && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-secondary/50"
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingElementId(element.id);
@@ -284,19 +268,38 @@ export default function LayersPanel({
                             }}
                             title="Rename"
                           >
-                            <Edit2 className="w-3 h-3 text-muted-foreground" />
+                            <Edit2 className="w-2.5 h-2.5 text-muted-foreground" />
+                          </Button>
+                        )}
+                        {onElementUpdate && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 p-0 hover:bg-secondary/50 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onElementUpdate(frame.id, element.id, { isLocked: !element.isLocked });
+                            }}
+                            title={element.isLocked ? "Unlock" : "Lock"}
+                          >
+                            {element.isLocked ? (
+                              <Unlock className="w-2.5 h-2.5 text-muted-foreground" />
+                            ) : (
+                              <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                            )}
                           </Button>
                         )}
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-5 w-5 opacity-0 group-hover:opacity-100 hover:bg-destructive/20"
+                          className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-destructive/20"
                           onClick={(e) => {
                             e.stopPropagation();
                             onElementDelete(element.id);
                           }}
+                          title="Delete"
                         >
-                          <Trash2 className="w-3 h-3 text-destructive" />
+                          <Trash2 className="w-2.5 h-2.5 text-destructive" />
                         </Button>
                       </div>
                     </div>
@@ -313,11 +316,11 @@ export default function LayersPanel({
   return (
     <DraggablePanel
       title="Layers"
-      defaultPosition={{ x: window.innerWidth - 320, y: 100 }}
+      defaultPosition={{ x: window.innerWidth - 380, y: 100 }}
       onClose={onClose}
     >
       <ScrollArea className="h-[500px] pr-2">
-        <div className="space-y-0.5">
+        <div className="space-y-0.5 min-w-[360px]">
           {frames.map((frame) => renderFrame(frame, 0))}
         </div>
       </ScrollArea>

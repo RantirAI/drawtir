@@ -281,7 +281,8 @@ export default function ResizableFrame({
       baseStyle.background = generateGradientCSS(gradientType, gradientAngle, gradientStops);
     } else if (backgroundType === "pattern" && patternFrameId) {
       baseStyle.backgroundColor = backgroundColor;
-    } else if (backgroundType === "video" && videoUrl) {
+    } else if (backgroundType === "video" && videoUrl && videoUrl.trim()) {
+      // Only use black background if video URL is actually provided
       baseStyle.backgroundColor = "#000000";
     } else {
       baseStyle.backgroundColor = backgroundColor;
@@ -326,7 +327,7 @@ export default function ResizableFrame({
         </div>
       )}
       {/* Video background for frames */}
-      {backgroundType === "video" && videoUrl && (
+      {backgroundType === "video" && videoUrl && videoUrl.trim() && (
         <video
           autoPlay
           loop

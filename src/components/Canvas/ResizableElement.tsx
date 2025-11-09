@@ -421,12 +421,8 @@ export default function ResizableElement({
     if ((type === "text" || type === "richtext") && !isLocked) {
       setIsEditing(true);
       setEditText((rest as any).richTextHtml || text || "");
-    } else {
-      // Toggle lock state
-      const next = !isLocked;
-      setIsLocked(next);
-      onUpdate(id, { isLocked: next });
     }
+    // Lock functionality removed - use layers panel to lock/unlock
   };
 
   const handleTextBlur = () => {
@@ -506,8 +502,8 @@ export default function ResizableElement({
     } else if (fillType === "pattern" && patternFrameId) {
       // Pattern will be rendered as a note for now
       baseStyle.backgroundColor = fill;
-    } else if (fillType === "video" && videoUrl) {
-      // Video background handled separately
+    } else if (fillType === "video" && videoUrl && videoUrl.trim()) {
+      // Video background handled separately - only use black if video URL is provided
       baseStyle.backgroundColor = "#000000";
     } else {
       baseStyle.backgroundColor = fill;
@@ -547,7 +543,7 @@ export default function ResizableElement({
     const fillStyle = generateFillStyle();
 
     // Video background for shapes
-    const videoElement = fillType === "video" && videoUrl ? (
+    const videoElement = fillType === "video" && videoUrl && videoUrl.trim() ? (
       <video
         autoPlay
         loop

@@ -2329,7 +2329,11 @@ export default function CanvasContainerNew({
                           ));
                         }}
                         onSelect={() => {
-                          toast.info("Nested frame selected");
+                          // When selecting a nested frame, treat it like selecting a frame
+                          // Show frame-level properties by clearing element selection
+                          setSelectedElementIds([]);
+                          setShowShapeSettings(true);
+                          toast.info(`Selected nested frame: ${nestedFrame.name}`);
                         }}
                       >
                         {/* Elements inside nested frame */}
@@ -2518,11 +2522,13 @@ export default function CanvasContainerNew({
         </DraggablePanel>
       )}
 
-      {showShapeSettings && (selectedElement?.type !== "shader") && (selectedElement || (selectedElementIds.length === 0 && selectedFrame)) && (
+      {showShapeSettings && (selectedElement?.type !== "shader") && (selectedElement || selectedElementIds.length > 1 || (selectedElementIds.length === 0 && selectedFrame)) && (
         <ShapeSettingsPanel
           elementType={selectedElement?.type === "qrcode" ? "qrcode" : selectedElement ? selectedElement.type : "frame"}
           elementName={
-            selectedElement 
+            selectedElementIds.length > 1
+              ? `${selectedElementIds.length} Elements`
+              : selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType
                 ? `Shape - ${selectedElement.shapeType.charAt(0).toUpperCase() + selectedElement.shapeType.slice(1)}`
                 : selectedElement.type === "icon"
