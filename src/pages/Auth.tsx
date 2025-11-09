@@ -188,8 +188,8 @@ export default function Auth() {
           />
           <div className="absolute inset-0 flex items-end justify-center pb-20 px-8">
             <h2 className="text-4xl font-bold text-white text-center leading-tight">
-              Be a Part of<br />
-              Something <span className="font-extrabold">Beautiful</span>
+              Create Amazing<br />
+              <span className="font-extrabold">Designs</span>
             </h2>
           </div>
         </div>
