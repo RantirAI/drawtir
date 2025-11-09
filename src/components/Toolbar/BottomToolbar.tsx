@@ -229,7 +229,7 @@ export default function BottomToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onDelete}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(239,68,68,0.4)] hover:bg-destructive hover:text-destructive-foreground group" onClick={onDelete}>
                 <Trash size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
