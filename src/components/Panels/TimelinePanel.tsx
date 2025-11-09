@@ -45,38 +45,25 @@ export default function TimelinePanel({
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
-  const [draggedElement, setDraggedElement] = useState<string | null>(null);
-  const [dragOffsetPx, setDragOffsetPx] = useState(0);
-  const [dragBarWidthPx, setDragBarWidthPx] = useState(0);
 
-  const getAnimationDuration = (element: Element) => {
-    const duration = element.animationDuration;
-    if (typeof duration === 'string') {
-      if (duration.endsWith('ms')) {
-        return parseFloat(duration) / 1000;
-      } else if (duration.endsWith('s')) {
-        return parseFloat(duration);
-      } else {
-        const n = parseFloat(duration);
-        if (!isNaN(n)) return n; // treat unitless as seconds
-      }
+  const parseDuration = (duration: string): number => {
+    if (duration.endsWith('ms')) {
+      return parseFloat(duration) / 1000;
+    } else if (duration.endsWith('s')) {
+      return parseFloat(duration);
     }
-    return 1; // Default 1 second
+    const n = parseFloat(duration);
+    return !isNaN(n) ? n : 1;
   };
 
-  const getAnimationDelay = (element: Element) => {
-    const delay = element.animationDelay;
-    if (typeof delay === 'string') {
-      if (delay.endsWith('ms')) {
-        return parseFloat(delay) / 1000;
-      } else if (delay.endsWith('s')) {
-        return parseFloat(delay);
-      } else {
-        const n = parseFloat(delay);
-        if (!isNaN(n)) return n; // treat unitless as seconds
-      }
+  const parseDelay = (delay: string): number => {
+    if (delay.endsWith('ms')) {
+      return parseFloat(delay) / 1000;
+    } else if (delay.endsWith('s')) {
+      return parseFloat(delay);
     }
-    return 0; // Default 0 seconds
+    const n = parseFloat(delay);
+    return !isNaN(n) ? n : 0;
   };
 
   const handlePlayheadDrag = (e: React.MouseEvent) => {
@@ -114,53 +101,6 @@ export default function TimelinePanel({
     };
   }, [isDraggingPlayhead, maxDuration]);
 
-  const handleBarDragStart = (elementId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDraggedElement(elementId);
-    if (!timelineRef.current) return;
-    const rect = timelineRef.current.getBoundingClientRect();
-    const el = elements.find(el => el.id === elementId);
-    if (!el) return;
-    const delay = getAnimationDelay(el);
-    const duration = getAnimationDuration(el);
-    const barLeftPx = (delay / maxDuration) * rect.width;
-    const barWidthPx = (duration / maxDuration) * rect.width;
-    setDragBarWidthPx(barWidthPx);
-    setDragOffsetPx(e.clientX - (rect.left + barLeftPx));
-  };
-
-  const handleBarDrag = (e: MouseEvent) => {
-    if (!timelineRef.current || !draggedElement) return;
-    const rect = timelineRef.current.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-    let newLeftPx = x - dragOffsetPx;
-    newLeftPx = Math.max(0, Math.min(newLeftPx, rect.width - dragBarWidthPx));
-    const newDelay = (newLeftPx / rect.width) * maxDuration;
-    onUpdateElement(draggedElement, { animationDelay: `${newDelay * 1000}ms` });
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (draggedElement) {
-        handleBarDrag(e);
-      }
-    };
-
-    const handleMouseUp = () => {
-      setDraggedElement(null);
-    };
-
-    if (draggedElement) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [draggedElement, maxDuration]);
-
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
   // Animation presets organized by category
@@ -194,15 +134,43 @@ export default function TimelinePanel({
   };
 
   const handleAddAnimation = (elementId: string, animationType: string, clickTimeInSeconds?: number) => {
+    const element = elements.find(el => el.id === elementId);
+    if (!element) return;
+
     const delay = clickTimeInSeconds !== undefined ? clickTimeInSeconds : 0;
+    const newAnimation = {
+      id: `anim-${Date.now()}`,
+      type: animationType as any,
+      duration: "0.5s",
+      delay: `${delay}s`,
+      timingFunction: "ease-out",
+      iterationCount: "1",
+      category: (animationType.includes("out") ? "out" : "in") as "in" | "out" | "custom",
+    };
+
+    const currentAnimations = element.animations || [];
     onUpdateElement(elementId, {
-      animation: animationType as Element["animation"],
-      animationDuration: "0.5s",
-      animationDelay: `${delay}s`,
-      animationTimingFunction: "ease-out",
-      animationIterationCount: "1",
-      animationCategory: animationType.includes("out") ? "out" : "in",
+      animations: [...currentAnimations, newAnimation],
     });
+  };
+
+  const handleUpdateAnimation = (elementId: string, animationId: string, updates: Partial<Element["animations"][0]>) => {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || !element.animations) return;
+
+    const updatedAnimations = element.animations.map(anim =>
+      anim.id === animationId ? { ...anim, ...updates } : anim
+    );
+
+    onUpdateElement(elementId, { animations: updatedAnimations });
+  };
+
+  const handleRemoveAnimation = (elementId: string, animationId: string) => {
+    const element = elements.find(el => el.id === elementId);
+    if (!element || !element.animations) return;
+
+    const updatedAnimations = element.animations.filter(anim => anim.id !== animationId);
+    onUpdateElement(elementId, { animations: updatedAnimations });
   };
 
   const handleTrackRightClick = (element: Element, e: React.MouseEvent) => {
@@ -277,12 +245,9 @@ export default function TimelinePanel({
           {/* Element tracks */}
           <div className="space-y-2 mt-4">
             {elements.map((element) => {
-              const delay = getAnimationDelay(element);
-              const duration = getAnimationDuration(element);
-              const startPercent = (delay / maxDuration) * 100;
-              const widthPercent = (duration / maxDuration) * 100;
               const isSelected = selectedElementIds.includes(element.id);
               const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
+              const elementAnimations = element.animations || [];
 
               return (
                 <ContextMenu key={element.id}>
@@ -298,19 +263,10 @@ export default function TimelinePanel({
                       <div className="text-xs truncate font-medium">
                         {elementName}
                       </div>
-                      {element.animationCategory && (
-                        <span className="text-[8px] px-1 py-0.5 rounded bg-primary/20 text-primary uppercase">
-                          {element.animationCategory}
-                        </span>
-                      )}
                     </div>
-                    {element.animation && (
-                      <div className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
-                        <span className="truncate">{element.animation}</span>
-                        <AnimationSettingsDialog
-                          element={element}
-                          onUpdateElement={onUpdateElement}
-                        />
+                    {elementAnimations.length > 0 && (
+                      <div className="text-[10px] text-muted-foreground">
+                        {elementAnimations.length} animation{elementAnimations.length !== 1 ? 's' : ''}
                       </div>
                     )}
                   </div>
@@ -318,40 +274,49 @@ export default function TimelinePanel({
                   <ContextMenu>
                     <ContextMenuTrigger asChild>
                       <div className="flex-1 relative h-8 bg-muted/30 rounded">
-                        {element.animation && (
-                          <div
-                            className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
-                              isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
-                            }`}
-                            style={{
-                              left: `${startPercent}%`,
-                              width: `${widthPercent}%`,
-                            }}
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              onElementSelect?.(element.id);
-                              handleBarDragStart(element.id, e);
-                            }}
-                          >
-                            <div className="h-full flex items-center justify-between px-1">
-                              <div className="text-[10px] text-primary-foreground font-medium truncate">
-                                {element.animation}
+                        {elementAnimations.map((anim) => {
+                          const delay = parseDelay(anim.delay);
+                          const duration = parseDuration(anim.duration);
+                          const startPercent = (delay / maxDuration) * 100;
+                          const widthPercent = (duration / maxDuration) * 100;
+
+                          return (
+                            <div
+                              key={anim.id}
+                              className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
+                                isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
+                              }`}
+                              style={{
+                                left: `${startPercent}%`,
+                                width: `${widthPercent}%`,
+                              }}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                onElementSelect?.(element.id);
+                              }}
+                            >
+                              <div className="h-full flex items-center justify-between px-1">
+                                <div className="text-[10px] text-primary-foreground font-medium truncate">
+                                  {anim.type}
+                                </div>
+                                <AnimationSettingsDialog
+                                  animation={anim}
+                                  elementId={element.id}
+                                  onUpdate={(animId, updates) => handleUpdateAnimation(element.id, animId, updates)}
+                                  onRemove={(animId) => handleRemoveAnimation(element.id, animId)}
+                                  trigger={
+                                    <button
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity h-4 w-4 flex items-center justify-center rounded hover:bg-white/20"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <Settings2 className="h-2.5 w-2.5 text-primary-foreground" />
+                                    </button>
+                                  }
+                                />
                               </div>
-                              <AnimationSettingsDialog
-                                element={element}
-                                onUpdateElement={onUpdateElement}
-                                trigger={
-                                  <button
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity h-4 w-4 flex items-center justify-center rounded hover:bg-white/20"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Settings2 className="h-2.5 w-2.5 text-primary-foreground" />
-                                  </button>
-                                }
-                              />
                             </div>
-                          </div>
-                        )}
+                          );
+                        })}
                       </div>
                     </ContextMenuTrigger>
                     <ContextMenuContent className="w-56" onContextMenu={(e) => e.preventDefault()}>
@@ -378,17 +343,11 @@ export default function TimelinePanel({
                       ))}
                       <ContextMenuSeparator />
                       <ContextMenuItem
-                        onClick={() => onUpdateElement(element.id, { 
-                          animation: undefined,
-                          animationDuration: undefined,
-                          animationDelay: undefined,
-                          animationTimingFunction: undefined,
-                          animationIterationCount: undefined,
-                          animationCategory: undefined,
-                        })}
+                        onClick={() => onUpdateElement(element.id, { animations: [] })}
                         className="text-xs text-destructive"
+                        disabled={elementAnimations.length === 0}
                       >
-                        Remove Animation
+                        Remove All Animations
                       </ContextMenuItem>
                     </ContextMenuContent>
                   </ContextMenu>
@@ -415,17 +374,11 @@ export default function TimelinePanel({
                 ))}
                 <ContextMenuSeparator />
                 <ContextMenuItem
-                  onClick={() => onUpdateElement(element.id, { 
-                    animation: undefined,
-                    animationDuration: undefined,
-                    animationDelay: undefined,
-                    animationTimingFunction: undefined,
-                    animationIterationCount: undefined,
-                    animationCategory: undefined,
-                  })}
+                  onClick={() => onUpdateElement(element.id, { animations: [] })}
                   className="text-xs text-destructive"
+                  disabled={elementAnimations.length === 0}
                 >
-                  Remove Animation
+                  Remove All Animations
                 </ContextMenuItem>
               </ContextMenuContent>
             </ContextMenu>

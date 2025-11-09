@@ -101,13 +101,24 @@ export interface Element {
   blendMode?: string;
   isLocked?: boolean;
   
-  // Animation properties
+  // Animation properties - supports multiple animations
   animation?: "none" | "fade-in" | "fade-out" | "slide-in-from-top" | "slide-in-from-bottom" | "slide-in-from-left" | "slide-in-from-right" | "slide-out-to-top" | "slide-out-to-bottom" | "slide-out-to-left" | "slide-out-to-right" | "zoom-in" | "zoom-out" | "pulse" | "bounce" | "spin" | "ping";
   animationDuration?: string; // e.g. "0.5s"
   animationDelay?: string; // e.g. "0.2s"
   animationTimingFunction?: string; // e.g. "ease-out"
   animationIterationCount?: string; // e.g. "1" | "infinite"
   animationCategory?: "in" | "out" | "custom"; // Category for organizing animations
+  
+  // Multiple animations support
+  animations?: Array<{
+    id: string;
+    type: "fade-in" | "fade-out" | "slide-in-from-top" | "slide-in-from-bottom" | "slide-in-from-left" | "slide-in-from-right" | "slide-out-to-top" | "slide-out-to-bottom" | "slide-out-to-left" | "slide-out-to-right" | "zoom-in" | "zoom-out" | "pulse" | "bounce" | "spin" | "ping";
+    duration: string; // e.g. "0.5s"
+    delay: string; // e.g. "0.2s"
+    timingFunction: string; // e.g. "ease-out"
+    iterationCount: string; // e.g. "1" | "infinite"
+    category: "in" | "out" | "custom";
+  }>;
   
   // Nesting support
   children?: Element[];

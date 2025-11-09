@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -16,24 +15,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { ChevronDown, ChevronUp, Settings2 } from "lucide-react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface AnimationSettingsDialogProps {
-  element: Element;
-  onUpdateElement: (elementId: string, updates: Partial<Element>) => void;
+  animation: NonNullable<Element["animations"]>[0];
+  elementId: string;
+  onUpdate: (animationId: string, updates: Partial<NonNullable<Element["animations"]>[0]>) => void;
+  onRemove: (animationId: string) => void;
   trigger?: React.ReactNode;
 }
 
 export default function AnimationSettingsDialog({
-  element,
-  onUpdateElement,
+  animation,
+  elementId,
+  onUpdate,
+  onRemove,
   trigger,
 }: AnimationSettingsDialogProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const getDurationValue = (duration?: string) => {
-    if (!duration) return 0.5;
+  const getDurationValue = (duration: string) => {
     const match = duration.match(/^([\d.]+)(m?s)$/);
     if (!match) return 0.5;
     const value = parseFloat(match[1]);
@@ -41,8 +43,7 @@ export default function AnimationSettingsDialog({
     return unit === 'ms' ? value / 1000 : value;
   };
 
-  const getDelayValue = (delay?: string) => {
-    if (!delay) return 0;
+  const getDelayValue = (delay: string) => {
     const match = delay.match(/^([\d.]+)(m?s)$/);
     if (!match) return 0;
     const value = parseFloat(match[1]);
@@ -50,35 +51,31 @@ export default function AnimationSettingsDialog({
     return unit === 'ms' ? value / 1000 : value;
   };
 
-  const duration = getDurationValue(element.animationDuration);
-  const delay = getDelayValue(element.animationDelay);
+  const duration = getDurationValue(animation.duration);
+  const delay = getDelayValue(animation.delay);
 
   const handleDurationChange = (value: number) => {
-    onUpdateElement(element.id, { animationDuration: `${value}s` });
+    onUpdate(animation.id, { duration: `${value}s` });
   };
 
   const handleDelayChange = (value: number) => {
-    onUpdateElement(element.id, { animationDelay: `${value}s` });
+    onUpdate(animation.id, { delay: `${value}s` });
   };
 
   const handleTimingFunctionChange = (value: string) => {
-    onUpdateElement(element.id, { animationTimingFunction: value });
+    onUpdate(animation.id, { timingFunction: value });
   };
 
   const handleIterationCountChange = (value: string) => {
-    onUpdateElement(element.id, { animationIterationCount: value });
+    onUpdate(animation.id, { iterationCount: value });
   };
-
-  if (!element.animation || element.animation === "none") {
-    return null;
-  }
 
   return (
     <Popover>
       <PopoverTrigger asChild>
         {trigger || (
           <Button variant="ghost" size="icon" className="h-5 w-5">
-            <Settings2 className="h-3 w-3" />
+            <X className="h-3 w-3" />
           </Button>
         )}
       </PopoverTrigger>
@@ -88,24 +85,26 @@ export default function AnimationSettingsDialog({
         align="start"
       >
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex-1">
             <h4 className="font-medium text-sm">Animation Settings</h4>
-            <p className="text-[10px] text-muted-foreground">
-              {element.animation}
+            <p className="text-[10px] text-muted-foreground truncate">
+              {animation.type}
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => setIsExpanded(!isExpanded)}
-          >
-            {isExpanded ? (
-              <ChevronDown className="h-3 w-3" />
-            ) : (
-              <ChevronUp className="h-3 w-3" />
-            )}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronUp className="h-3 w-3" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <Separator />
@@ -145,7 +144,7 @@ export default function AnimationSettingsDialog({
               <div>
                 <Label className="text-[10px]">Timing Function</Label>
                 <Select
-                  value={element.animationTimingFunction || "ease-out"}
+                  value={animation.timingFunction}
                   onValueChange={handleTimingFunctionChange}
                 >
                   <SelectTrigger className="h-7 text-xs">
@@ -167,7 +166,7 @@ export default function AnimationSettingsDialog({
               <div>
                 <Label className="text-[10px]">Repeat</Label>
                 <Select
-                  value={element.animationIterationCount || "1"}
+                  value={animation.iterationCount}
                   onValueChange={handleIterationCountChange}
                 >
                   <SelectTrigger className="h-7 text-xs">
@@ -191,14 +190,7 @@ export default function AnimationSettingsDialog({
           variant="destructive"
           size="sm"
           className="w-full h-7 text-xs"
-          onClick={() => onUpdateElement(element.id, { 
-            animation: undefined,
-            animationDuration: undefined,
-            animationDelay: undefined,
-            animationTimingFunction: undefined,
-            animationIterationCount: undefined,
-            animationCategory: undefined,
-          })}
+          onClick={() => onRemove(animation.id)}
         >
           Remove Animation
         </Button>
