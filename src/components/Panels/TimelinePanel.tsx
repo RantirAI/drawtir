@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Settings2 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,6 +14,7 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import AnimationSettingsDialog from "./AnimationSettingsDialog";
 
 interface TimelinePanelProps {
   frame: Frame | null;
@@ -192,15 +193,24 @@ export default function TimelinePanel({
     ],
   };
 
-  const handleAddAnimation = (elementId: string, animationType: string) => {
+  const handleAddAnimation = (elementId: string, animationType: string, clickTimeInSeconds?: number) => {
+    const delay = clickTimeInSeconds !== undefined ? clickTimeInSeconds : 0;
     onUpdateElement(elementId, {
       animation: animationType as Element["animation"],
       animationDuration: "0.5s",
-      animationDelay: "0s",
+      animationDelay: `${delay}s`,
       animationTimingFunction: "ease-out",
       animationIterationCount: "1",
       animationCategory: animationType.includes("out") ? "out" : "in",
     });
+  };
+
+  const handleTrackRightClick = (element: Element, e: React.MouseEvent) => {
+    if (!timelineRef.current) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const clickTime = (x / rect.width) * maxDuration;
+    return clickTime;
   };
 
   return (
@@ -295,36 +305,93 @@ export default function TimelinePanel({
                       )}
                     </div>
                     {element.animation && (
-                      <div className="text-[10px] text-muted-foreground truncate">
-                        {element.animation}
+                      <div className="text-[10px] text-muted-foreground truncate flex items-center gap-1">
+                        <span className="truncate">{element.animation}</span>
+                        <AnimationSettingsDialog
+                          element={element}
+                          onUpdateElement={onUpdateElement}
+                        />
                       </div>
                     )}
                   </div>
 
-                  <div className="flex-1 relative h-8 bg-muted/30 rounded">
-                    {element.animation && (
-                      <div
-                        className={`absolute top-1 bottom-1 rounded cursor-move transition-colors ${
-                          isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
-                        }`}
-                        style={{
-                          left: `${startPercent}%`,
-                          width: `${widthPercent}%`,
-                        }}
-                        onMouseDown={(e) => {
-                          e.stopPropagation();
-                          onElementSelect?.(element.id);
-                          handleBarDragStart(element.id, e);
-                        }}
-                      >
-                        <div className="h-full flex items-center justify-center">
-                          <div className="text-[10px] text-primary-foreground font-medium truncate px-1">
-                            {element.animation}
+                  <ContextMenu>
+                    <ContextMenuTrigger asChild>
+                      <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                        {element.animation && (
+                          <div
+                            className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
+                              isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
+                            }`}
+                            style={{
+                              left: `${startPercent}%`,
+                              width: `${widthPercent}%`,
+                            }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              onElementSelect?.(element.id);
+                              handleBarDragStart(element.id, e);
+                            }}
+                          >
+                            <div className="h-full flex items-center justify-between px-1">
+                              <div className="text-[10px] text-primary-foreground font-medium truncate">
+                                {element.animation}
+                              </div>
+                              <AnimationSettingsDialog
+                                element={element}
+                                onUpdateElement={onUpdateElement}
+                                trigger={
+                                  <button
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity h-4 w-4 flex items-center justify-center rounded hover:bg-white/20"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <Settings2 className="h-2.5 w-2.5 text-primary-foreground" />
+                                  </button>
+                                }
+                              />
+                            </div>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    )}
-                  </div>
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="w-56" onContextMenu={(e) => e.preventDefault()}>
+                      {Object.entries(animationsByCategory).map(([category, animations]) => (
+                        <ContextMenuSub key={category}>
+                          <ContextMenuSubTrigger className="text-xs">
+                            {category}
+                          </ContextMenuSubTrigger>
+                          <ContextMenuSubContent className="w-48">
+                            {animations.map((anim) => (
+                              <ContextMenuItem
+                                key={anim.value}
+                                onClick={(e) => {
+                                  const clickTime = handleTrackRightClick(element, e as any);
+                                  handleAddAnimation(element.id, anim.value, clickTime);
+                                }}
+                                className="text-xs"
+                              >
+                                {anim.name}
+                              </ContextMenuItem>
+                            ))}
+                          </ContextMenuSubContent>
+                        </ContextMenuSub>
+                      ))}
+                      <ContextMenuSeparator />
+                      <ContextMenuItem
+                        onClick={() => onUpdateElement(element.id, { 
+                          animation: undefined,
+                          animationDuration: undefined,
+                          animationDelay: undefined,
+                          animationTimingFunction: undefined,
+                          animationIterationCount: undefined,
+                          animationCategory: undefined,
+                        })}
+                        className="text-xs text-destructive"
+                      >
+                        Remove Animation
+                      </ContextMenuItem>
+                    </ContextMenuContent>
+                  </ContextMenu>
                 </div>
               </ContextMenuTrigger>
               <ContextMenuContent className="w-56">
@@ -337,7 +404,7 @@ export default function TimelinePanel({
                       {animations.map((anim) => (
                         <ContextMenuItem
                           key={anim.value}
-                          onClick={() => handleAddAnimation(element.id, anim.value)}
+                          onClick={() => handleAddAnimation(element.id, anim.value, 0)}
                           className="text-xs"
                         >
                           {anim.name}
@@ -348,7 +415,14 @@ export default function TimelinePanel({
                 ))}
                 <ContextMenuSeparator />
                 <ContextMenuItem
-                  onClick={() => onUpdateElement(element.id, { animation: undefined })}
+                  onClick={() => onUpdateElement(element.id, { 
+                    animation: undefined,
+                    animationDuration: undefined,
+                    animationDelay: undefined,
+                    animationTimingFunction: undefined,
+                    animationIterationCount: undefined,
+                    animationCategory: undefined,
+                  })}
                   className="text-xs text-destructive"
                 >
                   Remove Animation
