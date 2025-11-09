@@ -4,6 +4,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, RotateCcw } from "lucide-react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 
 interface TimelinePanelProps {
   frame: Frame | null;
@@ -152,6 +162,47 @@ export default function TimelinePanel({
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
+  // Animation presets organized by category
+  const animationsByCategory = {
+    "Fade": [
+      { name: "Fade In", value: "fade-in" },
+      { name: "Fade Out", value: "fade-out" },
+    ],
+    "Slide In": [
+      { name: "From Top", value: "slide-in-from-top" },
+      { name: "From Bottom", value: "slide-in-from-bottom" },
+      { name: "From Left", value: "slide-in-from-left" },
+      { name: "From Right", value: "slide-in-from-right" },
+    ],
+    "Slide Out": [
+      { name: "To Top", value: "slide-out-to-top" },
+      { name: "To Bottom", value: "slide-out-to-bottom" },
+      { name: "To Left", value: "slide-out-to-left" },
+      { name: "To Right", value: "slide-out-to-right" },
+    ],
+    "Scale": [
+      { name: "Zoom In", value: "zoom-in" },
+      { name: "Zoom Out", value: "zoom-out" },
+      { name: "Bounce", value: "bounce" },
+      { name: "Pulse", value: "pulse" },
+    ],
+    "Special": [
+      { name: "Spin", value: "spin" },
+      { name: "Ping", value: "ping" },
+    ],
+  };
+
+  const handleAddAnimation = (elementId: string, animationType: string) => {
+    onUpdateElement(elementId, {
+      animation: animationType as Element["animation"],
+      animationDuration: "0.5s",
+      animationDelay: "0s",
+      animationTimingFunction: "ease-out",
+      animationIterationCount: "1",
+      animationCategory: animationType.includes("out") ? "out" : "in",
+    });
+  };
+
   return (
     <div className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
@@ -224,13 +275,14 @@ export default function TimelinePanel({
               const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
 
               return (
-                <div 
-                  key={element.id} 
-                  className={`flex items-center gap-2 p-1 rounded transition-colors ${
-                    isSelected ? "bg-blue-500/10 ring-1 ring-blue-500/50" : ""
-                  }`}
-                  onClick={() => onElementSelect?.(element.id)}
-                >
+                <ContextMenu key={element.id}>
+                  <ContextMenuTrigger asChild>
+                    <div 
+                      className={`flex items-center gap-2 p-1 rounded transition-colors cursor-pointer ${
+                        isSelected ? "bg-blue-500/10 ring-1 ring-blue-500/50" : ""
+                      }`}
+                      onClick={() => onElementSelect?.(element.id)}
+                    >
                   <div className="w-32 flex-shrink-0">
                     <div className="flex items-center gap-1">
                       <div className="text-xs truncate font-medium">
@@ -274,6 +326,35 @@ export default function TimelinePanel({
                     )}
                   </div>
                 </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="w-56">
+                {Object.entries(animationsByCategory).map(([category, animations]) => (
+                  <ContextMenuSub key={category}>
+                    <ContextMenuSubTrigger className="text-xs">
+                      {category}
+                    </ContextMenuSubTrigger>
+                    <ContextMenuSubContent className="w-48">
+                      {animations.map((anim) => (
+                        <ContextMenuItem
+                          key={anim.value}
+                          onClick={() => handleAddAnimation(element.id, anim.value)}
+                          className="text-xs"
+                        >
+                          {anim.name}
+                        </ContextMenuItem>
+                      ))}
+                    </ContextMenuSubContent>
+                  </ContextMenuSub>
+                ))}
+                <ContextMenuSeparator />
+                <ContextMenuItem
+                  onClick={() => onUpdateElement(element.id, { animation: undefined })}
+                  className="text-xs text-destructive"
+                >
+                  Remove Animation
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
               );
             })}
           </div>
