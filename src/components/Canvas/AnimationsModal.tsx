@@ -10,6 +10,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Play } from "lucide-react";
 
 export type AnimationType = 
   | "none"
@@ -34,27 +36,28 @@ interface Animation {
   type: AnimationType;
   name: string;
   description: string;
+  category: "in" | "out" | "scale" | "special";
   duration?: string;
 }
 
 const animations: Animation[] = [
-  { type: "none", name: "None", description: "No animation" },
-  { type: "fade-in", name: "Fade In", description: "Fade in from transparent", duration: "0.5s" },
-  { type: "fade-out", name: "Fade Out", description: "Fade out to transparent", duration: "0.5s" },
-  { type: "zoom-in", name: "Zoom In", description: "Zoom in from small", duration: "0.5s" },
-  { type: "zoom-out", name: "Zoom Out", description: "Zoom out to small", duration: "0.5s" },
-  { type: "slide-in-from-top", name: "Slide In Top", description: "Slide in from top", duration: "0.5s" },
-  { type: "slide-in-from-bottom", name: "Slide In Bottom", description: "Slide in from bottom", duration: "0.5s" },
-  { type: "slide-in-from-left", name: "Slide In Left", description: "Slide in from left", duration: "0.5s" },
-  { type: "slide-in-from-right", name: "Slide In Right", description: "Slide in from right", duration: "0.5s" },
-  { type: "slide-out-to-top", name: "Slide Out Top", description: "Slide out to top", duration: "0.5s" },
-  { type: "slide-out-to-bottom", name: "Slide Out Bottom", description: "Slide out to bottom", duration: "0.5s" },
-  { type: "slide-out-to-left", name: "Slide Out Left", description: "Slide out to left", duration: "0.5s" },
-  { type: "slide-out-to-right", name: "Slide Out Right", description: "Slide out to right", duration: "0.5s" },
-  { type: "pulse", name: "Pulse", description: "Pulsing effect (loop)", duration: "2s" },
-  { type: "bounce", name: "Bounce", description: "Bouncing effect (loop)", duration: "1s" },
-  { type: "spin", name: "Spin", description: "Spinning effect (loop)", duration: "1s" },
-  { type: "ping", name: "Ping", description: "Ping effect (loop)", duration: "1s" },
+  { type: "none", name: "None", description: "No animation", category: "in" },
+  { type: "fade-in", name: "Fade In", description: "Smooth fade in", category: "in", duration: "0.5s" },
+  { type: "slide-in-from-top", name: "From Top", description: "Slide from top", category: "in", duration: "0.5s" },
+  { type: "slide-in-from-bottom", name: "From Bottom", description: "Slide from bottom", category: "in", duration: "0.5s" },
+  { type: "slide-in-from-left", name: "From Left", description: "Slide from left", category: "in", duration: "0.5s" },
+  { type: "slide-in-from-right", name: "From Right", description: "Slide from right", category: "in", duration: "0.5s" },
+  { type: "zoom-in", name: "Zoom In", description: "Scale up", category: "scale", duration: "0.5s" },
+  { type: "bounce", name: "Bounce", description: "Bouncing entrance", category: "scale", duration: "1s" },
+  { type: "fade-out", name: "Fade Out", description: "Smooth fade out", category: "out", duration: "0.5s" },
+  { type: "slide-out-to-top", name: "To Top", description: "Slide to top", category: "out", duration: "0.5s" },
+  { type: "slide-out-to-bottom", name: "To Bottom", description: "Slide to bottom", category: "out", duration: "0.5s" },
+  { type: "slide-out-to-left", name: "To Left", description: "Slide to left", category: "out", duration: "0.5s" },
+  { type: "slide-out-to-right", name: "To Right", description: "Slide to right", category: "out", duration: "0.5s" },
+  { type: "zoom-out", name: "Zoom Out", description: "Scale down", category: "out", duration: "0.5s" },
+  { type: "pulse", name: "Pulse", description: "Pulsing loop", category: "special", duration: "2s" },
+  { type: "spin", name: "Spin", description: "Rotation loop", category: "special", duration: "1s" },
+  { type: "ping", name: "Ping", description: "Ping effect", category: "special", duration: "1s" },
 ];
 
 interface AnimationsModalProps {
@@ -77,6 +80,7 @@ export default function AnimationsModal({
   const [delay, setDelay] = useState<string>("0");
   const [easing, setEasing] = useState<string>("ease-out");
   const [iterationCount, setIterationCount] = useState<string>("1");
+  const [activeTab, setActiveTab] = useState<"in" | "out" | "special">("in");
 
   const handleApply = () => {
     onSelectAnimation(
@@ -91,169 +95,395 @@ export default function AnimationsModal({
 
   const triggerPreview = () => setPreviewKey(prev => prev + 1);
 
+  const getAnimationsByCategory = (category: "in" | "out" | "scale" | "special") => {
+    return animations.filter(anim => anim.category === category);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
-          <DialogTitle>Choose Animation</DialogTitle>
+      <DialogContent className="max-w-5xl max-h-[90vh] p-0 gap-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="text-xl font-semibold">Animations</DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-0 h-[600px]">
           {/* Animation Grid - Left 2 columns */}
-          <div className="col-span-2">
-            <ScrollArea className="h-[500px] pr-4">
-              <div className="grid grid-cols-2 gap-3">
-                {animations.map((animation) => (
-                  <div
-                    key={animation.type}
-                    className={`group relative p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      selectedAnimation === animation.type
-                        ? "border-primary bg-primary/10"
-                        : "border-border hover:border-primary/50"
-                    }`}
-                    onClick={() => {
-                      setSelectedAnimation(animation.type);
-                      if (animation.duration) {
-                        setDuration(animation.duration.replace('s', ''));
-                      }
-                    }}
-                    onMouseEnter={() => setHoveredAnimation(animation.type)}
-                    onMouseLeave={() => setHoveredAnimation(null)}
-                  >
-                    {/* Preview Box */}
-                    <div className="h-24 flex items-center justify-center mb-3 bg-muted/50 rounded-md overflow-hidden">
-                      <div
-                        key={`${animation.type}-${hoveredAnimation === animation.type ? previewKey : 'static'}`}
-                        className={`w-12 h-12 bg-primary rounded ${
-                          hoveredAnimation === animation.type && animation.type !== "none"
-                            ? `animate-${animation.type}`
-                            : ""
-                        }`}
-                        style={{
-                          animationDuration: `${duration}s`,
-                          animationDelay: `${delay}s`,
-                          animationTimingFunction: easing,
-                          animationIterationCount: iterationCount,
-                        }}
-                      />
+          <div className="col-span-2 border-r">
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="h-full flex flex-col">
+              <TabsList className="w-full rounded-none border-b bg-muted/30 h-12 p-1">
+                <TabsTrigger value="in" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Entrance
+                </TabsTrigger>
+                <TabsTrigger value="out" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Exit
+                </TabsTrigger>
+                <TabsTrigger value="special" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  Loops
+                </TabsTrigger>
+              </TabsList>
+
+              <ScrollArea className="flex-1">
+                <TabsContent value="in" className="p-6 mt-0">
+                  {/* FADE Section */}
+                  <div className="mb-8">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Fade</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("in").filter(a => a.type.includes("fade")).map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
                     </div>
-                    
-                    {/* Animation Name */}
-                    <div className="font-medium text-sm">{animation.name}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {animation.description}
-                    </div>
-                    {animation.duration && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Duration: {animation.duration}
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
+
+                  {/* SLIDE Section */}
+                  <div className="mb-8">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Slide</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("in").filter(a => a.type.includes("slide")).map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SCALE Section */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Scale</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("scale").map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="out" className="p-6 mt-0">
+                  {/* FADE OUT Section */}
+                  <div className="mb-8">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Fade</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("out").filter(a => a.type.includes("fade")).map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SLIDE OUT Section */}
+                  <div className="mb-8">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Slide</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("out").filter(a => a.type.includes("slide")).map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SCALE OUT Section */}
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Scale</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {getAnimationsByCategory("out").filter(a => a.type.includes("zoom")).map((animation) => (
+                        <AnimationCard
+                          key={animation.type}
+                          animation={animation}
+                          selected={selectedAnimation === animation.type}
+                          hovered={hoveredAnimation === animation.type}
+                          previewKey={previewKey}
+                          duration={duration}
+                          delay={delay}
+                          easing={easing}
+                          iterationCount={iterationCount}
+                          onSelect={() => {
+                            setSelectedAnimation(animation.type);
+                            if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                          }}
+                          onHover={setHoveredAnimation}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="special" className="p-6 mt-0">
+                  <div className="grid grid-cols-3 gap-3">
+                    {getAnimationsByCategory("special").map((animation) => (
+                      <AnimationCard
+                        key={animation.type}
+                        animation={animation}
+                        selected={selectedAnimation === animation.type}
+                        hovered={hoveredAnimation === animation.type}
+                        previewKey={previewKey}
+                        duration={duration}
+                        delay={delay}
+                        easing={easing}
+                        iterationCount={iterationCount}
+                        onSelect={() => {
+                          setSelectedAnimation(animation.type);
+                          if (animation.duration) setDuration(animation.duration.replace('s', ''));
+                        }}
+                        onHover={setHoveredAnimation}
+                      />
+                    ))}
+                  </div>
+                </TabsContent>
+              </ScrollArea>
+            </Tabs>
           </div>
 
           {/* Settings Panel - Right column */}
-          <div className="space-y-4">
-            <div className="p-4 bg-muted/30 rounded-lg border">
-              <h3 className="font-medium text-sm mb-4">Selected animation</h3>
-              
-              {/* Large Preview */}
-              <div className="h-32 flex items-center justify-center bg-background rounded-md mb-4">
-                <div
-                  key={`preview-${selectedAnimation}-${previewKey}`}
-                  className={`w-16 h-16 bg-primary rounded-lg ${
-                    selectedAnimation !== "none" ? `animate-${selectedAnimation}` : ""
-                  }`}
-                  style={{
-                    animationDuration: `${duration}s`,
-                    animationDelay: `${delay}s`,
-                    animationTimingFunction: easing,
-                    animationIterationCount: iterationCount,
-                  }}
-                />
+          <div className="p-6 bg-muted/20 flex flex-col">
+            <div className="flex-1 space-y-6">
+              <div>
+                <h3 className="font-semibold text-sm mb-3 text-foreground">Preview</h3>
+                
+                {/* Large Preview */}
+                <div className="h-40 flex items-center justify-center bg-background rounded-lg border-2 border-border/50 mb-3 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+                  <div
+                    key={`preview-${selectedAnimation}-${previewKey}`}
+                    className={`w-20 h-20 bg-gradient-to-br from-primary to-primary/70 rounded-xl shadow-lg relative z-10 ${
+                      selectedAnimation !== "none" ? `animate-${selectedAnimation}` : ""
+                    }`}
+                    style={{
+                      animationDuration: `${duration}s`,
+                      animationDelay: `${delay}s`,
+                      animationTimingFunction: easing,
+                      animationIterationCount: iterationCount,
+                    }}
+                  />
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={triggerPreview}
+                  disabled={selectedAnimation === "none"}
+                >
+                  <Play className="w-3 h-3 mr-2" />
+                  Replay Preview
+                </Button>
               </div>
 
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full mb-4"
-                onClick={triggerPreview}
-                disabled={selectedAnimation === "none"}
-              >
-                Replay
-              </Button>
-
               {/* Animation Settings */}
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs">Duration (seconds)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={duration}
-                    onChange={(e) => setDuration(e.target.value)}
-                    className="h-8 text-xs"
-                  />
-                </div>
+              <div className="space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">Settings</h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs font-medium">Duration</Label>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={duration}
+                        onChange={(e) => setDuration(e.target.value)}
+                        className="h-9 text-sm"
+                      />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">seconds</span>
+                    </div>
+                  </div>
 
-                <div>
-                  <Label className="text-xs">Delay (seconds)</Label>
-                  <Input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={delay}
-                    onChange={(e) => setDelay(e.target.value)}
-                    className="h-8 text-xs"
-                  />
-                </div>
+                  <div>
+                    <Label className="text-xs font-medium">Delay</Label>
+                    <div className="flex items-center gap-2 mt-1.5">
+                      <Input
+                        type="number"
+                        step="0.1"
+                        min="0"
+                        value={delay}
+                        onChange={(e) => setDelay(e.target.value)}
+                        className="h-9 text-sm"
+                      />
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">seconds</span>
+                    </div>
+                  </div>
 
-                <div>
-                  <Label className="text-xs">Easing</Label>
-                  <Select value={easing} onValueChange={setEasing}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ease-out">Ease Out</SelectItem>
-                      <SelectItem value="ease-in">Ease In</SelectItem>
-                      <SelectItem value="ease-in-out">Ease In Out</SelectItem>
-                      <SelectItem value="linear">Linear</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                  <div>
+                    <Label className="text-xs font-medium">Easing</Label>
+                    <Select value={easing} onValueChange={setEasing}>
+                      <SelectTrigger className="h-9 text-sm mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ease-out">Ease Out</SelectItem>
+                        <SelectItem value="ease-in">Ease In</SelectItem>
+                        <SelectItem value="ease-in-out">Ease In Out</SelectItem>
+                        <SelectItem value="linear">Linear</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div>
-                  <Label className="text-xs">Repeat</Label>
-                  <Select value={iterationCount} onValueChange={setIterationCount}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Once</SelectItem>
-                      <SelectItem value="2">Twice</SelectItem>
-                      <SelectItem value="3">Three times</SelectItem>
-                      <SelectItem value="infinite">Infinite</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div>
+                    <Label className="text-xs font-medium">Repeat</Label>
+                    <Select value={iterationCount} onValueChange={setIterationCount}>
+                      <SelectTrigger className="h-9 text-sm mt-1.5">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">Once</SelectItem>
+                        <SelectItem value="2">Twice</SelectItem>
+                        <SelectItem value="3">Three times</SelectItem>
+                        <SelectItem value="infinite">Infinite</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleApply}>
-            Apply Animation
-          </Button>
+            <div className="flex gap-2 pt-4 border-t mt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button onClick={handleApply} className="flex-1">
+                Apply
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Animation Card Component
+interface AnimationCardProps {
+  animation: Animation;
+  selected: boolean;
+  hovered: boolean;
+  previewKey: number;
+  duration: string;
+  delay: string;
+  easing: string;
+  iterationCount: string;
+  onSelect: () => void;
+  onHover: (type: AnimationType | null) => void;
+}
+
+function AnimationCard({
+  animation,
+  selected,
+  hovered,
+  previewKey,
+  duration,
+  delay,
+  easing,
+  iterationCount,
+  onSelect,
+  onHover,
+}: AnimationCardProps) {
+  return (
+    <div
+      className={`group relative p-3 rounded-lg border-2 cursor-pointer transition-all hover:scale-[1.02] ${
+        selected
+          ? "border-primary bg-primary/5 shadow-sm"
+          : "border-border/50 hover:border-primary/30 hover:bg-accent/30"
+      }`}
+      onClick={onSelect}
+      onMouseEnter={() => onHover(animation.type)}
+      onMouseLeave={() => onHover(null)}
+    >
+      {/* Preview Box */}
+      <div className="h-20 flex items-center justify-center mb-2 bg-gradient-to-br from-muted/80 to-muted/40 rounded-md overflow-hidden relative">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div
+          key={`${animation.type}-${hovered ? previewKey : 'static'}`}
+          className={`w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-lg shadow-md relative z-10 ${
+            hovered && animation.type !== "none" ? `animate-${animation.type}` : ""
+          }`}
+          style={{
+            animationDuration: `${duration}s`,
+            animationDelay: `${delay}s`,
+            animationTimingFunction: easing,
+            animationIterationCount: iterationCount,
+          }}
+        />
+      </div>
+      
+      {/* Animation Name */}
+      <div className="text-center">
+        <div className="font-medium text-xs text-foreground">{animation.name}</div>
+      </div>
+
+      {/* Selected Indicator */}
+      {selected && (
+        <div className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full" />
+      )}
+    </div>
   );
 }
