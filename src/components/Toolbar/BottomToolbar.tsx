@@ -44,7 +44,7 @@ export default function BottomToolbar({
     <TooltipProvider>
       <div 
         className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-          timelinePanelOpen ? 'bottom-[260px]' : 'bottom-12'
+          timelinePanelOpen ? 'bottom-[300px]' : 'bottom-12'
         }`}
       >
         {/* Subtle light source glow behind toolbar */}
