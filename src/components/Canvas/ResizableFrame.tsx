@@ -47,6 +47,7 @@ interface ResizableFrameProps {
   gridSize?: number; // Grid spacing in pixels
   gridStyle?: "lines" | "dots"; // Grid visual style
   snapToGrid?: boolean; // Snap positioning to grid
+  isLocked?: boolean; // Prevent dragging/resizing
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -96,6 +97,7 @@ export default function ResizableFrame({
   gridSize = 20,
   gridStyle = "lines",
   snapToGrid = false,
+  isLocked = false,
   onUpdate,
   isSelected,
   onSelect,
@@ -205,6 +207,8 @@ export default function ResizableFrame({
   }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Don't allow dragging if frame is locked
+    if (isLocked) return;
     // Allow dragging from header OR empty frame background (not on elements or resize handles)
     const target = e.target as HTMLElement;
     if ((target.closest(".resize-handle")) || e.button === 2) return;
@@ -217,6 +221,7 @@ export default function ResizableFrame({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isLocked) return;
     const target = e.target as HTMLElement;
     if ((target.closest(".resize-handle"))) return;
     const isHeader = !!target.closest(".frame-drag-header");
@@ -250,6 +255,7 @@ export default function ResizableFrame({
   };
 
   const handleResizeStart = (e: React.MouseEvent, corner: string) => {
+    if (isLocked) return;
     e.stopPropagation();
     onSelect();
     setIsResizing(corner);
@@ -257,6 +263,7 @@ export default function ResizableFrame({
   };
 
   const handleResizeTouchStart = (e: React.TouchEvent, corner: string) => {
+    if (isLocked) return;
     e.stopPropagation();
     onSelect();
     const touch = e.touches[0];
@@ -321,7 +328,7 @@ export default function ResizableFrame({
       {/* Draggable frame header - only visible when selected */}
       {isSelected && (
         <div 
-          className="frame-drag-header absolute bg-blue-500 text-white text-xs px-2 py-0.5 rounded-tl rounded-tr font-medium cursor-move z-50 select-none whitespace-nowrap"
+          className="frame-drag-header absolute bg-blue-500 text-white text-xs px-2 py-0.5 rounded-tl rounded-tr font-medium cursor-move z-50 select-none whitespace-nowrap flex items-center gap-1"
           style={{ 
             top: '-24px',
             left: '0px'
@@ -330,6 +337,11 @@ export default function ResizableFrame({
           onTouchStart={handleTouchStart}
         >
           {name}
+          {isLocked && (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+            </svg>
+          )}
         </div>
       )}
       {/* Video background for frames */}
@@ -457,7 +469,7 @@ export default function ResizableFrame({
         </div>
       </div>
       
-      {isSelected && (
+      {isSelected && !isLocked && (
         <>
           {/* Dimension label at bottom in blue */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium z-50">

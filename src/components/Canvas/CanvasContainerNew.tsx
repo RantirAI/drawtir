@@ -246,7 +246,15 @@ export default function CanvasContainerNew({
         handleRedo();
       }
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        if (selectedElementIds.length > 0) {
+        // Don't delete if user is editing text (in input, textarea, or contenteditable)
+        const activeElement = document.activeElement;
+        const isEditingText = 
+          activeElement instanceof HTMLInputElement ||
+          activeElement instanceof HTMLTextAreaElement ||
+          (activeElement as HTMLElement)?.isContentEditable ||
+          (activeElement as HTMLElement)?.getAttribute('contenteditable') === 'true';
+        
+        if (!isEditingText && selectedElementIds.length > 0) {
           e.preventDefault();
           handleElementsDelete();
         }
@@ -2148,6 +2156,7 @@ export default function CanvasContainerNew({
                 initialHeight={frame.initialHeight}
                 enableDynamicScale={frame.enableDynamicScale}
                 isSelected={frame.id === selectedFrameId && selectedElementIds.length === 0}
+                isLocked={frame.isLocked}
                 showGrid={showGrid}
                 gridSize={gridSize}
                 gridStyle={gridStyle}
@@ -2330,6 +2339,7 @@ export default function CanvasContainerNew({
                         initialHeight={nestedFrame.initialHeight}
                         enableDynamicScale={nestedFrame.enableDynamicScale}
                         isSelected={false}
+                        isLocked={nestedFrame.isLocked}
                         onUpdate={(id, updates) => {
                           setFrames(frames.map(f => 
                             f.id === frame.id 
@@ -2755,6 +2765,20 @@ export default function CanvasContainerNew({
           }}
           onElementReorder={handleElementReorder}
           onFrameReorder={handleFrameReorder}
+          onFrameUpdate={(frameId, updates) => {
+            handleFrameUpdate(frameId, updates);
+          }}
+          onFrameDelete={(frameId) => {
+            if (frames.length > 1) {
+              setFrames(frames.filter(f => f.id !== frameId));
+              if (selectedFrameId === frameId) {
+                setSelectedFrameId(frames[0].id === frameId ? frames[1].id : frames[0].id);
+              }
+              toast.success("Frame deleted");
+            } else {
+              toast.error("Cannot delete the last frame");
+            }
+          }}
           onClose={() => setShowLayersPanel(false)}
         />
       )}

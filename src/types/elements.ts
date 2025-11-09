@@ -182,4 +182,5 @@ export interface Frame {
   cornerRadius?: number;
   cornerRadiusUnit?: "px" | "rem" | "%" | "em";
   blendMode?: string;
+  isLocked?: boolean;
 }

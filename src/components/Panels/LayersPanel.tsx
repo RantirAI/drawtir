@@ -16,6 +16,8 @@ interface LayersPanelProps {
   onElementUpdate?: (frameId: string, elementId: string, updates: Partial<Element>) => void;
   onElementReorder?: (frameId: string, fromIndex: number, toIndex: number) => void;
   onFrameReorder?: (sourceFrameId: string, targetFrameId: string, position: 'before' | 'after' | 'inside') => void;
+  onFrameUpdate?: (frameId: string, updates: Partial<Frame>) => void;
+  onFrameDelete?: (frameId: string) => void;
   onClose: () => void;
 }
 
@@ -45,6 +47,8 @@ export default function LayersPanel({
   onElementUpdate,
   onElementReorder,
   onFrameReorder,
+  onFrameUpdate,
+  onFrameDelete,
   onClose,
 }: LayersPanelProps) {
   const [collapsedFrames, setCollapsedFrames] = useState<Set<string>>(new Set());
@@ -53,6 +57,7 @@ export default function LayersPanel({
   const [draggedFrame, setDraggedFrame] = useState<string | null>(null);
   const [dragOverFrame, setDragOverFrame] = useState<{ frameId: string; position: 'before' | 'after' | 'inside' } | null>(null);
   const [editingElementId, setEditingElementId] = useState<string | null>(null);
+  const [editingFrameId, setEditingFrameId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
 
   const toggleFrameCollapse = (frameId: string) => {
@@ -121,7 +126,7 @@ export default function LayersPanel({
             setDragOverFrame(null);
           }}
           style={{ marginLeft: `${depth * 16}px` }}
-          className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
+          className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors group ${
             isFrameSelected ? "bg-primary/20" : "bg-secondary/50 hover:bg-secondary"
           } ${
             isDragOverFrame && dragOverFrame.position === 'before' ? "border-t-2 border-primary" : ""
@@ -132,7 +137,7 @@ export default function LayersPanel({
           }`}
           onClick={() => onFrameSelect(frame.id)}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {onFrameReorder && (
               <GripVertical className="w-3 h-3 text-muted-foreground/50 flex-shrink-0 cursor-grab active:cursor-grabbing" />
             )}
@@ -146,11 +151,89 @@ export default function LayersPanel({
               <span className="text-xs">{isCollapsed ? "▶" : "▼"}</span>
             </button>
             <Layers className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-            <span className="text-xs font-medium truncate">{frame.name}</span>
+            {editingFrameId === frame.id ? (
+              <Input
+                autoFocus
+                value={editingName}
+                onChange={(e) => setEditingName(e.target.value)}
+                onBlur={() => {
+                  if (editingName.trim() && onFrameUpdate) {
+                    onFrameUpdate(frame.id, { name: editingName.trim() });
+                  }
+                  setEditingFrameId(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    if (editingName.trim() && onFrameUpdate) {
+                      onFrameUpdate(frame.id, { name: editingName.trim() });
+                    }
+                    setEditingFrameId(null);
+                  } else if (e.key === 'Escape') {
+                    setEditingFrameId(null);
+                  }
+                }}
+                className="h-5 text-xs py-0 px-1"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <span className="text-xs font-medium truncate">{frame.name}</span>
+            )}
           </div>
-          <span className="text-xs text-muted-foreground flex-shrink-0">
-            {frameElements.length + nestedFrames.length}
-          </span>
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            {frame.isLocked && (
+              <Lock className="w-2.5 h-2.5 text-amber-500" />
+            )}
+            <span className="text-xs text-muted-foreground mr-1">
+              {frameElements.length + nestedFrames.length}
+            </span>
+            {onFrameUpdate && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-secondary/50 opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingFrameId(frame.id);
+                  setEditingName(frame.name);
+                }}
+                title="Rename"
+              >
+                <Edit2 className="w-2.5 h-2.5 text-muted-foreground" />
+              </Button>
+            )}
+            {onFrameUpdate && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 hover:bg-secondary/50 opacity-0 group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFrameUpdate(frame.id, { isLocked: !frame.isLocked });
+                }}
+                title={frame.isLocked ? "Unlock" : "Lock"}
+              >
+                {frame.isLocked ? (
+                  <Unlock className="w-2.5 h-2.5 text-muted-foreground" />
+                ) : (
+                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                )}
+              </Button>
+            )}
+            {onFrameDelete && frames.length > 1 && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-destructive/20"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onFrameDelete(frame.id);
+                }}
+                title="Delete"
+              >
+                <Trash2 className="w-2.5 h-2.5 text-destructive" />
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Nested frames and elements inside frame */}
@@ -316,7 +399,7 @@ export default function LayersPanel({
   return (
     <DraggablePanel
       title="Layers"
-      defaultPosition={{ x: window.innerWidth - 380, y: 100 }}
+      defaultPosition={{ x: window.innerWidth - 320, y: 100 }}
       onClose={onClose}
     >
       <ScrollArea className="h-[500px] pr-2">
