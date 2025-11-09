@@ -1,4 +1,5 @@
-import { HambergerMenu, Share, DocumentDownload, Save2, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Mouse } from "iconsax-react";
+import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Mouse } from "iconsax-react";
+import { Save, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -188,7 +189,7 @@ export default function EditorTopBar({
 
         {onSave && !hideCloudFeatures && (
           <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onSave} disabled={isSaving}>
-            <Save2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Save size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -197,7 +198,7 @@ export default function EditorTopBar({
         </Button>
 
         <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onShare}>
-          <Share size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          <Share2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onTogglePanMode && (
@@ -317,7 +318,7 @@ export default function EditorTopBar({
 
         {onSave && !hideCloudFeatures && (
           <Button variant="ghost" size="icon" className="h-6 w-6 text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary group" onClick={onSave} disabled={isSaving}>
-            <Save2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Save size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -326,7 +327,7 @@ export default function EditorTopBar({
         </Button>
 
         <Button variant="ghost" size="icon" className="h-6 w-6 text-white transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary group" onClick={onShare}>
-          <Share size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          <Share2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onTogglePanMode && (
