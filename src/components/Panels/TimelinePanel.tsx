@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Settings2 } from "lucide-react";
+import { Play, Pause, RotateCcw } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -45,6 +45,13 @@ export default function TimelinePanel({
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
+  const [draggingAnimation, setDraggingAnimation] = useState<{
+    elementId: string;
+    animationId: string;
+    startX: number;
+    startDelay: number;
+    mode: 'move' | 'resize';
+  } | null>(null);
 
   const parseDuration = (duration: string): number => {
     if (duration.endsWith('ms')) {
@@ -79,18 +86,49 @@ export default function TimelinePanel({
     handlePlayheadDrag(e);
   };
 
+  const handleAnimationDrag = (e: MouseEvent) => {
+    if (!timelineRef.current || !draggingAnimation) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const timeAtMouse = (x / rect.width) * maxDuration;
+
+    const element = elements.find(el => el.id === draggingAnimation.elementId);
+    if (!element || !element.animations) return;
+
+    const animation = element.animations.find(a => a.id === draggingAnimation.animationId);
+    if (!animation) return;
+
+    if (draggingAnimation.mode === 'move') {
+      const deltaX = x - draggingAnimation.startX;
+      const deltaTime = (deltaX / rect.width) * maxDuration;
+      const newDelay = Math.max(0, Math.min(draggingAnimation.startDelay + deltaTime, maxDuration));
+      handleUpdateAnimation(draggingAnimation.elementId, draggingAnimation.animationId, {
+        delay: `${newDelay.toFixed(2)}s`,
+      });
+    } else if (draggingAnimation.mode === 'resize') {
+      const delay = parseDelay(animation.delay);
+      const newDuration = Math.max(0.1, Math.min(timeAtMouse - delay, maxDuration - delay));
+      handleUpdateAnimation(draggingAnimation.elementId, draggingAnimation.animationId, {
+        duration: `${newDuration.toFixed(2)}s`,
+      });
+    }
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingPlayhead) {
         handlePlayheadDrag(e as any);
+      } else if (draggingAnimation) {
+        handleAnimationDrag(e);
       }
     };
 
     const handleMouseUp = () => {
       setIsDraggingPlayhead(false);
+      setDraggingAnimation(null);
     };
 
-    if (isDraggingPlayhead) {
+    if (isDraggingPlayhead || draggingAnimation) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     }
@@ -99,7 +137,7 @@ export default function TimelinePanel({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDraggingPlayhead, maxDuration]);
+  }, [isDraggingPlayhead, draggingAnimation, maxDuration]);
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
@@ -281,40 +319,61 @@ export default function TimelinePanel({
                           const widthPercent = (duration / maxDuration) * 100;
 
                           return (
-                            <div
+                            <AnimationSettingsDialog
                               key={anim.id}
-                              className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
-                                isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
-                              }`}
-                              style={{
-                                left: `${startPercent}%`,
-                                width: `${widthPercent}%`,
-                              }}
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                onElementSelect?.(element.id);
-                              }}
-                            >
-                              <div className="h-full flex items-center justify-between px-1">
-                                <div className="text-[10px] text-primary-foreground font-medium truncate">
-                                  {anim.type}
+                              animation={anim}
+                              elementId={element.id}
+                              onUpdate={(animId, updates) => handleUpdateAnimation(element.id, animId, updates)}
+                              onRemove={(animId) => handleRemoveAnimation(element.id, animId)}
+                              trigger={
+                                <div
+                                  className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
+                                    isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
+                                  }`}
+                                  style={{
+                                    left: `${startPercent}%`,
+                                    width: `${widthPercent}%`,
+                                  }}
+                                  onMouseDown={(e) => {
+                                    if (!timelineRef.current) return;
+                                    e.stopPropagation();
+                                    onElementSelect?.(element.id);
+                                    
+                                    const rect = timelineRef.current.getBoundingClientRect();
+                                    const barRect = e.currentTarget.getBoundingClientRect();
+                                    const clickX = e.clientX - barRect.left;
+                                    const isResizeZone = clickX > barRect.width - 8;
+                                    
+                                    if (isResizeZone) {
+                                      setDraggingAnimation({
+                                        elementId: element.id,
+                                        animationId: anim.id,
+                                        startX: e.clientX - rect.left,
+                                        startDelay: parseDelay(anim.delay),
+                                        mode: 'resize',
+                                      });
+                                    } else {
+                                      setDraggingAnimation({
+                                        elementId: element.id,
+                                        animationId: anim.id,
+                                        startX: e.clientX - rect.left,
+                                        startDelay: parseDelay(anim.delay),
+                                        mode: 'move',
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <div className="h-full flex items-center justify-between px-1">
+                                    <div className="text-[10px] text-primary-foreground font-medium truncate">
+                                      {anim.type}
+                                    </div>
+                                    <div className="w-2 h-full cursor-ew-resize flex items-center justify-center">
+                                      <div className="w-0.5 h-3 bg-primary-foreground/50 rounded" />
+                                    </div>
+                                  </div>
                                 </div>
-                                <AnimationSettingsDialog
-                                  animation={anim}
-                                  elementId={element.id}
-                                  onUpdate={(animId, updates) => handleUpdateAnimation(element.id, animId, updates)}
-                                  onRemove={(animId) => handleRemoveAnimation(element.id, animId)}
-                                  trigger={
-                                    <button
-                                      className="opacity-0 group-hover:opacity-100 transition-opacity h-4 w-4 flex items-center justify-center rounded hover:bg-white/20"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <Settings2 className="h-2.5 w-2.5 text-primary-foreground" />
-                                    </button>
-                                  }
-                                />
-                              </div>
-                            </div>
+                              }
+                            />
                           );
                         })}
                       </div>
