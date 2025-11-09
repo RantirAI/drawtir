@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, Image as ImageIcon, Trash2, Loader2, Search } from "lucide-react";
+import { Upload, Image as ImageIcon, Trash2, Loader2, Search, MoreVertical, Copy, Link, Files } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
@@ -22,6 +22,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MediaItem {
   id: string;
@@ -248,33 +254,32 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-5xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Media Library</DialogTitle>
+        <DialogContent className="max-w-4xl h-[70vh]">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-base">Media Library</DialogTitle>
           </DialogHeader>
 
           <Tabs defaultValue="uploads" className="flex-1 flex flex-col min-h-0">
-            <TabsList className="w-full">
-              <TabsTrigger value="uploads" className="flex-1">My Uploads</TabsTrigger>
-              <TabsTrigger value="unsplash" className="flex-1">Unsplash</TabsTrigger>
+            <TabsList className="w-full h-8">
+              <TabsTrigger value="uploads" className="flex-1 text-xs">My Uploads</TabsTrigger>
+              <TabsTrigger value="unsplash" className="flex-1 text-xs">Unsplash</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="uploads" className="flex-1 min-h-0 mt-4">
-              <ScrollArea className="h-[calc(80vh-140px)]">
+            <TabsContent value="uploads" className="flex-1 min-h-0 mt-2">
+              <ScrollArea className="h-[calc(70vh-100px)]">
                 {loading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                  <div className="flex items-center justify-center h-24">
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   </div>
                 ) : media.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-                    <ImageIcon className="w-8 h-8 mb-2" />
-                    <p className="text-sm">No media yet</p>
-                    <p className="text-xs">Upload images or use Unsplash</p>
+                  <div className="flex flex-col items-center justify-center h-24 text-muted-foreground">
+                    <ImageIcon className="w-6 h-6 mb-1" />
+                    <p className="text-xs">No media yet</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-4 p-4">
+                  <div className="grid grid-cols-6 gap-2 p-2">
                     {/* Upload tile */}
-                    <label className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border-2 border-dashed border-muted-foreground/30 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all">
+                    <label className="relative aspect-square rounded-md overflow-hidden cursor-pointer group border border-dashed border-border/50 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all">
                       <input
                         type="file"
                         accept="image/*"
@@ -282,13 +287,13 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                         className="hidden"
                         disabled={uploading}
                       />
-                      <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+                      <div className="w-full h-full flex flex-col items-center justify-center gap-1">
                         {uploading ? (
-                          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                          <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
                         ) : (
                           <>
-                            <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors">Upload</span>
+                            <Upload className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                            <span className="text-[10px] text-muted-foreground group-hover:text-primary transition-colors">Upload</span>
                           </>
                         )}
                       </div>
@@ -296,41 +301,73 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
 
                     {/* Existing images */}
                     {media.map((item) => (
-                      <div
-                        key={item.id}
-                        className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
-                        onClick={() => {
-                          onSelectImage?.(item.file_url);
-                          onClose?.();
-                        }}
-                      >
-                        <img
-                          src={item.file_url}
-                          alt={item.file_name}
-                          className="w-full h-full object-cover bg-muted/30"
-                        />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button
-                            size="icon"
-                            variant="destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteId(item.id);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
+                      <div key={item.id} className="relative group">
+                        <div
+                          className="aspect-square rounded-md overflow-hidden cursor-pointer hover:ring-1 hover:ring-primary transition-all"
+                          onClick={() => {
+                            onSelectImage?.(item.file_url);
+                            onClose?.();
+                          }}
+                        >
+                          <img
+                            src={item.file_url}
+                            alt={item.file_name}
+                            className="w-full h-full object-cover bg-muted/30"
+                          />
                         </div>
-                        {item.source === 'ai-generated' && (
-                          <div className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
-                            AI
-                          </div>
-                        )}
-                        {item.source === 'unsplash' && (
-                          <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground text-xs px-2 py-1 rounded">
-                            Unsplash
-                          </div>
-                        )}
+                        <div className="absolute -bottom-4 left-0 right-0 flex items-center justify-between px-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <p className="text-[9px] text-muted-foreground truncate flex-1 max-w-[80%]">{item.file_name}</p>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="icon" className="h-4 w-4 p-0">
+                                <MoreVertical className="w-3 h-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-36">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigator.clipboard.writeText(item.file_url);
+                                  toast({
+                                    title: "Link copied",
+                                    description: "Asset URL copied to clipboard",
+                                  });
+                                }}
+                              >
+                                <Copy className="w-3 h-3 mr-2" />
+                                <span className="text-xs">Copy link</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(item.file_url, '_blank');
+                                }}
+                              >
+                                <Link className="w-3 h-3 mr-2" />
+                                <span className="text-xs">Open link</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onSelectImage?.(item.file_url);
+                                }}
+                              >
+                                <Files className="w-3 h-3 mr-2" />
+                                <span className="text-xs">Duplicate</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeleteId(item.id);
+                                }}
+                              >
+                                <Trash2 className="w-3 h-3 mr-2" />
+                                <span className="text-xs">Delete</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -338,10 +375,10 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value="unsplash" className="flex-1 min-h-0 mt-4">
-              <div className="mb-4 flex gap-2">
+            <TabsContent value="unsplash" className="flex-1 min-h-0 mt-2">
+              <div className="mb-2 flex gap-1.5">
                 <Input
-                  placeholder="Search Unsplash images..."
+                  placeholder="Search Unsplash..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => {
@@ -349,36 +386,38 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                       searchUnsplash(searchQuery);
                     }
                   }}
+                  className="h-8 text-xs"
                 />
                 <Button
                   onClick={() => searchUnsplash(searchQuery)}
                   disabled={unsplashLoading}
+                  size="sm"
+                  className="h-8 px-3"
                 >
                   {unsplashLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-3 h-3 animate-spin" />
                   ) : (
-                    <Search className="w-4 h-4" />
+                    <Search className="w-3 h-3" />
                   )}
                 </Button>
               </div>
 
-              <ScrollArea className="h-[calc(80vh-200px)]">
+              <ScrollArea className="h-[calc(70vh-140px)]">
                 {unsplashLoading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <Loader2 className="w-6 h-6 animate-spin" />
+                  <div className="flex items-center justify-center h-24">
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   </div>
                 ) : unsplashImages.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
-                    <Search className="w-8 h-8 mb-2" />
-                    <p className="text-sm">Search for images</p>
-                    <p className="text-xs">Find professional photos from Unsplash</p>
+                  <div className="flex flex-col items-center justify-center h-24 text-muted-foreground">
+                    <Search className="w-6 h-6 mb-1" />
+                    <p className="text-xs">Search for images</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-4 gap-4 p-4">
+                  <div className="grid grid-cols-6 gap-2 p-2">
                     {unsplashImages.map((image) => (
                       <div
                         key={image.id}
-                        className="relative group aspect-square rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                        className="relative group aspect-square rounded-md overflow-hidden cursor-pointer hover:ring-1 hover:ring-primary transition-all"
                         onClick={() => {
                           handleUnsplashSelect(image);
                           onClose?.();
@@ -389,8 +428,8 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                           alt={image.alt_description || 'Unsplash image'}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2">
-                          <p className="text-white text-xs text-center">
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1">
+                          <p className="text-white text-[9px] truncate w-full">
                             by {image.user.name}
                           </p>
                         </div>
@@ -405,16 +444,16 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
       </Dialog>
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete image?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the image from your media library.
+            <AlertDialogTitle className="text-base">Delete image?</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs">
+              This will permanently delete the image from your media library.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel className="text-xs h-8">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="text-xs h-8">Delete</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

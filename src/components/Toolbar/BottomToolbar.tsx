@@ -23,6 +23,7 @@ interface BottomToolbarProps {
   onQRCodeAdd?: () => void;
   timelinePanelOpen?: boolean;
   onAddRichText?: () => void;
+  onDisablePanMode?: () => void;
 }
 
 export default function BottomToolbar({ 
@@ -38,7 +39,8 @@ export default function BottomToolbar({
   onLineAdd,
   onQRCodeAdd,
   timelinePanelOpen = false,
-  onAddRichText
+  onAddRichText,
+  onDisablePanMode
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
@@ -61,7 +63,10 @@ export default function BottomToolbar({
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
-                onClick={() => onToolChange?.("select")}
+                onClick={() => {
+                  onToolChange?.("select");
+                  onDisablePanMode?.();
+                }}
               >
                 <MousePointer2 size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>

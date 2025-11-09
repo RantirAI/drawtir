@@ -134,7 +134,7 @@ export default function EditorTopBar({
               <HambergerMenu size={12} className="transition-transform duration-300 group-hover:rotate-6" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuContent align="start" className="w-48 bg-card/95 backdrop-blur-xl border-border/50">
             <DropdownMenuItem onClick={() => navigate("/")}>
               Home
             </DropdownMenuItem>
@@ -225,7 +225,7 @@ export default function EditorTopBar({
                 <Grid1 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-border/50">
               <div className="flex items-center justify-between px-2 py-1.5">
                 <Label htmlFor="grid-toggle" className="text-sm font-normal cursor-pointer">Show Grid</Label>
                 <Switch
@@ -354,7 +354,7 @@ export default function EditorTopBar({
                 <Grid1 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-border/50">
               <div className="flex items-center justify-between px-2 py-1.5">
                 <Label htmlFor="grid-toggle-mobile" className="text-sm font-normal cursor-pointer">Show Grid</Label>
                 <Switch

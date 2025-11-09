@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { More2, Edit2 } from "iconsax-react";
+import { More2, Edit2, MouseSquare } from "iconsax-react";
 
 interface FrameBadgeProps {
   name: string;
@@ -8,9 +8,10 @@ interface FrameBadgeProps {
   y: number;
   onChange: (name: string) => void;
   onPositionChange?: (x: number, y: number) => void;
+  onSelect?: () => void;
 }
 
-export default function FrameBadge({ name, x, y, onChange, onPositionChange }: FrameBadgeProps) {
+export default function FrameBadge({ name, x, y, onChange, onPositionChange, onSelect }: FrameBadgeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(name);
   const [isDragging, setIsDragging] = useState(false);
@@ -105,7 +106,7 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange }: F
 
   return (
     <div
-      className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border text-[10px] font-medium hover:bg-card/90 transition-colors group"
+      className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border-border/50 border text-[10px] font-medium hover:bg-card/90 transition-colors group"
       style={{ left: x, top: y - 28 }}
       onDoubleClick={handleDoubleClick}
     >
@@ -115,6 +116,16 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange }: F
         onMouseDown={handleDragStart}
       />
       <span className="cursor-text">{name}</span>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect?.();
+        }}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/select"
+        aria-label="Select frame"
+      >
+        <MouseSquare size={12} className="text-muted-foreground group-hover/select:text-primary transition-colors" />
+      </button>
       <button
         onClick={handleEditClick}
         className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/edit"

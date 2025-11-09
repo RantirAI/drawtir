@@ -2079,6 +2079,7 @@ export default function CanvasContainerNew({
               y={frame.y}
               onChange={(name) => handleFrameUpdate(frame.id, { name })}
               onPositionChange={(newX, newY) => handleFrameUpdate(frame.id, { x: newX, y: newY })}
+              onSelect={() => setSelectedFrameId(frame.id)}
             />
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
@@ -2938,6 +2939,7 @@ export default function CanvasContainerNew({
         onAddRichText={handleAddRichText}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
+        onDisablePanMode={() => setIsPanning(false)}
       />
       
 
