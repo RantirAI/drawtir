@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
-import { Sparkles, Mail, Lock, Loader2 } from "lucide-react";
+import { Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import loginBackground from "@/assets/login-background.jpg";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -96,76 +98,102 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-primary/5 p-6">
-      <Card className="w-full max-w-md p-8 shadow-xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-primary to-accent mb-4">
-            <Sparkles className="w-8 h-8 text-white" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0 md:p-6">
+      <div className="w-full max-w-5xl h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden flex">
+        {/* Left side - Login Form */}
+        <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              {isLogin ? "Login" : "Sign Up"}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {isLogin ? "Enter your credentials to get in" : "Create your account to begin"}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
-            {isLogin ? "Welcome Back" : "Get Started"}
-          </h1>
-          <p className="text-muted-foreground">
-            {isLogin ? "Sign in to create amazing posters" : "Create your account to begin"}
-          </p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <Label htmlFor="email" className="text-sm font-medium mb-2 block">Email</Label>
               <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="pl-10"
+                placeholder="collegeguru@gmail.com"
+                className="h-11"
                 required
               />
             </div>
-          </div>
 
-          <div>
-            <label className="text-sm font-medium mb-2 block">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <div>
+              <Label htmlFor="password" className="text-sm font-medium mb-2 block">Password</Label>
               <Input
+                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="pl-10"
+                className="h-11"
                 required
               />
             </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox id="remember" />
+              <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+                Remember me
+              </Label>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-lg font-semibold"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isLogin ? "Signing in..." : "Creating account..."}
+                </>
+              ) : (
+                <>{isLogin ? "Login" : "Sign Up"}</>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isLogin ? (
+                <>
+                  Not a member? <span className="font-semibold">Create an account</span>
+                </>
+              ) : (
+                <>
+                  Already have an account? <span className="font-semibold">Sign in</span>
+                </>
+              )}
+            </button>
           </div>
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                {isLogin ? "Signing in..." : "Creating account..."}
-              </>
-            ) : (
-              <>{isLogin ? "Sign In" : "Create Account"}</>
-            )}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-          </button>
         </div>
-      </Card>
+
+        {/* Right side - Beautiful Image */}
+        <div className="hidden md:flex md:w-1/2 relative overflow-hidden">
+          <img 
+            src={loginBackground} 
+            alt="Beautiful gradient background" 
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 flex items-end justify-center pb-20 px-8">
+            <h2 className="text-4xl font-bold text-white text-center leading-tight">
+              Be a Part of<br />
+              Something <span className="font-extrabold">Beautiful</span>
+            </h2>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
