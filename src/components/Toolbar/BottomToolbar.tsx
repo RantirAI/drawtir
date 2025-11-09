@@ -1,7 +1,8 @@
 import { 
-  Mouse, Brush2, Box1, TextBlock, Gallery as GalleryIcon, Add,
+  Brush2, Box1, TextBlock, Gallery as GalleryIcon, Add,
   Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2
 } from "iconsax-react";
+import { MousePointer2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -57,12 +58,12 @@ export default function BottomToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
-                variant={activeTool === "select" ? "default" : "ghost"} 
+                variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
                 onClick={() => onToolChange?.("select")}
               >
-                <Mouse size={16} className="transition-transform duration-300 group-hover:rotate-6" />
+                <MousePointer2 size={16} className="transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Select</TooltipContent>
