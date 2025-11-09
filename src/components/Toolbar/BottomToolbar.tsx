@@ -1,8 +1,8 @@
 import { 
-  Brush2, Box1, TextBlock, Gallery as GalleryIcon, Add,
+  Brush2, TextBlock, Gallery as GalleryIcon, Add,
   Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2
 } from "iconsax-react";
-import { MousePointer2 } from "lucide-react";
+import { MousePointer2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -99,7 +99,7 @@ export default function BottomToolbar({
                     onShapeSelect?.("rectangle");
                   }}
                 >
-                  <Box1 size={16} className="transition-transform duration-300 group-hover:rotate-6" />
+                  <Square size={16} className="transition-transform duration-300 group-hover:rotate-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">Shape</TooltipContent>

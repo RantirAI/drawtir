@@ -1,5 +1,5 @@
-import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Mouse } from "iconsax-react";
-import { Save, Share2 } from "lucide-react";
+import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2 } from "iconsax-react";
+import { Save, Share2, Hand } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -209,7 +209,7 @@ export default function EditorTopBar({
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Mouse size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Hand size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -338,7 +338,7 @@ export default function EditorTopBar({
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Mouse size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Hand size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 

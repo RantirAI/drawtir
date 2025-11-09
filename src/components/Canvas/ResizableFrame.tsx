@@ -91,7 +91,7 @@ export default function ResizableFrame({
   gap = 0,
   initialWidth,
   initialHeight,
-  enableDynamicScale = true,
+  enableDynamicScale = false,
   showGrid = false,
   gridSize = 20,
   gridStyle = "lines",
