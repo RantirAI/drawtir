@@ -98,7 +98,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 p-0 md:p-6">
+    <div className="min-h-screen flex items-center justify-center bg-muted/20 p-0 md:p-6">
       <div className="w-full max-w-5xl h-[600px] bg-white rounded-3xl shadow-2xl overflow-hidden flex">
         {/* Left side - Login Form */}
         <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
