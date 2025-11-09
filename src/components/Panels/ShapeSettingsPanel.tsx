@@ -124,6 +124,7 @@ interface ShapeSettingsPanelProps {
   sizeUnit?: "px" | "rem" | "%" | "em";
   x?: number;
   y?: number;
+  isParentFrame?: boolean;
   rotation?: number;
   opacity?: number;
   cornerRadius?: number;
@@ -183,6 +184,7 @@ interface ShapeSettingsPanelProps {
   onTextAlignChange?: (align: "left" | "center" | "right") => void;
   onFontSizeChange?: (size: number) => void;
   onColorChange?: (color: string) => void;
+  onSizeUnitChange?: (unit: "px" | "rem" | "%" | "em") => void;
   onAlign?: (type: string) => void;
   onArrange?: (type: string) => void;
   onDistribute?: (type: string) => void;
@@ -263,6 +265,7 @@ export default function ShapeSettingsPanel({
   sizeUnit = "px",
   x = 0,
   y = 0,
+  isParentFrame = false,
   rotation = 0,
   opacity = 100,
   cornerRadius = 0,
@@ -322,6 +325,7 @@ export default function ShapeSettingsPanel({
   onTextAlignChange,
   onFontSizeChange,
   onColorChange,
+  onSizeUnitChange,
   onAlign,
   onArrange,
   onDistribute,
@@ -809,60 +813,60 @@ export default function ShapeSettingsPanel({
                 <div>
                   <Label className="text-[10px] mb-0.5 block text-muted-foreground">Align to frame</Label>
                   <div className="grid grid-cols-6 gap-0.5">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("left")}
-                      title="Align Left"
-                    >
-                      <AlignStartHorizontal className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("center")}
-                      title="Align Center Horizontal"
-                    >
-                      <AlignCenterHorizontal className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("right")}
-                      title="Align Right"
-                    >
-                      <AlignEndHorizontal className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("top")}
-                      title="Align Top"
-                    >
-                      <AlignStartVertical className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("middle")}
-                      title="Align Center Vertical"
-                    >
-                      <AlignCenterVertical className="h-3 w-3" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-7 w-full p-1 rounded" 
-                      onClick={() => onAlign("bottom")}
-                      title="Align Bottom"
-                    >
-                      <AlignEndVertical className="h-3 w-3" />
-                    </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("left")}
+                    title="Align Left"
+                  >
+                    <AlignStartVertical className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("center")}
+                    title="Align Center Horizontal"
+                  >
+                    <AlignCenterVertical className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("right")}
+                    title="Align Right"
+                  >
+                    <AlignEndVertical className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("top")}
+                    title="Align Top"
+                  >
+                    <AlignStartHorizontal className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("middle")}
+                    title="Align Center Vertical"
+                  >
+                    <AlignCenterHorizontal className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-full p-1 rounded" 
+                    onClick={() => onAlign("bottom")}
+                    title="Align Bottom"
+                  >
+                    <AlignEndHorizontal className="h-3 w-3" />
+                  </Button>
                   </div>
                 </div>
               )}
@@ -1020,7 +1024,9 @@ export default function ShapeSettingsPanel({
                       value={Math.round(width)}
                       onChange={onWidthChange}
                       unit={sizeUnit || "px"}
+                      onUnitChange={onSizeUnitChange}
                       showUnitSelector={true}
+                      availableUnits={isParentFrame ? ["px"] : ["px", "rem", "%", "em"]}
                     />
                   </div>
                 )}
@@ -1031,7 +1037,9 @@ export default function ShapeSettingsPanel({
                       value={Math.round(height)}
                       onChange={onHeightChange}
                       unit={sizeUnit || "px"}
+                      onUnitChange={onSizeUnitChange}
                       showUnitSelector={true}
+                      availableUnits={isParentFrame ? ["px"] : ["px", "rem", "%", "em"]}
                     />
                   </div>
                 )}

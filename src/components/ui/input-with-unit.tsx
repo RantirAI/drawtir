@@ -15,11 +15,12 @@ interface InputWithUnitProps extends Omit<React.ComponentProps<"input">, "onChan
   unit?: "px" | "rem" | "%" | "em";
   onUnitChange?: (unit: "px" | "rem" | "%" | "em") => void;
   showUnitSelector?: boolean;
+  availableUnits?: Array<"px" | "rem" | "%" | "em">;
   className?: string;
 }
 
 const InputWithUnit = React.forwardRef<HTMLInputElement, InputWithUnitProps>(
-  ({ className, value, onChange, unit = "px", onUnitChange, showUnitSelector = true, ...props }, ref) => {
+  ({ className, value, onChange, unit = "px", onUnitChange, showUnitSelector = true, availableUnits = ["px", "rem", "%", "em"], ...props }, ref) => {
     const [localValue, setLocalValue] = React.useState(String(value));
 
     React.useEffect(() => {
@@ -55,10 +56,10 @@ const InputWithUnit = React.forwardRef<HTMLInputElement, InputWithUnitProps>(
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="min-w-[60px]">
-              <SelectItem value="px" className="text-[10px]">px</SelectItem>
-              <SelectItem value="rem" className="text-[10px]">rem</SelectItem>
-              <SelectItem value="%" className="text-[10px]">%</SelectItem>
-              <SelectItem value="em" className="text-[10px]">em</SelectItem>
+              {availableUnits.includes("px") && <SelectItem value="px" className="text-[10px]">px</SelectItem>}
+              {availableUnits.includes("rem") && <SelectItem value="rem" className="text-[10px]">rem</SelectItem>}
+              {availableUnits.includes("%") && <SelectItem value="%" className="text-[10px]">%</SelectItem>}
+              {availableUnits.includes("em") && <SelectItem value="em" className="text-[10px]">em</SelectItem>}
             </SelectContent>
           </Select>
         ) : (

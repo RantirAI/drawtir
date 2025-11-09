@@ -197,6 +197,9 @@ export default function CanvasContainerNew({
   const selectedFrame = frames.find((f) => f.id === selectedFrameId);
   const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
   const selectedElement = selectedElements.length === 1 ? selectedElements[0] : null;
+  
+  // Determine if we're editing a parent frame (no units like %, rem, em) or an element/nested frame (all units)
+  const isEditingParentFrame = !selectedElement && selectedFrame !== undefined;
 
   // Undo/Redo handlers
   const handleUndo = () => {
@@ -2592,6 +2595,7 @@ export default function CanvasContainerNew({
           cornerRadius={selectedElement?.cornerRadius || selectedFrame?.cornerRadius || 0}
           cornerRadiusUnit={selectedElement?.cornerRadiusUnit || selectedFrame?.cornerRadiusUnit || "px"}
           blendMode={selectedElement?.blendMode || selectedFrame?.blendMode || "normal"}
+          isParentFrame={isEditingParentFrame}
           fontFamily={selectedElement?.fontFamily}
           fontWeight={selectedElement?.fontWeight}
           textAlign={selectedElement?.textAlign}
@@ -2698,6 +2702,13 @@ export default function CanvasContainerNew({
           onTextAlignChange={(align) => selectedElement && handleElementUpdate(selectedElement.id, { textAlign: align })}
           onFontSizeChange={(size) => selectedElement && handleElementUpdate(selectedElement.id, { fontSize: size })}
           onColorChange={(color) => selectedElement && handleElementUpdate(selectedElement.id, { color })}
+          onSizeUnitChange={(unit) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { sizeUnit: unit });
+            } else {
+              handleFrameUpdate(selectedFrameId, { sizeUnit: unit });
+            }
+          }}
           onImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { imageFit: fit })}
           onImageUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { imageUrl: url })}
           onBrightnessChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { brightness: val })}
