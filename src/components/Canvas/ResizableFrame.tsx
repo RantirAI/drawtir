@@ -205,17 +205,23 @@ export default function ResizableFrame({
   }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    // Only allow dragging from the header, not the frame body
-    if ((e.target as HTMLElement).closest(".resize-handle") || e.button === 2) return;
-    if (!(e.target as HTMLElement).closest(".frame-drag-header")) return;
+    // Allow dragging from header OR empty frame background (not on elements or resize handles)
+    const target = e.target as HTMLElement;
+    if ((target.closest(".resize-handle")) || e.button === 2) return;
+    const isHeader = !!target.closest(".frame-drag-header");
+    const isBackground = e.currentTarget === target; // click on empty frame area
+    if (!isHeader && !isBackground) return;
     e.stopPropagation();
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).closest(".resize-handle")) return;
-    if (!(e.target as HTMLElement).closest(".frame-drag-header")) return;
+    const target = e.target as HTMLElement;
+    if ((target.closest(".resize-handle"))) return;
+    const isHeader = !!target.closest(".frame-drag-header");
+    const isBackground = e.currentTarget === target;
+    if (!isHeader && !isBackground) return;
     e.stopPropagation();
     const touch = e.touches[0];
     setIsDragging(true);

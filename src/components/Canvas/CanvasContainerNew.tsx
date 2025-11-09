@@ -358,11 +358,25 @@ export default function CanvasContainerNew({
   };
 
   const handleAddFrame = () => {
+    // Place new frame 24px to the right of the rightmost frame (same row)
+    const spacing = 24;
+    const rightmost = frames.reduce(
+      (acc, f) => {
+        const right = f.x + f.width;
+        if (right > acc.right) return { right, y: f.y };
+        return acc;
+      },
+      { right: -Infinity, y: 100 }
+    );
+
+    const newX = isFinite(rightmost.right) ? rightmost.right + spacing : 100;
+    const newY = frames.length ? frames[0].y : 100;
+
     const newFrame: Frame = {
       id: `frame-${Date.now()}`,
       name: `Frame ${frames.length + 1}`,
-      x: 150 + frames.length * 50,
-      y: 150 + frames.length * 50,
+      x: newX,
+      y: newY,
       width: 400,
       height: 600,
       initialWidth: 400,

@@ -122,13 +122,13 @@ export default function LayersPanel({
           }}
           style={{ marginLeft: `${depth * 16}px` }}
           className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors ${
-            isFrameSelected ? "bg-blue-500/20 border border-blue-500" : "bg-secondary/50 hover:bg-secondary"
+            isFrameSelected ? "bg-primary/20" : "bg-secondary/50 hover:bg-secondary"
           } ${
-            isDragOverFrame && dragOverFrame.position === 'before' ? "border-t-2 border-blue-500" : ""
+            isDragOverFrame && dragOverFrame.position === 'before' ? "border-t-2 border-primary" : ""
           } ${
-            isDragOverFrame && dragOverFrame.position === 'after' ? "border-b-2 border-blue-500" : ""
+            isDragOverFrame && dragOverFrame.position === 'after' ? "border-b-2 border-primary" : ""
           } ${
-            isDragOverFrame && dragOverFrame.position === 'inside' ? "ring-2 ring-blue-500" : ""
+            isDragOverFrame && dragOverFrame.position === 'inside' ? "ring-2 ring-primary/50" : ""
           }`}
           onClick={() => onFrameSelect(frame.id)}
         >
@@ -199,8 +199,8 @@ export default function LayersPanel({
                         setDragOverIndex(null);
                       }}
                       className={`flex items-center justify-between px-2 py-1.5 rounded-md cursor-pointer transition-colors group ${
-                        isSelected ? "bg-blue-500/20 border border-blue-500" : "bg-secondary/30 hover:bg-secondary"
-                      } ${isDragOver ? "border-t-2 border-blue-500" : ""}`}
+                        isSelected ? "bg-primary/20" : "bg-secondary/30 hover:bg-secondary"
+                      } ${isDragOver ? "border-t-2 border-primary" : ""}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         onElementSelect(element.id, e.shiftKey || e.ctrlKey || e.metaKey);
@@ -320,7 +320,7 @@ export default function LayersPanel({
       onClose={onClose}
     >
       <ScrollArea className="h-[500px] pr-2">
-        <div className="space-y-0.5 min-w-[360px]">
+        <div className="space-y-0.5 min-w-[260px]">
           {frames.map((frame) => renderFrame(frame, 0))}
         </div>
       </ScrollArea>
