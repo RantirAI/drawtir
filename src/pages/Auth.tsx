@@ -119,7 +119,7 @@ export default function Auth() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="collegeguru@gmail.com"
+                placeholder="example@drawtir.com"
                 className="h-11"
                 required
               />
