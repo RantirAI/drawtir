@@ -51,6 +51,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="digital-tunnel">Digital Tunnel</SelectItem>
             <SelectItem value="glitch">Glitch</SelectItem>
             <SelectItem value="singularity">Singularity</SelectItem>
+            <SelectItem value="mobius-spiral">Mobius Spiral</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -298,6 +299,101 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={0.5}
               max={2.0}
               step={0.1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "mobius-spiral" && (
+        <>
+          <div>
+            <Label>Shape: {shader.shape || 2} (0=Square, 1=Circle, 2=Hexagon)</Label>
+            <Slider
+              value={[shader.shape || 2]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, shape: value }
+              })}
+              min={0}
+              max={2}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Double Spiral: {shader.doubleSpiral || 1}</Label>
+            <Slider
+              value={[shader.doubleSpiral || 1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, doubleSpiral: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Face Decoration: {shader.faceDecoration || 1}</Label>
+            <Slider
+              value={[shader.faceDecoration || 1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, faceDecoration: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Holes: {shader.holes || 0}</Label>
+            <Slider
+              value={[shader.holes || 0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, holes: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Raised: {shader.raised || 0}</Label>
+            <Slider
+              value={[shader.raised || 0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, raised: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Ridges: {shader.ridges || 0}</Label>
+            <Slider
+              value={[shader.ridges || 0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, ridges: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Vertical Lines: {shader.vertLines || 0}</Label>
+            <Slider
+              value={[shader.vertLines || 0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, vertLines: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
             />
           </div>
         </>

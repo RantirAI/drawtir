@@ -86,7 +86,7 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
@@ -99,6 +99,14 @@ export interface Element {
     stretch?: number;
     size?: number;
     waveStrength?: number;
+    shape?: number;
+    rowOffset?: number;
+    faceDecoration?: number;
+    doubleSpiral?: number;
+    holes?: number;
+    raised?: number;
+    ridges?: number;
+    vertLines?: number;
   };
   
   // Common properties

@@ -7,6 +7,7 @@ import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shade
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
+import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -29,7 +30,15 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     vibrancy = 1.1,
     stretch = 1.5,
     size = 1.1,
-    waveStrength = 1.0
+    waveStrength = 1.0,
+    shape = 2,
+    rowOffset = 1,
+    faceDecoration = 1,
+    doubleSpiral = 1,
+    holes = 0,
+    raised = 0,
+    ridges = 0,
+    vertLines = 0
   } = element.shader;
 
   const shaderProps = {
@@ -65,6 +74,19 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     className: "h-full w-full"
   };
 
+  const mobiusSpiralProps = {
+    speed,
+    shape,
+    rowOffset,
+    faceDecoration,
+    doubleSpiral,
+    holes,
+    raised,
+    ridges,
+    vertLines,
+    className: "h-full w-full"
+  };
+
   switch (type) {
     case "kaleidoscope":
       return <Kaleidoscope {...shaderProps} />;
@@ -82,6 +104,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <Glitch {...shaderProps} />;
     case "singularity":
       return <SingularityShaders {...singularityProps} />;
+    case "mobius-spiral":
+      return <ExtrudedMobiusSpiralShaders {...mobiusSpiralProps} />;
     default:
       return null;
   }

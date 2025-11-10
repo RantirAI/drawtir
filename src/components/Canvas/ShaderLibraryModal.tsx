@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
   name: string;
   description: string;
   defaultProps: {
@@ -22,6 +22,14 @@ interface ShaderOption {
     stretch?: number;
     size?: number;
     waveStrength?: number;
+    shape?: number;
+    rowOffset?: number;
+    faceDecoration?: number;
+    doubleSpiral?: number;
+    holes?: number;
+    raised?: number;
+    ridges?: number;
+    vertLines?: number;
   };
 }
 
@@ -96,6 +104,24 @@ const SHADER_OPTIONS: ShaderOption[] = [
       size: 1.1,
       waveStrength: 1.0,
       colorShift: 1.0
+    }
+  },
+  {
+    type: "mobius-spiral",
+    name: "Mobius Spiral",
+    description: "Raymarched 3D extruded Mobius spiral with complex transformations",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      shape: 2,
+      rowOffset: 1,
+      faceDecoration: 1,
+      doubleSpiral: 1,
+      holes: 0,
+      raised: 0,
+      ridges: 0,
+      vertLines: 0
     }
   }
 ];

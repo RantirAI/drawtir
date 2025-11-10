@@ -13,9 +13,10 @@ import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shade
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
+import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
   name: string;
   description: string;
   defaultProps: {
@@ -31,6 +32,14 @@ interface ShaderConfig {
     stretch?: number;
     size?: number;
     waveStrength?: number;
+    shape?: number;
+    rowOffset?: number;
+    faceDecoration?: number;
+    doubleSpiral?: number;
+    holes?: number;
+    raised?: number;
+    ridges?: number;
+    vertLines?: number;
   };
 }
 
@@ -83,6 +92,19 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           size={(props as any).size || 1.1}
           waveStrength={(props as any).waveStrength || 1.0}
           colorShift={(props as any).colorShift || 1.0}
+          className="h-full w-full"
+        />;
+      case "mobius-spiral":
+        return <ExtrudedMobiusSpiralShaders 
+          speed={props.speed}
+          shape={(props as any).shape || 2}
+          rowOffset={(props as any).rowOffset || 1}
+          faceDecoration={(props as any).faceDecoration || 1}
+          doubleSpiral={(props as any).doubleSpiral || 1}
+          holes={(props as any).holes || 0}
+          raised={(props as any).raised || 0}
+          ridges={(props as any).ridges || 0}
+          vertLines={(props as any).vertLines || 0}
           className="h-full w-full"
         />;
       default:
@@ -314,6 +336,87 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       min={0.5}
                       max={2.0}
                       step={0.1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "mobius-spiral" && (
+                <>
+                  <div>
+                    <Label>Shape: {(shaderProps as any).shape || 2} (0=Square, 1=Circle, 2=Hexagon)</Label>
+                    <Slider
+                      value={[(shaderProps as any).shape || 2]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, shape: value })}
+                      min={0}
+                      max={2}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Double Spiral: {(shaderProps as any).doubleSpiral || 1}</Label>
+                    <Slider
+                      value={[(shaderProps as any).doubleSpiral || 1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, doubleSpiral: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Face Decoration: {(shaderProps as any).faceDecoration || 1}</Label>
+                    <Slider
+                      value={[(shaderProps as any).faceDecoration || 1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, faceDecoration: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Holes: {(shaderProps as any).holes || 0}</Label>
+                    <Slider
+                      value={[(shaderProps as any).holes || 0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, holes: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Raised: {(shaderProps as any).raised || 0}</Label>
+                    <Slider
+                      value={[(shaderProps as any).raised || 0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, raised: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Ridges: {(shaderProps as any).ridges || 0}</Label>
+                    <Slider
+                      value={[(shaderProps as any).ridges || 0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, ridges: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Vertical Lines: {(shaderProps as any).vertLines || 0}</Label>
+                    <Slider
+                      value={[(shaderProps as any).vertLines || 0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, vertLines: value })}
+                      min={0}
+                      max={1}
+                      step={1}
                     />
                   </div>
                 </>
