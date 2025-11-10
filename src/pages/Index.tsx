@@ -29,8 +29,8 @@ const Index = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      // Only redirect to gallery if authenticated AND no project is being loaded
-      if (session && !searchParams.get("project")) {
+      // Only redirect to gallery if authenticated AND no project/new design is being created
+      if (session && !searchParams.get("project") && !searchParams.get("new")) {
         navigate("/gallery");
       }
     });
@@ -40,10 +40,10 @@ const Index = () => {
       setUser(session?.user ?? null);
       setIsLoading(false);
       
-      // Only redirect to gallery if authenticated AND no project is being loaded
-      if (session && !searchParams.get("project")) {
+      // Only redirect to gallery if authenticated AND no project/new design is being created
+      if (session && !searchParams.get("project") && !searchParams.get("new")) {
         navigate("/gallery");
-      } else if (session) {
+      } else if (session && searchParams.get("project")) {
         // Authenticated and has project param, load the project
         loadProject();
       }

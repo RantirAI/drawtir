@@ -254,7 +254,7 @@ export default function Gallery() {
                 </TabsTrigger>
               </TabsList>
               <Button 
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/?new=true")}
                 size="default"
                 className="gap-2"
               >
