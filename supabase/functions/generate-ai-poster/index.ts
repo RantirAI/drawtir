@@ -488,7 +488,9 @@ serve(async (req) => {
       canvasHeight = 1200,
       model = 'gemini-2.5-flash', // Default model
       colorPalette, // Optional color palette preference
-      generationTypes = [] // Array of generation types (e.g., ["generate-image", "create"])
+      generationTypes = [], // Array of generation types (e.g., ["generate-image", "create"])
+      conversationHistory = [], // Chat conversation history
+      currentSnapshot = null // Current canvas state
     } = await req.json();
     
     console.log('AI Poster Generation - Model:', model, 'Type:', analysisType, 'Generation types:', generationTypes);
@@ -842,10 +844,39 @@ Return JSON (COMPLETE structure, NO nested frames):
     }
 
     // Make API call to Lovable AI Gateway
+    const isIterative = conversationHistory && conversationHistory.length > 1;
+    const hasExistingDesign = currentSnapshot && currentSnapshot.frames && currentSnapshot.frames.length > 0;
+    
     const messages: any[] = [
       { 
         role: 'system', 
         content: DESIGN_SYSTEM_PROMPT + `
+
+${isIterative ? `
+🔄 ITERATIVE MODE: You are continuing a conversation and building upon an existing design.
+
+CRITICAL RULES FOR ITERATIVE UPDATES:
+1. The user is asking you to MODIFY or ADD to the existing design, NOT replace it entirely
+2. You MUST preserve existing elements that the user doesn't ask to change
+3. If the user says "add X", ADD the new elements to the existing ones
+4. If the user says "change Y", ONLY modify Y and keep everything else
+5. If the user says "make it Z", interpret what they want changed and keep the rest
+6. NEVER remove all elements and start fresh unless explicitly asked to "start over" or "create new"
+
+${hasExistingDesign ? `
+CURRENT DESIGN STATE:
+${JSON.stringify(currentSnapshot.frames[0], null, 2)}
+
+When responding:
+- Include ALL existing elements in your response
+- Add or modify only what the user requests
+- Maintain the same canvas dimensions and backgroundColor unless asked to change
+- Keep element IDs when possible for continuity
+` : ''}
+
+CONVERSATION CONTEXT:
+${conversationHistory.slice(0, -1).map((msg: any) => `${msg.role}: ${msg.content}`).join('\n')}
+` : ''}
 
 🚨 CRITICAL JSON FORMAT REQUIREMENTS - FOLLOW EXACTLY:
 1. Your response MUST start with { (opening brace) as the VERY FIRST CHARACTER

@@ -473,7 +473,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string) => {
+  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string, conversationHistory?: any[]) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -605,6 +605,9 @@ export default function CanvasContainerNew({
       const canvasWidth = selectedFrame?.width || 800;
       const canvasHeight = selectedFrame?.height || 1200;
 
+      // Get current snapshot for iterative updates
+      const currentSnapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+
       // Full AI poster generation with streaming
       const { data: { session } } = await supabase.auth.getSession();
       const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -626,6 +629,8 @@ export default function CanvasContainerNew({
             model,
             colorPalette,
             generationTypes, // Pass generation types to backend
+            conversationHistory: conversationHistory || [], // Pass conversation history
+            currentSnapshot, // Pass current canvas state
           }),
         }
       );

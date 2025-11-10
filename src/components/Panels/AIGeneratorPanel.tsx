@@ -24,7 +24,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationTypes: string[], model: string, colorPalette?: string) => Promise<void>;
+  onGenerate: (generationTypes: string[], model: string, colorPalette?: string, conversationHistory?: ChatMessage[]) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -36,6 +36,12 @@ interface Conversation {
   generation_type: string;
   output_snapshot: CanvasSnapshot;
   created_at: string;
+}
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
 }
 
 export default function AIGeneratorPanel({
@@ -63,6 +69,8 @@ export default function AIGeneratorPanel({
   const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
   const [accordionValue, setAccordionValue] = useState<string>("");
   const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const colorPalettes = [
     { id: "auto", name: "Auto Select", colors: [] },
@@ -125,6 +133,16 @@ export default function AIGeneratorPanel({
   }, [activeTab, projectId]);
 
   const handleGenerate = async () => {
+    if (!description.trim()) return;
+    
+    // Add user message to chat
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: description,
+      timestamp: new Date()
+    };
+    setChatMessages(prev => [...prev, userMessage]);
+    
     let paletteToUse = selectedPalette !== "auto" ? selectedPalette : undefined;
     
     // If custom palette is selected and has valid colors, use those
@@ -135,13 +153,30 @@ export default function AIGeneratorPanel({
       }
     }
     
-    // Pass all selected generation types
-    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse);
+    // Pass all selected generation types and conversation history
+    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse, [...chatMessages, userMessage]);
+    
+    // Add AI response to chat
+    const aiMessage: ChatMessage = {
+      role: 'assistant',
+      content: `I've ${chatMessages.length === 0 ? 'created' : 'updated'} the design based on your request.`,
+      timestamp: new Date()
+    };
+    setChatMessages(prev => [...prev, aiMessage]);
+    
+    // Clear the input
+    setDescription("");
+    
     // Reload conversations after generation
     if (projectId) {
       loadConversations();
     }
   };
+
+  // Scroll chat to bottom
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
 
   const toggleGenerationType = (typeId: string) => {
     if (typeId === "freeform") {
@@ -326,6 +361,34 @@ export default function AIGeneratorPanel({
           </div>
 
           <TabsContent value="generator" className="p-3 space-y-3 mt-0">
+            {/* Chat Messages */}
+            {chatMessages.length > 0 && (
+              <ScrollArea className="h-[200px] bg-muted/30 border border-border rounded-lg p-3">
+                <div className="space-y-3">
+                  {chatMessages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                          msg.role === 'user'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-background border border-border'
+                        }`}
+                      >
+                        <p className="text-xs opacity-70 mb-1">
+                          {msg.role === 'user' ? 'You' : 'AI'}
+                        </p>
+                        <p>{msg.content}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+              </ScrollArea>
+            )}
+
             {/* Description Section */}
             <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
               {/* Description Label and AI Model Selector Row */}
@@ -355,7 +418,13 @@ export default function AIGeneratorPanel({
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Ask Drawtir to create..."
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleGenerate();
+                  }
+                }}
+                placeholder={chatMessages.length === 0 ? "Describe what you want to create..." : "Tell me what to change or add..."}
                 className="min-h-[80px] text-sm resize-none bg-background border-border placeholder:text-muted-foreground"
               />
               
@@ -412,11 +481,38 @@ export default function AIGeneratorPanel({
                   {isGenerating ? (
                     <span className="truncate">{generationProgress || "Generating..."}</span>
                   ) : (
-                    "Generate"
+                    chatMessages.length === 0 ? "Generate" : "Update"
                   )}
                 </Button>
               </div>
+
+              {/* New Conversation Button */}
+              {chatMessages.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setChatMessages([]);
+                    setDescription("");
+                    toast.success("Started new conversation");
+                  }}
+                  className="w-full h-8 text-xs"
+                >
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                  New Conversation
+                </Button>
+              )}
             </div>
+
+            {/* Context Indicator */}
+            {chatMessages.length > 0 && (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-2 text-xs text-center">
+                <span className="text-primary font-medium">
+                  💬 {chatMessages.length} message{chatMessages.length !== 1 ? 's' : ''} in conversation
+                </span>
+                <p className="text-muted-foreground mt-0.5">AI will build on your existing design</p>
+              </div>
+            )}
 
             {/* Uploaded Images Preview */}
             {captionImage && captionImage.length > 0 && (
