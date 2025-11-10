@@ -270,7 +270,6 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                         onClick={() => setPreviewShader(shader)}
                         className="flex-1"
                       >
-                        <Eye className="w-3 h-3 mr-1" />
                         Preview
                       </Button>
                       <Button
@@ -281,7 +280,6 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                         }}
                         className="flex-1"
                       >
-                        <Sparkles className="w-3 h-3 mr-1" />
                         Use
                       </Button>
                     </div>
