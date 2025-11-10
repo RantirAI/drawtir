@@ -54,6 +54,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="singularity">Singularity</SelectItem>
             <SelectItem value="mobius-spiral">Mobius Spiral</SelectItem>
             <SelectItem value="fire-3d">Fire 3D</SelectItem>
+            <SelectItem value="pyramid-pattern">Pyramid Pattern</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -451,6 +452,75 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               })}
               min={0.5}
               max={2.0}
+              step={0.1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "pyramid-pattern" && (
+        <>
+          <div>
+            <Label>Scale: {shader.scale?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.scale || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, scale: value }
+              })}
+              min={0.5}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Offset Rows: {shader.offsetRows || 1}</Label>
+            <Slider
+              value={[shader.offsetRows || 1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, offsetRows: value }
+              })}
+              min={0}
+              max={1}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Bump Strength: {shader.bumpStrength?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.bumpStrength || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, bumpStrength: value }
+              })}
+              min={0.0}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Hatch Intensity: {shader.hatchIntensity?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.hatchIntensity || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, hatchIntensity: value }
+              })}
+              min={0.0}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Light Movement: {shader.lightMovement?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.lightMovement || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, lightMovement: value }
+              })}
+              min={0.0}
+              max={3.0}
               step={0.1}
             />
           </div>

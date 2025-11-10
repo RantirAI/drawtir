@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern";
   name: string;
   description: string;
   defaultProps: {
@@ -32,6 +32,11 @@ interface ShaderOption {
     vertLines?: number;
     height?: number;
     turbulence?: number;
+    scale?: number;
+    offsetRows?: number;
+    bumpStrength?: number;
+    hatchIntensity?: number;
+    lightMovement?: number;
   };
 }
 
@@ -152,6 +157,21 @@ const SHADER_OPTIONS: ShaderOption[] = [
       height: 1.0,
       turbulence: 1.1,
       colorShift: 1.0
+    }
+  },
+  {
+    type: "pyramid-pattern",
+    name: "Pyramid Pattern",
+    description: "3D pyramid grid with bump mapping, dynamic lighting, and animated patterns",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      scale: 1.0,
+      offsetRows: 1,
+      bumpStrength: 1.0,
+      hatchIntensity: 1.0,
+      lightMovement: 1.0
     }
   }
 ];

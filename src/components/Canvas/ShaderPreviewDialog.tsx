@@ -16,9 +16,10 @@ import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
+import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern";
   name: string;
   description: string;
   defaultProps: {
@@ -44,6 +45,11 @@ interface ShaderConfig {
     vertLines?: number;
     height?: number;
     turbulence?: number;
+    scale?: number;
+    offsetRows?: number;
+    bumpStrength?: number;
+    hatchIntensity?: number;
+    lightMovement?: number;
   };
 }
 
@@ -127,6 +133,16 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           height={(props as any).height || 1.0}
           turbulence={(props as any).turbulence || 1.1}
           colorShift={(props as any).colorShift || 1.0}
+          className="h-full w-full"
+        />;
+      case "pyramid-pattern":
+        return <PyramidPatternShaders 
+          speed={props.speed}
+          scale={(props as any).scale || 1.0}
+          offsetRows={(props as any).offsetRows || 1}
+          bumpStrength={(props as any).bumpStrength || 1.0}
+          hatchIntensity={(props as any).hatchIntensity || 1.0}
+          lightMovement={(props as any).lightMovement || 1.0}
           className="h-full w-full"
         />;
       default:
@@ -486,6 +502,65 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       onValueChange={([value]) => setShaderProps({ ...shaderProps, colorShift: value })}
                       min={0.5}
                       max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "pyramid-pattern" && (
+                <>
+                  <div>
+                    <Label>Scale: {(shaderProps as any).scale?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).scale || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, scale: value })}
+                      min={0.5}
+                      max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Offset Rows: {(shaderProps as any).offsetRows || 1}</Label>
+                    <Slider
+                      value={[(shaderProps as any).offsetRows || 1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, offsetRows: value })}
+                      min={0}
+                      max={1}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Bump Strength: {(shaderProps as any).bumpStrength?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).bumpStrength || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, bumpStrength: value })}
+                      min={0.0}
+                      max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Hatch Intensity: {(shaderProps as any).hatchIntensity?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).hatchIntensity || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, hatchIntensity: value })}
+                      min={0.0}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Light Movement: {(shaderProps as any).lightMovement?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).lightMovement || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, lightMovement: value })}
+                      min={0.0}
+                      max={3.0}
                       step={0.1}
                     />
                   </div>
