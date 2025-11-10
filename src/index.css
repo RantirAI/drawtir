@@ -115,6 +115,12 @@ All colors MUST be HSL.
     --glass-border: 240 5% 30% / 0.3;
     --glass-shadow: 0 8px 32px 0 rgb(0 0 0 / 0.5);
   }
+  
+  /* SDK Demo page specific styles for subtle borders in dark mode */
+  .dark .sdk-demo-page .border,
+  .dark .sdk-demo-page [class*="border-"] {
+    border-color: hsl(240 4% 10% / 0.1) !important;
+  }
 }
 
 @layer base {

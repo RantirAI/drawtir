@@ -3,10 +3,12 @@ import { DrawtirEmbed } from "@/sdk/DrawtirEmbed";
 import type { DrawtirEmbedRef } from "@/sdk/DrawtirEmbed";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Download, Save, Trash2, FileJson, Code, Rocket } from "lucide-react";
+import { Download, Trash2, FileJson, Code, FolderOpen } from "lucide-react";
+import HorizontalNav from "@/components/Navigation/HorizontalNav";
+import PageFooter from "@/components/Footer/PageFooter";
 
 // Default initial snapshot with a welcome frame
 const getInitialSnapshot = (): CanvasSnapshot => {
@@ -246,112 +248,92 @@ function App() {
 </script>`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/10">
-      {/* Header */}
-      <div className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Rocket className="w-6 h-6 text-primary" />
-                Drawtir SDK Demo
-              </h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Embed the full canvas editor in your applications
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <Button onClick={handleLoadSample} variant="outline" size="sm">
-                Load Sample
-              </Button>
-              <Button onClick={handleExportJSON} variant="outline" size="sm">
-                <FileJson className="w-4 h-4 mr-2" />
-                Export JSON
-              </Button>
-              <Button onClick={handleExportPNG} variant="outline" size="sm">
-                <Download className="w-4 h-4 mr-2" />
-                Export PNG
-              </Button>
-              <Button onClick={handleClear} variant="outline" size="sm">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Clear
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex gap-4 px-4 py-6 h-[calc(100vh-80px)]">
+    <div className="min-h-screen flex flex-col sdk-demo-page" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+      <HorizontalNav />
+      
+      <div className="flex gap-4 px-4 py-4 flex-1 overflow-hidden">
         {/* Canvas Embed - Takes most of the space */}
         <div className="flex-1 min-w-0">
-          <Card className="h-full flex flex-col">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle>Live Canvas Editor</CardTitle>
-              <CardDescription>
-                This is the actual DrawtirEmbed component running live
-              </CardDescription>
-            </CardHeader>
+          <Card className="h-full flex flex-col border-border/10">
             <CardContent className="flex-1 p-0 min-h-0">
-              <div className="border-t h-full">
-                <DrawtirEmbed
-                  ref={drawtirRef}
-                  onSave={handleSave}
-                  onChange={(snapshot) => setSavedSnapshot(snapshot)}
-                  hideCloudFeatures={true}
-                />
-              </div>
+              <DrawtirEmbed
+                ref={drawtirRef}
+                onSave={handleSave}
+                onChange={(snapshot) => setSavedSnapshot(snapshot)}
+                hideCloudFeatures={true}
+              />
             </CardContent>
           </Card>
         </div>
 
         {/* Info & Code - Fixed width sidebar on the right */}
         <div className="w-[380px] flex-shrink-0 overflow-y-auto space-y-4">
+          {/* Action Buttons */}
+          <Card className="border-border/10">
+            <CardContent className="p-4 space-y-2">
+              <Button onClick={handleLoadSample} variant="outline" size="sm" className="w-full justify-start">
+                <FolderOpen className="w-4 h-4 mr-2" />
+                Load Sample
+              </Button>
+              <Button onClick={handleExportJSON} variant="outline" size="sm" className="w-full justify-start">
+                <FileJson className="w-4 h-4 mr-2" />
+                Export JSON
+              </Button>
+              <Button onClick={handleExportPNG} variant="outline" size="sm" className="w-full justify-start">
+                <Download className="w-4 h-4 mr-2" />
+                Export PNG
+              </Button>
+              <Button onClick={handleClear} variant="outline" size="sm" className="w-full justify-start">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear Canvas
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Features */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Features</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                <div>
-                  <p className="font-medium">Full Editor Embedded</p>
-                  <p className="text-muted-foreground text-xs">Complete canvas with all tools</p>
+          <Card className="border-border/10">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold mb-3">Features</h3>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Full Editor Embedded</p>
+                    <p className="text-muted-foreground">Complete canvas with all tools</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                <div>
-                  <p className="font-medium">Export PNG/JSON</p>
-                  <p className="text-muted-foreground text-xs">Download designs in multiple formats</p>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Export PNG/JSON</p>
+                    <p className="text-muted-foreground">Download designs in multiple formats</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                <div>
-                  <p className="font-medium">Custom Storage</p>
-                  <p className="text-muted-foreground text-xs">Save to your own backend</p>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">Custom Storage</p>
+                    <p className="text-muted-foreground">Save to your own backend</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2" />
-                <div>
-                  <p className="font-medium">TypeScript Support</p>
-                  <p className="text-muted-foreground text-xs">Full type definitions included</p>
+                <div className="flex items-start gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium">TypeScript Support</p>
+                    <p className="text-muted-foreground">Full type definitions included</p>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Code Examples */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
+          <Card className="border-border/10">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-3">
                 <Code className="w-4 h-4" />
-                Code Examples
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+                <h3 className="text-sm font-semibold">Code Examples</h3>
+              </div>
               <Tabs value={showCode} onValueChange={(v) => setShowCode(v as any)}>
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="react">React</TabsTrigger>
@@ -372,11 +354,9 @@ function App() {
           </Card>
 
           {/* Installation */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Installation</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="border-border/10">
+            <CardContent className="p-4">
+              <h3 className="text-sm font-semibold mb-3">Installation</h3>
               <pre className="text-xs bg-secondary/50 p-3 rounded-lg">
                 <code>npm install drawtir-sdk</code>
               </pre>
@@ -387,6 +367,8 @@ function App() {
           </Card>
         </div>
       </div>
+      
+      <PageFooter />
     </div>
   );
 }
