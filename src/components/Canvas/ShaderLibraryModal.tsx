@@ -205,25 +205,23 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                     {shader.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex gap-2">
+                <CardContent className="flex gap-2 justify-end">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="flex-1"
                     onClick={() => setPreviewShader(shader)}
                   >
-                    <Eye className="w-4 h-4 mr-2" />
+                    <Eye className="w-3 h-3 mr-1" />
                     Preview
                   </Button>
                   <Button
                     size="sm"
-                    className="flex-1"
                     onClick={() => {
                       onSelect(shader);
                       onClose();
                     }}
                   >
-                    <Sparkles className="w-4 h-4 mr-2" />
+                    <Sparkles className="w-3 h-3 mr-1" />
                     Use Shader
                   </Button>
                 </CardContent>
