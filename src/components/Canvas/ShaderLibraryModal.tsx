@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
   name: string;
   description: string;
   defaultProps: {
@@ -76,6 +76,20 @@ const SHADER_OPTIONS: ShaderOption[] = [
       speed: 1.0, 
       glowIntensity: 1.4, 
       colorTint: [2.0, 4.0, 6.0],
+      amplitude: 1.2,
+      frequency: 0.8,
+      starDensity: 1.0,
+      colorShift: 1.0
+    }
+  },
+  {
+    type: "cosmic-flow",
+    name: "Cosmic Flow",
+    description: "Flowing cosmic gradients with fractal noise and dynamic color cycling",
+    defaultProps: { 
+      speed: 1.0, 
+      glowIntensity: 1.0, 
+      colorTint: [1.0, 1.0, 1.0],
       amplitude: 1.2,
       frequency: 0.8,
       starDensity: 1.0,

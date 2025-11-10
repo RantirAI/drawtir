@@ -10,6 +10,7 @@ import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
 import AuroraShaders from "@/components/ui/shadcn-io/aurora-shaders";
 import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
+import { CosmicFlowShaders } from "@/components/ui/shadcn-io/cosmic-flow-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
@@ -17,7 +18,7 @@ import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
   name: string;
   description: string;
   defaultProps: {
@@ -77,6 +78,15 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         />;
       case "cosmic-waves":
         return <CosmicWavesShaders 
+          speed={props.speed}
+          amplitude={(props as any).amplitude || 1.2}
+          frequency={(props as any).frequency || 0.8}
+          starDensity={(props as any).starDensity || 1.0}
+          colorShift={(props as any).colorShift || 1.0}
+          className="h-full w-full"
+        />;
+      case "cosmic-flow":
+        return <CosmicFlowShaders 
           speed={props.speed}
           amplitude={(props as any).amplitude || 1.2}
           frequency={(props as any).frequency || 0.8}
@@ -257,7 +267,7 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                 </>
               )}
 
-              {shader.type === "cosmic-waves" && (
+              {(shader.type === "cosmic-waves" || shader.type === "cosmic-flow") && (
                 <>
                   <div>
                     <Label>Amplitude: {(shaderProps as any).amplitude?.toFixed(2) || "1.00"}</Label>

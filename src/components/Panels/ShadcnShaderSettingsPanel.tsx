@@ -48,6 +48,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="nebula">Nebula</SelectItem>
             <SelectItem value="aurora">Aurora</SelectItem>
             <SelectItem value="cosmic-waves">Cosmic Waves</SelectItem>
+            <SelectItem value="cosmic-flow">Cosmic Flow</SelectItem>
             <SelectItem value="digital-tunnel">Digital Tunnel</SelectItem>
             <SelectItem value="glitch">Glitch</SelectItem>
             <SelectItem value="singularity">Singularity</SelectItem>
@@ -193,7 +194,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
         </>
       )}
 
-      {shader.type === "cosmic-waves" && (
+      {(shader.type === "cosmic-waves" || shader.type === "cosmic-flow") && (
         <>
           <div>
             <Label>Amplitude: {shader.amplitude?.toFixed(2) || "1.00"}</Label>

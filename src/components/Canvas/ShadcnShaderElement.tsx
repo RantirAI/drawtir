@@ -4,6 +4,7 @@ import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
 import AuroraShaders from "@/components/ui/shadcn-io/aurora-shaders";
 import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
+import { CosmicFlowShaders } from "@/components/ui/shadcn-io/cosmic-flow-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
@@ -110,6 +111,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <AuroraShaders {...auroraProps} />;
     case "cosmic-waves":
       return <CosmicWavesShaders {...cosmicWavesProps} />;
+    case "cosmic-flow":
+      return <CosmicFlowShaders {...cosmicWavesProps} />;
     case "digital-tunnel":
       return <DigitalTunnel {...shaderProps} />;
     case "glitch":
