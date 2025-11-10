@@ -15,8 +15,8 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
     speed: 1.0,
     glowIntensity: 1.5,
     colorTint: [1.0, 2.0, 9.0],
-    amplitude: 1.0,
-    frequency: 1.0,
+    amplitude: 1.2,
+    frequency: 0.8,
     starDensity: 1.0,
     colorShift: 1.0
   };

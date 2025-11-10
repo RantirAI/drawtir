@@ -3,7 +3,7 @@ import Kaleidoscope from "@/components/ui/kaleidoscope";
 import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
 import Aurora from "@/components/ui/aurora";
-import CosmicWaves from "@/components/ui/cosmic-waves";
+import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import type { Element } from "@/types/elements";
@@ -20,8 +20,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     speed = 1.0, 
     glowIntensity = 1.0, 
     colorTint = [1.0, 2.0, 9.0],
-    amplitude = 1.0,
-    frequency = 1.0,
+    amplitude = 1.2,
+    frequency = 0.8,
     starDensity = 1.0,
     colorShift = 1.0
   } = element.shader;
@@ -30,10 +30,15 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     speed,
     glowIntensity,
     colorTint: colorTint as [number, number, number],
+  };
+
+  const cosmicWavesProps = {
+    speed,
     amplitude,
     frequency,
     starDensity,
-    colorShift
+    colorShift,
+    className: "h-full w-full"
   };
 
   switch (type) {
@@ -46,7 +51,7 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     case "aurora":
       return <Aurora {...shaderProps} />;
     case "cosmic-waves":
-      return <CosmicWaves {...shaderProps} />;
+      return <CosmicWavesShaders {...cosmicWavesProps} />;
     case "digital-tunnel":
       return <DigitalTunnel {...shaderProps} />;
     case "glitch":

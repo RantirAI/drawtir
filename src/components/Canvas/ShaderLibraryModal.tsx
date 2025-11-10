@@ -53,8 +53,8 @@ const SHADER_OPTIONS: ShaderOption[] = [
       speed: 1.0, 
       glowIntensity: 1.4, 
       colorTint: [2.0, 4.0, 6.0],
-      amplitude: 1.0,
-      frequency: 1.0,
+      amplitude: 1.2,
+      frequency: 0.8,
       starDensity: 1.0,
       colorShift: 1.0
     }

@@ -9,7 +9,7 @@ import Kaleidoscope from "@/components/ui/kaleidoscope";
 import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
 import Aurora from "@/components/ui/aurora";
-import CosmicWaves from "@/components/ui/cosmic-waves";
+import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 
@@ -51,7 +51,14 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
       case "aurora":
         return <Aurora {...props} />;
       case "cosmic-waves":
-        return <CosmicWaves {...props} />;
+        return <CosmicWavesShaders 
+          speed={props.speed}
+          amplitude={(props as any).amplitude || 1.2}
+          frequency={(props as any).frequency || 0.8}
+          starDensity={(props as any).starDensity || 1.0}
+          colorShift={(props as any).colorShift || 1.0}
+          className="h-full w-full"
+        />;
       case "digital-tunnel":
         return <DigitalTunnel {...props} />;
       case "glitch":
