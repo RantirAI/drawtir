@@ -77,6 +77,9 @@ export default function HorizontalNav() {
               <Link to="/documentation" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Docs
               </Link>
+              <Link to="/sdk-demo" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Embed
+              </Link>
               <Link to="/settings" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Settings
               </Link>
