@@ -276,7 +276,6 @@ void main() {
             vec3 col2 = .5 + .45*cos(6.2831*index.y + 3.14159/2.5 + vec3(0, 1, 2)*1.35);
             texCol = col1;
             
-            #if 1
             float di2D = svGID.w;
             float tmp = map(sp - vec3(3./450., 0, 0));
             float di2DX = gID.w;
@@ -285,7 +284,6 @@ void main() {
             
             vec3 dF = (vec3(di2DX, di2DY, 1e5) - di2D);
             float sf = length(dF.xy);
-            
             // Vertical lines for hexagon
             const float aNum = 6.;
             vec2 zLines = rot2(3.14159/aNum)*svP; 
@@ -397,6 +395,7 @@ export default function ExtrudedMobiusSpiralShaders({
     // Get uniform locations
     const iResolution = gl.getUniformLocation(program, "iResolution");
     const iTime = gl.getUniformLocation(program, "iTime");
+    const u_speedLoc = gl.getUniformLocation(program, "u_speed");
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
@@ -411,6 +410,7 @@ export default function ExtrudedMobiusSpiralShaders({
 
       gl.uniform2f(iResolution, canvas.width, canvas.height);
       gl.uniform1f(iTime, timeRef.current);
+      if (u_speedLoc) gl.uniform1f(u_speedLoc, speed);
 
       gl.clearColor(0, 0, 0, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
