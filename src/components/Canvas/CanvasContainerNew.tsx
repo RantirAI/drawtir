@@ -2855,154 +2855,146 @@ export default function CanvasContainerNew({
       )}
 
       {/* Quick Action Buttons */}
-      <div className="fixed left-6 top-1/2 -translate-y-1/2 z-40 group/sidebar">
-        <div className="flex flex-col gap-2 bg-card/95 backdrop-blur-sm rounded-full p-2 border border-border/40 shadow-lg group-hover/sidebar:rounded-2xl transition-all duration-300">
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showGeneratePanel 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setShowGeneratePanel(!showGeneratePanel)}
-            >
-              <Magicpen size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showGeneratePanel ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              AI Generator
-            </span>
-          </div>
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 z-40">
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showGeneratePanel 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => setShowGeneratePanel(!showGeneratePanel)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Magicpen size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showGeneratePanel ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                AI Generator
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showTemplatesPanel 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
-            >
-              <Element2 size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showTemplatesPanel ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Templates
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showTemplatesPanel 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Element2 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showTemplatesPanel ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Templates
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showLayersPanel 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => {
-                setShowLayersPanel(!showLayersPanel);
-              }}
-            >
-              <Layer size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showLayersPanel ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Layers
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showLayersPanel 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => {
+              setShowLayersPanel(!showLayersPanel);
+            }}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Layer size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showLayersPanel ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Layers
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showMediaLibrary 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setShowMediaLibrary(!showMediaLibrary)}
-            >
-              <Gallery size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showMediaLibrary ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Media Library
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showMediaLibrary 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => setShowMediaLibrary(!showMediaLibrary)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Gallery size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showMediaLibrary ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Media Library
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showShapeSettings || selectedElementIds.length > 0 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setShowShapeSettings(!showShapeSettings)}
-            >
-              <Setting4 size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Settings
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showShapeSettings || selectedElementIds.length > 0 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => setShowShapeSettings(!showShapeSettings)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Setting4 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Settings
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showAnimationsPanel 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => {
-                if (!showAnimationsPanel && selectedElementIds.length > 0) {
-                  setAnimatingElementId(selectedElementIds[0]);
-                }
-                setShowAnimationsPanel(!showAnimationsPanel);
-              }}
-            >
-              <Video size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showAnimationsPanel ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Animations
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showAnimationsPanel 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => {
+              if (!showAnimationsPanel && selectedElementIds.length > 0) {
+                setAnimatingElementId(selectedElementIds[0]);
+              }
+              setShowAnimationsPanel(!showAnimationsPanel);
+            }}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Video size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showAnimationsPanel ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Animations
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm ${
-                showBrandKitPanel 
-                  ? 'bg-primary/20 text-primary shadow-primary/20' 
-                  : 'hover:shadow-md'
-              }`}
-              onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
-            >
-              <Colorfilter size={16} className={`transition-transform duration-300 group-hover/button:rotate-6 ${showBrandKitPanel ? 'text-primary' : ''}`} />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Brand Kit
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+              showBrandKitPanel 
+                ? 'bg-primary/20 text-primary shadow-primary/20' 
+                : 'bg-card hover:shadow-md'
+            }`}
+            onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <Colorfilter size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showBrandKitPanel ? 'text-primary' : ''}`} />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Brand Kit
+              </span>
+            </div>
+          </Button>
           
-          <div className="relative flex items-center group/button">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20"
-              onClick={() => setShowPreviewDialog(true)}
-            >
-              <PlayCircle size={16} className="text-primary transition-transform duration-300 group-hover/button:rotate-6" />
-            </Button>
-            <span className="absolute left-full ml-3 px-3 py-1.5 bg-card border border-border/40 rounded-lg text-sm font-medium whitespace-nowrap opacity-0 group-hover/button:opacity-100 pointer-events-none transition-opacity duration-200 shadow-lg">
-              Preview
-            </span>
-          </div>
+          <Button
+            variant="ghost"
+            className="h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group/btn overflow-hidden"
+            onClick={() => setShowPreviewDialog(true)}
+          >
+            <div className="flex items-center gap-2 whitespace-nowrap">
+              <PlayCircle size={16} className="text-primary transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0" />
+              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
+                Preview
+              </span>
+            </div>
+          </Button>
         </div>
       </div>
       
