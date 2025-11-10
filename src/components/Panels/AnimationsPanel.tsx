@@ -155,49 +155,49 @@ export default function AnimationsPanel({
       className="w-[320px]"
     >
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AnimationCategory)} className="w-full">
-        <TabsList className="w-full grid grid-cols-3 h-6 p-0 bg-muted/50">
+        <TabsList className="w-full inline-flex h-9 items-center justify-start gap-1 rounded-lg bg-muted/30 p-1">
           <TabsTrigger 
             value="in" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             IN
           </TabsTrigger>
           <TabsTrigger 
             value="out" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             OUT
           </TabsTrigger>
           <TabsTrigger 
             value="custom" 
-            className="text-[10px] h-5 px-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-sm"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             CUSTOM
           </TabsTrigger>
         </TabsList>
 
-        <ScrollArea className="h-[280px]">
-          <TabsContent value="in" className="pb-2 mt-1">
+        <ScrollArea className="h-[280px] mt-3">
+          <TabsContent value="in" className="pb-2 mt-0">
             {Object.entries(groupedAnimations).map(([subcategory, anims]) => (
-              <div key={subcategory} className="mb-2">
-                <h4 className="text-[9px] font-medium text-muted-foreground uppercase mb-1 px-0.5">{subcategory}</h4>
-                <div className="grid grid-cols-3 gap-1">
+              <div key={subcategory} className="mb-4">
+                <h4 className="text-[10px] font-semibold text-muted-foreground uppercase mb-2 tracking-wide">{subcategory}</h4>
+                <div className="grid grid-cols-3 gap-2">
                   {anims.map((anim) => (
                     <button
                       key={anim.type}
                       onClick={() => handleAnimationSelect(anim)}
                       onMouseEnter={() => setHoveredAnimation(anim.type)}
                       onMouseLeave={() => setHoveredAnimation(null)}
-                      className={`relative h-11 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
+                      className={`relative h-16 rounded-lg border overflow-hidden transition-all ${
                         selectedAnimation === anim.type
-                          ? "ring-1 ring-primary bg-primary/10"
-                          : "hover:border-primary/50 bg-card"
+                          ? "ring-2 ring-primary bg-primary/10 border-primary"
+                          : "hover:border-primary/50 bg-card/50 hover:bg-card border-border"
                       }`}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center pb-3">
+                      <div className="absolute inset-0 flex items-center justify-center pb-5">
                         <div
                           key={hoveredAnimation === anim.type ? previewKey : 0}
-                          className={`w-4 h-4 bg-primary rounded ${
+                          className={`w-5 h-5 bg-primary rounded ${
                             hoveredAnimation === anim.type ? `animate-${anim.type}` : ""
                           }`}
                           style={{
@@ -206,8 +206,8 @@ export default function AnimationsPanel({
                           }}
                         />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 to-transparent p-0.5">
-                        <p className="text-[8px] font-medium text-center truncate leading-tight">{anim.name}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent p-1">
+                        <p className="text-[9px] font-medium text-center truncate leading-tight">{anim.name}</p>
                       </div>
                     </button>
                   ))}
@@ -216,27 +216,27 @@ export default function AnimationsPanel({
             ))}
           </TabsContent>
 
-          <TabsContent value="out" className="pb-2 mt-1">
+          <TabsContent value="out" className="pb-2 mt-0">
             {Object.entries(groupedAnimations).map(([subcategory, anims]) => (
-              <div key={subcategory} className="mb-2">
-                <h4 className="text-[9px] font-medium text-muted-foreground uppercase mb-1 px-0.5">{subcategory}</h4>
-                <div className="grid grid-cols-3 gap-1">
+              <div key={subcategory} className="mb-4">
+                <h4 className="text-[10px] font-semibold text-muted-foreground uppercase mb-2 tracking-wide">{subcategory}</h4>
+                <div className="grid grid-cols-3 gap-2">
                   {anims.map((anim) => (
                     <button
                       key={anim.type}
                       onClick={() => handleAnimationSelect(anim)}
                       onMouseEnter={() => setHoveredAnimation(anim.type)}
                       onMouseLeave={() => setHoveredAnimation(null)}
-                      className={`relative h-11 rounded border dark:border-zinc-700 overflow-hidden transition-all ${
+                      className={`relative h-16 rounded-lg border overflow-hidden transition-all ${
                         selectedAnimation === anim.type
-                          ? "ring-1 ring-primary bg-primary/10"
-                          : "hover:border-primary/50 bg-card"
+                          ? "ring-2 ring-primary bg-primary/10 border-primary"
+                          : "hover:border-primary/50 bg-card/50 hover:bg-card border-border"
                       }`}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center pb-3">
+                      <div className="absolute inset-0 flex items-center justify-center pb-5">
                         <div
                           key={hoveredAnimation === anim.type ? previewKey : 0}
-                          className={`w-4 h-4 bg-primary rounded ${
+                          className={`w-5 h-5 bg-primary rounded ${
                             hoveredAnimation === anim.type ? `animate-${anim.type}` : ""
                           }`}
                           style={{
@@ -245,8 +245,8 @@ export default function AnimationsPanel({
                           }}
                         />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/95 to-transparent p-0.5">
-                        <p className="text-[8px] font-medium text-center truncate leading-tight">{anim.name}</p>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background via-background/95 to-transparent p-1">
+                        <p className="text-[9px] font-medium text-center truncate leading-tight">{anim.name}</p>
                       </div>
                     </button>
                   ))}
@@ -255,31 +255,31 @@ export default function AnimationsPanel({
             ))}
           </TabsContent>
 
-          <TabsContent value="custom" className="pb-2 mt-1">
-            <div className="space-y-1.5">
-              <p className="text-[9px] text-muted-foreground mb-2">
+          <TabsContent value="custom" className="pb-2 mt-0">
+            <div className="space-y-3 p-2">
+              <p className="text-xs text-muted-foreground">
                 Custom animations coming soon. Use timeline to create keyframe animations.
               </p>
-              <div className="space-y-1">
-                <p className="text-[9px] font-medium text-muted-foreground">TRANSFORM</p>
-                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-2">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">TRANSFORM</p>
+                <div className="text-xs text-muted-foreground/70 space-y-1 pl-2">
                   <p>• Move</p>
                   <p>• Scale</p>
                   <p>• Rotate</p>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[9px] font-medium text-muted-foreground">STYLE</p>
-                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-2">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">STYLE</p>
+                <div className="text-xs text-muted-foreground/70 space-y-1 pl-2">
                   <p>• Opacity</p>
                   <p>• Color</p>
                   <p>• Shadow</p>
                   <p>• Blur</p>
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-[9px] font-medium text-muted-foreground">OTHER</p>
-                <div className="text-[8px] text-muted-foreground/60 space-y-0.5">
+              <div className="space-y-2">
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">OTHER</p>
+                <div className="text-xs text-muted-foreground/70 space-y-1 pl-2">
                   <p>• Hide/Show</p>
                   <p>• Resize</p>
                   <p>• Corner Radius</p>
@@ -293,47 +293,47 @@ export default function AnimationsPanel({
 
       {/* Settings Section */}
       {activeTab !== "custom" && selectedAnimation !== "none" && (
-        <div className="pt-2 border-t dark:border-zinc-700 space-y-1.5">
+        <div className="pt-3 mt-3 border-t space-y-3">
           {/* Preview Section */}
           <div className="flex items-center justify-between">
-            <Label className="text-[9px] text-muted-foreground">Preview</Label>
+            <Label className="text-xs font-medium">Preview</Label>
             <Button
               onClick={triggerPreview}
               size="sm"
               variant="outline"
-              className="h-5 px-2 text-[8px]"
+              className="h-7 px-3 text-xs"
             >
-              <Play className="h-2.5 w-2.5 mr-1" />
+              <Play className="h-3 w-3 mr-1.5" />
               Replay
             </Button>
           </div>
 
           {/* Timing Controls */}
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <Label className="text-[8px] text-muted-foreground">Duration</Label>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Duration</Label>
               <Input
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
-                className="h-6 text-[9px] mt-0.5"
+                className="h-8 text-xs"
                 placeholder="0.5s"
               />
             </div>
             <div>
-              <Label className="text-[8px] text-muted-foreground">Delay</Label>
+              <Label className="text-xs text-muted-foreground mb-1.5 block">Delay</Label>
               <Input
                 value={delay}
                 onChange={(e) => setDelay(e.target.value)}
-                className="h-6 text-[9px] mt-0.5"
+                className="h-8 text-xs"
                 placeholder="0s"
               />
             </div>
           </div>
 
           <div>
-            <Label className="text-[8px] text-muted-foreground">Easing</Label>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Easing</Label>
             <Select value={easing} onValueChange={setEasing}>
-              <SelectTrigger className="h-6 text-[9px] mt-0.5">
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -347,9 +347,9 @@ export default function AnimationsPanel({
           </div>
 
           <div>
-            <Label className="text-[8px] text-muted-foreground">Iterations</Label>
+            <Label className="text-xs text-muted-foreground mb-1.5 block">Iterations</Label>
             <Select value={iterationCount} onValueChange={setIterationCount}>
-              <SelectTrigger className="h-6 text-[9px] mt-0.5">
+              <SelectTrigger className="h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -362,19 +362,19 @@ export default function AnimationsPanel({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-1.5 pt-1">
+          <div className="flex gap-2 pt-1">
             <Button
               onClick={onClose}
               variant="outline"
               size="sm"
-              className="flex-1 h-6 text-[9px]"
+              className="flex-1 h-8 text-xs"
             >
               Cancel
             </Button>
             <Button
               onClick={handleApply}
               size="sm"
-              className="flex-1 h-6 text-[9px]"
+              className="flex-1 h-8 text-xs"
             >
               Apply
             </Button>
