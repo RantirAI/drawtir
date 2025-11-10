@@ -101,6 +101,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
                 newTint[0] = parseFloat(e.target.value) || 0;
                 onUpdate({ shader: { ...shader, colorTint: newTint as [number, number, number] } });
               }}
+              className="h-8 text-sm"
             />
           </div>
           <div>
@@ -116,6 +117,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
                 newTint[1] = parseFloat(e.target.value) || 0;
                 onUpdate({ shader: { ...shader, colorTint: newTint as [number, number, number] } });
               }}
+              className="h-8 text-sm"
             />
           </div>
           <div>
@@ -131,6 +133,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
                 newTint[2] = parseFloat(e.target.value) || 0;
                 onUpdate({ shader: { ...shader, colorTint: newTint as [number, number, number] } });
               }}
+              className="h-8 text-sm"
             />
           </div>
         </div>
