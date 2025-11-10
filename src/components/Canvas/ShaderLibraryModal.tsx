@@ -268,7 +268,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewShader(shader)}
-                        className="flex-1"
+                        className="flex-1 h-7 text-xs"
                       >
                         Preview
                       </Button>
@@ -278,7 +278,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                           onSelect(shader);
                           onClose();
                         }}
-                        className="flex-1"
+                        className="flex-1 h-7 text-xs"
                       >
                         Use
                       </Button>
