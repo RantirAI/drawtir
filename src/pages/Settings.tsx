@@ -35,7 +35,7 @@ export default function Settings() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/auth");
+        navigate("/");
         return;
       }
 
@@ -66,7 +66,7 @@ export default function Settings() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/auth");
+        navigate("/");
         return;
       }
 
@@ -115,7 +115,7 @@ export default function Settings() {
       // Verify current password by attempting to sign in
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        navigate("/auth");
+        navigate("/");
         return;
       }
 

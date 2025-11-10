@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 import { Loader2 } from "lucide-react";
+import type { CanvasSnapshot } from "@/types/snapshot";
+import { validateSnapshot } from "@/lib/snapshot";
+import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 import AnnounceBanner from "@/components/HomePage/AnnounceBanner";
 import HomeNav from "@/components/HomePage/HomeNav";
 import AuthModal from "@/components/HomePage/AuthModal";
@@ -14,8 +17,10 @@ import panel3 from "@/assets/panel-3.svg";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [snapshot, setSnapshot] = useState<CanvasSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
@@ -24,7 +29,8 @@ const Index = () => {
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session) {
+      // Only redirect to gallery if authenticated AND no project is being loaded
+      if (session && !searchParams.get("project")) {
         navigate("/gallery");
       }
     });
@@ -34,14 +40,45 @@ const Index = () => {
       setUser(session?.user ?? null);
       setIsLoading(false);
       
-      if (session) {
+      // Only redirect to gallery if authenticated AND no project is being loaded
+      if (session && !searchParams.get("project")) {
         navigate("/gallery");
+      } else if (session) {
+        // Authenticated and has project param, load the project
+        loadProject();
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, searchParams]);
 
+  const loadProject = async () => {
+    const projectId = searchParams.get("project");
+    if (!projectId) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from("posters")
+        .select("canvas_data")
+        .eq("id", projectId)
+        .single();
+
+      if (error) throw error;
+      
+      if (data?.canvas_data && validateSnapshot(data.canvas_data)) {
+        setSnapshot(data.canvas_data);
+      }
+    } catch (error) {
+      console.error("Error loading project:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show loading state while checking auth
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0A0A0B]">
@@ -50,8 +87,10 @@ const Index = () => {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#0A0A0B] dark">
+  // If not authenticated, show homepage with login modal
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0B] dark">
       <AnnounceBanner />
       <HomeNav onOpenAuth={() => setAuthModalOpen(true)} />
       
@@ -148,6 +187,16 @@ const Index = () => {
       </div>
 
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+    </div>
+    );
+  }
+
+  // If authenticated, show canvas editor
+  return (
+    <div className="flex flex-col h-screen">
+      <div className="flex-1 overflow-hidden">
+        <CanvasContainerNew initialSnapshot={snapshot || undefined} />
+      </div>
     </div>
   );
 };
