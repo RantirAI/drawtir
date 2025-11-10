@@ -6,6 +6,7 @@ import AuroraShaders from "@/components/ui/shadcn-io/aurora-shaders";
 import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
+import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -26,7 +27,9 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     colorShift = 1.0,
     intensity = 1.2,
     vibrancy = 1.1,
-    stretch = 1.5
+    stretch = 1.5,
+    size = 1.1,
+    waveStrength = 1.0
   } = element.shader;
 
   const shaderProps = {
@@ -53,6 +56,15 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     className: "h-full w-full"
   };
 
+  const singularityProps = {
+    speed,
+    intensity,
+    size,
+    waveStrength,
+    colorShift,
+    className: "h-full w-full"
+  };
+
   switch (type) {
     case "kaleidoscope":
       return <Kaleidoscope {...shaderProps} />;
@@ -68,6 +80,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <DigitalTunnel {...shaderProps} />;
     case "glitch":
       return <Glitch {...shaderProps} />;
+    case "singularity":
+      return <SingularityShaders {...singularityProps} />;
     default:
       return null;
   }

@@ -12,9 +12,10 @@ import AuroraShaders from "@/components/ui/shadcn-io/aurora-shaders";
 import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
+import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
   name: string;
   description: string;
   defaultProps: {
@@ -28,6 +29,8 @@ interface ShaderConfig {
     intensity?: number;
     vibrancy?: number;
     stretch?: number;
+    size?: number;
+    waveStrength?: number;
   };
 }
 
@@ -73,6 +76,15 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         return <DigitalTunnel {...props} />;
       case "glitch":
         return <Glitch {...props} />;
+      case "singularity":
+        return <SingularityShaders 
+          speed={props.speed}
+          intensity={(props as any).intensity || 1.2}
+          size={(props as any).size || 1.1}
+          waveStrength={(props as any).waveStrength || 1.0}
+          colorShift={(props as any).colorShift || 1.0}
+          className="h-full w-full"
+        />;
       default:
         return null;
     }
@@ -253,6 +265,54 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       onValueChange={([value]) => setShaderProps({ ...shaderProps, colorShift: value })}
                       min={0.1}
                       max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "singularity" && (
+                <>
+                  <div>
+                    <Label>Intensity: {(shaderProps as any).intensity?.toFixed(2) || "1.20"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).intensity || 1.2]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, intensity: value })}
+                      min={0.5}
+                      max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Size: {(shaderProps as any).size?.toFixed(2) || "1.10"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).size || 1.1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, size: value })}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Wave Strength: {(shaderProps as any).waveStrength?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).waveStrength || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, waveStrength: value })}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Color Shift: {(shaderProps as any).colorShift?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).colorShift || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, colorShift: value })}
+                      min={0.5}
+                      max={2.0}
                       step={0.1}
                     />
                   </div>

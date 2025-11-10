@@ -58,10 +58,19 @@ interface ResizableElementProps {
   videoUrl?: string;
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
+    amplitude?: number;
+    frequency?: number;
+    starDensity?: number;
+    colorShift?: number;
+    intensity?: number;
+    vibrancy?: number;
+    stretch?: number;
+    size?: number;
+    waveStrength?: number;
   };
   // QR Code properties
   qrValue?: string;

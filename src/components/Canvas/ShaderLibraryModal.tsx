@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity";
   name: string;
   description: string;
   defaultProps: {
@@ -20,6 +20,8 @@ interface ShaderOption {
     intensity?: number;
     vibrancy?: number;
     stretch?: number;
+    size?: number;
+    waveStrength?: number;
   };
 }
 
@@ -81,6 +83,20 @@ const SHADER_OPTIONS: ShaderOption[] = [
     name: "Glitch",
     description: "Digital corruption effects with chromatic aberration and cyberpunk glitch",
     defaultProps: { speed: 1.0, glowIntensity: 1.2, colorTint: [1.0, 0.0, 1.0] }
+  },
+  {
+    type: "singularity",
+    name: "Singularity",
+    description: "Blackhole gravitational lensing with accretion disk and photon sphere",
+    defaultProps: { 
+      speed: 1.0, 
+      glowIntensity: 1.5, 
+      colorTint: [1.0, 0.6, 0.2],
+      intensity: 1.2,
+      size: 1.1,
+      waveStrength: 1.0,
+      colorShift: 1.0
+    }
   }
 ];
 

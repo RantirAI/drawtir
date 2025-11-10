@@ -21,7 +21,9 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
     colorShift: 1.0,
     intensity: 1.2,
     vibrancy: 1.1,
-    stretch: 1.5
+    stretch: 1.5,
+    size: 1.1,
+    waveStrength: 1.0
   };
 
   return (
@@ -48,6 +50,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="cosmic-waves">Cosmic Waves</SelectItem>
             <SelectItem value="digital-tunnel">Digital Tunnel</SelectItem>
             <SelectItem value="glitch">Glitch</SelectItem>
+            <SelectItem value="singularity">Singularity</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -238,6 +241,62 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               })}
               min={0.1}
               max={3.0}
+              step={0.1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "singularity" && (
+        <>
+          <div>
+            <Label>Intensity: {shader.intensity?.toFixed(2) || "1.20"}</Label>
+            <Slider
+              value={[shader.intensity || 1.2]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, intensity: value }
+              })}
+              min={0.5}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Size: {shader.size?.toFixed(2) || "1.10"}</Label>
+            <Slider
+              value={[shader.size || 1.1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, size: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Wave Strength: {shader.waveStrength?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.waveStrength || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, waveStrength: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Color Shift: {shader.colorShift?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.colorShift || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, colorShift: value }
+              })}
+              min={0.5}
+              max={2.0}
               step={0.1}
             />
           </div>
