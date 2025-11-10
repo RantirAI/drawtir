@@ -86,7 +86,7 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];

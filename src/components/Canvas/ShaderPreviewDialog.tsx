@@ -6,17 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import Kaleidoscope from "@/components/ui/kaleidoscope";
-import Ripple from "@/components/ui/ripple";
 import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
-import Matrix from "@/components/ui/matrix";
 import Aurora from "@/components/ui/aurora";
 import CosmicWaves from "@/components/ui/cosmic-waves";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
   name: string;
   description: string;
   defaultProps: {
@@ -46,14 +44,10 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
     switch (shader.type) {
       case "kaleidoscope":
         return <Kaleidoscope {...props} />;
-      case "ripple":
-        return <Ripple {...props} />;
       case "plasma":
         return <Plasma {...props} />;
       case "nebula":
         return <Nebula {...props} />;
-      case "matrix":
-        return <Matrix {...props} />;
       case "aurora":
         return <Aurora {...props} />;
       case "cosmic-waves":

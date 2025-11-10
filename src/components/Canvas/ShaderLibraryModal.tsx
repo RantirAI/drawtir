@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
   name: string;
   description: string;
   defaultProps: {
@@ -28,12 +28,6 @@ const SHADER_OPTIONS: ShaderOption[] = [
     defaultProps: { speed: 1.0, glowIntensity: 1.5, colorTint: [1.0, 2.0, 9.0] }
   },
   {
-    type: "ripple",
-    name: "Ripple",
-    description: "Realistic water ripples with wave interference patterns and expanding circles",
-    defaultProps: { speed: 1.0, glowIntensity: 1.0, colorTint: [2.0, 4.0, 8.0] }
-  },
-  {
     type: "plasma",
     name: "Plasma",
     description: "Organic energy effects with flowing plasma patterns and smooth color cycling",
@@ -44,12 +38,6 @@ const SHADER_OPTIONS: ShaderOption[] = [
     name: "Nebula",
     description: "Procedural cosmic clouds with fractal structures and animated star fields",
     defaultProps: { speed: 1.0, glowIntensity: 1.3, colorTint: [2.0, 3.0, 6.0] }
-  },
-  {
-    type: "matrix",
-    name: "Matrix Rain",
-    description: "Authentic digital rain with procedural characters and cyberpunk green effects",
-    defaultProps: { speed: 1.0, glowIntensity: 1.5, colorTint: [0.2, 1.0, 0.3] }
   },
   {
     type: "aurora",

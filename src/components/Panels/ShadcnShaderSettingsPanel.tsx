@@ -39,10 +39,8 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="kaleidoscope">Kaleidoscope</SelectItem>
-            <SelectItem value="ripple">Ripple</SelectItem>
             <SelectItem value="plasma">Plasma</SelectItem>
             <SelectItem value="nebula">Nebula</SelectItem>
-            <SelectItem value="matrix">Matrix Rain</SelectItem>
             <SelectItem value="aurora">Aurora</SelectItem>
             <SelectItem value="cosmic-waves">Cosmic Waves</SelectItem>
             <SelectItem value="digital-tunnel">Digital Tunnel</SelectItem>
