@@ -490,11 +490,13 @@ serve(async (req) => {
       colorPalette, // Optional color palette preference
       generationTypes = [], // Array of generation types (e.g., ["generate-image", "create"])
       conversationHistory = [], // Chat conversation history
-      currentSnapshot = null // Current canvas state
+      currentSnapshot = null, // Current canvas state
+      targetFrameId = null // Specific frame to generate in
     } = await req.json();
     
     console.log('AI Poster Generation - Model:', model, 'Type:', analysisType, 'Generation types:', generationTypes);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
+    console.log('Target frame:', targetFrameId);
     
     // Validate model
     const modelConfig = MODEL_CONFIGS[model];
@@ -847,6 +849,13 @@ Return JSON (COMPLETE structure, NO nested frames):
     const isIterative = conversationHistory && conversationHistory.length > 1;
     const hasExistingDesign = currentSnapshot && currentSnapshot.frames && currentSnapshot.frames.length > 0;
     
+    // Find the target frame if specified
+    let targetFrame = null;
+    if (hasExistingDesign && targetFrameId) {
+      targetFrame = currentSnapshot.frames.find((f: any) => f.id === targetFrameId);
+      console.log('Target frame found:', targetFrame?.name || targetFrame?.id);
+    }
+    
     const messages: any[] = [
       { 
         role: 'system', 
@@ -863,16 +872,22 @@ CRITICAL RULES FOR ITERATIVE UPDATES:
 5. If the user says "make it Z", interpret what they want changed and keep the rest
 6. NEVER remove all elements and start fresh unless explicitly asked to "start over" or "create new"
 
-${hasExistingDesign ? `
+${targetFrame ? `
+🎯 TARGET FRAME: "${targetFrame.name || targetFrame.id}"
+You are working ONLY on this specific frame. The user has multiple frames and wants to modify only this one.
+
+CURRENT FRAME STATE:
+${JSON.stringify(targetFrame, null, 2)}
+` : hasExistingDesign ? `
 CURRENT DESIGN STATE:
 ${JSON.stringify(currentSnapshot.frames[0], null, 2)}
+` : ''}
 
 When responding:
 - Include ALL existing elements in your response
 - Add or modify only what the user requests
 - Maintain the same canvas dimensions and backgroundColor unless asked to change
 - Keep element IDs when possible for continuity
-` : ''}
 
 CONVERSATION CONTEXT:
 ${conversationHistory.slice(0, -1).map((msg: any) => `${msg.role}: ${msg.content}`).join('\n')}
@@ -1282,7 +1297,8 @@ Here's the design: {"title":"Example"}
             controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
               type: 'complete', 
               designSpec,
-              model
+              model,
+              targetFrameId // Include target frame ID in response
             })}\n\n`));
             
             controller.close();

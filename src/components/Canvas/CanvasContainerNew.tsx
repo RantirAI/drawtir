@@ -473,7 +473,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string, conversationHistory?: any[]) => {
+  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string, conversationHistory?: any[], targetFrameId?: string) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -491,10 +491,11 @@ export default function CanvasContainerNew({
     } else {
       setGenerationProgress(`Starting generation with ${model}...`);
       // Notify user that new elements will be added to existing design
-      const currentFrame = frames.find(f => f.id === selectedFrameId);
+      const frameId = targetFrameId || selectedFrameId;
+      const currentFrame = frames.find(f => f.id === frameId);
       const existingElementCount = currentFrame?.elements?.length || 0;
       if (existingElementCount > 0) {
-        toast.success(`Adding new elements to your design (${existingElementCount} existing elements will be preserved)`);
+        toast.success(`Adding new elements to ${currentFrame?.name || 'selected frame'} (${existingElementCount} existing elements will be preserved)`);
       }
     }
     setGenerationProgressPercent(0);
@@ -601,7 +602,8 @@ export default function CanvasContainerNew({
       setGenerationProgress(shouldReplicate ? "Analyzing image..." : "Designing poster layout...");
 
       // Get current frame dimensions to tell AI the canvas size
-      const selectedFrame = frames.find(f => f.id === selectedFrameId);
+      const frameId = targetFrameId || selectedFrameId;
+      const selectedFrame = frames.find(f => f.id === frameId);
       const canvasWidth = selectedFrame?.width || 800;
       const canvasHeight = selectedFrame?.height || 1200;
 
@@ -631,6 +633,7 @@ export default function CanvasContainerNew({
             generationTypes, // Pass generation types to backend
             conversationHistory: conversationHistory || [], // Pass conversation history
             currentSnapshot, // Pass current canvas state
+            targetFrameId: frameId, // Pass target frame ID
           }),
         }
       );
@@ -649,6 +652,7 @@ export default function CanvasContainerNew({
       const decoder = new TextDecoder();
       let buffer = '';
       let designSpec = null;
+      let targetFrameIdFromResponse = targetFrameId; // Store target frame ID for applying changes
 
       if (!reader) {
         throw new Error("No response body");
@@ -769,6 +773,8 @@ export default function CanvasContainerNew({
                   s.id === designStepId ? { ...s, status: 'complete' as const } : s
                 ));
                 designSpec = data.designSpec;
+                // Store the target frame ID from the response
+                targetFrameIdFromResponse = data.targetFrameId;
               }
             } catch (e) {
               // Skip invalid JSON
@@ -809,12 +815,13 @@ export default function CanvasContainerNew({
       }
 
       // Update current frame background
-      if (selectedFrameId && designSpec.backgroundColor) {
-        handleFrameUpdate(selectedFrameId, { backgroundColor: designSpec.backgroundColor });
+      const targetFrame = targetFrameIdFromResponse || selectedFrameId;
+      if (targetFrame && designSpec.backgroundColor) {
+        handleFrameUpdate(targetFrame, { backgroundColor: designSpec.backgroundColor });
       }
 
         // Add elements to the current frame
-        if (selectedFrameId && combinedElements.length > 0) {
+        if (targetFrame && combinedElements.length > 0) {
           const newElements = combinedElements.map((el: any) => {
             // Determine border radius based on shape type
             let borderRadius = 0;
@@ -885,7 +892,7 @@ export default function CanvasContainerNew({
           });
 
           setFrames(frames.map(f => 
-            f.id === selectedFrameId 
+            f.id === targetFrame 
               ? { ...f, elements: [...(f.elements || []), ...newElements] }
               : f
           ));
@@ -2488,6 +2495,9 @@ export default function CanvasContainerNew({
         <AIGeneratorPanel
           projectId={projectId}
           currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff")}
+          frames={frames}
+          selectedFrameId={selectedFrameId}
+          onFrameSelect={setSelectedFrameId}
           description={description}
           setDescription={setDescription}
           captionImage={captionImage}

@@ -17,6 +17,9 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 interface AIGeneratorPanelProps {
   projectId: string | null;
   currentSnapshot: CanvasSnapshot;
+  frames: Frame[];
+  selectedFrameId: string;
+  onFrameSelect: (frameId: string) => void;
   description: string;
   setDescription: (desc: string) => void;
   captionImage: string[];
@@ -24,7 +27,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationTypes: string[], model: string, colorPalette?: string, conversationHistory?: ChatMessage[]) => Promise<void>;
+  onGenerate: (generationTypes: string[], model: string, colorPalette?: string, conversationHistory?: ChatMessage[], targetFrameId?: string) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -47,6 +50,9 @@ interface ChatMessage {
 export default function AIGeneratorPanel({
   projectId,
   currentSnapshot,
+  frames,
+  selectedFrameId,
+  onFrameSelect,
   description,
   setDescription,
   captionImage = [], // Default to empty array
@@ -153,8 +159,8 @@ export default function AIGeneratorPanel({
       }
     }
     
-    // Pass all selected generation types and conversation history
-    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse, [...chatMessages, userMessage]);
+    // Pass all selected generation types and conversation history, including target frame
+    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse, [...chatMessages, userMessage], selectedFrameId);
     
     // Add AI response to chat
     const aiMessage: ChatMessage = {
@@ -361,6 +367,26 @@ export default function AIGeneratorPanel({
           </div>
 
           <TabsContent value="generator" className="p-3 space-y-3 mt-0">
+            {/* Target Frame Selector */}
+            <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
+              <Label className="text-xs text-muted-foreground">Target Frame</Label>
+              <Select value={selectedFrameId} onValueChange={onFrameSelect}>
+                <SelectTrigger className="w-full h-9 text-sm bg-background border-border">
+                  <SelectValue placeholder="Select frame to generate in" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border z-50">
+                  {frames.map((frame) => (
+                    <SelectItem key={frame.id} value={frame.id}>
+                      {frame.name || frame.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                AI will generate content in the selected frame only
+              </p>
+            </div>
+
             {/* Chat Messages */}
             {chatMessages.length > 0 && (
               <ScrollArea className="h-[200px] bg-muted/30 border border-border rounded-lg p-3">
