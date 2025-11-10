@@ -1055,7 +1055,25 @@ export default function ShapeSettingsPanel({
             {/* Opacity */}
             {onOpacityChange && (
               <div>
-                <Label className="text-[10px] mb-0.5 block text-muted-foreground">Opacity: {opacity}%</Label>
+                <div className="flex items-center justify-between mb-0.5">
+                  <Label className="text-[10px] text-muted-foreground">Opacity</Label>
+                  <Input
+                    type="number"
+                    value={opacity}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '' || val === '0') {
+                        onOpacityChange(0);
+                      } else {
+                        const num = Math.max(0, Math.min(100, Number(val)));
+                        onOpacityChange(num);
+                      }
+                    }}
+                    className="h-7 w-14 text-[11px] text-center px-1 rounded"
+                    min="0"
+                    max="100"
+                  />
+                </div>
                 <Slider
                   value={[opacity]}
                   onValueChange={([v]) => onOpacityChange(v)}
@@ -1157,7 +1175,7 @@ export default function ShapeSettingsPanel({
                 gradientStops={gradientStops}
                 patternFrameId={patternFrameId}
                 videoUrl={videoUrl}
-                opacity={opacity}
+                opacity={fillOpacity}
                 onFillTypeChange={(type) => {
                   if (elementType === "frame") {
                     onBackgroundTypeChange?.(type);

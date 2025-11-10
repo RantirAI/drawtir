@@ -270,29 +270,58 @@ export default function ResizableElement({
         const dx = (e.clientX - resizeStart.x) / zoom;
         const dy = (e.clientY - resizeStart.y) / zoom;
         
-        // Hold Shift for fine control
-        const multiplier = e.shiftKey ? 0.5 : 1;
-        
         let newWidth = resizeStart.width;
         let newHeight = resizeStart.height;
         let newX = resizeStart.elementX;
         let newY = resizeStart.elementY;
 
-        if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(1, snapToGridHelper(resizeStart.width + (dx * multiplier), gridSize));
-        }
-        if (resizeStart.corner.includes("w")) {
-          const widthDelta = (dx * multiplier);
-          newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
-          newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
-        }
-        if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(1, snapToGridHelper(resizeStart.height + (dy * multiplier), gridSize));
-        }
-        if (resizeStart.corner.includes("n")) {
-          const heightDelta = (dy * multiplier);
-          newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
-          newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
+        // Hold Shift to maintain aspect ratio
+        if (e.shiftKey) {
+          const aspectRatio = resizeStart.width / resizeStart.height;
+          
+          if (resizeStart.corner.includes("e") || resizeStart.corner.includes("w")) {
+            // Resize based on width change
+            const widthDelta = resizeStart.corner.includes("e") ? dx : -dx;
+            newWidth = Math.max(1, resizeStart.width + widthDelta);
+            newHeight = newWidth / aspectRatio;
+            
+            if (resizeStart.corner.includes("w")) {
+              newX = resizeStart.elementX + (resizeStart.width - newWidth);
+            }
+          } else if (resizeStart.corner.includes("n") || resizeStart.corner.includes("s")) {
+            // Resize based on height change
+            const heightDelta = resizeStart.corner.includes("s") ? dy : -dy;
+            newHeight = Math.max(1, resizeStart.height + heightDelta);
+            newWidth = newHeight * aspectRatio;
+            
+            if (resizeStart.corner.includes("n")) {
+              newY = resizeStart.elementY + (resizeStart.height - newHeight);
+            }
+          }
+          
+          // Snap to grid if enabled
+          newWidth = snapToGridHelper(newWidth, gridSize);
+          newHeight = snapToGridHelper(newHeight, gridSize);
+          newX = snapToGridHelper(newX, gridSize);
+          newY = snapToGridHelper(newY, gridSize);
+        } else {
+          // Normal resize without aspect ratio constraint
+          if (resizeStart.corner.includes("e")) {
+            newWidth = Math.max(1, snapToGridHelper(resizeStart.width + dx, gridSize));
+          }
+          if (resizeStart.corner.includes("w")) {
+            const widthDelta = dx;
+            newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
+            newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
+          }
+          if (resizeStart.corner.includes("s")) {
+            newHeight = Math.max(1, snapToGridHelper(resizeStart.height + dy, gridSize));
+          }
+          if (resizeStart.corner.includes("n")) {
+            const heightDelta = dy;
+            newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
+            newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
+          }
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
@@ -804,7 +833,17 @@ export default function ResizableElement({
           height, 
           shader 
         } as Element} />
+      ) : type === "image" && (fillType === "image" && fillImage) ? (
+        // Image element with fill image style
+        <div 
+          className="w-full h-full relative overflow-hidden" 
+          style={{ 
+            borderRadius: cornerRadius ? `${cornerRadius}px` : '0',
+            ...generateFillStyle()
+          }}
+        />
       ) : type === "image" && src ? (
+        // Regular image element
         <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
           <img 
             src={src} 
