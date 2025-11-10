@@ -18,7 +18,10 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
     amplitude: 1.2,
     frequency: 0.8,
     starDensity: 1.0,
-    colorShift: 1.0
+    colorShift: 1.0,
+    intensity: 1.2,
+    vibrancy: 1.1,
+    stretch: 1.5
   };
 
   return (
@@ -128,6 +131,62 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
           RGB values from 0-10 for shader color calculations
         </p>
       </div>
+
+      {shader.type === "aurora" && (
+        <>
+          <div>
+            <Label>Intensity: {shader.intensity?.toFixed(2) || "1.20"}</Label>
+            <Slider
+              value={[shader.intensity || 1.2]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, intensity: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Vibrancy: {shader.vibrancy?.toFixed(2) || "1.10"}</Label>
+            <Slider
+              value={[shader.vibrancy || 1.1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, vibrancy: value }
+              })}
+              min={0.0}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Frequency: {shader.frequency?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.frequency || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, frequency: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Stretch: {shader.stretch?.toFixed(2) || "1.50"}</Label>
+            <Slider
+              value={[shader.stretch || 1.5]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, stretch: value }
+              })}
+              min={0.5}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+        </>
+      )}
 
       {shader.type === "cosmic-waves" && (
         <>

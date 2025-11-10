@@ -94,6 +94,9 @@ export interface Element {
     frequency?: number;
     starDensity?: number;
     colorShift?: number;
+    intensity?: number;
+    vibrancy?: number;
+    stretch?: number;
   };
   
   // Common properties

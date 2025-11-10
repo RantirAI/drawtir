@@ -8,7 +8,7 @@ import { useState } from "react";
 import Kaleidoscope from "@/components/ui/kaleidoscope";
 import Plasma from "@/components/ui/plasma";
 import Nebula from "@/components/ui/nebula";
-import Aurora from "@/components/ui/aurora";
+import AuroraShaders from "@/components/ui/shadcn-io/aurora-shaders";
 import { CosmicWavesShaders } from "@/components/ui/shadcn-io/cosmic-waves-shaders";
 import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
@@ -25,6 +25,9 @@ interface ShaderConfig {
     frequency?: number;
     starDensity?: number;
     colorShift?: number;
+    intensity?: number;
+    vibrancy?: number;
+    stretch?: number;
   };
 }
 
@@ -49,7 +52,14 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
       case "nebula":
         return <Nebula {...props} />;
       case "aurora":
-        return <Aurora {...props} />;
+        return <AuroraShaders 
+          speed={props.speed}
+          intensity={(props as any).intensity || 1.2}
+          vibrancy={(props as any).vibrancy || 1.1}
+          frequency={(props as any).frequency || 1.0}
+          stretch={(props as any).stretch || 1.5}
+          className="h-full w-full"
+        />;
       case "cosmic-waves":
         return <CosmicWavesShaders 
           speed={props.speed}
@@ -152,6 +162,54 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                   </div>
                 </div>
               </div>
+
+              {shader.type === "aurora" && (
+                <>
+                  <div>
+                    <Label>Intensity: {(shaderProps as any).intensity?.toFixed(2) || "1.20"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).intensity || 1.2]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, intensity: value })}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Vibrancy: {(shaderProps as any).vibrancy?.toFixed(2) || "1.10"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).vibrancy || 1.1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, vibrancy: value })}
+                      min={0.0}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Frequency: {(shaderProps as any).frequency?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).frequency || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, frequency: value })}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Stretch: {(shaderProps as any).stretch?.toFixed(2) || "1.50"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).stretch || 1.5]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, stretch: value })}
+                      min={0.5}
+                      max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+                </>
+              )}
 
               {shader.type === "cosmic-waves" && (
                 <>

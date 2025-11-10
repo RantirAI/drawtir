@@ -17,6 +17,9 @@ interface ShaderOption {
     frequency?: number;
     starDensity?: number;
     colorShift?: number;
+    intensity?: number;
+    vibrancy?: number;
+    stretch?: number;
   };
 }
 
@@ -43,7 +46,15 @@ const SHADER_OPTIONS: ShaderOption[] = [
     type: "aurora",
     name: "Aurora",
     description: "Flowing northern lights with fractal noise patterns and atmospheric colors",
-    defaultProps: { speed: 1.0, glowIntensity: 1.8, colorTint: [1.0, 3.0, 5.0] }
+    defaultProps: { 
+      speed: 0.8, 
+      glowIntensity: 1.8, 
+      colorTint: [1.0, 3.0, 5.0],
+      intensity: 1.2,
+      vibrancy: 1.1,
+      frequency: 1.0,
+      stretch: 1.5
+    }
   },
   {
     type: "cosmic-waves",
