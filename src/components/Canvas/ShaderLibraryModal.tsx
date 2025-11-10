@@ -198,7 +198,11 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
   const [previewShader, setPreviewShader] = useState<ShaderOption | null>(null);
 
   const renderShaderPreview = (type: ShaderOption['type']) => {
-    const commonProps = { className: "w-full h-24 rounded-md overflow-hidden" };
+    // Smaller canvas for better performance in grid view
+    const commonProps = { 
+      className: "w-full h-full rounded-md overflow-hidden",
+      style: { width: '120px', height: '120px' }
+    };
     
     switch (type) {
       case "kaleidoscope":
@@ -244,37 +248,45 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {SHADER_OPTIONS.map((shader) => (
               <Card key={shader.type} className="border-border/50 hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg">{shader.name}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {shader.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="relative rounded-md overflow-hidden border border-border/50">
+                <div className="flex gap-4 p-4">
+                  {/* Preview on left */}
+                  <div className="relative rounded-md overflow-hidden border border-border/50 flex-shrink-0" style={{ width: '120px', height: '120px' }}>
                     {renderShaderPreview(shader.type)}
                   </div>
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPreviewShader(shader)}
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      Preview
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        onSelect(shader);
-                        onClose();
-                      }}
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Use Shader
-                    </Button>
+                  
+                  {/* Content on right */}
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <div className="flex-1">
+                      <CardTitle className="text-base mb-1">{shader.name}</CardTitle>
+                      <CardDescription className="text-xs line-clamp-3">
+                        {shader.description}
+                      </CardDescription>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPreviewShader(shader)}
+                        className="flex-1"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Preview
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          onSelect(shader);
+                          onClose();
+                        }}
+                        className="flex-1"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Use
+                      </Button>
+                    </div>
                   </div>
-                </CardContent>
+                </div>
               </Card>
             ))}
           </div>
