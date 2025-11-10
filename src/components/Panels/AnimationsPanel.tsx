@@ -155,22 +155,22 @@ export default function AnimationsPanel({
       className="w-[320px]"
     >
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as AnimationCategory)} className="w-full">
-        <TabsList className="w-full inline-flex h-9 items-center justify-start gap-0 bg-transparent p-0 border-b border-border">
+        <TabsList className="w-full inline-flex h-9 items-center justify-start gap-1 rounded-lg bg-muted/30 p-1">
           <TabsTrigger 
             value="in" 
-            className="relative text-xs h-9 px-4 data-[state=active]:text-foreground data-[state=active]:font-medium text-muted-foreground rounded-none border-r border-border first:border-l-0 hover:text-foreground transition-colors data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             IN
           </TabsTrigger>
           <TabsTrigger 
             value="out" 
-            className="relative text-xs h-9 px-4 data-[state=active]:text-foreground data-[state=active]:font-medium text-muted-foreground rounded-none border-r border-border hover:text-foreground transition-colors data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             OUT
           </TabsTrigger>
           <TabsTrigger 
             value="custom" 
-            className="relative text-xs h-9 px-4 data-[state=active]:text-foreground data-[state=active]:font-medium text-muted-foreground rounded-none hover:text-foreground transition-colors data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary"
+            className="text-xs h-7 px-4 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-md font-medium transition-all"
           >
             CUSTOM
           </TabsTrigger>
