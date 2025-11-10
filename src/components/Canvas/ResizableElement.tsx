@@ -14,6 +14,9 @@ interface ResizableElementProps {
   y: number;
   width: number;
   height: number;
+  sizeUnit?: "px" | "rem" | "%" | "em";
+  frameWidth?: number; // Parent frame width for % calculations
+  frameHeight?: number; // Parent frame height for % calculations
   src?: string;
   text?: string;
   richTextHtml?: string;
@@ -105,6 +108,9 @@ export default function ResizableElement({
   y,
   width,
   height,
+  sizeUnit = "px",
+  frameWidth = 0,
+  frameHeight = 0,
   src,
   text,
   shapeType = "rectangle",
@@ -215,6 +221,18 @@ export default function ResizableElement({
 
   const strokeWithOpacity = hexToRgba(stroke, strokeOpacity);
   const fillWithOpacity = fillType === "solid" ? hexToRgba(fill, fillOpacity) : fill;
+
+  // Calculate actual pixel dimensions from percentage if needed
+  const getActualDimension = (value: number, unit: string, referenceSize: number): number => {
+    if (unit === "%") {
+      return (value / 100) * referenceSize;
+    }
+    // For now, only handle px and %, can extend for rem/em later
+    return value;
+  };
+
+  const actualWidth = getActualDimension(width, sizeUnit, frameWidth || width);
+  const actualHeight = getActualDimension(height, sizeUnit, frameHeight || height);
 
   // Calculate adjusted corner radius based on stroke position
   const getAdjustedCornerRadius = (baseRadius: number): { outer: number; inner: number } => {
@@ -551,7 +569,7 @@ export default function ResizableElement({
         <svg
           width="100%"
           height="100%"
-          viewBox={`0 0 ${width} ${height}`}
+          viewBox={`0 0 ${actualWidth} ${actualHeight}`}
           preserveAspectRatio="none"
           style={{ overflow: 'visible' }}
         >
@@ -950,7 +968,7 @@ export default function ResizableElement({
         <div className="w-full h-full flex items-center justify-center">
           <QRCodeSVG
             value={(rest as any).qrValue || "https://example.com"}
-            size={Math.min(width, height)}
+            size={Math.min(actualWidth, actualHeight)}
             bgColor={(rest as any).qrBgColor || "#ffffff"}
             fgColor={(rest as any).qrFgColor || "#000000"}
             level={(rest as any).qrLevel || "M"}
@@ -979,7 +997,7 @@ export default function ResizableElement({
           
           {/* Dimension label at bottom in blue */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium">
-            {Math.round(width)} × {Math.round(height)}
+            {Math.round(actualWidth)} × {Math.round(actualHeight)} {sizeUnit !== "px" && `(${width}${sizeUnit})`}
           </div>
           
           {/* Resize handles in blue - hidden when locked */}

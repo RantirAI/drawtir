@@ -2215,6 +2215,9 @@ export default function CanvasContainerNew({
                        y={element.y}
                        width={element.width}
                        height={element.height}
+                       sizeUnit={element.sizeUnit}
+                       frameWidth={frame.width}
+                       frameHeight={frame.height}
                        src={element.imageUrl}
                        text={element.text}
                        shapeType={element.shapeType}
@@ -2379,6 +2382,9 @@ export default function CanvasContainerNew({
                             y={element.y}
                             width={element.width}
                             height={element.height}
+                            sizeUnit={element.sizeUnit}
+                            frameWidth={nestedFrame.width}
+                            frameHeight={nestedFrame.height}
                             text={element.text}
                             shapeType={element.shapeType}
                             fill={element.fill}

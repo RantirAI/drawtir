@@ -108,9 +108,7 @@ export default function ResizableFrame({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const frameRef = useRef<HTMLDivElement>(null);
 
-  // Calculate scale for dynamic content
-  const scaleX = enableDynamicScale && initialWidth ? width / initialWidth : 1;
-  const scaleY = enableDynamicScale && initialHeight ? height / initialHeight : 1;
+  // No dynamic scaling - elements maintain their actual sizes
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -453,16 +451,12 @@ export default function ResizableFrame({
         <div 
           className="pointer-events-auto flex"
           style={{
-            width: enableDynamicScale && initialWidth ? `${initialWidth}px` : '100%',
-            height: enableDynamicScale && initialHeight ? `${initialHeight}px` : '100%',
+            width: '100%',
+            height: '100%',
             flexDirection: flexDirection,
             justifyContent: justifyContent,
             alignItems: alignItems,
             gap: `${gap}px`,
-            transform: enableDynamicScale && (scaleX !== 1 || scaleY !== 1) 
-              ? `scale(${scaleX}, ${scaleY})` 
-              : undefined,
-            transformOrigin: 'top left',
           }}
         >
           {children}
