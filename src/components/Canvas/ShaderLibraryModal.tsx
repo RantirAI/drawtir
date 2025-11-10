@@ -147,8 +147,9 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
           shader={previewShader}
           open={!!previewShader}
           onClose={() => setPreviewShader(null)}
-          onUse={() => {
-            onSelect(previewShader);
+          onUse={(customProps) => {
+            const shaderWithCustomProps = { ...previewShader, defaultProps: customProps };
+            onSelect(shaderWithCustomProps);
             setPreviewShader(null);
             onClose();
           }}
