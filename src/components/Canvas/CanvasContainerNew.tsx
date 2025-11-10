@@ -2859,41 +2859,37 @@ export default function CanvasContainerNew({
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showGeneratePanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
             }`}
             onClick={() => setShowGeneratePanel(!showGeneratePanel)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Magicpen size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showGeneratePanel ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                AI Generator
-              </span>
-            </div>
+            <Magicpen size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showGeneratePanel ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              AI Generator
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showTemplatesPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
             }`}
             onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Element2 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showTemplatesPanel ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Templates
-              </span>
-            </div>
+            <Element2 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showTemplatesPanel ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Templates
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showLayersPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2902,51 +2898,45 @@ export default function CanvasContainerNew({
               setShowLayersPanel(!showLayersPanel);
             }}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Layer size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showLayersPanel ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Layers
-              </span>
-            </div>
+            <Layer size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showLayersPanel ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Layers
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showMediaLibrary 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
             }`}
             onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Gallery size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showMediaLibrary ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Media Library
-              </span>
-            </div>
+            <Gallery size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showMediaLibrary ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Media Library
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showShapeSettings || selectedElementIds.length > 0 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
             }`}
             onClick={() => setShowShapeSettings(!showShapeSettings)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Setting4 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Settings
-              </span>
-            </div>
+            <Setting4 size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Settings
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showAnimationsPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2958,42 +2948,36 @@ export default function CanvasContainerNew({
               setShowAnimationsPanel(!showAnimationsPanel);
             }}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Video size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showAnimationsPanel ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Animations
-              </span>
-            </div>
+            <Video size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showAnimationsPanel ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Animations
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden justify-center ${
               showBrandKitPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
             }`}
             onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <Colorfilter size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showBrandKitPanel ? 'text-primary' : ''}`} />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Brand Kit
-              </span>
-            </div>
+            <Colorfilter size={16} className={`transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0 ${showBrandKitPanel ? 'text-primary' : ''}`} />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Brand Kit
+            </span>
           </Button>
           
           <Button
             variant="ghost"
-            className="h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group/btn overflow-hidden flex items-center justify-center"
+            className="h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:justify-start hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group/btn overflow-hidden justify-center"
             onClick={() => setShowPreviewDialog(true)}
           >
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <PlayCircle size={16} className="text-primary transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0" />
-              <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] transition-all duration-300 text-sm font-medium">
-                Preview
-              </span>
-            </div>
+            <PlayCircle size={16} className="text-primary transition-transform duration-300 group-hover/btn:rotate-6 flex-shrink-0" />
+            <span className="max-w-0 overflow-hidden group-hover/btn:max-w-[150px] group-hover/btn:ml-2 transition-all duration-300 text-sm font-medium">
+              Preview
+            </span>
           </Button>
         </div>
       </div>
