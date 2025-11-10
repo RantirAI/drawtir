@@ -7,7 +7,8 @@ import { Video, Gallery, Colorfilter } from "iconsax-react";
 import ResizableFrame from "./ResizableFrame";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
-import { ShaderSettingsPanel } from "../Panels/ShaderSettingsPanel";
+import { ShadcnShaderSettingsPanel } from "../Panels/ShadcnShaderSettingsPanel";
+import { ShaderLibraryModal } from "./ShaderLibraryModal";
 import LayersPanel from "../Panels/LayersPanel";
 import AIGeneratorPanel from "../Panels/AIGeneratorPanel";
 import TemplatesPanel from "../Panels/TemplatesPanel";
@@ -173,6 +174,7 @@ export default function CanvasContainerNew({
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
+  const [showShaderLibrary, setShowShaderLibrary] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
@@ -1497,17 +1499,18 @@ export default function CanvasContainerNew({
     toast.success(`Icon added!`);
   };
 
-  const handleShaderAdd = () => {
+  const handleShaderSelect = (shaderConfig: any) => {
     const targetFrameId = selectedFrameId || frames[0]?.id;
     if (!targetFrameId) {
       toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === targetFrameId);
-    if (!frame) return;
 
     const defaultWidth = 400;
     const defaultHeight = 400;
+    const frame = frames.find(f => f.id === targetFrameId);
+    if (!frame) return;
+
     const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
     const y = Math.max(0, Math.floor((frame.height - defaultHeight) / 2));
 
@@ -1519,13 +1522,10 @@ export default function CanvasContainerNew({
       width: defaultWidth,
       height: defaultHeight,
       shader: {
-        type: "ripple",
-        speed: 1,
-        intensity: 1,
-        scale: 10,
-        color1: "#ff0080",
-        color2: "#00ffff",
-        color3: "#ffff00"
+        type: shaderConfig.type,
+        speed: shaderConfig.defaultProps.speed,
+        glowIntensity: shaderConfig.defaultProps.glowIntensity,
+        colorTint: shaderConfig.defaultProps.colorTint
       },
       opacity: 100,
       cornerRadius: 0,
@@ -1541,7 +1541,7 @@ export default function CanvasContainerNew({
     setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
-    toast.success(`Shader effect added!`);
+    toast.success(`${shaderConfig.name} shader added!`);
   };
 
   const handleLineAdd = () => {
@@ -2574,7 +2574,7 @@ export default function CanvasContainerNew({
           defaultPosition={{ x: window.innerWidth - 320, y: 100 }}
           onClose={() => setShowShapeSettings(false)}
         >
-          <ShaderSettingsPanel
+          <ShadcnShaderSettingsPanel
             element={selectedElement}
             onUpdate={(updates) => handleElementUpdate(selectedElement.id, updates)}
           />
@@ -3023,7 +3023,7 @@ export default function CanvasContainerNew({
         onIconSelect={handleIconSelect}
         onQRCodeAdd={handleQRCodeAdd}
         timelinePanelOpen={showTimelinePanel}
-        onShaderAdd={handleShaderAdd}
+        onShaderAdd={() => setShowShaderLibrary(true)}
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
@@ -3189,6 +3189,13 @@ export default function CanvasContainerNew({
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
 
       <DrawtirFooter />
+
+      {/* Shader Library Modal */}
+      <ShaderLibraryModal
+        open={showShaderLibrary}
+        onClose={() => setShowShaderLibrary(false)}
+        onSelect={handleShaderSelect}
+      />
 
       <input
         ref={imageInputRef}

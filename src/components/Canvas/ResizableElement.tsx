@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { generateGradientCSS, getFitStyle, getObjectFitStyle } from "@/lib/utils";
 import DynamicIcon from "./DynamicIcon";
-import { ShaderElement } from "./ShaderElement";
+import { ShadcnShaderElement } from "./ShadcnShaderElement";
 import { BendableLine } from "./BendableLine";
 import RichTextEditor from "./RichTextEditor";
 import { QRCodeSVG } from 'qrcode.react';
@@ -58,13 +58,10 @@ interface ResizableElementProps {
   videoUrl?: string;
   // Shader properties
   shader?: {
-    type: "ripple" | "distortion" | "particles" | "noise" | "waves" | "tunnel" | "plasma";
+    type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
     speed?: number;
-    intensity?: number;
-    scale?: number;
-    color1?: string;
-    color2?: string;
-    color3?: string;
+    glowIntensity?: number;
+    colorTint?: [number, number, number];
   };
   // QR Code properties
   qrValue?: string;
@@ -845,7 +842,7 @@ export default function ResizableElement({
       onDoubleClick={handleDoubleClick}
     >
       {type === "shader" && shader ? (
-        <ShaderElement element={{ 
+        <ShadcnShaderElement element={{ 
           id, 
           type: "shader", 
           x, 

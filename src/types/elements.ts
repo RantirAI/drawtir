@@ -86,13 +86,10 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "ripple" | "distortion" | "particles" | "noise" | "waves" | "tunnel" | "plasma";
+    type: "kaleidoscope" | "ripple" | "plasma" | "nebula" | "matrix" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch";
     speed?: number;
-    intensity?: number;
-    scale?: number;
-    color1?: string;
-    color2?: string;
-    color3?: string;
+    glowIntensity?: number;
+    colorTint?: [number, number, number];
   };
   
   // Common properties
