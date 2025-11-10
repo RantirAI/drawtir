@@ -34,6 +34,7 @@ interface ResizableElementProps {
   // Icon properties
   iconName?: string;
   iconFamily?: string;
+  iconStrokeWidth?: number;
   // Image properties
   brightness?: number;
   contrast?: number;
@@ -126,6 +127,7 @@ export default function ResizableElement({
   blendMode = "normal",
   iconName,
   iconFamily,
+  iconStrokeWidth = 2,
   brightness = 100,
   contrast = 100,
   saturation = 100,
@@ -762,6 +764,7 @@ export default function ResizableElement({
               iconName={iconName}
               iconFamily={iconFamily}
               color={fill}
+              strokeWidth={iconStrokeWidth}
               className="w-full h-full"
             />
           </div>

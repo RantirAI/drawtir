@@ -12,6 +12,7 @@ interface DynamicIconProps {
   iconFamily?: string;
   color?: string;
   size?: number | string;
+  strokeWidth?: number;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export default function DynamicIcon({
   iconFamily, 
   color = '#000000',
   size,
+  strokeWidth,
   className = ''
 }: DynamicIconProps) {
   const IconComponent = useMemo(() => {
@@ -57,19 +59,28 @@ export default function DynamicIcon({
         className={`flex items-center justify-center ${className}`}
         style={{ color }}
       >
-        <LucideIcons.HelpCircle style={{ width: size || '100%', height: size || '100%' }} />
+        <LucideIcons.HelpCircle 
+          style={{ width: size || '100%', height: size || '100%' }} 
+          strokeWidth={strokeWidth}
+        />
       </div>
     );
   }
 
-  return (
-    <IconComponent 
-      className={className}
-      style={{ 
-        width: size || '100%', 
-        height: size || '100%', 
-        color 
-      }} 
-    />
-  );
+  // Props for icon libraries
+  const iconProps: any = {
+    className,
+    style: { 
+      width: size || '100%', 
+      height: size || '100%', 
+      color 
+    }
+  };
+
+  // Add strokeWidth for libraries that support it (Lucide, Iconsax, Feather)
+  if (strokeWidth !== undefined && (iconFamily === 'lucide' || iconFamily === 'iconsax' || iconFamily === 'fi' || iconFamily === 'feather')) {
+    iconProps.strokeWidth = strokeWidth;
+  }
+
+  return <IconComponent {...iconProps} />;
 }

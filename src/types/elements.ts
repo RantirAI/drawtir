@@ -76,6 +76,7 @@ export interface Element {
   iconFamily?: string; // fa, md, hi, ai, bs, etc.
   iconColor?: string;
   iconSize?: number;
+  iconStrokeWidth?: number;
   
   // QR Code properties
   qrValue?: string;

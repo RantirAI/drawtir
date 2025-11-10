@@ -198,6 +198,8 @@ interface ShapeSettingsPanelProps {
   onGapChange?: (gap: number) => void;
   availableFrames?: Array<{id: string, name: string}>;
   onIconChange?: (iconName: string, iconFamily: string) => void;
+  iconStrokeWidth?: number;
+  onIconStrokeWidthChange?: (width: number) => void;
   onClose?: () => void;
   onOpenBrandKit?: () => void;
 }
@@ -339,6 +341,8 @@ export default function ShapeSettingsPanel({
   onGapChange,
   availableFrames = [],
   onIconChange,
+  iconStrokeWidth = 2,
+  onIconStrokeWidthChange,
   onClose,
   onOpenBrandKit,
 }: ShapeSettingsPanelProps) {
@@ -1155,6 +1159,32 @@ export default function ShapeSettingsPanel({
                   <Smile className="h-3 w-3 mr-2" />
                   Change Icon
                 </Button>
+                
+                {/* Icon Stroke Width - for supported icon families */}
+                {(iconFamily === 'lucide' || iconFamily === 'iconsax' || iconFamily === 'fi' || iconFamily === 'feather') && onIconStrokeWidthChange && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] text-muted-foreground">Stroke Width</Label>
+                      <Input
+                        type="number"
+                        value={iconStrokeWidth}
+                        onChange={(e) => onIconStrokeWidthChange(Number(e.target.value))}
+                        className="h-6 w-14 text-[10px] px-2"
+                        min="0.5"
+                        max="4"
+                        step="0.25"
+                      />
+                    </div>
+                    <Slider
+                      value={[iconStrokeWidth]}
+                      onValueChange={([value]) => onIconStrokeWidthChange(value)}
+                      min={0.5}
+                      max={4}
+                      step={0.25}
+                      className="w-full"
+                    />
+                  </div>
+                )}
               </div>
             </AccordionContent>
           </AccordionItem>

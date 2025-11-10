@@ -707,6 +707,7 @@ export default function CanvasContainerNew({
                       ...baseElement,
                       iconName: el.iconName || "heart",
                       iconFamily: el.iconFamily || "lucide",
+                      iconStrokeWidth: el.iconStrokeWidth || 2,
                       fill: el.color || "#000000",
                     };
                   } else if (el.type === "text") {
@@ -839,6 +840,7 @@ export default function CanvasContainerNew({
                 ...baseElement,
                 iconName: el.iconName || "heart",
                 iconFamily: el.iconFamily || "lucide",
+                iconStrokeWidth: el.iconStrokeWidth || 2,
                 fill: el.color || "#000000",
               };
             } else if (el.type === "text") {
@@ -1462,6 +1464,7 @@ export default function CanvasContainerNew({
       shapeType: "icon" as any,
       iconName,
       iconFamily,
+      iconStrokeWidth: 2,
       fill: penColor,
       stroke: "transparent",
       strokeWidth: 0,
@@ -2248,10 +2251,11 @@ export default function CanvasContainerNew({
                        gradientAngle={element.gradientAngle}
                        gradientStops={element.gradientStops}
                        patternFrameId={element.patternFrameId}
-                       videoUrl={element.videoUrl}
-                       iconName={element.iconName}
-                       iconFamily={element.iconFamily}
-                       shader={element.shader}
+                        videoUrl={element.videoUrl}
+                        iconName={element.iconName}
+                        iconFamily={element.iconFamily}
+                        iconStrokeWidth={element.iconStrokeWidth}
+                        shader={element.shader}
                        lineStyle={element.lineStyle}
                        lineCap={element.lineCap}
                        lineJoin={element.lineJoin}
@@ -2394,10 +2398,11 @@ export default function CanvasContainerNew({
                             cornerRadius={element.cornerRadius}
                             fontSize={element.fontSize}
                             fontFamily={element.fontFamily}
-                            fontWeight={element.fontWeight}
-                            iconName={element.iconName}
-                            iconFamily={element.iconFamily}
-                             shader={element.shader}
+                             fontWeight={element.fontWeight}
+                             iconName={element.iconName}
+                             iconFamily={element.iconFamily}
+                             iconStrokeWidth={element.iconStrokeWidth}
+                              shader={element.shader}
                              animations={element.animations}
                              useFlexLayout={false}
                              isLocked={element.isLocked}
@@ -2580,6 +2585,7 @@ export default function CanvasContainerNew({
           shapeType={selectedElement?.shapeType}
           iconName={selectedElement?.iconName}
           iconFamily={selectedElement?.iconFamily}
+          iconStrokeWidth={selectedElement?.iconStrokeWidth}
           backgroundColor={selectedFrame?.backgroundColor}
           backgroundType={selectedFrame?.backgroundType}
           fillType={selectedElement?.fillType}
@@ -2736,6 +2742,7 @@ export default function CanvasContainerNew({
           onVideoUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { videoUrl: url })}
           availableFrames={frames.map(f => ({ id: f.id, name: f.name }))}
           onIconChange={(iconName, iconFamily) => selectedElement && handleElementUpdate(selectedElement.id, { iconName, iconFamily })}
+          onIconStrokeWidthChange={(width) => selectedElement && handleElementUpdate(selectedElement.id, { iconStrokeWidth: width })}
           // Line-specific props and handlers
           lineStyle={selectedElement?.lineStyle}
           lineCap={selectedElement?.lineCap}
