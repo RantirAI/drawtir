@@ -2858,7 +2858,7 @@ export default function CanvasContainerNew({
       <div className="fixed left-6 top-1/2 -translate-y-1/2 z-40">
         <div className="flex flex-col gap-2">
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[140px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[140px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showGeneratePanel 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2876,7 +2876,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[130px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[130px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showTemplatesPanel 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2894,7 +2894,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showLayersPanel 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2912,7 +2912,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[140px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[140px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showMediaLibrary 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2930,7 +2930,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showShapeSettings || selectedElementIds.length > 0 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2948,7 +2948,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[130px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[130px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showAnimationsPanel 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2971,7 +2971,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className={`absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[120px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md ${
+            <div className={`absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[120px] group-hover/btn:bg-primary backdrop-blur-sm shadow-sm group-hover/btn:shadow-md -z-10 ${
               showBrandKitPanel 
                 ? 'bg-primary/20 shadow-primary/20' 
                 : 'bg-card'
@@ -2989,7 +2989,7 @@ export default function CanvasContainerNew({
           </div>
           
           <div className="group/btn relative">
-            <div className="absolute inset-0 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm bg-primary/20 shadow-sm shadow-primary/20 group-hover/btn:shadow-md" />
+            <div className="absolute left-0 top-0 h-10 w-10 rounded-full transition-all duration-500 ease-out delay-75 group-hover/btn:delay-0 group-hover/btn:rounded-3xl group-hover/btn:w-[110px] group-hover/btn:bg-primary backdrop-blur-sm bg-primary/20 shadow-sm shadow-primary/20 group-hover/btn:shadow-md -z-10" />
             <Button
               variant="ghost"
               className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-transparent"
