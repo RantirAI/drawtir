@@ -1,6 +1,4 @@
-"use client";
-import React, { forwardRef } from "react";
-import { Shader } from "react-shaders";
+import React, { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ExtrudedMobiusSpiralShadersProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -15,7 +13,27 @@ export interface ExtrudedMobiusSpiralShadersProps extends React.HTMLAttributes<H
   vertLines?: number;
 }
 
+const vertexShader = `
+attribute vec2 position;
+void main() {
+  gl_Position = vec4(position, 0.0, 1.0);
+}
+`;
+
 const fragmentShader = `
+precision highp float;
+uniform vec2 iResolution;
+uniform float iTime;
+uniform float u_speed;
+uniform float u_shape;
+uniform float u_rowOffset;
+uniform float u_faceDecoration;
+uniform float u_doubleSpiral;
+uniform float u_holes;
+uniform float u_raised;
+uniform float u_ridges;
+uniform float u_vertLines;
+
 #define ROW_OFFSET
 #define SHAPE 2
 #define FACE_DECO
@@ -372,49 +390,143 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
 }
 `;
 
-export const ExtrudedMobiusSpiralShaders = forwardRef<HTMLDivElement, ExtrudedMobiusSpiralShadersProps>(
-  (
-    {
-      className,
-      speed = 1.0,
-      shape = 2,
-      rowOffset = 1,
-      faceDecoration = 1,
-      doubleSpiral = 1,
-      holes = 0,
-      raised = 0,
-      ridges = 0,
-      vertLines = 0,
-      ...props
-    },
-    ref
-  ) => {
-    return (
-      <div
-        ref={ref}
-        className={cn('w-full h-full', className)}
-        {...props}
-      >
-        <Shader
-          fs={fragmentShader}
-          uniforms={{
-            u_speed: { type: '1f', value: speed },
-            u_shape: { type: '1f', value: shape },
-            u_rowOffset: { type: '1f', value: rowOffset },
-            u_faceDecoration: { type: '1f', value: faceDecoration },
-            u_doubleSpiral: { type: '1f', value: doubleSpiral },
-            u_holes: { type: '1f', value: holes },
-            u_raised: { type: '1f', value: raised },
-            u_ridges: { type: '1f', value: ridges },
-            u_vertLines: { type: '1f', value: vertLines },
-          }}
-          style={{ width: '100%', height: '100%' } as CSSStyleDeclaration}
-        />
-      </div>
+export default function ExtrudedMobiusSpiralShaders({
+  speed = 1.0,
+  shape = 2,
+  rowOffset = 1,
+  faceDecoration = 1,
+  doubleSpiral = 1,
+  holes = 0,
+  raised = 0,
+  ridges = 0,
+  vertLines = 0,
+  className,
+  children,
+  ...props
+}: ExtrudedMobiusSpiralShadersProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const timeRef = useRef(0);
+  const animationFrameRef = useRef<number>();
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const gl = canvas.getContext("webgl");
+    if (!gl) {
+      console.warn("WebGL not supported");
+      return;
+    }
+
+    // Compile shaders
+    const vs = gl.createShader(gl.VERTEX_SHADER);
+    const fs = gl.createShader(gl.FRAGMENT_SHADER);
+    if (!vs || !fs) return;
+
+    gl.shaderSource(vs, vertexShader);
+    gl.compileShader(vs);
+    
+    if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+      console.error("Vertex shader error:", gl.getShaderInfoLog(vs));
+      return;
+    }
+
+    gl.shaderSource(fs, fragmentShader);
+    gl.compileShader(fs);
+    
+    if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+      console.error("Fragment shader error:", gl.getShaderInfoLog(fs));
+      return;
+    }
+
+    const program = gl.createProgram();
+    if (!program) return;
+
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("Program link error:", gl.getProgramInfoLog(program));
+      return;
+    }
+    
+    gl.useProgram(program);
+
+    // Setup geometry
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      gl.STATIC_DRAW
     );
-  }
-);
 
-ExtrudedMobiusSpiralShaders.displayName = "ExtrudedMobiusSpiralShaders";
+    const position = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(position);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
 
-export default ExtrudedMobiusSpiralShaders;
+    // Get uniform locations
+    const iResolution = gl.getUniformLocation(program, "iResolution");
+    const iTime = gl.getUniformLocation(program, "iTime");
+    const u_speed = gl.getUniformLocation(program, "u_speed");
+    const u_shape = gl.getUniformLocation(program, "u_shape");
+    const u_rowOffset = gl.getUniformLocation(program, "u_rowOffset");
+    const u_faceDecoration = gl.getUniformLocation(program, "u_faceDecoration");
+    const u_doubleSpiral = gl.getUniformLocation(program, "u_doubleSpiral");
+    const u_holes = gl.getUniformLocation(program, "u_holes");
+    const u_raised = gl.getUniformLocation(program, "u_raised");
+    const u_ridges = gl.getUniformLocation(program, "u_ridges");
+    const u_vertLines = gl.getUniformLocation(program, "u_vertLines");
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    const animate = () => {
+      timeRef.current += 0.016 * speed;
+
+      gl.uniform2f(iResolution, canvas.width, canvas.height);
+      gl.uniform1f(iTime, timeRef.current);
+      gl.uniform1f(u_speed, speed);
+      gl.uniform1f(u_shape, shape);
+      gl.uniform1f(u_rowOffset, rowOffset);
+      gl.uniform1f(u_faceDecoration, faceDecoration);
+      gl.uniform1f(u_doubleSpiral, doubleSpiral);
+      gl.uniform1f(u_holes, holes);
+      gl.uniform1f(u_raised, raised);
+      gl.uniform1f(u_ridges, ridges);
+      gl.uniform1f(u_vertLines, vertLines);
+
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resize);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [speed, shape, rowOffset, faceDecoration, doubleSpiral, holes, raised, ridges, vertLines]);
+
+  return (
+    <div className={cn("relative w-full h-full", className)} {...props}>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+      />
+      {children && <div className="relative z-10">{children}</div>}
+    </div>
+  );
+}
+
+export { ExtrudedMobiusSpiralShaders };
