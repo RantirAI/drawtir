@@ -89,12 +89,12 @@ const Index = () => {
 
   // If not authenticated, show homepage with login modal
   if (!session) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0B] dark">
+  return (
+    <div className="min-h-screen bg-[#0A0A0B] dark">
       <AnnounceBanner />
       <HomeNav onOpenAuth={() => setAuthModalOpen(true)} />
       
-      <div className="relative min-h-[calc(100vh-120px)] overflow-hidden">
+      <div className="relative min-h-[calc(100vh-120px)] overflow-hidden pt-20">
         {/* Gradient Background */}
         <div 
           className="absolute inset-0"
@@ -102,88 +102,52 @@ const Index = () => {
             background: "radial-gradient(circle at top left, rgba(30, 41, 59, 0.4) 0%, rgba(10, 10, 11, 1) 50%)",
           }}
         />
-        
-        {/* Canvas Background Pattern */}
-        <div 
-          className="absolute inset-0 opacity-30"
-          style={{
-            backgroundImage: `url(${canvasBg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
-        />
 
-        {/* Bento Grid Container */}
-        <div className="relative container mx-auto px-8 py-16 h-full">
-          <div className="grid grid-cols-3 gap-6 h-[600px]">
-            {/* Box 1 - Image */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-              <img src={panel1} alt="Panel 1" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* Box 2 - Image */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-              <img src={panel2} alt="Panel 2" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* Box 3 - Image */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-              <img src={panel3} alt="Panel 3" className="w-full h-full object-cover" />
-            </div>
-            
-            {/* Box 4 - Featured Content with Frame */}
-            <div className="col-span-2 bg-gradient-to-br from-purple-600/20 via-blue-600/20 to-cyan-600/20 backdrop-blur-sm rounded-2xl border-2 border-white/30 p-12 flex flex-col justify-center relative overflow-hidden">
-              <div className="absolute top-4 left-4 bg-white/10 backdrop-blur-sm px-3 py-1 rounded-full border border-white/20">
-                <span className="text-xs text-white/80">Frame 1</span>
+        {/* Bento Grid Container - Centered */}
+        <div className="relative container mx-auto px-8 py-16 h-full flex items-center justify-center">
+          <div className="w-full max-w-[720px] space-y-6">
+            {/* Row 1: Three cards with images */}
+            <div className="grid grid-cols-3 gap-4">
+              {/* Card 1 */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg mb-4"></div>
+                <h3 className="text-sm font-semibold text-white mb-2">Vibe design</h3>
+                <p className="text-xs text-white/60">Tell Drawtir what you want to create and watch the AI work its magic.</p>
               </div>
-              <h2 className="text-4xl font-bold text-white mb-4">
-                Vibe design
-              </h2>
-              <p className="text-white/70 text-lg mb-6">
-                Tell Drawtir what you want to create and select the tags for the "best" framework and watch the AI work its magic.
-              </p>
-              <div className="flex gap-4">
-                <button className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-lg border border-white/20 text-white transition-colors">
-                  Learn More
-                </button>
-                <button className="px-6 py-3 bg-white text-black hover:bg-white/90 rounded-lg transition-colors font-medium">
-                  Get Started
-                </button>
+
+              {/* Card 2 */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mb-4"></div>
+                <h3 className="text-sm font-semibold text-white mb-2">Edit visually</h3>
+                <p className="text-xs text-white/60">Adjust colors, layouts and styles with manual edit or with the style editor.</p>
+              </div>
+
+              {/* Card 3 */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg mb-4"></div>
+                <h3 className="text-sm font-semibold text-white mb-2">Brand Guide</h3>
+                <p className="text-xs text-white/60">Create beautiful UIs, bring your own design systems and components.</p>
               </div>
             </div>
-            
-            {/* Box 5 - Secondary Content */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 flex flex-col justify-center">
-              <h3 className="text-2xl font-semibold text-white mb-3">
-                Export & Embed
-              </h3>
-              <p className="text-white/60 text-sm">
-                Get production-ready code design editor built around your own Figma, Canvas or Web Assets to finalize your Drawtir SDK experience.
-              </p>
+
+            {/* Row 2: Two larger cards */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Large Card 1 */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-8">
+                <h3 className="text-lg font-semibold text-white mb-3">Open source & free</h3>
+                <p className="text-sm text-white/60">Work together, share projects, and build with your team seamlessly or fork and host it yourself with your own AI API keys.</p>
+              </div>
+
+              {/* Large Card 2 */}
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-8">
+                <h3 className="text-lg font-semibold text-white mb-3">Export & Embed</h3>
+                <p className="text-sm text-white/60">Get production-ready code design editor built around your own Figma, Canvas or Web Assets to finetune your Drawtir SDK experience.</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Draggable Panels */}
-        <DraggablePanel initialX={100} initialY={200} zIndex={50}>
-          <img src={panel1} alt="Draggable Panel 1" className="w-48 opacity-80 hover:opacity-100 transition-opacity" />
-        </DraggablePanel>
-        
-        <DraggablePanel initialX={window.innerWidth - 300} initialY={150} zIndex={50}>
-          <img src={panel2} alt="Draggable Panel 2" className="w-56 opacity-80 hover:opacity-100 transition-opacity" />
-        </DraggablePanel>
-        
-        <DraggablePanel initialX={window.innerWidth - 350} initialY={500} zIndex={50}>
-          <img src={panel3} alt="Draggable Panel 3" className="w-64 opacity-80 hover:opacity-100 transition-opacity" />
-        </DraggablePanel>
-
-        {/* Draggable Frame Badge */}
-        <DraggablePanel initialX={window.innerWidth / 2 - 50} initialY={100} zIndex={60}>
-          <div className="bg-purple-600/30 backdrop-blur-sm px-4 py-2 rounded-full border-2 border-purple-400/50 shadow-lg">
-            <span className="text-sm text-white font-medium">Frame 1</span>
-          </div>
-        </DraggablePanel>
+        {/* Remove draggable panels - they're not needed anymore */}
       </div>
 
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
