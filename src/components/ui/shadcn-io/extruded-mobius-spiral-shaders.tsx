@@ -25,39 +25,10 @@ precision highp float;
 uniform vec2 iResolution;
 uniform float iTime;
 uniform float u_speed;
-uniform float u_shape;
-uniform float u_rowOffset;
-uniform float u_faceDecoration;
-uniform float u_doubleSpiral;
-uniform float u_holes;
-uniform float u_raised;
-uniform float u_ridges;
-uniform float u_vertLines;
-
-#define ROW_OFFSET
-#define SHAPE 2
-#define FACE_DECO
-#define DOUBLE_SPIRAL
-
-#if SHAPE == 2
-#ifndef ROW_OFFSET
-#define ROW_OFFSET
-#endif
-#endif
-
-#ifdef ROW_OFFSET
-#if SHAPE >= 1
-const vec2 rDim = vec2(1, 2.*.8660254);
-#else
-const vec2 rDim = vec2(1, 2);
-#endif
-#else
-const vec2 rDim = vec2(1, 2);
-#endif
 
 vec2 scale = vec2(1./8.);
-
-#define FAR 20.
+const vec2 rDim = vec2(1, 2.*.8660254);
+const float FAR = 20.0;
 
 float objID;
 
@@ -72,18 +43,16 @@ float opExtrusion(in float sdf, in float pz, in float h){
       return min(max(w.x, w.y), 0.) + length(max(w, 0.));
 }
 
-#if SHAPE == 2
 float sHexS(in vec2 p, float r, in float sf){
-      const vec3 k = vec3(.5, -.8660254, .57735);
-      p = abs(p); 
-      p -= 2.*min(dot(k.xy, p), 0.)*k.xy;
-      r -= sf;
-      return length(p - vec2(r, clamp(p.y, -k.z*r, k.z*r)))*sign(p.x - r) - sf;
+  const vec3 k = vec3(.5, -.8660254, .57735);
+  p = abs(p); 
+  p -= 2.*min(dot(k.xy, p), 0.)*k.xy;
+  r -= sf;
+  return length(p - vec2(r, clamp(p.y, -k.z*r, k.z*r)))*sign(p.x - r) - sf;
 }
-#endif
 
 float hm(in vec2 p){ 
-     return (sin(6.2831*(p.y*2. + p.x) + iTime*u_speed*2.)*.5 + .5); 
+  return (sin(6.2831*(p.y*2. + p.x) + iTime*2.)*.5 + .5); 
 }
 
 float sBoxS(in vec2 p, in vec2 b, in float sf){
@@ -131,32 +100,10 @@ vec4 blocks(vec3 q3){
         vec2 index = mod(idi, rDim.yx)/rDim.yx; 
         
         float h = hm(index)*tempR*.1;
-            
-        #if SHAPE == 2
+        
+        // Always use hexagon shape for simplicity
         float di2D = sHexS(p, minSc/1.732 - .0035, .015);
-        #elif SHAPE == 1
-        #ifdef ROW_OFFSET
-        float di2D = length(p) - minSc/1.732 + .0035;
-        #else
-        float di2D = length(p) - l.x/2. + .0035;
-        #endif
-        #else
-        float di2D = sBoxS(p, l/2. - .0035, .02);
-        #endif
-        
-        if (u_holes > 0.5) {
-            di2D = max(di2D, -(di2D + minSc/3.));
-        }
-        
         float di = opExtrusion(di2D, (q3.z + h - 1.), h + 1.);
-        
-        if (u_raised > 0.5) {
-            di += di2D*.5*tempR;
-        }
-        
-        if (u_ridges > 0.5) {
-            di += smoothstep(-.5, .5, sin(di2D/minSc*6.2831*3.))*.01;
-        }
         if(di<d){
             d = di;
             id = idi;         
@@ -186,22 +133,21 @@ vec4 gID;
 float map(vec3 p){
     float fl = -p.z + .01;
     
-    vec2 z = rot2(-sin(iTime/3.*u_speed)*.65)*p.xy;
+    vec2 z = rot2(-sin(iTime/3.)*.65)*p.xy;
     const float sc = 1.5;
     float r = min(length(z - vec2(sc, 0)), length(z - vec2(-sc, 0)));
     tempR = r;
     z = caTanh(-z, sc)/6.2831;
  
-    if (u_doubleSpiral > 0.5) {
-        vec2 z2 = rot2(-cos(iTime/3.*u_speed)*.65*2.)*p.xy;    
-        const float sc2 = .75;
-        float r2 = min(length(z2.xy - vec2(sc2, 0)), length(z2.xy - vec2(-sc2, 0)));
-        tempR = min(tempR, r2);
-        z += caTanh(z2, sc2)/6.2831;
-    }
+    // Double spiral
+    vec2 z2 = rot2(-cos(iTime/3.)*.65*2.)*p.xy;    
+    const float sc2 = .75;
+    float r2 = min(length(z2.xy - vec2(sc2, 0)), length(z2.xy - vec2(-sc2, 0)));
+    tempR = min(tempR, r2);
+    z += caTanh(z2, sc2)/6.2831;
     
     tempR = smoothstep(.1, .5, tempR);
-    z.y = fract(z.y + iTime*.1*u_speed);
+    z.y = fract(z.y + iTime*.1);
     z = cMul(rDim, z);
  
     p.xy = z;
@@ -272,14 +218,11 @@ float calcAO(vec3 p, vec3 n){
     return clamp(occ, 0., 1.);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord ){
+void main() {
+    vec2 fragCoord = gl_FragCoord.xy;
     vec2 uv = (fragCoord - iResolution.xy*.5)/iResolution.y;
     
-    #ifdef ROW_OFFSET
-    #if SHAPE >= 1
     scale *= vec2(2./1.732, 1);
-    #endif
-    #endif
     
     vec3 ro = vec3(0, -1, -2.2);
     vec3 lk = ro + vec3(0, .1, .25);
@@ -342,34 +285,19 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
             
             vec3 dF = (vec3(di2DX, di2DY, 1e5) - di2D);
             float sf = length(dF.xy);
-            #else
-            float sf = fwidth(svGID.w);
-            #endif
             
-            if (u_vertLines > 0.5) {
-                #if SHAPE == 2
-                const float aNum = 6.;
-                vec2 z = rot2(3.14159/aNum)*svP; 
-                #else
-                const float aNum = 4.;
-                vec2 z = svP; 
-                #endif
-                float a = mod(atan(z.x, z.y), 6.2831)/6.2831;
-                a = (floor(a*aNum) + .5)/aNum;
-                z *= rot2(a*6.2831);
-                texCol = mix(texCol, vec3(0), (1. - smoothstep(0., sf, abs(z.x) - .001))*.95);     
-            }
+            // Vertical lines for hexagon
+            const float aNum = 6.;
+            vec2 zLines = rot2(3.14159/aNum)*svP; 
+            float a = mod(atan(zLines.x, zLines.y), 6.2831)/6.2831;
+            a = (floor(a*aNum) + .5)/aNum;
+            zLines *= rot2(a*6.2831);
+            texCol = mix(texCol, vec3(0), (1. - smoothstep(0., sf, abs(zLines.x) - .001))*.95);
             
-            if (u_faceDecoration > 0.5) {
-                float rim = .04;
-                #ifdef ROW_OFFSET
-                #if SHAPE >= 1
-                rim /= .8660254;
-                #endif
-                #endif
-                texCol = mix(texCol, vec3(0), (1. - smoothstep(0., sf, svGID.w + rim))*.95);
-                texCol = mix(texCol, col2, (1. - smoothstep(0., sf, svGID.w + rim + .005)));
-            }
+            // Face decoration
+            float rim = .04 / .8660254;
+            texCol = mix(texCol, vec3(0), (1. - smoothstep(0., sf, svGID.w + rim))*.95);
+            texCol = mix(texCol, col2, (1. - smoothstep(0., sf, svGID.w + rim + .005)));
             float h = hm(index);
             float lw = .0035;
             float dS = abs(svGID.w) - lw/2.;
@@ -385,8 +313,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ){
       
         col *= ao*atten;
     }
-          
-    fragColor = vec4(sqrt(max(col, 0.)), 1);
+    
+    gl_FragColor = vec4(sqrt(max(col, 0.)), 1.0);
 }
 `;
 
@@ -469,15 +397,6 @@ export default function ExtrudedMobiusSpiralShaders({
     // Get uniform locations
     const iResolution = gl.getUniformLocation(program, "iResolution");
     const iTime = gl.getUniformLocation(program, "iTime");
-    const u_speed = gl.getUniformLocation(program, "u_speed");
-    const u_shape = gl.getUniformLocation(program, "u_shape");
-    const u_rowOffset = gl.getUniformLocation(program, "u_rowOffset");
-    const u_faceDecoration = gl.getUniformLocation(program, "u_faceDecoration");
-    const u_doubleSpiral = gl.getUniformLocation(program, "u_doubleSpiral");
-    const u_holes = gl.getUniformLocation(program, "u_holes");
-    const u_raised = gl.getUniformLocation(program, "u_raised");
-    const u_ridges = gl.getUniformLocation(program, "u_ridges");
-    const u_vertLines = gl.getUniformLocation(program, "u_vertLines");
 
     const resize = () => {
       canvas.width = canvas.offsetWidth;
@@ -492,15 +411,6 @@ export default function ExtrudedMobiusSpiralShaders({
 
       gl.uniform2f(iResolution, canvas.width, canvas.height);
       gl.uniform1f(iTime, timeRef.current);
-      gl.uniform1f(u_speed, speed);
-      gl.uniform1f(u_shape, shape);
-      gl.uniform1f(u_rowOffset, rowOffset);
-      gl.uniform1f(u_faceDecoration, faceDecoration);
-      gl.uniform1f(u_doubleSpiral, doubleSpiral);
-      gl.uniform1f(u_holes, holes);
-      gl.uniform1f(u_raised, raised);
-      gl.uniform1f(u_ridges, ridges);
-      gl.uniform1f(u_vertLines, vertLines);
 
       gl.clearColor(0, 0, 0, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -516,7 +426,7 @@ export default function ExtrudedMobiusSpiralShaders({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [speed, shape, rowOffset, faceDecoration, doubleSpiral, holes, raised, ridges, vertLines]);
+  }, [speed]);
 
   return (
     <div className={cn("relative w-full h-full", className)} {...props}>

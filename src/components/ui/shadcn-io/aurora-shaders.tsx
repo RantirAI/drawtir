@@ -123,8 +123,8 @@ export default function AuroraShaders({
         auroraColor = mix(auroraColor, cyan, smoothstep(0.8, 1.0, auroraPattern));
 
         // Apply intensity
-        float aurораIntensity = smoothstep(0.3, 0.8, auroraPattern) * u_intensity;
-        vec3 finalColor = auroraColor * aurораIntensity;
+        float auroraIntensity = smoothstep(0.3, 0.8, auroraPattern) * u_intensity;
+        vec3 finalColor = auroraColor * auroraIntensity;
 
         // Atmospheric stars in dark areas
         vec2 starCoord = uv * 60.0;
@@ -144,7 +144,7 @@ export default function AuroraShaders({
         }
 
         // Add stars only in dark areas
-        finalColor += vec3(stars) * (1.0 - aurораIntensity);
+        finalColor += vec3(stars) * (1.0 - auroraIntensity);
 
         // Horizon glow effect
         float horizonGlow = exp(-abs(p.y + 0.3) * 3.0) * 0.2;
@@ -162,16 +162,32 @@ export default function AuroraShaders({
     const vertexShader = gl.createShader(gl.VERTEX_SHADER)!;
     gl.shaderSource(vertexShader, vertexShaderSource);
     gl.compileShader(vertexShader);
+    
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+      console.error("Aurora vertex shader error:", gl.getShaderInfoLog(vertexShader));
+      return;
+    }
 
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER)!;
     gl.shaderSource(fragmentShader, fragmentShaderSource);
     gl.compileShader(fragmentShader);
+    
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+      console.error("Aurora fragment shader error:", gl.getShaderInfoLog(fragmentShader));
+      return;
+    }
 
     // Create program
     const program = gl.createProgram()!;
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+    
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("Aurora program link error:", gl.getProgramInfoLog(program));
+      return;
+    }
+    
     gl.useProgram(program);
 
     // Set up geometry
