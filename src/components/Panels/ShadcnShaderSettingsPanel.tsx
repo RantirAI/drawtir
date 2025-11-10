@@ -14,7 +14,11 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
     type: "kaleidoscope",
     speed: 1.0,
     glowIntensity: 1.5,
-    colorTint: [1.0, 2.0, 9.0]
+    colorTint: [1.0, 2.0, 9.0],
+    amplitude: 1.0,
+    frequency: 1.0,
+    starDensity: 1.0,
+    colorShift: 1.0
   };
 
   return (
@@ -126,6 +130,62 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
           RGB values from 0-10 for shader color calculations
         </p>
       </div>
+
+      {shader.type === "cosmic-waves" && (
+        <>
+          <div>
+            <Label>Amplitude: {shader.amplitude?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.amplitude || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, amplitude: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Frequency: {shader.frequency?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.frequency || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, frequency: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Star Density: {shader.starDensity?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.starDensity || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, starDensity: value }
+              })}
+              min={0.0}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Color Shift: {shader.colorShift?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.colorShift || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, colorShift: value }
+              })}
+              min={0.1}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

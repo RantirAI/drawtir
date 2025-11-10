@@ -13,6 +13,10 @@ interface ShaderOption {
     speed: number;
     glowIntensity: number;
     colorTint: [number, number, number];
+    amplitude?: number;
+    frequency?: number;
+    starDensity?: number;
+    colorShift?: number;
   };
 }
 
@@ -57,7 +61,15 @@ const SHADER_OPTIONS: ShaderOption[] = [
     type: "cosmic-waves",
     name: "Cosmic Waves",
     description: "Flowing cosmic ocean patterns with multi-layer waves and starfields",
-    defaultProps: { speed: 1.0, glowIntensity: 1.4, colorTint: [2.0, 4.0, 6.0] }
+    defaultProps: { 
+      speed: 1.0, 
+      glowIntensity: 1.4, 
+      colorTint: [2.0, 4.0, 6.0],
+      amplitude: 1.0,
+      frequency: 1.0,
+      starDensity: 1.0,
+      colorShift: 1.0
+    }
   },
   {
     type: "digital-tunnel",

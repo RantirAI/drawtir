@@ -17,12 +17,25 @@ interface ShadcnShaderElementProps {
 export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ element }) => {
   if (!element.shader) return null;
 
-  const { type, speed = 1.0, glowIntensity = 1.0, colorTint = [1.0, 2.0, 9.0] } = element.shader;
+  const { 
+    type, 
+    speed = 1.0, 
+    glowIntensity = 1.0, 
+    colorTint = [1.0, 2.0, 9.0],
+    amplitude = 1.0,
+    frequency = 1.0,
+    starDensity = 1.0,
+    colorShift = 1.0
+  } = element.shader;
 
   const shaderProps = {
     speed,
     glowIntensity,
-    colorTint: colorTint as [number, number, number]
+    colorTint: colorTint as [number, number, number],
+    amplitude,
+    frequency,
+    starDensity,
+    colorShift
   };
 
   switch (type) {

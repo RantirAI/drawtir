@@ -90,6 +90,10 @@ export interface Element {
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
+    amplitude?: number;
+    frequency?: number;
+    starDensity?: number;
+    colorShift?: number;
   };
   
   // Common properties
