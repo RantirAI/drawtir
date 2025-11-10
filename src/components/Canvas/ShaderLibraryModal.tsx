@@ -4,6 +4,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
+import { Kaleidoscope } from "@/components/ui/kaleidoscope";
+import { Plasma } from "@/components/ui/plasma";
+import { Nebula } from "@/components/ui/nebula";
+import { Aurora } from "@/components/ui/aurora";
+import { CosmicWaves } from "@/components/ui/cosmic-waves";
+import { CosmicFlowShaders } from "@/components/ui/shadcn-io/cosmic-flow-shaders";
+import { DigitalTunnel } from "@/components/ui/digital-tunnel";
+import { Glitch } from "@/components/ui/glitch";
+import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
+import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
+import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
+import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 
 interface ShaderOption {
   type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern";
@@ -185,6 +197,39 @@ interface ShaderLibraryModalProps {
 export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryModalProps) {
   const [previewShader, setPreviewShader] = useState<ShaderOption | null>(null);
 
+  const renderShaderPreview = (type: ShaderOption['type']) => {
+    const commonProps = { className: "w-full h-24 rounded-md overflow-hidden" };
+    
+    switch (type) {
+      case "kaleidoscope":
+        return <Kaleidoscope {...commonProps} />;
+      case "plasma":
+        return <Plasma {...commonProps} />;
+      case "nebula":
+        return <Nebula {...commonProps} />;
+      case "aurora":
+        return <Aurora {...commonProps} />;
+      case "cosmic-waves":
+        return <CosmicWaves {...commonProps} />;
+      case "cosmic-flow":
+        return <CosmicFlowShaders {...commonProps} />;
+      case "digital-tunnel":
+        return <DigitalTunnel {...commonProps} />;
+      case "glitch":
+        return <Glitch {...commonProps} />;
+      case "singularity":
+        return <SingularityShaders {...commonProps} />;
+      case "mobius-spiral":
+        return <ExtrudedMobiusSpiralShaders {...commonProps} />;
+      case "fire-3d":
+        return <Fire3DShaders {...commonProps} />;
+      case "pyramid-pattern":
+        return <PyramidPatternShaders {...commonProps} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
@@ -199,31 +244,36 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {SHADER_OPTIONS.map((shader) => (
               <Card key={shader.type} className="border-border/50 hover:border-primary/50 transition-colors">
-                <CardHeader>
+                <CardHeader className="pb-3">
                   <CardTitle className="text-lg">{shader.name}</CardTitle>
                   <CardDescription className="text-sm">
                     {shader.description}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPreviewShader(shader)}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    Preview
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      onSelect(shader);
-                      onClose();
-                    }}
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Use Shader
-                  </Button>
+                <CardContent className="space-y-3">
+                  <div className="relative rounded-md overflow-hidden border border-border/50">
+                    {renderShaderPreview(shader.type)}
+                  </div>
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPreviewShader(shader)}
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      Preview
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        onSelect(shader);
+                        onClose();
+                      }}
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Use Shader
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}
