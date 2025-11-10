@@ -2859,7 +2859,7 @@ export default function CanvasContainerNew({
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showGeneratePanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2876,7 +2876,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showTemplatesPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2893,7 +2893,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showLayersPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2912,7 +2912,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showMediaLibrary 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2929,7 +2929,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showShapeSettings || selectedElementIds.length > 0 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2946,7 +2946,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showAnimationsPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2968,7 +2968,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden ${
+            className={`h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group/btn overflow-hidden flex items-center justify-center ${
               showBrandKitPanel 
                 ? 'bg-primary/20 text-primary shadow-primary/20' 
                 : 'bg-card hover:shadow-md'
@@ -2985,7 +2985,7 @@ export default function CanvasContainerNew({
           
           <Button
             variant="ghost"
-            className="h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group/btn overflow-hidden"
+            className="h-10 w-10 rounded-full transition-all duration-300 hover:w-auto hover:rounded-3xl hover:px-4 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group/btn overflow-hidden flex items-center justify-center"
             onClick={() => setShowPreviewDialog(true)}
           >
             <div className="flex items-center gap-2 whitespace-nowrap">
