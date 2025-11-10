@@ -166,7 +166,7 @@ export default function Settings() {
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Profile Settings */}
-          <Card>
+          <Card className="border-border/10">
             <CardHeader>
               <CardTitle>Profile Settings</CardTitle>
               <CardDescription>Manage your profile information</CardDescription>
@@ -213,7 +213,7 @@ export default function Settings() {
           </Card>
 
           {/* Password Settings */}
-          <Card>
+          <Card className="border-border/10">
             <CardHeader>
               <CardTitle>Change Password</CardTitle>
               <CardDescription>Update your password to keep your account secure</CardDescription>

@@ -9,7 +9,7 @@ export default function PageFooter() {
   ];
 
   return (
-    <footer className="border-t mt-auto py-3">
+    <footer className="border-t border-border/10 mt-auto py-3">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center justify-between gap-2">
           <p className="text-xs text-muted-foreground text-center md:text-left">

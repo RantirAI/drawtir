@@ -192,7 +192,7 @@ export default function Gallery() {
               isTemplate ? openTemplate(project.id) : openProject(project.id);
             }}
             size="sm"
-            className="bg-white/95 hover:bg-white text-foreground h-8 text-xs shadow-lg"
+            className="bg-white/95 hover:bg-white text-black h-8 text-xs shadow-lg"
           >
             {isTemplate ? "Use Template" : "Open"}
           </Button>
@@ -201,7 +201,7 @@ export default function Gallery() {
               <Button
                 onClick={(e) => togglePublic(project.id, project.is_public, e)}
                 size="sm"
-                className="bg-white/95 hover:bg-primary hover:text-primary-foreground text-foreground h-8 w-8 p-0 shadow-lg"
+                className="bg-white/95 hover:bg-primary hover:text-primary-foreground text-black h-8 w-8 p-0 shadow-lg"
                 title={project.is_public ? "Make Private" : "Make Public Template"}
               >
                 {project.is_public ? (

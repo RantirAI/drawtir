@@ -129,7 +129,7 @@ export default function TemplatesPanel({
                       </button>
                       <button
                         onClick={() => handleTemplateClick(template.snapshot, template.name)}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                        className="bg-white/90 hover:bg-white text-black px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
                       >
                         Use Template
                       </button>
@@ -195,7 +195,7 @@ export default function TemplatesPanel({
                         </button>
                         <button
                           onClick={() => handleTemplateClick(template.canvas_data, template.project_name)}
-                          className="bg-primary hover:bg-primary/90 text-primary-foreground px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                          className="bg-white/90 hover:bg-white text-black px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
                         >
                           Use Template
                         </button>

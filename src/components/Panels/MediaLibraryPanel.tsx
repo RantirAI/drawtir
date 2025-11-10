@@ -315,7 +315,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                             className="w-full h-full object-cover bg-muted/30"
                           />
                         </div>
-                        <div className="absolute -bottom-4 left-0 right-0 flex items-center justify-between px-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute -bottom-4 left-0 right-0 flex items-center justify-between px-0.5 opacity-0 group-hover:opacity-100 transition-opacity pt-1">
                           <p className="text-[9px] text-muted-foreground truncate flex-1 max-w-[80%]">{item.file_name}</p>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -428,7 +428,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                           alt={image.alt_description || 'Unsplash image'}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1">
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1 pt-1.5">
                           <p className="text-white text-[9px] truncate w-full">
                             by {image.user.name}
                           </p>
