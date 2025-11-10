@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter } from "lucide-react";
+import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -253,6 +253,14 @@ export default function Gallery() {
                   Templates ({templates.length})
                 </TabsTrigger>
               </TabsList>
+              <Button 
+                onClick={() => navigate("/")}
+                size="default"
+                className="gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Create New Design
+              </Button>
             </div>
 
             <TabsContent value="projects" className="space-y-4">
