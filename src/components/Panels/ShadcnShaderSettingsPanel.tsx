@@ -52,6 +52,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="glitch">Glitch</SelectItem>
             <SelectItem value="singularity">Singularity</SelectItem>
             <SelectItem value="mobius-spiral">Mobius Spiral</SelectItem>
+            <SelectItem value="fire-3d">Fire 3D</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -394,6 +395,62 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={0}
               max={1}
               step={1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "fire-3d" && (
+        <>
+          <div>
+            <Label>Intensity: {shader.intensity?.toFixed(2) || "1.20"}</Label>
+            <Slider
+              value={[shader.intensity || 1.2]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, intensity: value }
+              })}
+              min={0.5}
+              max={3.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Height: {shader.height?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.height || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, height: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Turbulence: {shader.turbulence?.toFixed(2) || "1.10"}</Label>
+            <Slider
+              value={[shader.turbulence || 1.1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, turbulence: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Color Shift: {shader.colorShift?.toFixed(2) || "1.00"}</Label>
+            <Slider
+              value={[shader.colorShift || 1.0]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, colorShift: value }
+              })}
+              min={0.5}
+              max={2.0}
+              step={0.1}
             />
           </div>
         </>

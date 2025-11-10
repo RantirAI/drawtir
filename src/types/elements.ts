@@ -86,7 +86,7 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
@@ -107,6 +107,8 @@ export interface Element {
     raised?: number;
     ridges?: number;
     vertLines?: number;
+    height?: number;
+    turbulence?: number;
   };
   
   // Common properties

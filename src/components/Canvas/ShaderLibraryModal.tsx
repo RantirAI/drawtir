@@ -6,7 +6,7 @@ import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
   name: string;
   description: string;
   defaultProps: {
@@ -30,6 +30,8 @@ interface ShaderOption {
     raised?: number;
     ridges?: number;
     vertLines?: number;
+    height?: number;
+    turbulence?: number;
   };
 }
 
@@ -122,6 +124,20 @@ const SHADER_OPTIONS: ShaderOption[] = [
       raised: 0,
       ridges: 0,
       vertLines: 0
+    }
+  },
+  {
+    type: "fire-3d",
+    name: "Fire 3D",
+    description: "Volumetric raymarched 3D fire with turbulence and realistic flame dynamics",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      intensity: 1.2,
+      height: 1.0,
+      turbulence: 1.1,
+      colorShift: 1.0
     }
   }
 ];

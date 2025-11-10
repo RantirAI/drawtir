@@ -14,9 +14,10 @@ import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
+import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d";
   name: string;
   description: string;
   defaultProps: {
@@ -40,6 +41,8 @@ interface ShaderConfig {
     raised?: number;
     ridges?: number;
     vertLines?: number;
+    height?: number;
+    turbulence?: number;
   };
 }
 
@@ -105,6 +108,15 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           raised={(props as any).raised || 0}
           ridges={(props as any).ridges || 0}
           vertLines={(props as any).vertLines || 0}
+          className="h-full w-full"
+        />;
+      case "fire-3d":
+        return <Fire3DShaders 
+          speed={props.speed}
+          intensity={(props as any).intensity || 1.2}
+          height={(props as any).height || 1.0}
+          turbulence={(props as any).turbulence || 1.1}
+          colorShift={(props as any).colorShift || 1.0}
           className="h-full w-full"
         />;
       default:
@@ -417,6 +429,54 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       min={0}
                       max={1}
                       step={1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "fire-3d" && (
+                <>
+                  <div>
+                    <Label>Intensity: {(shaderProps as any).intensity?.toFixed(2) || "1.20"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).intensity || 1.2]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, intensity: value })}
+                      min={0.5}
+                      max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Height: {(shaderProps as any).height?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).height || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, height: value } as any)}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Turbulence: {(shaderProps as any).turbulence?.toFixed(2) || "1.10"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).turbulence || 1.1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, turbulence: value } as any)}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Color Shift: {(shaderProps as any).colorShift?.toFixed(2) || "1.00"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).colorShift || 1.0]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, colorShift: value })}
+                      min={0.5}
+                      max={2.0}
+                      step={0.1}
                     />
                   </div>
                 </>

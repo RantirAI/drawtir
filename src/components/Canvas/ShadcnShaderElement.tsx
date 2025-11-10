@@ -8,6 +8,7 @@ import DigitalTunnel from "@/components/ui/digital-tunnel";
 import Glitch from "@/components/ui/glitch";
 import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
+import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -38,7 +39,9 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     holes = 0,
     raised = 0,
     ridges = 0,
-    vertLines = 0
+    vertLines = 0,
+    height = 1.0,
+    turbulence = 1.1
   } = element.shader;
 
   const shaderProps = {
@@ -87,6 +90,15 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     className: "h-full w-full"
   };
 
+  const fire3DProps = {
+    speed,
+    intensity,
+    height,
+    turbulence,
+    colorShift,
+    className: "h-full w-full"
+  };
+
   switch (type) {
     case "kaleidoscope":
       return <Kaleidoscope {...shaderProps} />;
@@ -106,6 +118,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <SingularityShaders {...singularityProps} />;
     case "mobius-spiral":
       return <ExtrudedMobiusSpiralShaders {...mobiusSpiralProps} />;
+    case "fire-3d":
+      return <Fire3DShaders {...fire3DProps} />;
     default:
       return null;
   }
