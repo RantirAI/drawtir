@@ -19,9 +19,10 @@ import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
+import { BackgroundLines } from "@/components/ui/background-lines";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines";
   name: string;
   description: string;
   defaultProps: {
@@ -59,6 +60,7 @@ interface ShaderOption {
     baseRadius?: number;
     rangeRadius?: number;
     meteorCount?: number;
+    lineDuration?: number;
   };
 }
 
@@ -232,6 +234,17 @@ const SHADER_OPTIONS: ShaderOption[] = [
       colorTint: [1.0, 1.0, 1.0],
       meteorCount: 20
     }
+  },
+  {
+    type: "background-lines",
+    name: "Background Lines",
+    description: "Animated flowing SVG path lines with colorful gradient strokes",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      lineDuration: 10
+    }
   }
 ];
 
@@ -282,6 +295,8 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <BackgroundBeams {...commonProps} />;
       case "meteors":
         return <Meteors {...commonProps} number={10} />;
+      case "background-lines":
+        return <BackgroundLines {...commonProps} svgOptions={{ duration: 5 }} />;
       default:
         return null;
     }

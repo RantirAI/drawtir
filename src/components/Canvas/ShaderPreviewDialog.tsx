@@ -20,9 +20,10 @@ import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
+import { BackgroundLines } from "@/components/ui/background-lines";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines";
   name: string;
   description: string;
   defaultProps: {
@@ -60,6 +61,7 @@ interface ShaderConfig {
     baseRadius?: number;
     rangeRadius?: number;
     meteorCount?: number;
+    lineDuration?: number;
   };
 }
 
@@ -171,6 +173,8 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         return <BackgroundBeams className="h-full w-full" />;
       case "meteors":
         return <Meteors number={(props as any).meteorCount || 20} className="h-full w-full" />;
+      case "background-lines":
+        return <BackgroundLines className="h-full w-full" svgOptions={{ duration: (props as any).lineDuration || 10 }} />;
       default:
         return null;
     }
@@ -673,6 +677,21 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       min={5}
                       max={50}
                       step={1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "background-lines" && (
+                <>
+                  <div>
+                    <Label>Animation Duration: {(shaderProps as any).lineDuration?.toFixed(1) || "10.0"}s</Label>
+                    <Slider
+                      value={[(shaderProps as any).lineDuration || 10]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, lineDuration: value } as any)}
+                      min={3}
+                      max={30}
+                      step={0.5}
                     />
                   </div>
                 </>

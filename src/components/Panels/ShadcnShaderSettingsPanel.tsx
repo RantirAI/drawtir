@@ -58,6 +58,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="vortex">Vortex</SelectItem>
             <SelectItem value="background-beams">Background Beams</SelectItem>
             <SelectItem value="meteors">Meteors</SelectItem>
+            <SelectItem value="background-lines">Background Lines</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -627,6 +628,23 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={5}
               max={50}
               step={1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "background-lines" && (
+        <>
+          <div>
+            <Label>Animation Duration: {shader.lineDuration?.toFixed(1) || "10.0"}s</Label>
+            <Slider
+              value={[shader.lineDuration || 10]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, lineDuration: value }
+              })}
+              min={3}
+              max={30}
+              step={0.5}
             />
           </div>
         </>

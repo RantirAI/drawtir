@@ -14,6 +14,7 @@ import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
+import { BackgroundLines } from "@/components/ui/background-lines";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -58,7 +59,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     rangeSpeed = 1.5,
     baseRadius = 1,
     rangeRadius = 2,
-    meteorCount = 20
+    meteorCount = 20,
+    lineDuration = 10
   } = element.shader;
 
   const shaderProps = {
@@ -169,6 +171,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <BackgroundBeams className="h-full w-full" />;
     case "meteors":
       return <Meteors number={meteorCount} className="h-full w-full" />;
+    case "background-lines":
+      return <BackgroundLines className="h-full w-full" svgOptions={{ duration: lineDuration }} />;
     default:
       return null;
   }
