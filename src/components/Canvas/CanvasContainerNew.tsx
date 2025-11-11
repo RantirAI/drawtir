@@ -2505,14 +2505,11 @@ export default function CanvasContainerNew({
                           ));
                         }}
                         onSelect={() => {
-                          // When selecting a nested frame, treat it like selecting a frame
-                          // Show frame-level properties by clearing element selection
                           setSelectedElementIds([]);
                           setShowShapeSettings(true);
                           toast.info(`Selected nested frame: ${nestedFrame.name}`);
                         }}
                       >
-                        {/* Elements inside nested frame */}
                         {(nestedFrame.elements || []).map((element) => (
                           <ResizableElement
                             key={element.id}
@@ -2534,18 +2531,18 @@ export default function CanvasContainerNew({
                             cornerRadius={element.cornerRadius}
                             fontSize={element.fontSize}
                             fontFamily={element.fontFamily}
-                             fontWeight={element.fontWeight}
-                             iconName={element.iconName}
-                             iconFamily={element.iconFamily}
-                             iconStrokeWidth={element.iconStrokeWidth}
-                              shader={element.shader}
-                             animations={element.animations}
-                             useFlexLayout={false}
-                             isLocked={element.isLocked}
-                             isSelected={false}
-                             zoom={zoom}
-                             isPlaying={isPlayingAnimation}
-                             onUpdate={(id, updates) => {
+                            fontWeight={element.fontWeight}
+                            iconName={element.iconName}
+                            iconFamily={element.iconFamily}
+                            iconStrokeWidth={element.iconStrokeWidth}
+                            shader={element.shader}
+                            animations={element.animations}
+                            useFlexLayout={false}
+                            isLocked={element.isLocked}
+                            isSelected={false}
+                            zoom={zoom}
+                            isPlaying={isPlayingAnimation}
+                            onUpdate={(id, updates) => {
                               setFrames(frames.map(f => 
                                 f.id === frame.id 
                                   ? {
@@ -2574,11 +2571,10 @@ export default function CanvasContainerNew({
                   </CanvasContextMenu>
                 ))}
               </ResizableFrame>
-            </div>
-          </CanvasContextMenu>
-        </div>
-      ))}
-      {/* Pen drawing overlay inside transformed canvas */}
+            </CanvasContextMenu>
+          </div>
+        ))}
+        {/* Pen drawing overlay inside transformed canvas */}
         {selectedFrame && (
           <DrawingLayer
             isActive={activeTool === "pen"}
