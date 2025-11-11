@@ -238,6 +238,19 @@ export default {
             transform: "translateX(100%)",
           },
         },
+        "meteor-effect": {
+          "0%": {
+            transform: "rotate(45deg) translateX(0)",
+            opacity: "1",
+          },
+          "70%": {
+            opacity: "1",
+          },
+          "100%": {
+            transform: "rotate(45deg) translateX(-500px)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -254,6 +267,7 @@ export default {
         "slide-out-to-bottom": "slide-out-to-bottom 0.5s ease-out",
         "slide-out-to-left": "slide-out-to-left 0.5s ease-out",
         "slide-out-to-right": "slide-out-to-right 0.5s ease-out",
+        "meteor-effect": "meteor-effect linear infinite",
       },
     },
   },

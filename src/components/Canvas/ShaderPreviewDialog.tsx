@@ -19,9 +19,10 @@ import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import { Meteors } from "@/components/ui/meteors";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors";
   name: string;
   description: string;
   defaultProps: {
@@ -58,6 +59,7 @@ interface ShaderConfig {
     rangeSpeed?: number;
     baseRadius?: number;
     rangeRadius?: number;
+    meteorCount?: number;
   };
 }
 
@@ -167,6 +169,8 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         />;
       case "background-beams":
         return <BackgroundBeams className="h-full w-full" />;
+      case "meteors":
+        return <Meteors number={(props as any).meteorCount || 20} className="h-full w-full" />;
       default:
         return null;
     }
@@ -654,6 +658,21 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       min={0.5}
                       max={10.0}
                       step={0.1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "meteors" && (
+                <>
+                  <div>
+                    <Label>Meteor Count: {(shaderProps as any).meteorCount || 20}</Label>
+                    <Slider
+                      value={[(shaderProps as any).meteorCount || 20]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, meteorCount: Math.round(value) } as any)}
+                      min={5}
+                      max={50}
+                      step={1}
                     />
                   </div>
                 </>

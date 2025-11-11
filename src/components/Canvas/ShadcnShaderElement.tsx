@@ -13,6 +13,7 @@ import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import { Meteors } from "@/components/ui/meteors";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -56,7 +57,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     baseHue = 220,
     rangeSpeed = 1.5,
     baseRadius = 1,
-    rangeRadius = 2
+    rangeRadius = 2,
+    meteorCount = 20
   } = element.shader;
 
   const shaderProps = {
@@ -165,6 +167,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <Vortex {...vortexProps} />;
     case "background-beams":
       return <BackgroundBeams className="h-full w-full" />;
+    case "meteors":
+      return <Meteors number={meteorCount} className="h-full w-full" />;
     default:
       return null;
   }

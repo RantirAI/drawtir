@@ -57,6 +57,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="pyramid-pattern">Pyramid Pattern</SelectItem>
             <SelectItem value="vortex">Vortex</SelectItem>
             <SelectItem value="background-beams">Background Beams</SelectItem>
+            <SelectItem value="meteors">Meteors</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -609,6 +610,23 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={0.5}
               max={10.0}
               step={0.1}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "meteors" && (
+        <>
+          <div>
+            <Label>Meteor Count: {shader.meteorCount || 20}</Label>
+            <Slider
+              value={[shader.meteorCount || 20]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, meteorCount: Math.round(value) }
+              })}
+              min={5}
+              max={50}
+              step={1}
             />
           </div>
         </>

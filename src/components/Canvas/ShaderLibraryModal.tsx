@@ -18,9 +18,10 @@ import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
+import { Meteors } from "@/components/ui/meteors";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors";
   name: string;
   description: string;
   defaultProps: {
@@ -57,6 +58,7 @@ interface ShaderOption {
     rangeSpeed?: number;
     baseRadius?: number;
     rangeRadius?: number;
+    meteorCount?: number;
   };
 }
 
@@ -219,6 +221,17 @@ const SHADER_OPTIONS: ShaderOption[] = [
       glowIntensity: 1.0,
       colorTint: [1.0, 1.0, 1.0]
     }
+  },
+  {
+    type: "meteors",
+    name: "Meteors",
+    description: "Falling meteor shower effect with animated streaks and trails",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      meteorCount: 20
+    }
   }
 ];
 
@@ -267,6 +280,8 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <Vortex {...commonProps} particleCount={200} />;
       case "background-beams":
         return <BackgroundBeams {...commonProps} />;
+      case "meteors":
+        return <Meteors {...commonProps} number={10} />;
       default:
         return null;
     }
