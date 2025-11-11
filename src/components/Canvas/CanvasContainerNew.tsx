@@ -2532,6 +2532,10 @@ export default function CanvasContainerNew({
                         top: nestedFrame.y,
                         width: nestedFrame.width,
                         height: nestedFrame.height,
+                        outline: nestedFrame.id === selectedFrameId && selectedElementIds.length === 0 
+                          ? '2px solid hsl(var(--primary))' 
+                          : 'none',
+                        outlineOffset: '2px',
                       }}
                     >
                       <ResizableFrame
@@ -2592,9 +2596,11 @@ export default function CanvasContainerNew({
                           ));
                         }}
                         onSelect={() => {
+                          console.log("🎯 Nested frame selected:", nestedFrame.id);
                           setSelectedFrameId(nestedFrame.id);
                           setSelectedElementIds([]);
                           setShowShapeSettings(true);
+                          toast.success(`Selected nested frame: ${nestedFrame.name}`);
                         }}
                       >
                         {/* Elements inside nested frame */}
