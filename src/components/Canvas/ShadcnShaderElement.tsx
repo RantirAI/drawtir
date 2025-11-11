@@ -189,30 +189,35 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <BackgroundLines className="h-full w-full" svgOptions={{ duration: lineDuration }} />;
     case "globe":
       return (
-        <World 
-          data={SAMPLE_GLOBE_ARCS}
-          globeConfig={{
-            pointSize,
-            globeColor,
-            showAtmosphere: true,
-            atmosphereColor,
-            atmosphereAltitude: 0.1,
-            emissive: globeColor,
-            emissiveIntensity: 0.1,
-            shininess: 0.9,
-            polygonColor: "rgba(255,255,255,0.7)",
-            ambientLight: "#38bdf8",
-            directionalLeftLight: "#ffffff",
-            directionalTopLight: "#ffffff",
-            pointLight: "#ffffff",
-            arcTime,
-            arcLength: 0.9,
-            rings: 1,
-            maxRings: 3,
-            autoRotate: true,
-            autoRotateSpeed
-          }}
-        />
+        <div 
+          className="h-full w-full relative"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <World 
+            data={SAMPLE_GLOBE_ARCS}
+            globeConfig={{
+              pointSize,
+              globeColor,
+              showAtmosphere: true,
+              atmosphereColor,
+              atmosphereAltitude: 0.1,
+              emissive: globeColor,
+              emissiveIntensity: 0.1,
+              shininess: 0.9,
+              polygonColor: "rgba(255,255,255,0.7)",
+              ambientLight: "#38bdf8",
+              directionalLeftLight: "#ffffff",
+              directionalTopLight: "#ffffff",
+              pointLight: "#ffffff",
+              arcTime,
+              arcLength: 0.9,
+              rings: 1,
+              maxRings: 3,
+              autoRotate: true,
+              autoRotateSpeed
+            }}
+          />
+        </div>
       );
     default:
       return null;
