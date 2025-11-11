@@ -103,11 +103,25 @@ export default function PreviewDialog({
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
-  const renderFrame = (frame: Frame, isInteractive: boolean = true) => {
+  const renderFrame = (frame: Frame, isInteractive: boolean = true, isGridView: boolean = false) => {
+    const frameStyle = isGridView
+      ? {
+          width: "100%",
+          height: "100%",
+          aspectRatio: `${frame.width} / ${frame.height}`,
+        }
+      : {
+          width: `${frame.width}px`,
+          height: `${frame.height}px`,
+          maxWidth: "90vw",
+          maxHeight: "90vh",
+        };
+
     return (
       <div
-        className="w-full h-full relative overflow-hidden"
+        className="relative overflow-hidden"
         style={{
+          ...frameStyle,
           ...getBackgroundStyle(frame),
           opacity: (frame.opacity || 100) / 100,
         }}
@@ -265,8 +279,10 @@ export default function PreviewDialog({
 
           {/* Content */}
           {viewMode === "single" ? (
-            <div className="w-full h-full flex items-center justify-center">
-              {renderFrame(currentFrame)}
+            <div className="w-full h-full flex items-center justify-center p-8">
+              <div className="flex items-center justify-center">
+                {renderFrame(currentFrame, true, false)}
+              </div>
               
               {/* Navigation arrows for single view */}
               {frames.length > 1 && (
@@ -295,19 +311,24 @@ export default function PreviewDialog({
             </div>
           ) : (
             <div className="w-full h-full overflow-auto p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {frames.map((frame, index) => (
                   <div
                     key={frame.id}
-                    className="relative aspect-square cursor-pointer rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-colors"
+                    className="relative cursor-pointer rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-colors shadow-lg"
+                    style={{
+                      aspectRatio: `${frame.width} / ${frame.height}`,
+                    }}
                     onClick={() => {
                       setCurrentFrameIndex(index);
                       setViewMode("single");
                     }}
                   >
-                    {renderFrame(frame, false)}
-                    <div className="absolute bottom-2 left-2 bg-background/80 px-2 py-1 rounded text-xs">
-                      Frame {index + 1}
+                    <div className="w-full h-full">
+                      {renderFrame(frame, false, true)}
+                    </div>
+                    <div className="absolute bottom-2 left-2 bg-background/90 px-3 py-1 rounded-full text-xs font-medium">
+                      {frame.name || `Frame ${index + 1}`}
                     </div>
                   </div>
                 ))}
