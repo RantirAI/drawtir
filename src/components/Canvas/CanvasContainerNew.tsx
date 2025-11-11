@@ -439,16 +439,22 @@ export default function CanvasContainerNew({
       return;
     }
 
+    // Make nested frame 60% of parent width and 50% of parent height with good padding
+    const nestedWidth = Math.max(200, Math.floor(selectedFrame.width * 0.6));
+    const nestedHeight = Math.max(150, Math.floor(selectedFrame.height * 0.5));
+    const paddingX = Math.floor((selectedFrame.width - nestedWidth) / 2);
+    const paddingY = Math.floor((selectedFrame.height - nestedHeight) / 2);
+
     const newNestedFrame: Frame = {
       id: `nested-frame-${Date.now()}`,
       name: `Nested Frame`,
-      x: 20,
-      y: 20,
-      width: Math.max(100, selectedFrame.width - 40),
-      height: Math.max(100, selectedFrame.height - 40),
+      x: paddingX,
+      y: paddingY,
+      width: nestedWidth,
+      height: nestedHeight,
       sizeUnit: "px",
-      initialWidth: Math.max(100, selectedFrame.width - 40),
-      initialHeight: Math.max(100, selectedFrame.height - 40),
+      initialWidth: nestedWidth,
+      initialHeight: nestedHeight,
       enableDynamicScale: false,
       backgroundColor: "rgba(255, 255, 255, 0.9)",
       backgroundType: "solid",
