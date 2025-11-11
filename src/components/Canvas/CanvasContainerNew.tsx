@@ -115,9 +115,11 @@ export default function CanvasContainerNew({
     const viewportHeight = canvasAreaRef.current?.clientHeight ?? window.innerHeight;
     const firstFrame = frames[0];
     if (!firstFrame) return { x: 0, y: 0 };
+    const frameWidth = getNumericDimension(firstFrame.width, 400);
+    const frameHeight = getNumericDimension(firstFrame.height, 600);
     // Center the frame in the viewport
-    const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
-    const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
+    const centerX = (viewportWidth / 2) - (frameWidth / 2) - firstFrame.x;
+    const centerY = (viewportHeight / 2) - (frameHeight / 2) - firstFrame.y;
     return { x: centerX, y: centerY };
   };
   const [panOffset, setPanOffset] = useState(calculateCenterOffset());
@@ -128,6 +130,14 @@ export default function CanvasContainerNew({
   const [gridStyle, setGridStyle] = useState<"lines" | "dots">("lines");
   const [snapToGrid, setSnapToGrid] = useState(false);
 
+  // Helper function to get numeric dimension from Frame (supports string percentages)
+  const getNumericDimension = (dim: number | string, defaultVal: number = 400): number => {
+    if (typeof dim === 'number') return dim;
+    // If it's a percentage string, we can't convert without parent context, so use default
+    if (typeof dim === 'string' && dim.includes('%')) return defaultVal;
+    return parseFloat(dim) || defaultVal;
+  };
+
   // Auto-fit frame to viewport
   const fitFrameToView = (frameId: string) => {
     const frame = frames.find(f => f.id === frameId);
@@ -137,14 +147,17 @@ export default function CanvasContainerNew({
     const viewportHeight = canvasAreaRef.current?.clientHeight ?? window.innerHeight;
     const padding = 100; // Leave some padding around the frame
 
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
     // Calculate zoom to fit frame with padding
-    const zoomX = (viewportWidth - padding * 2) / frame.width;
-    const zoomY = (viewportHeight - padding * 2) / frame.height;
+    const zoomX = (viewportWidth - padding * 2) / frameWidth;
+    const zoomY = (viewportHeight - padding * 2) / frameHeight;
     const newZoom = Math.min(zoomX, zoomY, 1); // Don't zoom in beyond 100%
 
     // Calculate pan offset to center the frame
-    const centerX = (viewportWidth / 2) - (frame.width * newZoom / 2) - (frame.x * newZoom);
-    const centerY = (viewportHeight / 2) - (frame.height * newZoom / 2) - (frame.y * newZoom);
+    const centerX = (viewportWidth / 2) - (frameWidth * newZoom / 2) - (frame.x * newZoom);
+    const centerY = (viewportHeight / 2) - (frameHeight * newZoom / 2) - (frame.y * newZoom);
 
     setZoom(newZoom);
     setPanOffset({ x: centerX, y: centerY });
@@ -382,7 +395,8 @@ export default function CanvasContainerNew({
     const spacing = 24;
     const rightmost = frames.reduce(
       (acc, f) => {
-        const right = f.x + f.width;
+        const frameWidth = getNumericDimension(f.width, 400);
+        const right = f.x + frameWidth;
         if (right > acc.right) return { right, y: f.y };
         return acc;
       },
@@ -439,16 +453,28 @@ export default function CanvasContainerNew({
       return;
     }
 
+  const handleAddNestedFrame = () => {
+    const selectedFrame = frames.find(f => f.id === selectedFrameId);
+    if (!selectedFrame) {
+      toast.error("Please select a parent frame first");
+      return;
+    }
+
+    const frameWidth = getNumericDimension(selectedFrame.width, 400);
+    const frameHeight = getNumericDimension(selectedFrame.height, 600);
+
     const newNestedFrame: Frame = {
       id: `nested-frame-${Date.now()}`,
       name: `Nested Frame`,
       x: 20,
       y: 20,
-      width: Math.max(100, selectedFrame.width - 40),
-      height: Math.max(100, selectedFrame.height - 40),
+      width: Math.max(100, frameWidth - 40),
+      height: Math.max(100, frameHeight - 40),
       sizeUnit: "px",
-      initialWidth: Math.max(100, selectedFrame.width - 40),
-      initialHeight: Math.max(100, selectedFrame.height - 40),
+      percentageWidth: "100%", // Track percentage for UI controls
+      percentageHeight: "100%",
+      initialWidth: Math.max(100, frameWidth - 40),
+      initialHeight: Math.max(100, frameHeight - 40),
       enableDynamicScale: false,
       backgroundColor: "rgba(255, 255, 255, 0.9)",
       backgroundType: "solid",
@@ -1142,8 +1168,10 @@ export default function CanvasContainerNew({
     }
 
     const canvas = document.createElement("canvas");
-    canvas.width = selectedFrame.width;
-    canvas.height = selectedFrame.height;
+    const frameWidth = getNumericDimension(selectedFrame.width, 400);
+    const frameHeight = getNumericDimension(selectedFrame.height, 600);
+    canvas.width = frameWidth;
+    canvas.height = frameHeight;
     const ctx = canvas.getContext("2d");
     
     if (ctx) {
@@ -1198,19 +1226,22 @@ export default function CanvasContainerNew({
     const updatedElements = frame.elements.map(el => {
       if (!selectedElementIds.includes(el.id)) return el;
 
+      const frameWidth = getNumericDimension(frame.width, 400);
+      const frameHeight = getNumericDimension(frame.height, 600);
+
       switch (type) {
         case "left":
           return { ...el, x: 0 };
         case "center":
-          return { ...el, x: Math.max(0, (frame.width - el.width) / 2) };
+          return { ...el, x: Math.max(0, (frameWidth - el.width) / 2) };
         case "right":
-          return { ...el, x: Math.max(0, frame.width - el.width) };
+          return { ...el, x: Math.max(0, frameWidth - el.width) };
         case "top":
           return { ...el, y: 0 };
         case "middle":
-          return { ...el, y: Math.max(0, (frame.height - el.height) / 2) };
+          return { ...el, y: Math.max(0, (frameHeight - el.height) / 2) };
         case "bottom":
-          return { ...el, y: Math.max(0, frame.height - el.height) };
+          return { ...el, y: Math.max(0, frameHeight - el.height) };
         default:
           return el;
       }
@@ -1350,11 +1381,14 @@ export default function CanvasContainerNew({
 
     const selectedElements = frame.elements.filter(el => selectedElementIds.includes(el.id));
     
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+    
     if (type === "horizontal") {
       // Sort by x position
       const sorted = [...selectedElements].sort((a, b) => a.x - b.x);
       const totalWidth = sorted.reduce((sum, el) => sum + el.width, 0);
-      const availableSpace = frame.width - totalWidth;
+      const availableSpace = frameWidth - totalWidth;
       const spacing = availableSpace / (sorted.length + 1);
       
       let currentX = spacing;
@@ -1375,7 +1409,7 @@ export default function CanvasContainerNew({
       // Sort by y position
       const sorted = [...selectedElements].sort((a, b) => a.y - b.y);
       const totalHeight = sorted.reduce((sum, el) => sum + el.height, 0);
-      const availableSpace = frame.height - totalHeight;
+      const availableSpace = frameHeight - totalHeight;
       const spacing = availableSpace / (sorted.length + 1);
       
       let currentY = spacing;
@@ -1429,19 +1463,22 @@ export default function CanvasContainerNew({
     }
     console.log("✅ Frame found:", frame.id);
 
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
     const defaultWidth = shapeType === "line" || shapeType === "arrow" 
-      ? Math.max(150, Math.floor(frame.width * 0.5)) 
+      ? Math.max(150, Math.floor(frameWidth * 0.5)) 
       : shapeType === "rectangle"
         ? 120
-        : Math.floor(frame.width * 0.25);
+        : Math.floor(frameWidth * 0.25);
     const defaultHeight = shapeType === "line" || shapeType === "arrow" 
       ? 2 
       : shapeType === "rectangle"
         ? 120
-        : Math.floor(frame.height * 0.25);
+        : Math.floor(frameHeight * 0.25);
 
-    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
-    const y = Math.max(0, Math.floor((frame.height - (shapeType === "line" || shapeType === "arrow" ? Math.max(2, defaultHeight) : defaultHeight)) / 2));
+    const x = Math.max(0, Math.floor((frameWidth - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frameHeight - (shapeType === "line" || shapeType === "arrow" ? Math.max(2, defaultHeight) : defaultHeight)) / 2));
 
     const newElement: Element = {
       id: `element-${Date.now()}`,
@@ -1486,9 +1523,12 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === targetFrameId);
     if (!frame) return;
 
-    const defaultSize = Math.min(150, Math.floor(frame.width * 0.3));
-    const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
-    const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
+    const defaultSize = Math.min(150, Math.floor(frameWidth * 0.3));
+    const x = Math.max(0, Math.floor((frameWidth - defaultSize) / 2));
+    const y = Math.max(0, Math.floor((frameHeight - defaultSize) / 2));
 
     const newElement: Element = {
       id: `element-${Date.now()}`,
@@ -1527,9 +1567,12 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === targetFrameId);
     if (!frame) return;
 
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
     const defaultSize = 80;
-    const x = Math.max(0, Math.floor((frame.width - defaultSize) / 2));
-    const y = Math.max(0, Math.floor((frame.height - defaultSize) / 2));
+    const x = Math.max(0, Math.floor((frameWidth - defaultSize) / 2));
+    const y = Math.max(0, Math.floor((frameHeight - defaultSize) / 2));
 
     const newElement: Element = {
       id: `element-${Date.now()}`,
@@ -1574,8 +1617,11 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === targetFrameId);
     if (!frame) return;
 
-    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
-    const y = Math.max(0, Math.floor((frame.height - defaultHeight) / 2));
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
+    const x = Math.max(0, Math.floor((frameWidth - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frameHeight - defaultHeight) / 2));
 
     const newElement: Element = {
       id: `element-${Date.now()}`,
@@ -1616,10 +1662,13 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === targetFrameId);
     if (!frame) return;
 
+    const frameWidth = getNumericDimension(frame.width, 400);
+    const frameHeight = getNumericDimension(frame.height, 600);
+
     const defaultWidth = 300;
     const defaultHeight = 100;
-    const x = Math.max(0, Math.floor((frame.width - defaultWidth) / 2));
-    const y = Math.max(0, Math.floor((frame.height - defaultHeight) / 2));
+    const x = Math.max(0, Math.floor((frameWidth - defaultWidth) / 2));
+    const y = Math.max(0, Math.floor((frameHeight - defaultHeight) / 2));
 
     const newElement: Element = {
       id: `element-${Date.now()}`,
@@ -2439,6 +2488,10 @@ export default function CanvasContainerNew({
                         isLocked={nestedFrame.isLocked}
                         zoom={zoom}
                         panOffset={panOffset}
+                        parentWidth={getNumericDimension(frame.width, 400)}
+                        parentHeight={getNumericDimension(frame.height, 600)}
+                        percentageWidth={nestedFrame.percentageWidth}
+                        percentageHeight={nestedFrame.percentageHeight}
                         onUpdate={(id, updates) => {
                           setFrames(frames.map(f => 
                             f.id === frame.id 
@@ -2521,10 +2574,11 @@ export default function CanvasContainerNew({
                   </CanvasContextMenu>
                 ))}
               </ResizableFrame>
-            </CanvasContextMenu>
-          </div>
-        ))}
-        {/* Pen drawing overlay inside transformed canvas */}
+            </div>
+          </CanvasContextMenu>
+        </div>
+      ))}
+      {/* Pen drawing overlay inside transformed canvas */}
         {selectedFrame && (
           <DrawingLayer
             isActive={activeTool === "pen"}
