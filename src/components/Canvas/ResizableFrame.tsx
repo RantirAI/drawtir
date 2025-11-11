@@ -335,17 +335,14 @@ export default function ResizableFrame({
   return (
     <div
       ref={frameRef}
-      className={`absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
+      className={`frame-root absolute ${isSelected ? "ring-1 ring-blue-500" : ""}`}
       style={{
         left: `${x}px`,
         top: `${y}px`,
         width: `${width}px`,
         height: `${height}px`,
-        overflow: "hidden",
-        borderRadius: `${cornerRadius}px`,
         opacity: opacity / 100,
         mixBlendMode: (blendMode || 'normal') as any,
-        ...backgroundStyle,
       }}
       onClick={handleFrameClick}
       onMouseDown={handleMouseDown}
@@ -354,10 +351,11 @@ export default function ResizableFrame({
       {/* Draggable frame header - only visible when selected */}
       {isSelected && (
         <div 
-          className="frame-drag-header absolute bg-blue-500 text-white text-xs px-2 py-0.5 rounded-tl rounded-tr font-medium cursor-move z-50 select-none whitespace-nowrap flex items-center gap-1"
+          className="frame-drag-header absolute bg-blue-500 text-white text-xs px-2 py-0.5 rounded-tl rounded-tr font-medium cursor-move select-none whitespace-nowrap flex items-center gap-1 pointer-events-auto"
           style={{ 
             top: '-24px',
-            left: '0px'
+            left: '0px',
+            zIndex: 100,
           }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
@@ -370,124 +368,135 @@ export default function ResizableFrame({
           )}
         </div>
       )}
-      {/* Video background for frames */}
-      {backgroundType === "video" && videoUrl && videoUrl.trim() && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ borderRadius: `${cornerRadius}px` }}
-        >
-          <source src={videoUrl} type="video/mp4" />
-        </video>
-      )}
+      
+      {/* Inner content wrapper with clipping */}
+      <div
+        className="absolute inset-0"
+        style={{
+          overflow: "hidden",
+          borderRadius: `${cornerRadius}px`,
+          ...backgroundStyle,
+        }}
+      >
+        {/* Video background for frames */}
+        {backgroundType === "video" && videoUrl && videoUrl.trim() && (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+            style={{ borderRadius: `${cornerRadius}px` }}
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+        )}
 
-      {/* Enhanced Grid overlay */}
-      {showGrid && (
-        <svg
-          className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ borderRadius: `${cornerRadius}px` }}
-        >
-          <defs>
-            {gridStyle === "lines" ? (
-              <>
-                {/* Minor grid pattern */}
+        {/* Enhanced Grid overlay */}
+        {showGrid && (
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            style={{ borderRadius: `${cornerRadius}px` }}
+          >
+            <defs>
+              {gridStyle === "lines" ? (
+                <>
+                  {/* Minor grid pattern */}
+                  <pattern
+                    id={`grid-minor-${id}`}
+                    width={gridSize}
+                    height={gridSize}
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="0.5"
+                      className="text-primary/20 dark:text-primary/15"
+                    />
+                  </pattern>
+                  {/* Major grid pattern (every 5th line) */}
+                  <pattern
+                    id={`grid-major-${id}`}
+                    width={gridSize * 5}
+                    height={gridSize * 5}
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d={`M ${gridSize * 5} 0 L 0 0 0 ${gridSize * 5}`}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      className="text-primary/40 dark:text-primary/30"
+                    />
+                  </pattern>
+                </>
+              ) : (
+                /* Dot grid pattern */
                 <pattern
-                  id={`grid-minor-${id}`}
+                  id={`grid-dots-${id}`}
                   width={gridSize}
                   height={gridSize}
                   patternUnits="userSpaceOnUse"
                 >
-                  <path
-                    d={`M ${gridSize} 0 L 0 0 0 ${gridSize}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="0.5"
-                    className="text-primary/20 dark:text-primary/15"
+                  <circle
+                    cx={gridSize / 2}
+                    cy={gridSize / 2}
+                    r="1"
+                    fill="currentColor"
+                    className="text-primary/30 dark:text-primary/25"
                   />
                 </pattern>
-                {/* Major grid pattern (every 5th line) */}
-                <pattern
-                  id={`grid-major-${id}`}
-                  width={gridSize * 5}
-                  height={gridSize * 5}
-                  patternUnits="userSpaceOnUse"
-                >
-                  <path
-                    d={`M ${gridSize * 5} 0 L 0 0 0 ${gridSize * 5}`}
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    className="text-primary/40 dark:text-primary/30"
-                  />
-                </pattern>
+              )}
+            </defs>
+            {gridStyle === "lines" ? (
+              <>
+                {/* Draw minor grid first */}
+                <rect width="100%" height="100%" fill={`url(#grid-minor-${id})`} />
+                {/* Draw major grid on top */}
+                <rect width="100%" height="100%" fill={`url(#grid-major-${id})`} />
               </>
             ) : (
-              /* Dot grid pattern */
-              <pattern
-                id={`grid-dots-${id}`}
-                width={gridSize}
-                height={gridSize}
-                patternUnits="userSpaceOnUse"
-              >
-                <circle
-                  cx={gridSize / 2}
-                  cy={gridSize / 2}
-                  r="1"
-                  fill="currentColor"
-                  className="text-primary/30 dark:text-primary/25"
-                />
-              </pattern>
+              <rect width="100%" height="100%" fill={`url(#grid-dots-${id})`} />
             )}
-          </defs>
-          {gridStyle === "lines" ? (
-            <>
-              {/* Draw minor grid first */}
-              <rect width="100%" height="100%" fill={`url(#grid-minor-${id})`} />
-              {/* Draw major grid on top */}
-              <rect width="100%" height="100%" fill={`url(#grid-major-${id})`} />
-            </>
-          ) : (
-            <rect width="100%" height="100%" fill={`url(#grid-dots-${id})`} />
-          )}
-        </svg>
-      )}
+          </svg>
+        )}
 
-      {/* Legacy poster preview (only if image is set) */}
-      {image && (
-        <PosterPreview
-          image={image}
-          topCaption={topCaption}
-          bottomCaption={bottomCaption}
-          backgroundColor={backgroundColor}
-          textColor={textColor}
-          textAlign={textAlign}
-          textSize={textSize}
-          textOpacity={textOpacity}
-          imageStyle={imageStyle}
-          filterStyle={filterStyle}
-          linkText={linkText}
-          linkPosition={linkPosition}
-          gradientIntensity={gradientIntensity}
-        />
-      )}
-      
-      {/* Elements inside frame */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div 
-          className="pointer-events-auto flex"
-          style={{
-            width: '100%',
-            height: '100%',
-            flexDirection: flexDirection,
-            justifyContent: justifyContent,
-            alignItems: alignItems,
-            gap: `${gap}px`,
-          }}
-        >
-          {children}
+        {/* Legacy poster preview (only if image is set) */}
+        {image && (
+          <PosterPreview
+            image={image}
+            topCaption={topCaption}
+            bottomCaption={bottomCaption}
+            backgroundColor={backgroundColor}
+            textColor={textColor}
+            textAlign={textAlign}
+            textSize={textSize}
+            textOpacity={textOpacity}
+            imageStyle={imageStyle}
+            filterStyle={filterStyle}
+            linkText={linkText}
+            linkPosition={linkPosition}
+            gradientIntensity={gradientIntensity}
+          />
+        )}
+        
+        {/* Elements inside frame */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div 
+            className="pointer-events-auto flex"
+            style={{
+              width: '100%',
+              height: '100%',
+              flexDirection: flexDirection,
+              justifyContent: justifyContent,
+              alignItems: alignItems,
+              gap: `${gap}px`,
+            }}
+          >
+            {children}
+          </div>
         </div>
       </div>
       

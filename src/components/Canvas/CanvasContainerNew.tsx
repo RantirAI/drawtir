@@ -119,6 +119,13 @@ export default function CanvasContainerNew({
   const [panOffset, setPanOffset] = useState(calculateCenterOffset());
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  
+  // Reset panStart when panning mode is disabled
+  useEffect(() => {
+    if (!isPanning) {
+      setPanStart({ x: 0, y: 0 });
+    }
+  }, [isPanning]);
   const [showGrid, setShowGrid] = useState(false);
   const [gridSize, setGridSize] = useState(20);
   const [gridStyle, setGridStyle] = useState<"lines" | "dots">("lines");
@@ -2103,16 +2110,26 @@ export default function CanvasContainerNew({
 
       {/* Canvas Area */}
       <div 
-        className="flex-1 overflow-hidden relative"
+        className="flex-1 overflow-hidden relative canvas-background"
         onMouseDown={(e) => {
-          if (isPanning && e.button === 0 && activeTool !== 'pen') {
+          // Only start panning if clicking directly on canvas background (not on frames or elements)
+          const target = e.target as HTMLElement;
+          const isClickOnBackground = target.classList.contains('canvas-background');
+          const isClickOnFrame = target.closest('.frame-root');
+          const isClickOnElement = target.closest('.resizable-element-root');
+          
+          if (isPanning && e.button === 0 && activeTool !== 'pen' && isClickOnBackground && !isClickOnFrame && !isClickOnElement) {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
           }
         }}
         onMouseMove={(e) => {
-          if (isPanning && e.buttons === 1 && activeTool !== 'pen') {
+          if (isPanning && e.buttons === 1 && activeTool !== 'pen' && panStart.x !== 0) {
             setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
           }
+        }}
+        onMouseUp={() => {
+          // Reset pan start on mouse up to prevent stale coordinates
+          setPanStart({ x: 0, y: 0 });
         }}
           style={{
             transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
