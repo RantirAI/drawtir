@@ -2114,12 +2114,12 @@ export default function CanvasContainerNew({
             setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
           }
         }}
-        style={{
-          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
-          transformOrigin: 'center',
-          transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-          cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
-        }}
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+            transformOrigin: '0 0',
+            transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+            cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
+          }}
       >
         {frames.map((frame) => (
           <div key={frame.id}>

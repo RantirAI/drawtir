@@ -230,7 +230,7 @@ export default function ResizableFrame({
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate]);
+  }, [isDragging, isResizing, dragStart, x, y, width, height, id, onUpdate, zoom, snapToGrid, gridSize]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // Don't allow dragging if frame is locked
