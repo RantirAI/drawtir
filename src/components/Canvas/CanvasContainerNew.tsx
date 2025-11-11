@@ -3191,7 +3191,8 @@ export default function CanvasContainerNew({
       <PreviewDialog
         open={showPreviewDialog}
         onOpenChange={setShowPreviewDialog}
-        frame={selectedFrame}
+        frames={frames}
+        initialFrameId={selectedFrame?.id}
       />
 
       <BrandKitPanel

@@ -218,7 +218,7 @@ export default function TemplatesPanel({
       <PreviewDialog
         open={previewOpen}
         onOpenChange={setPreviewOpen}
-        frame={previewFrame}
+        frames={previewFrame ? [previewFrame] : []}
       />
     </DraggablePanel>
   );
