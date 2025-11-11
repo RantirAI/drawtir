@@ -86,7 +86,7 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines" | "globe";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
@@ -122,6 +122,11 @@ export interface Element {
     rangeRadius?: number;
     meteorCount?: number;
     lineDuration?: number;
+    globeColor?: string;
+    atmosphereColor?: string;
+    autoRotateSpeed?: number;
+    arcTime?: number;
+    pointSize?: number;
   };
   
   // Common properties

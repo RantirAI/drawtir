@@ -15,6 +15,7 @@ import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
 import { BackgroundLines } from "@/components/ui/background-lines";
+import { World } from "@/components/ui/globe";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -60,7 +61,12 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     baseRadius = 1,
     rangeRadius = 2,
     meteorCount = 20,
-    lineDuration = 10
+    lineDuration = 10,
+    globeColor = "#062056",
+    atmosphereColor = "#FFFFFF",
+    autoRotateSpeed = 0.5,
+    arcTime = 1000,
+    pointSize = 4
   } = element.shader;
 
   const shaderProps = {
@@ -173,6 +179,33 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <Meteors number={meteorCount} className="h-full w-full" />;
     case "background-lines":
       return <BackgroundLines className="h-full w-full" svgOptions={{ duration: lineDuration }} />;
+    case "globe":
+      return (
+        <World 
+          data={[]}
+          globeConfig={{
+            pointSize,
+            globeColor,
+            showAtmosphere: true,
+            atmosphereColor,
+            atmosphereAltitude: 0.1,
+            emissive: globeColor,
+            emissiveIntensity: 0.1,
+            shininess: 0.9,
+            polygonColor: "rgba(255,255,255,0.7)",
+            ambientLight: "#38bdf8",
+            directionalLeftLight: "#ffffff",
+            directionalTopLight: "#ffffff",
+            pointLight: "#ffffff",
+            arcTime,
+            arcLength: 0.9,
+            rings: 1,
+            maxRings: 3,
+            autoRotate: true,
+            autoRotateSpeed
+          }}
+        />
+      );
     default:
       return null;
   }

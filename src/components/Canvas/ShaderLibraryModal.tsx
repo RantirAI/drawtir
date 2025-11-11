@@ -20,9 +20,10 @@ import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
 import { BackgroundLines } from "@/components/ui/background-lines";
+import { World } from "@/components/ui/globe";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines" | "globe";
   name: string;
   description: string;
   defaultProps: {
@@ -61,6 +62,11 @@ interface ShaderOption {
     rangeRadius?: number;
     meteorCount?: number;
     lineDuration?: number;
+    globeColor?: string;
+    atmosphereColor?: string;
+    autoRotateSpeed?: number;
+    arcTime?: number;
+    pointSize?: number;
   };
 }
 
@@ -245,6 +251,21 @@ const SHADER_OPTIONS: ShaderOption[] = [
       colorTint: [1.0, 1.0, 1.0],
       lineDuration: 10
     }
+  },
+  {
+    type: "globe",
+    name: "3D Globe",
+    description: "Interactive 3D globe with animated connection arcs and atmospheric effects",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      globeColor: "#062056",
+      atmosphereColor: "#FFFFFF",
+      autoRotateSpeed: 0.5,
+      arcTime: 1000,
+      pointSize: 4
+    }
   }
 ];
 
@@ -297,6 +318,22 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <Meteors {...commonProps} number={10} />;
       case "background-lines":
         return <BackgroundLines {...commonProps} svgOptions={{ duration: 5 }} />;
+      case "globe":
+        return (
+          <div {...commonProps}>
+            <World 
+              data={[]}
+              globeConfig={{
+                pointSize: 2,
+                globeColor: "#062056",
+                showAtmosphere: true,
+                atmosphereColor: "#FFFFFF",
+                autoRotate: true,
+                autoRotateSpeed: 0.5
+              }}
+            />
+          </div>
+        );
       default:
         return null;
     }

@@ -59,6 +59,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="background-beams">Background Beams</SelectItem>
             <SelectItem value="meteors">Meteors</SelectItem>
             <SelectItem value="background-lines">Background Lines</SelectItem>
+            <SelectItem value="globe">3D Globe</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -645,6 +646,71 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={3}
               max={30}
               step={0.5}
+            />
+          </div>
+        </>
+      )}
+
+      {shader.type === "globe" && (
+        <>
+          <div>
+            <Label>Globe Color</Label>
+            <Input
+              type="color"
+              value={shader.globeColor || "#062056"}
+              onChange={(e) => onUpdate({
+                shader: { ...shader, globeColor: e.target.value }
+              })}
+            />
+          </div>
+
+          <div>
+            <Label>Atmosphere Color</Label>
+            <Input
+              type="color"
+              value={shader.atmosphereColor || "#FFFFFF"}
+              onChange={(e) => onUpdate({
+                shader: { ...shader, atmosphereColor: e.target.value }
+              })}
+            />
+          </div>
+
+          <div>
+            <Label>Rotation Speed: {shader.autoRotateSpeed?.toFixed(2) || "0.50"}</Label>
+            <Slider
+              value={[shader.autoRotateSpeed || 0.5]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, autoRotateSpeed: value }
+              })}
+              min={0.1}
+              max={2.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Arc Animation Time: {shader.arcTime || 1000}ms</Label>
+            <Slider
+              value={[shader.arcTime || 1000]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, arcTime: Math.round(value) }
+              })}
+              min={500}
+              max={3000}
+              step={100}
+            />
+          </div>
+
+          <div>
+            <Label>Point Size: {shader.pointSize || 4}</Label>
+            <Slider
+              value={[shader.pointSize || 4]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, pointSize: Math.round(value) }
+              })}
+              min={1}
+              max={10}
+              step={1}
             />
           </div>
         </>

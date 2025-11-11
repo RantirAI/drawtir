@@ -49,6 +49,10 @@ export default defineConfig(({ mode }) => ({
       "@radix-ui/react-toggle",
       "@radix-ui/react-toggle-group",
       "@radix-ui/react-tooltip",
+      "three",
+      "three-globe",
+      "@react-three/fiber",
+      "@react-three/drei",
     ],
   },
 }));

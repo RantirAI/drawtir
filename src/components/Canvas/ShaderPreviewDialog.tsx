@@ -21,9 +21,10 @@ import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 import { Meteors } from "@/components/ui/meteors";
 import { BackgroundLines } from "@/components/ui/background-lines";
+import { World } from "@/components/ui/globe";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines" | "globe";
   name: string;
   description: string;
   defaultProps: {
@@ -62,6 +63,11 @@ interface ShaderConfig {
     rangeRadius?: number;
     meteorCount?: number;
     lineDuration?: number;
+    globeColor?: string;
+    atmosphereColor?: string;
+    autoRotateSpeed?: number;
+    arcTime?: number;
+    pointSize?: number;
   };
 }
 
@@ -175,6 +181,23 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         return <Meteors number={(props as any).meteorCount || 20} className="h-full w-full" />;
       case "background-lines":
         return <BackgroundLines className="h-full w-full" svgOptions={{ duration: (props as any).lineDuration || 10 }} />;
+      case "globe":
+        return (
+          <div className="h-full w-full">
+            <World 
+              data={[]}
+              globeConfig={{
+                pointSize: (props as any).pointSize || 4,
+                globeColor: (props as any).globeColor || "#062056",
+                showAtmosphere: true,
+                atmosphereColor: (props as any).atmosphereColor || "#FFFFFF",
+                autoRotate: true,
+                autoRotateSpeed: (props as any).autoRotateSpeed || 0.5,
+                arcTime: (props as any).arcTime || 1000
+              }}
+            />
+          </div>
+        );
       default:
         return null;
     }
@@ -692,6 +715,61 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       min={3}
                       max={30}
                       step={0.5}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "globe" && (
+                <>
+                  <div>
+                    <Label>Globe Color</Label>
+                    <Input
+                      type="color"
+                      value={(shaderProps as any).globeColor || "#062056"}
+                      onChange={(e) => setShaderProps({ ...shaderProps, globeColor: e.target.value } as any)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Atmosphere Color</Label>
+                    <Input
+                      type="color"
+                      value={(shaderProps as any).atmosphereColor || "#FFFFFF"}
+                      onChange={(e) => setShaderProps({ ...shaderProps, atmosphereColor: e.target.value } as any)}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Rotation Speed: {(shaderProps as any).autoRotateSpeed?.toFixed(2) || "0.50"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).autoRotateSpeed || 0.5]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, autoRotateSpeed: value } as any)}
+                      min={0.1}
+                      max={2.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Arc Animation Time: {(shaderProps as any).arcTime || 1000}ms</Label>
+                    <Slider
+                      value={[(shaderProps as any).arcTime || 1000]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, arcTime: Math.round(value) } as any)}
+                      min={500}
+                      max={3000}
+                      step={100}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Point Size: {(shaderProps as any).pointSize || 4}</Label>
+                    <Slider
+                      value={[(shaderProps as any).pointSize || 4]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, pointSize: Math.round(value) } as any)}
+                      min={1}
+                      max={10}
+                      step={1}
                     />
                   </div>
                 </>
