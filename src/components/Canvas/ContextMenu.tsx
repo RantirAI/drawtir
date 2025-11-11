@@ -56,7 +56,7 @@ export default function CanvasContextMenu({
       <ContextMenuTrigger asChild>
         <div className="relative">{children}</div>
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-48">
+      <ContextMenuContent className="w-48 border-border/50">
         {onGenerate && (
           <>
             <ContextMenuItem onClick={onGenerate} className="text-xs">

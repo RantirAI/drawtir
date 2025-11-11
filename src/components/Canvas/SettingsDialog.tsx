@@ -87,9 +87,9 @@ export default function SettingsDialog({ open, onOpenChange, projectId }: Settin
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Project Settings</DialogTitle>
+      <DialogContent className="sm:max-w-md p-3">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-sm">Project Settings</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">

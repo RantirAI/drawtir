@@ -41,8 +41,8 @@ export default function FillStrokeModal({ open, onOpenChange, currentValue, onCh
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
+      <DialogContent className="max-w-md p-3">
+        <DialogHeader className="pb-2">
           <DialogTitle className="text-sm">
             {mode === "fill" ? "Fill Options" : "Stroke Options"}
           </DialogTitle>

@@ -126,9 +126,9 @@ export default function ShareDialog({ open, onOpenChange, framePreview, frameNam
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share Frame</DialogTitle>
+      <DialogContent className="sm:max-w-md p-3">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-sm">Share Frame</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">

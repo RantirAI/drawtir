@@ -16,9 +16,9 @@ interface InfoModalProps {
 export const InfoModal = ({ isOpen, onClose, title, content }: InfoModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+      <DialogContent className="sm:max-w-[500px] p-3">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-sm">{title}</DialogTitle>
         </DialogHeader>
         <DialogDescription className="text-foreground whitespace-pre-wrap">
           {content}

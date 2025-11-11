@@ -85,9 +85,9 @@ export default function IconLibraryModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle>Icon Library</DialogTitle>
+      <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-2">
+          <DialogHeader className="px-4 pt-4 pb-2 border-b">
+            <DialogTitle className="text-sm">Icon Library</DialogTitle>
             <DialogDescription className="sr-only" id="icon-library-desc">
               Browse and search icon libraries.
             </DialogDescription>

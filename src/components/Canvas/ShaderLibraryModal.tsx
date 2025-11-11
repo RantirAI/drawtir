@@ -269,40 +269,40 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5" />
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-3">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="flex items-center gap-1.5 text-sm">
+              <Sparkles className="w-3.5 h-3.5" />
               Shader Library
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
             {SHADER_OPTIONS.map((shader) => (
               <Card key={shader.type} className="group border-border/50 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all cursor-pointer">
-                <div className="flex gap-3 p-3">
+                <div className="flex gap-2 p-2">
                   {/* Preview on left */}
-                  <div className={`relative rounded-md overflow-hidden border border-border/50 flex-shrink-0 ${getShaderGradient(shader.type)} animate-pulse`} style={{ width: '80px', height: '80px' }}>
+                  <div className={`relative rounded-md overflow-hidden border border-border/50 flex-shrink-0 ${getShaderGradient(shader.type)} animate-pulse`} style={{ width: '60px', height: '60px' }}>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-white/80" />
+                      <Eye className="w-4 h-4 text-white/80" />
                     </div>
                   </div>
                   
                   {/* Content on right */}
                   <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex-1">
-                      <CardTitle className="text-sm mb-0.5">{shader.name}</CardTitle>
-                      <CardDescription className="text-xs line-clamp-2 group-hover:text-primary-foreground/90">
+                      <CardTitle className="text-[11px] mb-0.5">{shader.name}</CardTitle>
+                      <CardDescription className="text-[10px] line-clamp-2 group-hover:text-primary-foreground/90">
                         {shader.description}
                       </CardDescription>
                     </div>
                     
-                    <div className="flex gap-1.5 mt-2 justify-end">
+                    <div className="flex gap-1 mt-1.5 justify-end">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewShader(shader)}
-                        className="h-6 text-xs px-2 group-hover:bg-primary-foreground group-hover:text-primary group-hover:border-primary-foreground"
+                        className="h-5 text-[10px] px-1.5 group-hover:bg-primary-foreground group-hover:text-primary group-hover:border-primary-foreground"
                       >
                         Preview
                       </Button>
@@ -312,7 +312,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                           onSelect(shader);
                           onClose();
                         }}
-                        className="h-6 text-xs px-2 group-hover:bg-primary-foreground group-hover:text-primary"
+                        className="h-5 text-[10px] px-1.5 group-hover:bg-primary-foreground group-hover:text-primary"
                       >
                         Use
                       </Button>

@@ -122,9 +122,9 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Export Frames</DialogTitle>
+      <DialogContent className="max-w-2xl p-3">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-sm">Export Frames</DialogTitle>
         </DialogHeader>
 
         <div className="grid gap-6">

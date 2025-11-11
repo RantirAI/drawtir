@@ -71,9 +71,9 @@ export default function ExportAllDialog({ open, onOpenChange, frames }: ExportAl
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Export All Frames</DialogTitle>
+      <DialogContent className="sm:max-w-md p-3">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-sm">Export All Frames</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">

@@ -254,9 +254,9 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl h-[70vh]">
+        <DialogContent className="max-w-4xl h-[70vh] p-3">
           <DialogHeader className="pb-2">
-            <DialogTitle className="text-base">Media Library</DialogTitle>
+            <DialogTitle className="text-sm">Media Library</DialogTitle>
           </DialogHeader>
 
           <Tabs defaultValue="uploads" className="flex-1 flex flex-col min-h-0">

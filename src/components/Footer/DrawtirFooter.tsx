@@ -121,7 +121,7 @@ export default function DrawtirFooter() {
 
       {/* Roadmap Modal */}
       <Dialog open={showRoadmap} onOpenChange={setShowRoadmap}>
-        <DialogContent className="fixed p-3 m-0 right-4" style={{ bottom: bottomOffset, right: rightOffset, width: footerSize.width || undefined }}>
+        <DialogContent className="fixed top-auto left-auto translate-x-0 translate-y-0 p-3 m-0 right-4" style={{ bottom: bottomOffset, right: rightOffset, width: footerSize.width || undefined }}>
           <DialogHeader className="pb-2">
             <DialogTitle className="text-sm">Roadmap</DialogTitle>
           </DialogHeader>

@@ -101,9 +101,9 @@ export default function AnimationsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b">
-          <DialogTitle className="text-xl font-semibold">Animations</DialogTitle>
+      <DialogContent className="max-w-5xl max-h-[90vh] p-2 gap-0">
+        <DialogHeader className="px-4 pt-4 pb-2 border-b">
+          <DialogTitle className="text-sm">Animations</DialogTitle>
         </DialogHeader>
         
         <div className="grid grid-cols-3 gap-0 h-[600px]">
