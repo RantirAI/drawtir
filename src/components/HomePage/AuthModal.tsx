@@ -118,7 +118,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white hover:bg-primary/90 text-sm h-9 shadow-[0_8px_16px_rgba(59,130,246,0.4),0_4px_8px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.5),0_6px_12px_rgba(59,130,246,0.4)] transition-all duration-200"
+            className="w-full bg-primary text-white hover:bg-primary/90 text-sm px-3 py-1.5 h-auto shadow-[0_2px_4px_rgba(59,130,246,0.15)] hover:shadow-[0_3px_6px_rgba(59,130,246,0.2)] transition-all duration-200"
           >
             {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
           </Button>
