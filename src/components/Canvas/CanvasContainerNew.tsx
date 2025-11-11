@@ -1650,7 +1650,6 @@ export default function CanvasContainerNew({
     setActiveTool("select");
     toast.success(`${iconName} icon added!`);
   };
-  };
 
   const handleShaderSelect = (shaderConfig: any) => {
     const targetFrameId = selectedFrameId || frames[0]?.id;
