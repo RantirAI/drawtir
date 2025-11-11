@@ -50,14 +50,12 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="cosmic-waves">Cosmic Waves</SelectItem>
             <SelectItem value="cosmic-flow">Cosmic Flow</SelectItem>
             <SelectItem value="digital-tunnel">Digital Tunnel</SelectItem>
-            <SelectItem value="glitch">Glitch</SelectItem>
             <SelectItem value="singularity">Singularity</SelectItem>
             <SelectItem value="mobius-spiral">Mobius Spiral</SelectItem>
             <SelectItem value="fire-3d">Fire 3D</SelectItem>
             <SelectItem value="pyramid-pattern">Pyramid Pattern</SelectItem>
             <SelectItem value="vortex">Vortex</SelectItem>
             <SelectItem value="background-beams">Background Beams</SelectItem>
-            <SelectItem value="meteors">Meteors</SelectItem>
             <SelectItem value="background-lines">Background Lines</SelectItem>
             <SelectItem value="globe">3D Globe</SelectItem>
           </SelectContent>
@@ -612,23 +610,6 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
               min={0.5}
               max={10.0}
               step={0.1}
-            />
-          </div>
-        </>
-      )}
-
-      {shader.type === "meteors" && (
-        <>
-          <div>
-            <Label>Meteor Count: {shader.meteorCount || 20}</Label>
-            <Slider
-              value={[shader.meteorCount || 20]}
-              onValueChange={([value]) => onUpdate({
-                shader: { ...shader, meteorCount: Math.round(value) }
-              })}
-              min={5}
-              max={50}
-              step={1}
             />
           </div>
         </>

@@ -13,7 +13,6 @@ import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
-import { Meteors } from "@/components/ui/meteors";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { World } from "@/components/ui/globe";
 import type { Element } from "@/types/elements";
@@ -74,7 +73,6 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     rangeSpeed = 1.5,
     baseRadius = 1,
     rangeRadius = 2,
-    meteorCount = 20,
     lineDuration = 10,
     globeColor = "#062056",
     atmosphereColor = "#FFFFFF",
@@ -175,8 +173,6 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <CosmicFlowShaders {...cosmicWavesProps} />;
     case "digital-tunnel":
       return <DigitalTunnel {...shaderProps} />;
-    case "glitch":
-      return <Glitch {...shaderProps} />;
     case "singularity":
       return <SingularityShaders {...singularityProps} />;
     case "mobius-spiral":
@@ -189,8 +185,6 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <Vortex {...vortexProps} />;
     case "background-beams":
       return <BackgroundBeams className="h-full w-full" />;
-    case "meteors":
-      return <Meteors number={meteorCount} className="h-full w-full" />;
     case "background-lines":
       return <BackgroundLines className="h-full w-full" svgOptions={{ duration: lineDuration }} />;
     case "globe":

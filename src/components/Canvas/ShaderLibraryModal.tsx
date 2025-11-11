@@ -18,12 +18,11 @@ import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
 import { BackgroundBeams } from "@/components/ui/background-beams";
-import { Meteors } from "@/components/ui/meteors";
 import { BackgroundLines } from "@/components/ui/background-lines";
 import { World } from "@/components/ui/globe";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "meteors" | "background-lines" | "globe";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "background-lines" | "globe";
   name: string;
   description: string;
   defaultProps: {
@@ -60,7 +59,6 @@ interface ShaderOption {
     rangeSpeed?: number;
     baseRadius?: number;
     rangeRadius?: number;
-    meteorCount?: number;
     lineDuration?: number;
     globeColor?: string;
     atmosphereColor?: string;
@@ -136,12 +134,6 @@ const SHADER_OPTIONS: ShaderOption[] = [
     name: "Digital Tunnel",
     description: "Infinite 3D tunnel with neon rings and particle flows using raymarching",
     defaultProps: { speed: 1.0, glowIntensity: 1.6, colorTint: [0.0, 0.5, 1.0] }
-  },
-  {
-    type: "glitch",
-    name: "Glitch",
-    description: "Digital corruption effects with chromatic aberration and cyberpunk glitch",
-    defaultProps: { speed: 1.0, glowIntensity: 1.2, colorTint: [1.0, 0.0, 1.0] }
   },
   {
     type: "singularity",
@@ -231,17 +223,6 @@ const SHADER_OPTIONS: ShaderOption[] = [
     }
   },
   {
-    type: "meteors",
-    name: "Meteors",
-    description: "Falling meteor shower effect with animated streaks and trails",
-    defaultProps: {
-      speed: 1.0,
-      glowIntensity: 1.0,
-      colorTint: [1.0, 1.0, 1.0],
-      meteorCount: 20
-    }
-  },
-  {
     type: "background-lines",
     name: "Background Lines",
     description: "Animated flowing SVG path lines with colorful gradient strokes",
@@ -300,8 +281,6 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <CosmicFlowShaders {...commonProps} />;
       case "digital-tunnel":
         return <DigitalTunnel {...commonProps} />;
-      case "glitch":
-        return <Glitch {...commonProps} />;
       case "singularity":
         return <SingularityShaders {...commonProps} />;
       case "mobius-spiral":
@@ -314,8 +293,6 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <Vortex {...commonProps} particleCount={200} />;
       case "background-beams":
         return <BackgroundBeams {...commonProps} />;
-      case "meteors":
-        return <Meteors {...commonProps} number={10} />;
       case "background-lines":
         return <BackgroundLines {...commonProps} svgOptions={{ duration: 5 }} />;
       case "globe":
