@@ -50,10 +50,6 @@ interface ResizableFrameProps {
   isLocked?: boolean; // Prevent dragging/resizing
   zoom?: number; // Canvas zoom level
   panOffset?: { x: number; y: number }; // Canvas pan offset
-  parentWidth?: number;
-  parentHeight?: number;
-  percentageWidth?: string;
-  percentageHeight?: string;
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -106,10 +102,6 @@ export default function ResizableFrame({
   isLocked = false,
   zoom = 1,
   panOffset = { x: 0, y: 0 },
-  parentWidth,
-  parentHeight,
-  percentageWidth,
-  percentageHeight,
   onUpdate,
   isSelected,
   onSelect,
@@ -119,14 +111,6 @@ export default function ResizableFrame({
   const [isResizing, setIsResizing] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const frameRef = useRef<HTMLDivElement>(null);
-
-  // Show percentage in label if available
-  const getSizeLabel = () => {
-    if (percentageWidth || percentageHeight) {
-      return `${percentageWidth || Math.round(width)+'px'} × ${percentageHeight || Math.round(height)+'px'}`;
-    }
-    return `${Math.round(width)} × ${Math.round(height)}`;
-  };
 
   // No dynamic scaling - elements maintain their actual sizes
 
@@ -511,7 +495,7 @@ export default function ResizableFrame({
         <>
           {/* Dimension label at bottom in blue */}
           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-xs px-2 py-1 rounded whitespace-nowrap pointer-events-none font-medium z-50">
-            {getSizeLabel()}
+            {Math.round(width)} × {Math.round(height)}
           </div>
           
           {/* Corner handles */}

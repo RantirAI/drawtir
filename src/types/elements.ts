@@ -179,8 +179,6 @@ export interface Frame {
   y: number;
   width: number;
   height: number;
-  percentageWidth?: string; // "50%", "75%", "100%" for nested frames
-  percentageHeight?: string; // "50%", "75%", "100%" for nested frames
   sizeUnit?: "px" | "rem" | "%" | "em";
   rotation?: number;
   backgroundColor: string;
