@@ -268,7 +268,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewShader(shader)}
-                        className="h-6 text-xs px-2"
+                        className="h-6 text-xs px-2 group-hover:bg-primary-foreground group-hover:text-primary group-hover:border-primary-foreground"
                       >
                         Preview
                       </Button>
@@ -278,7 +278,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                           onSelect(shader);
                           onClose();
                         }}
-                        className="h-6 text-xs px-2"
+                        className="h-6 text-xs px-2 group-hover:bg-primary-foreground group-hover:text-primary"
                       >
                         Use
                       </Button>
