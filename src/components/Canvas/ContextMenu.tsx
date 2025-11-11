@@ -186,10 +186,13 @@ export default function CanvasContextMenu({
           </ContextMenuItem>
         )}
         {onAddNestedFrame && (
-          <ContextMenuItem onClick={onAddNestedFrame} className="text-xs">
-            <Box className="h-3 w-3 mr-2" />
-            Add Nested Frame
-          </ContextMenuItem>
+          <>
+            {!onGroup && !onWrapInFrame && <ContextMenuSeparator />}
+            <ContextMenuItem onClick={onAddNestedFrame} className="text-xs">
+              <Box className="h-3 w-3 mr-2" />
+              Add Nested Frame
+            </ContextMenuItem>
+          </>
         )}
         {onDelete && (
           <>
