@@ -61,12 +61,12 @@ export default function DrawtirFooter() {
 
       {/* License Modal */}
       <Dialog open={showLicense} onOpenChange={setShowLicense}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>License</DialogTitle>
+        <DialogContent className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1200px] p-3 m-0">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-sm">License</DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-4 text-xs text-muted-foreground">
+          <ScrollArea className="h-[40vh] pr-3">
+            <div className="space-y-2 text-[11px] text-muted-foreground">
               <p>
                 MIT License
               </p>
@@ -101,14 +101,14 @@ export default function DrawtirFooter() {
 
       {/* Roadmap Modal */}
       <Dialog open={showRoadmap} onOpenChange={setShowRoadmap}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Roadmap</DialogTitle>
+        <DialogContent className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1200px] p-3 m-0">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-sm">Roadmap</DialogTitle>
           </DialogHeader>
-          <ScrollArea className="h-[60vh] pr-4">
-            <div className="space-y-4 text-xs">
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold">🪐 Rantir Studio + Drawtir SDK Roadmap</h3>
+          <ScrollArea className="h-[40vh] pr-3">
+            <div className="space-y-3 text-[11px]">
+              <div className="space-y-1.5">
+                <h3 className="text-xs font-semibold">🪐 Rantir Studio + Drawtir SDK Roadmap</h3>
                 <p className="text-muted-foreground">
                   Rantir Studio is the visual layer of the Rantir ecosystem — a collaborative, AI-native workspace that blends no-code app design, schema-aware data editing, and AI generation into a single cloud environment. Its companion, Drawtir SDK, powers the design canvas and embeddable visual logic layer — letting developers integrate drawing, prototyping, and live-data components directly inside their own tools or Rantir Cloud apps.
                 </p>
@@ -117,50 +117,50 @@ export default function DrawtirFooter() {
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">1️⃣ November 15, 2025 — Initial Rantir Studio Cloud Release</h4>
-                  <p className="text-muted-foreground italic">Codename: "Aurora"</p>
+              <div className="space-y-3">
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">1️⃣ November 15, 2025 — Initial Rantir Studio Cloud Release</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Aurora"</p>
                   <p className="text-muted-foreground mt-1">
                     The first public release of Rantir Studio Cloud. Includes workspace creation, project saving via Supabase, visual layout grid, schema editing, and AI-powered page scaffolding. Users can generate pages, connect to Rantir Data, and deploy to Rantir Cloud or external domains.
                   </p>
                 </div>
 
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">2️⃣ December 6, 2025 — Drawtir Embed Release</h4>
-                  <p className="text-muted-foreground italic">Codename: "Embed-1"</p>
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">2️⃣ December 6, 2025 — Drawtir Embed Release</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Embed-1"</p>
                   <p className="text-muted-foreground mt-1">
                     Launch of the Drawtir SDK as an embeddable canvas package. Developers can embed the Rantir canvas inside any app or platform with full node editing, TLDraw-based structure, and JSON sync via Supabase. Includes multi-user presence, custom block types, and SDK documentation for Lovable and Supabase integrations.
                   </p>
                 </div>
 
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">3️⃣ January 10, 2026 — Components Library + AI Actions</h4>
-                  <p className="text-muted-foreground italic">Codename: "Nova"</p>
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">3️⃣ January 10, 2026 — Components Library + AI Actions</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Nova"</p>
                   <p className="text-muted-foreground mt-1">
                     Unified Rantir Components Library release — drag-and-drop blocks for forms, charts, and UI logic. Adds AI Actions, allowing users to trigger scripts, Supabase queries, or model calls from within the visual builder. Integration with Lovable templates and versioned component storage inside Rantir Data.
                   </p>
                 </div>
 
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">4️⃣ February 18, 2026 — Video & Motion Release (Veo 3.1 + Sora Integration)</h4>
-                  <p className="text-muted-foreground italic">Codename: "Pulse"</p>
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">4️⃣ February 18, 2026 — Video & Motion Release (Veo 3.1 + Sora Integration)</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Pulse"</p>
                   <p className="text-muted-foreground mt-1">
                     Native video and motion design support powered by Veo 3.1 and Sora. Users can generate, edit, and embed dynamic videos directly in projects, apply motion prompts, and sync AI-generated clips to UI states or timelines. Adds "Record Canvas" and "AI Scene Transitions" for interactive storytelling.
                   </p>
                 </div>
 
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">5️⃣ March 15, 2026 — 3D + Lottie Support</h4>
-                  <p className="text-muted-foreground italic">Codename: "Dimension"</p>
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">5️⃣ March 15, 2026 — 3D + Lottie Support</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Dimension"</p>
                   <p className="text-muted-foreground mt-1">
                     Full 3D object import (GLB/FBX) and Lottie animation layers. Adds physics and interaction scripting to scenes, along with AI texture generation. Drawtir SDK adds lightweight WebGL renderer for live canvas previews and animation playback.
                   </p>
                 </div>
 
-                <div className="border-l-2 border-primary pl-4">
-                  <h4 className="font-semibold text-sm">6️⃣ April 20, 2026 — 2D → 3D Canvas & Mixed Reality Toolkit</h4>
-                  <p className="text-muted-foreground italic">Codename: "Orbit"</p>
+                <div className="border-l-2 border-primary pl-3 py-1">
+                  <h4 className="font-semibold text-xs">6️⃣ April 20, 2026 — 2D → 3D Canvas & Mixed Reality Toolkit</h4>
+                  <p className="text-muted-foreground italic text-[10px]">Codename: "Orbit"</p>
                   <p className="text-muted-foreground mt-1">
                     Transform 2D designs into 3D environments with a single click. Launches Rantir Mixed Reality Toolkit — enabling 2D-to-3D projection, environment lighting, and spatial editing within the same Drawtir canvas. Paves the way for Rantir hardware integration (r.canvas) and multi-viewport collaboration.
                   </p>

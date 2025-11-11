@@ -62,7 +62,7 @@ export default function HomeNav({ onOpenAuth }: HomeNavProps) {
             />
             <Button 
               onClick={onOpenAuth}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs px-3 py-1 h-auto"
+              className="bg-primary text-white hover:bg-primary/90 text-xs px-3 py-1 h-auto shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_2px_4px_rgba(59,130,246,0.3)] hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_3px_6px_rgba(59,130,246,0.4)] transition-all duration-200"
             >
               Login / Sign Up
             </Button>
