@@ -51,10 +51,18 @@ async function drawFrameBackground(ctx: CanvasRenderingContext2D, frame: Frame) 
 async function drawElement(ctx: CanvasRenderingContext2D, element: Element, frame: Frame) {
   ctx.save();
   
-  const x = element.x - frame.x;
-  const y = element.y - frame.y;
+  // Elements are positioned relative to the frame, not absolute canvas coordinates
+  const x = element.x;
+  const y = element.y;
   const width = element.width;
   const height = element.height;
+
+  // Apply rotation if present
+  if (element.rotation) {
+    ctx.translate(x + width / 2, y + height / 2);
+    ctx.rotate((element.rotation * Math.PI) / 180);
+    ctx.translate(-(x + width / 2), -(y + height / 2));
+  }
 
   if (element.type === "text") {
     drawText(ctx, element, x, y);
@@ -74,9 +82,7 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
     ctx.textBaseline = "middle";
     ctx.fillText("★", x + width/2, y + height/2);
   } else if (element.type === "drawing" && element.pathData) {
-    ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
-    ctx.translate(frame.x, frame.y);
   } else if (element.type === "shader" && element.shader) {
     // Draw shader as gradient placeholder for static exports
     ctx.globalAlpha = (element.opacity ?? 100) / 100;
@@ -521,8 +527,16 @@ async function drawAnimatedElement(
 ) {
   ctx.save();
   
-  const x = element.x - frame.x;
-  const y = element.y - frame.y;
+  // Elements are positioned relative to the frame
+  const x = element.x;
+  const y = element.y;
+
+  // Apply rotation if present
+  if (element.rotation) {
+    ctx.translate(x + element.width / 2, y + element.height / 2);
+    ctx.rotate((element.rotation * Math.PI) / 180);
+    ctx.translate(-(x + element.width / 2), -(y + element.height / 2));
+  }
 
   // Compute animation progress (0..1)
   const hasAnim = element.animation && element.animation !== 'none';
@@ -572,10 +586,8 @@ async function drawAnimatedElement(
     ctx.textBaseline = "middle";
     ctx.fillText("★", x + element.width/2, y + element.height/2);
   } else if (element.type === "drawing" && element.pathData) {
-    ctx.translate(-frame.x, -frame.y);
     const el = { ...element, opacity: effectiveOpacity } as Element;
     drawPenPath(ctx, el);
-    ctx.translate(frame.x, frame.y);
   } else if (element.type === "shader" && element.shader) {
     // Draw shader as gradient for animated exports
     ctx.globalAlpha = effectiveOpacity;
