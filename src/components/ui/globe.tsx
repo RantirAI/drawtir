@@ -252,7 +252,14 @@ export function World(props: WorldProps) {
   const scene = new Scene();
   scene.fog = new Fog(0xffffff, 400, 2000);
   return (
-    <Canvas scene={scene} camera={new PerspectiveCamera(50, aspect, 180, 1800)}>
+    <Canvas 
+      scene={scene} 
+      camera={new PerspectiveCamera(50, aspect, 180, 1800)}
+      onContextMenu={(e) => {
+        e.stopPropagation();
+      }}
+      style={{ pointerEvents: 'auto' }}
+    >
       <WebGLRendererConfig />
       <ambientLight color={globeConfig.ambientLight} intensity={0.6} />
       <directionalLight
@@ -278,6 +285,11 @@ export function World(props: WorldProps) {
         autoRotate={globeConfig.autoRotate !== false}
         minPolarAngle={Math.PI / 3.5}
         maxPolarAngle={Math.PI - Math.PI / 3}
+        mouseButtons={{
+          LEFT: 0,
+          MIDDLE: 1,
+          RIGHT: undefined
+        }}
       />
     </Canvas>
   );
