@@ -106,11 +106,15 @@ export default function CanvasContainerNew({
   const [penColor, setPenColor] = useState("#9ca3af");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [zoom, setZoom] = useState(1);
+  // Reference to the actual canvas area so centering uses the real viewport, not the window
+  const canvasAreaRef = useRef<HTMLDivElement>(null);
+  
   // Calculate initial pan offset to center the first frame
   const calculateCenterOffset = () => {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const viewportWidth = canvasAreaRef.current?.clientWidth ?? window.innerWidth;
+    const viewportHeight = canvasAreaRef.current?.clientHeight ?? window.innerHeight;
     const firstFrame = frames[0];
+    if (!firstFrame) return { x: 0, y: 0 };
     // Center the frame in the viewport
     const centerX = (viewportWidth / 2) - (firstFrame.width / 2) - firstFrame.x;
     const centerY = (viewportHeight / 2) - (firstFrame.height / 2) - firstFrame.y;
@@ -129,8 +133,8 @@ export default function CanvasContainerNew({
     const frame = frames.find(f => f.id === frameId);
     if (!frame) return;
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const viewportWidth = canvasAreaRef.current?.clientWidth ?? window.innerWidth;
+    const viewportHeight = canvasAreaRef.current?.clientHeight ?? window.innerHeight;
     const padding = 100; // Leave some padding around the frame
 
     // Calculate zoom to fit frame with padding
@@ -145,7 +149,6 @@ export default function CanvasContainerNew({
     setZoom(newZoom);
     setPanOffset({ x: centerX, y: centerY });
   };
-
   const fitDebounceRef = useRef<number | null>(null);
 
   // Fit frame to view only when selection changes, not on every frame update
@@ -2103,6 +2106,7 @@ export default function CanvasContainerNew({
 
       {/* Canvas Area */}
       <div 
+        ref={canvasAreaRef}
         className="flex-1 overflow-hidden relative"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
