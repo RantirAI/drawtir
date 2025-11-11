@@ -488,8 +488,40 @@ export default function CanvasContainerNew({
     toast.success("Nested frame added!");
   };
 
+  // Helper function to find a frame (top-level or nested)
+  const findFrame = (frameId: string): { frame: Frame | null, parentId: string | null } => {
+    // Check top-level frames
+    const topFrame = frames.find(f => f.id === frameId);
+    if (topFrame) return { frame: topFrame, parentId: null };
+    
+    // Check nested frames
+    for (const parentFrame of frames) {
+      const nestedFrame = parentFrame.frames?.find(nf => nf.id === frameId);
+      if (nestedFrame) return { frame: nestedFrame, parentId: parentFrame.id };
+    }
+    
+    return { frame: null, parentId: null };
+  };
+
   const handleFrameUpdate = (id: string, updates: Partial<Frame>) => {
-    setFrames(frames.map((f) => (f.id === id ? { ...f, ...updates } : f)));
+    const { parentId } = findFrame(id);
+    
+    if (parentId) {
+      // Update nested frame
+      setFrames(frames.map((f) => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === id ? { ...nf, ...updates } : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Update top-level frame
+      setFrames(frames.map((f) => (f.id === id ? { ...f, ...updates } : f)));
+    }
   };
 
   const handleImageUpload = () => {
@@ -1422,7 +1454,8 @@ export default function CanvasContainerNew({
       toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === targetFrameId);
+    
+    const { frame, parentId } = findFrame(targetFrameId);
     if (!frame) {
       console.log("❌ Frame not found");
       return;
@@ -1461,14 +1494,32 @@ export default function CanvasContainerNew({
 
     console.log("🔷 Created new shape element:", newElement);
 
-    setFrames(prevFrames => prevFrames.map(f => {
-      if (f.id === targetFrameId) {
-        const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
-        console.log("✅ Updated frame with new element. Total elements:", updatedFrame.elements?.length);
-        return updatedFrame;
-      }
-      return f;
-    }));
+    if (parentId) {
+      // Add to nested frame
+      setFrames(prevFrames => prevFrames.map(f => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === targetFrameId
+                  ? { ...nf, elements: [...(nf.elements || []), newElement] }
+                  : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Add to top-level frame
+      setFrames(prevFrames => prevFrames.map(f => {
+        if (f.id === targetFrameId) {
+          const updatedFrame = { ...f, elements: [...(f.elements || []), newElement] };
+          console.log("✅ Updated frame with new element. Total elements:", updatedFrame.elements?.length);
+          return updatedFrame;
+        }
+        return f;
+      }));
+    }
+    
     setSelectedElementIds([newElement.id]);
     console.log("✅ Selected new element:", newElement.id);
     setShowShapeSettings(true);
@@ -1483,7 +1534,8 @@ export default function CanvasContainerNew({
       toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === targetFrameId);
+    
+    const { frame, parentId } = findFrame(targetFrameId);
     if (!frame) return;
 
     const defaultSize = Math.min(150, Math.floor(frame.width * 0.3));
@@ -1506,12 +1558,30 @@ export default function CanvasContainerNew({
       blendMode: "normal",
     };
 
-    setFrames(prevFrames => prevFrames.map(f => {
-      if (f.id === targetFrameId) {
-        return { ...f, elements: [...(f.elements || []), newElement] };
-      }
-      return f;
-    }));
+    if (parentId) {
+      // Add to nested frame
+      setFrames(prevFrames => prevFrames.map(f => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === targetFrameId
+                  ? { ...nf, elements: [...(nf.elements || []), newElement] }
+                  : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Add to top-level frame
+      setFrames(prevFrames => prevFrames.map(f => {
+        if (f.id === targetFrameId) {
+          return { ...f, elements: [...(f.elements || []), newElement] };
+        }
+        return f;
+      }));
+    }
+    
     setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
@@ -1524,7 +1594,8 @@ export default function CanvasContainerNew({
       toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === targetFrameId);
+    
+    const { frame, parentId } = findFrame(targetFrameId);
     if (!frame) return;
 
     const defaultSize = 80;
@@ -1550,16 +1621,35 @@ export default function CanvasContainerNew({
       blendMode: "normal",
     };
 
-    setFrames(prevFrames => prevFrames.map(f => {
-      if (f.id === targetFrameId) {
-        return { ...f, elements: [...(f.elements || []), newElement] };
-      }
-      return f;
-    }));
+    if (parentId) {
+      // Add to nested frame
+      setFrames(prevFrames => prevFrames.map(f => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === targetFrameId
+                  ? { ...nf, elements: [...(nf.elements || []), newElement] }
+                  : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Add to top-level frame
+      setFrames(prevFrames => prevFrames.map(f => {
+        if (f.id === targetFrameId) {
+          return { ...f, elements: [...(f.elements || []), newElement] };
+        }
+        return f;
+      }));
+    }
+    
     setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
-    toast.success(`Icon added!`);
+    toast.success(`${iconName} icon added!`);
+  };
   };
 
   const handleShaderSelect = (shaderConfig: any) => {
@@ -1613,7 +1703,8 @@ export default function CanvasContainerNew({
       toast.error("Please add a frame first");
       return;
     }
-    const frame = frames.find(f => f.id === targetFrameId);
+    
+    const { frame, parentId } = findFrame(targetFrameId);
     if (!frame) return;
 
     const defaultWidth = 300;
@@ -1644,12 +1735,30 @@ export default function CanvasContainerNew({
       fillOpacity: 0,
     };
 
-    setFrames(prevFrames => prevFrames.map(f => {
-      if (f.id === targetFrameId) {
-        return { ...f, elements: [...(f.elements || []), newElement] };
-      }
-      return f;
-    }));
+    if (parentId) {
+      // Add to nested frame
+      setFrames(prevFrames => prevFrames.map(f => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === targetFrameId
+                  ? { ...nf, elements: [...(nf.elements || []), newElement] }
+                  : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Add to top-level frame
+      setFrames(prevFrames => prevFrames.map(f => {
+        if (f.id === targetFrameId) {
+          return { ...f, elements: [...(f.elements || []), newElement] };
+        }
+        return f;
+      }));
+    }
+    
     setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
@@ -1716,12 +1825,32 @@ export default function CanvasContainerNew({
       blendMode: "normal",
     };
 
-    setFrames(frames.map(f => {
-      if (f.id === selectedFrameId) {
-        return { ...f, elements: [...(f.elements || []), newElement] };
-      }
-      return f;
-    }));
+    const { parentId } = findFrame(selectedFrameId);
+    
+    if (parentId) {
+      // Add to nested frame
+      setFrames(frames.map(f => 
+        f.id === parentId
+          ? {
+              ...f,
+              frames: (f.frames || []).map(nf => 
+                nf.id === selectedFrameId 
+                  ? { ...nf, elements: [...(nf.elements || []), newElement] }
+                  : nf
+              )
+            }
+          : f
+      ));
+    } else {
+      // Add to top-level frame
+      setFrames(frames.map(f => {
+        if (f.id === selectedFrameId) {
+          return { ...f, elements: [...(f.elements || []), newElement] };
+        }
+        return f;
+      }));
+    }
+    
     setSelectedElementIds([newElement.id]);
     setShowShapeSettings(true);
     setActiveTool("select");
@@ -2380,6 +2509,9 @@ export default function CanvasContainerNew({
                           ? { ...f, frames: (f.frames || []).filter(nf => nf.id !== nestedFrame.id) }
                           : f
                       ));
+                      if (selectedFrameId === nestedFrame.id) {
+                        setSelectedFrameId(frame.id);
+                      }
                       toast.success("Nested frame deleted");
                     }}
                     onDuplicate={() => {
@@ -2440,8 +2572,12 @@ export default function CanvasContainerNew({
                         initialWidth={nestedFrame.initialWidth}
                         initialHeight={nestedFrame.initialHeight}
                         enableDynamicScale={nestedFrame.enableDynamicScale}
-                        isSelected={false}
+                        isSelected={nestedFrame.id === selectedFrameId && selectedElementIds.length === 0}
                         isLocked={nestedFrame.isLocked}
+                        showGrid={showGrid}
+                        gridSize={gridSize}
+                        gridStyle={gridStyle}
+                        snapToGrid={snapToGrid}
                         zoom={zoom}
                         panOffset={panOffset}
                         onUpdate={(id, updates) => {
@@ -2457,47 +2593,16 @@ export default function CanvasContainerNew({
                           ));
                         }}
                         onSelect={() => {
-                          // When selecting a nested frame, treat it like selecting a frame
-                          // Show frame-level properties by clearing element selection
+                          setSelectedFrameId(nestedFrame.id);
                           setSelectedElementIds([]);
                           setShowShapeSettings(true);
-                          toast.info(`Selected nested frame: ${nestedFrame.name}`);
                         }}
                       >
                         {/* Elements inside nested frame */}
                         {(nestedFrame.elements || []).map((element) => (
-                          <ResizableElement
+                          <CanvasContextMenu
                             key={element.id}
-                            id={element.id}
-                            type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "qrcode" ? "shape" : element.type}
-                            x={element.x}
-                            y={element.y}
-                            width={element.width}
-                            height={element.height}
-                            sizeUnit={element.sizeUnit}
-                            frameWidth={nestedFrame.width}
-                            frameHeight={nestedFrame.height}
-                            text={element.text}
-                            shapeType={element.shapeType}
-                            fill={element.fill}
-                            stroke={element.stroke}
-                            strokeWidth={element.strokeWidth}
-                            opacity={element.opacity}
-                            cornerRadius={element.cornerRadius}
-                            fontSize={element.fontSize}
-                            fontFamily={element.fontFamily}
-                             fontWeight={element.fontWeight}
-                             iconName={element.iconName}
-                             iconFamily={element.iconFamily}
-                             iconStrokeWidth={element.iconStrokeWidth}
-                              shader={element.shader}
-                             animations={element.animations}
-                             useFlexLayout={false}
-                             isLocked={element.isLocked}
-                             isSelected={false}
-                             zoom={zoom}
-                             isPlaying={isPlayingAnimation}
-                             onUpdate={(id, updates) => {
+                            onDelete={() => {
                               setFrames(frames.map(f => 
                                 f.id === frame.id 
                                   ? {
@@ -2506,9 +2611,52 @@ export default function CanvasContainerNew({
                                         nf.id === nestedFrame.id
                                           ? {
                                               ...nf,
-                                              elements: (nf.elements || []).map(el =>
-                                                el.id === id ? { ...el, ...updates } : el
-                                              )
+                                              elements: (nf.elements || []).filter(el => el.id !== element.id)
+                                            }
+                                          : nf
+                                      )
+                                    }
+                                  : f
+                              ));
+                              toast.success("Element deleted");
+                            }}
+                            onDuplicate={() => {
+                              const duplicated = { ...element, id: crypto.randomUUID(), x: element.x + 20, y: element.y + 20 };
+                              setFrames(frames.map(f => 
+                                f.id === frame.id 
+                                  ? {
+                                      ...f,
+                                      frames: (f.frames || []).map(nf =>
+                                        nf.id === nestedFrame.id
+                                          ? {
+                                              ...nf,
+                                              elements: [...(nf.elements || []), duplicated]
+                                            }
+                                          : nf
+                                      )
+                                    }
+                                  : f
+                              ));
+                              toast.success("Element duplicated");
+                            }}
+                            onBringToFront={() => {
+                              setFrames(frames.map(f => 
+                                f.id === frame.id 
+                                  ? {
+                                      ...f,
+                                      frames: (f.frames || []).map(nf =>
+                                        nf.id === nestedFrame.id
+                                          ? {
+                                              ...nf,
+                                              elements: (() => {
+                                                const els = [...(nf.elements || [])];
+                                                const idx = els.findIndex(e => e.id === element.id);
+                                                if (idx !== -1) {
+                                                  const [el] = els.splice(idx, 1);
+                                                  els.push(el);
+                                                }
+                                                return els;
+                                              })()
                                             }
                                           : nf
                                       )
@@ -2516,10 +2664,175 @@ export default function CanvasContainerNew({
                                   : f
                               ));
                             }}
-                            onSelect={() => {}}
-                            onDelete={() => {}}
-                            onDuplicate={() => {}}
-                          />
+                            onSendToBack={() => {
+                              setFrames(frames.map(f => 
+                                f.id === frame.id 
+                                  ? {
+                                      ...f,
+                                      frames: (f.frames || []).map(nf =>
+                                        nf.id === nestedFrame.id
+                                          ? {
+                                              ...nf,
+                                              elements: (() => {
+                                                const els = [...(nf.elements || [])];
+                                                const idx = els.findIndex(e => e.id === element.id);
+                                                if (idx !== -1) {
+                                                  const [el] = els.splice(idx, 1);
+                                                  els.unshift(el);
+                                                }
+                                                return els;
+                                              })()
+                                            }
+                                          : nf
+                                      )
+                                    }
+                                  : f
+                              ));
+                            }}
+                            onEditFill={() => {
+                              setSelectedFrameId(nestedFrame.id);
+                              setSelectedElementIds([element.id]);
+                              setShowShapeSettings(true);
+                            }}
+                          >
+                            <ResizableElement
+                              id={element.id}
+                              type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "qrcode" ? "shape" : element.type}
+                              x={element.x}
+                              y={element.y}
+                              width={element.width}
+                              height={element.height}
+                              sizeUnit={element.sizeUnit}
+                              frameWidth={nestedFrame.width}
+                              frameHeight={nestedFrame.height}
+                              src={element.imageUrl}
+                              text={element.text}
+                              shapeType={element.shapeType}
+                              fill={element.fill}
+                              stroke={element.stroke}
+                              strokeWidth={element.strokeWidth}
+                              strokeOpacity={element.strokeOpacity}
+                              strokePosition={element.strokePosition}
+                              fillOpacity={element.fillOpacity}
+                              opacity={element.opacity}
+                              blendMode={element.blendMode}
+                              cornerRadius={element.cornerRadius}
+                              brightness={element.brightness}
+                              contrast={element.contrast}
+                              saturation={element.saturation}
+                              blur={element.blur}
+                              imageFit={element.imageFit}
+                              fontSize={element.fontSize}
+                              fontFamily={element.fontFamily}
+                              fontWeight={element.fontWeight}
+                              textAlign={element.textAlign}
+                              color={element.color}
+                              fillType={element.fillType}
+                              fillImage={element.fillImage}
+                              fillImageFit={element.fillImageFit}
+                              gradientType={element.gradientType}
+                              gradientAngle={element.gradientAngle}
+                              gradientStops={element.gradientStops}
+                              patternFrameId={element.patternFrameId}
+                              videoUrl={element.videoUrl}
+                              iconName={element.iconName}
+                              iconFamily={element.iconFamily}
+                              iconStrokeWidth={element.iconStrokeWidth}
+                              shader={element.shader}
+                              lineStyle={element.lineStyle}
+                              lineCap={element.lineCap}
+                              lineJoin={element.lineJoin}
+                              dashArray={element.dashArray}
+                              controlPoints={element.controlPoints}
+                              rotation={element.rotation}
+                              animations={element.animations}
+                              useFlexLayout={false}
+                              isLocked={element.isLocked}
+                              isSelected={selectedFrameId === nestedFrame.id && selectedElementIds.includes(element.id)}
+                              zoom={zoom}
+                              currentTime={currentTime}
+                              isPlaying={isPlayingAnimation}
+                              snapToGrid={snapToGrid}
+                              gridSize={gridSize}
+                              qrValue={element.qrValue}
+                              qrFgColor={element.qrFgColor}
+                              qrBgColor={element.qrBgColor}
+                              qrLevel={element.qrLevel}
+                              interactivity={element.interactivity}
+                              readOnly={readOnly}
+                              onUpdate={(id, updates) => {
+                                setFrames(frames.map(f => 
+                                  f.id === frame.id 
+                                    ? {
+                                        ...f,
+                                        frames: (f.frames || []).map(nf =>
+                                          nf.id === nestedFrame.id
+                                            ? {
+                                                ...nf,
+                                                elements: (nf.elements || []).map(el =>
+                                                  el.id === id ? { ...el, ...updates } : el
+                                                )
+                                              }
+                                            : nf
+                                        )
+                                      }
+                                    : f
+                                ));
+                              }}
+                              onSelect={(e) => {
+                                setSelectedFrameId(nestedFrame.id);
+                                if (e?.shiftKey || e?.ctrlKey || e?.metaKey) {
+                                  setSelectedElementIds(prev => 
+                                    prev.includes(element.id) 
+                                      ? prev.filter(id => id !== element.id)
+                                      : [...prev, element.id]
+                                  );
+                                } else {
+                                  setSelectedElementIds([element.id]);
+                                }
+                                setShowShapeSettings(true);
+                              }}
+                              onDelete={() => {
+                                setFrames(frames.map(f => 
+                                  f.id === frame.id 
+                                    ? {
+                                        ...f,
+                                        frames: (f.frames || []).map(nf =>
+                                          nf.id === nestedFrame.id
+                                            ? {
+                                                ...nf,
+                                                elements: (nf.elements || []).filter(el => el.id !== element.id)
+                                              }
+                                            : nf
+                                        )
+                                      }
+                                    : f
+                                ));
+                                toast.success("Element deleted");
+                              }}
+                              onDuplicate={() => {
+                                const duplicated = { ...element, id: crypto.randomUUID(), x: element.x + 20, y: element.y + 20 };
+                                setFrames(frames.map(f => 
+                                  f.id === frame.id 
+                                    ? {
+                                        ...f,
+                                        frames: (f.frames || []).map(nf =>
+                                          nf.id === nestedFrame.id
+                                            ? {
+                                                ...nf,
+                                                elements: [...(nf.elements || []), duplicated]
+                                              }
+                                            : nf
+                                        )
+                                      }
+                                    : f
+                                ));
+                                toast.success("Element duplicated");
+                              }}
+                              globalAnimationTrigger={animationGlobalKey as any}
+                              onElementInteraction={() => onElementInteraction?.(element)}
+                            />
+                          </CanvasContextMenu>
                         ))}
                       </ResizableFrame>
                     </div>
