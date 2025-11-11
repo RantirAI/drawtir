@@ -879,12 +879,12 @@ export default function ResizableElement({
       {...rest}
       ref={containerRef}
       key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
-      className={`resizable-element-root ${useFlexLayout ? 'relative' : 'absolute'} ${
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${
         type === 'shape' && shapeType === 'line' ? '' : readOnly && interactivity?.enabled ? 'cursor-pointer' : 'cursor-move'
       } ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-primary' : ''} ${animationClasses} ${
         interactivity?.enabled && !readOnly ? 'ring-2 ring-blue-400 ring-offset-2' : ''
       }`}
-      style={{
+      style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
         width, 

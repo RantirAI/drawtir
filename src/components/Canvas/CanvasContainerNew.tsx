@@ -119,13 +119,6 @@ export default function CanvasContainerNew({
   const [panOffset, setPanOffset] = useState(calculateCenterOffset());
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  
-  // Reset panStart when panning mode is disabled
-  useEffect(() => {
-    if (!isPanning) {
-      setPanStart({ x: 0, y: 0 });
-    }
-  }, [isPanning]);
   const [showGrid, setShowGrid] = useState(false);
   const [gridSize, setGridSize] = useState(20);
   const [gridStyle, setGridStyle] = useState<"lines" | "dots">("lines");
@@ -2110,33 +2103,23 @@ export default function CanvasContainerNew({
 
       {/* Canvas Area */}
       <div 
-        className="flex-1 relative overflow-visible canvas-background"
+        className="flex-1 overflow-hidden relative"
         onMouseDown={(e) => {
-          // Only start panning if clicking directly on canvas background (not on frames or elements)
-          const target = e.target as HTMLElement;
-          const isClickOnBackground = target.classList.contains('canvas-background');
-          const isClickOnFrame = target.closest('.frame-root');
-          const isClickOnElement = target.closest('.resizable-element-root');
-          
-          if (isPanning && e.button === 0 && activeTool !== 'pen' && isClickOnBackground && !isClickOnFrame && !isClickOnElement) {
+          if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
           }
         }}
         onMouseMove={(e) => {
-          if (isPanning && e.buttons === 1 && activeTool !== 'pen' && panStart.x !== 0) {
+          if (isPanning && e.buttons === 1 && activeTool !== 'pen') {
             setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
           }
         }}
-        onMouseUp={() => {
-          // Reset pan start on mouse up to prevent stale coordinates
-          setPanStart({ x: 0, y: 0 });
+        style={{
+          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+          transformOrigin: 'center',
+          transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+          cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
         }}
-          style={{
-            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
-            transformOrigin: '0 0',
-            transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-            cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
-          }}
       >
         {frames.map((frame) => (
           <div key={frame.id}>
