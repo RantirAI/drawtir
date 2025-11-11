@@ -79,18 +79,18 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-primary border-primary/20 shadow-[0_20px_40px_rgba(59,130,246,0.3),0_10px_20px_rgba(0,0,0,0.5)]">
-        <DialogHeader className="space-y-1">
+      <DialogContent className="sm:max-w-md bg-[#0A0A0B] border-white/10 p-5">
+        <DialogHeader className="space-y-0.5">
           <DialogTitle className="text-white text-base">
             {isLogin ? "Login" : "Sign Up"}
           </DialogTitle>
-          <DialogDescription className="text-white/70 text-xs">
+          <DialogDescription className="text-white/60 text-xs">
             {isLogin
               ? "Welcome back! Please login to your account."
               : "Create a new account to get started."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2.5 mt-3">
           <div className="space-y-1">
             <Label htmlFor="email" className="text-white/80 text-xs">Email</Label>
             <Input
@@ -118,7 +118,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-primary hover:bg-white/90 text-sm h-9"
+            className="w-full bg-primary text-white hover:bg-primary/90 text-sm h-9 shadow-[0_8px_16px_rgba(59,130,246,0.4),0_4px_8px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_24px_rgba(59,130,246,0.5),0_6px_12px_rgba(59,130,246,0.4)] transition-all duration-200"
           >
             {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
           </Button>
