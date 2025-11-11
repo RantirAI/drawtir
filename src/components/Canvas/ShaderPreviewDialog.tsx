@@ -17,9 +17,10 @@ import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shader
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
+import { Vortex } from "@/components/ui/vortex";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex";
   name: string;
   description: string;
   defaultProps: {
@@ -50,6 +51,12 @@ interface ShaderConfig {
     bumpStrength?: number;
     hatchIntensity?: number;
     lightMovement?: number;
+    particleCount?: number;
+    rangeY?: number;
+    baseHue?: number;
+    rangeSpeed?: number;
+    baseRadius?: number;
+    rangeRadius?: number;
   };
 }
 
@@ -143,6 +150,18 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           bumpStrength={(props as any).bumpStrength || 1.0}
           hatchIntensity={(props as any).hatchIntensity || 1.0}
           lightMovement={(props as any).lightMovement || 1.0}
+          className="h-full w-full"
+        />;
+      case "vortex":
+        return <Vortex 
+          particleCount={(props as any).particleCount || 700}
+          rangeY={(props as any).rangeY || 100}
+          baseHue={(props as any).baseHue || 220}
+          baseSpeed={props.speed * 0.5 || 0.5}
+          rangeSpeed={(props as any).rangeSpeed || 1.5}
+          baseRadius={(props as any).baseRadius || 1}
+          rangeRadius={(props as any).rangeRadius || 2}
+          backgroundColor="transparent"
           className="h-full w-full"
         />;
       default:

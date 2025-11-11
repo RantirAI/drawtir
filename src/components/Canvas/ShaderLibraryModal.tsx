@@ -16,9 +16,10 @@ import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shader
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
+import { Vortex } from "@/components/ui/vortex";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex";
   name: string;
   description: string;
   defaultProps: {
@@ -49,6 +50,12 @@ interface ShaderOption {
     bumpStrength?: number;
     hatchIntensity?: number;
     lightMovement?: number;
+    particleCount?: number;
+    rangeY?: number;
+    baseHue?: number;
+    rangeSpeed?: number;
+    baseRadius?: number;
+    rangeRadius?: number;
   };
 }
 
@@ -185,6 +192,22 @@ const SHADER_OPTIONS: ShaderOption[] = [
       hatchIntensity: 1.0,
       lightMovement: 1.0
     }
+  },
+  {
+    type: "vortex",
+    name: "Vortex",
+    description: "Particle-based vortex effect with noise-driven flow and glowing trails",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0],
+      particleCount: 700,
+      rangeY: 100,
+      baseHue: 220,
+      rangeSpeed: 1.5,
+      baseRadius: 1,
+      rangeRadius: 2
+    }
   }
 ];
 
@@ -229,6 +252,8 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <Fire3DShaders {...commonProps} />;
       case "pyramid-pattern":
         return <PyramidPatternShaders {...commonProps} />;
+      case "vortex":
+        return <Vortex {...commonProps} particleCount={200} />;
       default:
         return null;
     }

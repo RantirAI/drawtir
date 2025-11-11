@@ -55,6 +55,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="mobius-spiral">Mobius Spiral</SelectItem>
             <SelectItem value="fire-3d">Fire 3D</SelectItem>
             <SelectItem value="pyramid-pattern">Pyramid Pattern</SelectItem>
+            <SelectItem value="vortex">Vortex</SelectItem>
           </SelectContent>
         </Select>
       </div>

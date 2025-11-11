@@ -11,6 +11,7 @@ import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shader
 import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
+import { Vortex } from "@/components/ui/vortex";
 import type { Element } from "@/types/elements";
 
 interface ShadcnShaderElementProps {
@@ -48,7 +49,13 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     offsetRows = 1,
     bumpStrength = 1.0,
     hatchIntensity = 1.0,
-    lightMovement = 1.0
+    lightMovement = 1.0,
+    particleCount = 700,
+    rangeY = 100,
+    baseHue = 220,
+    rangeSpeed = 1.5,
+    baseRadius = 1,
+    rangeRadius = 2
   } = element.shader;
 
   const shaderProps = {
@@ -116,6 +123,18 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     className: "h-full w-full"
   };
 
+  const vortexProps = {
+    particleCount,
+    rangeY,
+    baseHue,
+    baseSpeed: speed * 0.5,
+    rangeSpeed,
+    baseRadius,
+    rangeRadius,
+    backgroundColor: "transparent",
+    className: "h-full w-full"
+  };
+
   switch (type) {
     case "kaleidoscope":
       return <Kaleidoscope {...shaderProps} />;
@@ -141,6 +160,8 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
       return <Fire3DShaders {...fire3DProps} />;
     case "pyramid-pattern":
       return <PyramidPatternShaders {...pyramidPatternProps} />;
+    case "vortex":
+      return <Vortex {...vortexProps} />;
     default:
       return null;
   }
