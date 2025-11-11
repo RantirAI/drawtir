@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -9,9 +9,29 @@ export default function DrawtirFooter() {
   const [showLicense, setShowLicense] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
 
+  const footerRef = useRef<HTMLDivElement>(null);
+  const [footerSize, setFooterSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const el = footerRef.current;
+    if (!el) return;
+    const update = () => setFooterSize({ width: el.offsetWidth, height: el.offsetHeight });
+    update();
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
+
+  const bottomOffset = footerSize.height + 8; // 8px gap above footer
+  const rightOffset = 16; // match right-4 spacing
+
   return (
     <>
-      <div className="fixed bottom-2 right-4 z-30 flex items-center gap-3 bg-background/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-xs">
+      <div ref={footerRef} className="fixed bottom-2 right-4 z-30 flex items-center gap-3 bg-background/80 backdrop-blur-sm border border-border rounded-lg px-3 py-2 text-xs">
         {/* Drawtir Logo */}
         <svg width="67" height="14.5" viewBox="0 0 134 29" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-80">
           <path d="M0 25.3158V16.8596C0 14.4035 3.41632 14.4035 4.63643 14.7719C7.30206 15.7896 7.9826 19.0609 8.13875 21.6454C8.39888 18.8079 9.7967 16.8476 10.615 16.1228C12.5561 14.4035 15.8208 14.4444 17.6916 14.4035C15.7395 14.4035 12.5672 13.7045 11.3471 12.807C8.53743 10.7404 8.15241 7.58209 8.15761 5.46496C8.01196 8.69057 6.97258 10.927 6.36842 11.6491C4.58861 14.0105 1.91462 13.9158 0.611804 13.6144C0.229751 13.526 0 13.1693 0 12.7771V3C0 2.44772 0.447715 2 0.999999 2H10.615C19.107 2.29474 21.718 9.73684 21.962 13.4211C22.5477 22.2632 16.2275 26.3158 11.9571 26.3158H1C0.447715 26.3158 0 25.8681 0 25.3158Z" fill={isDark ? "#ffffff" : "#141526"} />
@@ -61,7 +81,7 @@ export default function DrawtirFooter() {
 
       {/* License Modal */}
       <Dialog open={showLicense} onOpenChange={setShowLicense}>
-        <DialogContent className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1200px] p-3 m-0">
+          <DialogContent className="fixed top-auto left-auto translate-x-0 translate-y-0 p-3 m-0 right-4" style={{ bottom: bottomOffset, right: rightOffset, width: footerSize.width || undefined }}>
           <DialogHeader className="pb-2">
             <DialogTitle className="text-sm">License</DialogTitle>
           </DialogHeader>
@@ -101,7 +121,7 @@ export default function DrawtirFooter() {
 
       {/* Roadmap Modal */}
       <Dialog open={showRoadmap} onOpenChange={setShowRoadmap}>
-        <DialogContent className="fixed bottom-20 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1200px] p-3 m-0">
+        <DialogContent className="fixed p-3 m-0 right-4" style={{ bottom: bottomOffset, right: rightOffset, width: footerSize.width || undefined }}>
           <DialogHeader className="pb-2">
             <DialogTitle className="text-sm">Roadmap</DialogTitle>
           </DialogHeader>
