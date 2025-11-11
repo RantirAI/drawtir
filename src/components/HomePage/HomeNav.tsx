@@ -7,7 +7,7 @@ interface HomeNavProps {
 
 export default function HomeNav({ onOpenAuth }: HomeNavProps) {
   return (
-    <nav className="bg-transparent absolute top-0 left-0 right-0 z-50 border-b border-white/5">
+    <nav className="bg-transparent fixed top-[32px] left-0 right-0 z-40 border-b border-white/5">
       <div className="container mx-auto px-6 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">

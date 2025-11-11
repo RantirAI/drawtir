@@ -10,10 +10,11 @@ import AnnounceBanner from "@/components/HomePage/AnnounceBanner";
 import HomeNav from "@/components/HomePage/HomeNav";
 import AuthModal from "@/components/HomePage/AuthModal";
 import DraggablePanel from "@/components/HomePage/DraggablePanel";
-import canvasBg from "@/assets/canvas-background.svg";
-import panel1 from "@/assets/panel-1.svg";
-import panel2 from "@/assets/panel-2.svg";
-import panel3 from "@/assets/panel-3.svg";
+import DrawtirFooter from "@/components/Footer/DrawtirFooter";
+import homeBackground from "@/assets/home-background.svg";
+import panel1 from "@/assets/panel-1-home.svg";
+import panel2 from "@/assets/panel-2-home.svg";
+import panel3 from "@/assets/panel-3-home.svg";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -90,11 +91,11 @@ const Index = () => {
   // If not authenticated, show homepage with login modal
   if (!session) {
   return (
-    <div className="min-h-screen bg-[#0A0A0B] dark">
+    <div className="min-h-screen bg-[#0A0A0B] dark relative">
       <AnnounceBanner />
       <HomeNav onOpenAuth={() => setAuthModalOpen(true)} />
       
-      <div className="relative min-h-[calc(100vh-120px)] overflow-hidden pt-20">
+      <div className="relative min-h-[calc(100vh-60px)] overflow-hidden flex items-center justify-center" style={{ paddingTop: '80px' }}>
         {/* Gradient Background */}
         <div 
           className="absolute inset-0"
@@ -103,53 +104,104 @@ const Index = () => {
           }}
         />
 
-        {/* Bento Grid Container - Centered */}
-        <div className="relative container mx-auto px-8 py-16 h-full flex items-center justify-center">
-          <div className="w-full max-w-[720px] space-y-6">
-            {/* Row 1: Three cards with images */}
-            <div className="grid grid-cols-3 gap-4">
-              {/* Card 1 */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg mb-4"></div>
-                <h3 className="text-sm font-semibold text-white mb-2">Vibe design</h3>
-                <p className="text-xs text-white/60">Tell Drawtir what you want to create and watch the AI work its magic.</p>
-              </div>
+        {/* Background Frame */}
+        <div className="absolute" style={{ 
+          width: '1317px', 
+          height: '824px',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)'
+        }}>
+          <img src={homeBackground} alt="" className="w-full h-full opacity-20" />
+        </div>
 
-              {/* Card 2 */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mb-4"></div>
-                <h3 className="text-sm font-semibold text-white mb-2">Edit visually</h3>
-                <p className="text-xs text-white/60">Adjust colors, layouts and styles with manual edit or with the style editor.</p>
-              </div>
-
-              {/* Card 3 */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-6 flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg mb-4"></div>
-                <h3 className="text-sm font-semibold text-white mb-2">Brand Guide</h3>
-                <p className="text-xs text-white/60">Create beautiful UIs, bring your own design systems and components.</p>
+        {/* Blue Frame Container with Editable Title */}
+        <DraggablePanel
+          initialX={typeof window !== 'undefined' ? (window.innerWidth - 800) / 2 : 200}
+          initialY={typeof window !== 'undefined' ? (window.innerHeight - 600) / 2 : 100}
+          zIndex={20}
+        >
+          <div style={{
+            width: '800px',
+            height: '600px',
+            border: '2px solid #3B82F6',
+            borderRadius: '8px',
+            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+            position: 'relative'
+          }}>
+            {/* Frame Title */}
+            <div className="absolute -top-6 left-0 right-0 flex justify-center pointer-events-none">
+              <div className="text-white text-sm font-medium bg-[#0A0A0B] px-3 py-1 rounded">
+                Frame 1
               </div>
             </div>
 
-            {/* Row 2: Two larger cards */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Large Card 1 */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-8">
-                <h3 className="text-lg font-semibold text-white mb-3">Open source & free</h3>
-                <p className="text-sm text-white/60">Work together, share projects, and build with your team seamlessly or fork and host it yourself with your own AI API keys.</p>
-              </div>
+            {/* Bento Grid Content */}
+            <div className="w-full h-full p-12 flex items-center justify-center pointer-events-none">
+              <div className="w-full max-w-[600px] space-y-4">
+                {/* Row 1: Three cards */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg mb-3"></div>
+                    <h3 className="text-xs font-semibold text-white mb-1">Vibe design</h3>
+                    <p className="text-[10px] text-white/60">Tell Drawtir what you want to create.</p>
+                  </div>
 
-              {/* Large Card 2 */}
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-8">
-                <h3 className="text-lg font-semibold text-white mb-3">Export & Embed</h3>
-                <p className="text-sm text-white/60">Get production-ready code design editor built around your own Figma, Canvas or Web Assets to finetune your Drawtir SDK experience.</p>
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mb-3"></div>
+                    <h3 className="text-xs font-semibold text-white mb-1">Edit visually</h3>
+                    <p className="text-[10px] text-white/60">Adjust colors and layouts.</p>
+                  </div>
+
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-4 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-lg mb-3"></div>
+                    <h3 className="text-xs font-semibold text-white mb-1">Brand Guide</h3>
+                    <p className="text-[10px] text-white/60">Bring your design systems.</p>
+                  </div>
+                </div>
+
+                {/* Row 2: Two larger cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-5">
+                    <h3 className="text-sm font-semibold text-white mb-2">Open source</h3>
+                    <p className="text-[10px] text-white/60">Work together and build seamlessly.</p>
+                  </div>
+
+                  <div className="bg-white/5 backdrop-blur-sm rounded-lg border border-white/10 p-5">
+                    <h3 className="text-sm font-semibold text-white mb-2">Export & Embed</h3>
+                    <p className="text-[10px] text-white/60">Get production-ready code.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </DraggablePanel>
 
-        {/* Remove draggable panels - they're not needed anymore */}
+        {/* Draggable Panels */}
+        <DraggablePanel
+          initialX={100}
+          initialY={200}
+          zIndex={30}
+        >
+          <img src={panel1} alt="Panel 1" className="pointer-events-none" style={{ width: '213px', height: '631px' }} />
+        </DraggablePanel>
+        <DraggablePanel
+          initialX={typeof window !== 'undefined' ? window.innerWidth - 350 : 1000}
+          initialY={200}
+          zIndex={30}
+        >
+          <img src={panel2} alt="Panel 2" className="pointer-events-none" style={{ width: '233px', height: '126px' }} />
+        </DraggablePanel>
+        <DraggablePanel
+          initialX={typeof window !== 'undefined' ? window.innerWidth - 400 : 1000}
+          initialY={typeof window !== 'undefined' ? window.innerHeight - 600 : 400}
+          zIndex={30}
+        >
+          <img src={panel3} alt="Panel 3" className="pointer-events-none" style={{ width: '305px', height: '542px' }} />
+        </DraggablePanel>
       </div>
 
+      <DrawtirFooter />
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
     );
