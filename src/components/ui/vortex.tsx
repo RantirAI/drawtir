@@ -245,7 +245,7 @@ export const Vortex = (props: VortexProps) => {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, []);
+  }, [props.particleCount, props.baseHue, props.baseSpeed, props.rangeSpeed, props.baseRadius, props.rangeRadius, props.rangeY, props.backgroundColor]);
 
   return (
     <div className={cn("relative h-full w-full", props.containerClassName)}>
