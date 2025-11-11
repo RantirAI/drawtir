@@ -8,6 +8,7 @@ import { X, Grid3x3, Square, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Frame, Element } from "@/types/elements";
 import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 import { InfoModal } from "./InfoModal";
+import { ShadcnShaderElement } from "./ShadcnShaderElement";
 
 interface PreviewDialogProps {
   open: boolean;
@@ -209,38 +210,12 @@ export default function PreviewDialog({
                         : "0",
                     }}
                   />
-                ) : element.type === "shape" ? (
-                  <div
-                    className="w-full h-full"
-                    style={{
-                      backgroundColor: fillWithOpacity,
-                      borderRadius:
-                        element.shapeType === "ellipse"
-                          ? "50%"
-                          : element.cornerRadius
-                          ? `${element.cornerRadius}px`
-                          : "0",
-                    }}
-                  />
                 ) : element.type === "shader" && element.shader ? (
                   <div className="w-full h-full">
-                    {element.shader.type === "kaleidoscope" && (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 animate-pulse" />
-                    )}
-                    {element.shader.type === "plasma" && (
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500" style={{ animation: "pulse 3s ease-in-out infinite" }} />
-                    )}
-                    {element.shader.type === "nebula" && (
-                      <div className="w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-black" style={{ animation: "pulse 4s ease-in-out infinite" }} />
-                    )}
-                    {element.shader.type === "aurora" && (
-                      <div className="w-full h-full bg-gradient-to-t from-green-400 via-blue-400 to-purple-500" style={{ animation: "pulse 5s ease-in-out infinite" }} />
-                    )}
-                    {element.shader.type === "vortex" && (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 animate-spin" style={{ animationDuration: "20s" }} />
-                    )}
-                    {!["kaleidoscope", "plasma", "nebula", "aurora", "vortex"].includes(element.shader.type) && (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 animate-pulse" />
+                    {isGridView ? (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
+                    ) : (
+                      <ShadcnShaderElement element={element} />
                     )}
                   </div>
                 ) : null}
