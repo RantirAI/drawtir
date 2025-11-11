@@ -240,14 +240,14 @@ export default {
         },
         "meteor-effect": {
           "0%": {
-            transform: "rotate(45deg) translateX(0)",
+            transform: "rotate(215deg) translateX(0) translateY(0)",
             opacity: "1",
           },
           "70%": {
             opacity: "1",
           },
           "100%": {
-            transform: "rotate(45deg) translateX(-500px)",
+            transform: "rotate(215deg) translateX(-500px) translateY(500px)",
             opacity: "0",
           },
         },
