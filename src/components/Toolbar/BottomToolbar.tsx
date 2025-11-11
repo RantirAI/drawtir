@@ -14,7 +14,6 @@ interface BottomToolbarProps {
   onToolChange?: (tool: string) => void;
   onImageUpload: () => void;
   onAddFrame: () => void;
-  onAddNestedFrame?: () => void;
   onDuplicate?: () => void;
   onDelete?: () => void;
   onShapeSelect?: (shapeType: string) => void;
@@ -32,7 +31,6 @@ export default function BottomToolbar({
   onToolChange,
   onImageUpload, 
   onAddFrame,
-  onAddNestedFrame,
   onDuplicate,
   onDelete,
   onShapeSelect,
@@ -224,15 +222,6 @@ export default function BottomToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Frame</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(147,51,234,0.4)] hover:bg-purple-500 hover:text-white group" onClick={onAddNestedFrame}>
-                <Square size={16} className="transition-transform duration-300 group-hover:scale-90" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Add Nested Frame</TooltipContent>
           </Tooltip>
 
           <Tooltip>

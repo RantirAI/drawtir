@@ -2243,6 +2243,7 @@ export default function CanvasContainerNew({
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
               onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
+              onAddNestedFrame={() => handleAddNestedFrame(frame.id)}
               onBringToFront={() => handleArrange('toFront', [], frame.id)}
               onSendToBack={() => handleArrange('toBack', [], frame.id)}
               onBringForward={() => handleArrange('forward', [], frame.id)}
@@ -2412,7 +2413,8 @@ export default function CanvasContainerNew({
                           onElementInteraction={() => onElementInteraction?.(element)}
                        />
                     </CanvasContextMenu>
-                )})}
+                  );
+                })}
                 
                 {/* Nested frames inside parent frame */}
                 {(frame.frames || []).map((nestedFrame) => (

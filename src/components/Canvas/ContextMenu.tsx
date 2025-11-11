@@ -16,6 +16,7 @@ interface CanvasContextMenuProps {
   onRegenerate?: () => void;
   onGroup?: () => void;
   onWrapInFrame?: () => void;
+  onAddNestedFrame?: () => void;
   onBringToFront?: () => void;
   onSendToBack?: () => void;
   onBringForward?: () => void;
@@ -38,6 +39,7 @@ export default function CanvasContextMenu({
   onRegenerate,
   onGroup,
   onWrapInFrame,
+  onAddNestedFrame,
   onBringToFront,
   onSendToBack,
   onBringForward,
@@ -181,6 +183,12 @@ export default function CanvasContextMenu({
           <ContextMenuItem onClick={onWrapInFrame} className="text-xs">
             <Box className="h-3 w-3 mr-2" />
             Wrap in Frame
+          </ContextMenuItem>
+        )}
+        {onAddNestedFrame && (
+          <ContextMenuItem onClick={onAddNestedFrame} className="text-xs">
+            <Box className="h-3 w-3 mr-2" />
+            Add Nested Frame
           </ContextMenuItem>
         )}
         {onDelete && (
