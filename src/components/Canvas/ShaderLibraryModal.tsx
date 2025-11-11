@@ -17,9 +17,10 @@ import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 interface ShaderOption {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams";
   name: string;
   description: string;
   defaultProps: {
@@ -208,6 +209,16 @@ const SHADER_OPTIONS: ShaderOption[] = [
       baseRadius: 1,
       rangeRadius: 2
     }
+  },
+  {
+    type: "background-beams",
+    name: "Background Beams",
+    description: "Animated gradient beams with flowing light paths and radial patterns",
+    defaultProps: {
+      speed: 1.0,
+      glowIntensity: 1.0,
+      colorTint: [1.0, 1.0, 1.0]
+    }
   }
 ];
 
@@ -254,6 +265,8 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return <PyramidPatternShaders {...commonProps} />;
       case "vortex":
         return <Vortex {...commonProps} particleCount={200} />;
+      case "background-beams":
+        return <BackgroundBeams {...commonProps} />;
       default:
         return null;
     }

@@ -56,6 +56,7 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
             <SelectItem value="fire-3d">Fire 3D</SelectItem>
             <SelectItem value="pyramid-pattern">Pyramid Pattern</SelectItem>
             <SelectItem value="vortex">Vortex</SelectItem>
+            <SelectItem value="background-beams">Background Beams</SelectItem>
           </SelectContent>
         </Select>
       </div>

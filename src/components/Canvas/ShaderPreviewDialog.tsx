@@ -18,9 +18,10 @@ import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-
 import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
 import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
 import { Vortex } from "@/components/ui/vortex";
+import { BackgroundBeams } from "@/components/ui/background-beams";
 
 interface ShaderConfig {
-  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex";
+  type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams";
   name: string;
   description: string;
   defaultProps: {
@@ -164,6 +165,8 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           backgroundColor="transparent"
           className="h-full w-full"
         />;
+      case "background-beams":
+        return <BackgroundBeams className="h-full w-full" />;
       default:
         return null;
     }

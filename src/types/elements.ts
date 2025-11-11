@@ -86,7 +86,7 @@ export interface Element {
   
   // Shader properties
   shader?: {
-    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex";
+    type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "glitch" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams";
     speed?: number;
     glowIntensity?: number;
     colorTint?: [number, number, number];
