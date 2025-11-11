@@ -129,6 +129,19 @@ interface ResizableElementProps {
   isLocked?: boolean;
   snapToGrid?: boolean;
   gridSize?: number;
+  // Interactivity properties
+  interactivity?: {
+    enabled: boolean;
+    actionType: "link" | "info" | "animation";
+    url?: string;
+    openInNewTab?: boolean;
+    infoTitle?: string;
+    infoContent?: string;
+    triggerAnimations?: boolean;
+  };
+  readOnly?: boolean;
+  onElementInteraction?: () => void;
+  // Callbacks
   onUpdate: (id: string, updates: Partial<Element>) => void;
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
@@ -195,6 +208,9 @@ export default function ResizableElement({
   currentTime,
   snapToGrid = false,
   gridSize = 20,
+  interactivity,
+  readOnly = false,
+  onElementInteraction,
   onUpdate,
   onSelect,
   onDelete,
@@ -473,6 +489,15 @@ export default function ResizableElement({
         e.button === 2 || isLocked) {
       return;
     }
+    
+    // Handle interactivity in readOnly mode
+    if (readOnly && interactivity?.enabled) {
+      e.stopPropagation();
+      onElementInteraction?.();
+      return;
+    }
+    
+    // In editor mode, just select
     e.stopPropagation();
     onSelect(e);
     setIsDragging(true);
@@ -854,7 +879,11 @@ export default function ResizableElement({
       {...rest}
       ref={containerRef}
       key={`${id}-${animationKey}-${(rest as any).globalAnimationTrigger ?? ''}`}
-      className={`${useFlexLayout ? 'relative' : 'absolute'} ${type === 'shape' && shapeType === 'line' ? '' : 'cursor-move'} ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-primary' : ''} ${animationClasses}`}
+      className={`${useFlexLayout ? 'relative' : 'absolute'} ${
+        type === 'shape' && shapeType === 'line' ? '' : readOnly && interactivity?.enabled ? 'cursor-pointer' : 'cursor-move'
+      } ${useFlexLayout ? 'flex-shrink-0' : ''} ${isSelected ? 'ring-1 ring-primary' : ''} ${animationClasses} ${
+        interactivity?.enabled && !readOnly ? 'ring-2 ring-blue-400 ring-offset-2' : ''
+      }`}
       style={{ 
         left: useFlexLayout ? undefined : x,
         top: useFlexLayout ? undefined : y,
@@ -876,6 +905,7 @@ export default function ResizableElement({
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
       onDoubleClick={handleDoubleClick}
+      title={interactivity?.enabled && !readOnly ? 'Interactive element - configure in Interactivity panel' : ''}
     >
       {type === "shader" && shader ? (
         <ShadcnShaderElement element={{ 

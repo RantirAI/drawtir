@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { InfoModal } from "@/components/Canvas/InfoModal";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 
@@ -12,6 +13,9 @@ export default function PublicPoster() {
   const [snapshot, setSnapshot] = useState<CanvasSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [infoModalTitle, setInfoModalTitle] = useState("");
+  const [infoModalContent, setInfoModalContent] = useState("");
 
   useEffect(() => {
     const loadPublicPoster = async () => {
@@ -81,8 +85,25 @@ export default function PublicPoster() {
           initialSnapshot={snapshot} 
           readOnly={true}
           isEmbedded={true}
+          onElementInteraction={(element) => {
+            if (!element.interactivity?.enabled) return;
+            
+            if (element.interactivity.actionType === "link" && element.interactivity.url) {
+              window.open(element.interactivity.url, element.interactivity.openInNewTab ? "_blank" : "_self");
+            } else if (element.interactivity.actionType === "info") {
+              setInfoModalTitle(element.interactivity.infoTitle || "Information");
+              setInfoModalContent(element.interactivity.infoContent || "");
+              setShowInfoModal(true);
+            }
+          }}
         />
       </div>
+      <InfoModal
+        isOpen={showInfoModal}
+        onClose={() => setShowInfoModal(false)}
+        title={infoModalTitle}
+        content={infoModalContent}
+      />
     </div>
   );
 }

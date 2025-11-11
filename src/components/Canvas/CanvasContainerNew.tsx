@@ -28,6 +28,7 @@ import { exportFrames } from "@/lib/exportUtils";
 import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
+import { InteractivityPanel } from "@/components/Panels/InteractivityPanel";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ interface CanvasContainerNewProps {
   onSnapshotChange?: (snapshot: CanvasSnapshot) => void;
   onSaveRequest?: (snapshot: CanvasSnapshot) => void | Promise<void>;
   readOnly?: boolean;
+  onElementInteraction?: (element: Element) => void;
 }
 
 export default function CanvasContainerNew({
@@ -54,6 +56,7 @@ export default function CanvasContainerNew({
   onSnapshotChange,
   onSaveRequest,
   readOnly = false,
+  onElementInteraction,
 }: CanvasContainerNewProps = {}) {
   const [projectTitle, setProjectTitle] = useState(initialSnapshot?.metadata.title || "Untitled Poster");
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -174,6 +177,7 @@ export default function CanvasContainerNew({
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
+  const [showInteractivityPanel, setShowInteractivityPanel] = useState(false);
   const [showShaderLibrary, setShowShaderLibrary] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -2223,76 +2227,79 @@ export default function CanvasContainerNew({
                        setShowAnimationsPanel(true);
                      }}
                     >
-                      <ResizableElement
-                       id={element.id}
-                        type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
-                       x={element.x}
-                       y={element.y}
-                       width={element.width}
-                       height={element.height}
-                       sizeUnit={element.sizeUnit}
-                       frameWidth={frame.width}
-                       frameHeight={frame.height}
-                       src={element.imageUrl}
-                       text={element.text}
-                       shapeType={element.shapeType}
-                       fill={element.fill}
-                       stroke={element.stroke}
-                       pathData={element.pathData}
-                       strokeWidth={element.strokeWidth}
-                       strokeOpacity={element.strokeOpacity}
-                       strokePosition={element.strokePosition}
-                       fillOpacity={element.fillOpacity}
-                       opacity={element.opacity}
-                       blendMode={element.blendMode}
-                       cornerRadius={element.cornerRadius}
-                       brightness={element.brightness}
-                       contrast={element.contrast}
-                       saturation={element.saturation}
-                       blur={element.blur}
-                       imageFit={element.imageFit}
-                       fontSize={element.fontSize}
-                       fontFamily={element.fontFamily}
-                       fontWeight={element.fontWeight}
-                       textAlign={element.textAlign}
-                       color={element.color}
-                       fillType={element.fillType}
-                       fillImage={element.fillImage}
-                       fillImageFit={element.fillImageFit}
-                       gradientType={element.gradientType}
-                       gradientAngle={element.gradientAngle}
-                       gradientStops={element.gradientStops}
-                       patternFrameId={element.patternFrameId}
-                        videoUrl={element.videoUrl}
-                        iconName={element.iconName}
-                        iconFamily={element.iconFamily}
-                        iconStrokeWidth={element.iconStrokeWidth}
-                        shader={element.shader}
-                       lineStyle={element.lineStyle}
-                       lineCap={element.lineCap}
-                       lineJoin={element.lineJoin}
-                       dashArray={element.dashArray}
-                       controlPoints={element.controlPoints}
-                        rotation={element.rotation}
-                        animations={element.animations}
-                        useFlexLayout={false}
-                       isLocked={element.isLocked}
-                       isSelected={selectedElementIds.includes(element.id)}
-                       zoom={zoom}
-                       currentTime={currentTime}
-                        isPlaying={isPlayingAnimation}
-                        onUpdate={handleElementUpdate}
-                        onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
-                        onDelete={() => handleElementDelete(element.id)}
-                        onDuplicate={() => handleElementDuplicate(element.id)}
-                         globalAnimationTrigger={animationGlobalKey as any}
-                         snapToGrid={snapToGrid}
-                         gridSize={gridSize}
-                         qrValue={element.qrValue}
-                         qrFgColor={element.qrFgColor}
-                         qrBgColor={element.qrBgColor}
-                         qrLevel={element.qrLevel}
-                      />
+                       <ResizableElement
+                        id={element.id}
+                         type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
+                        x={element.x}
+                        y={element.y}
+                        width={element.width}
+                        height={element.height}
+                        sizeUnit={element.sizeUnit}
+                        frameWidth={frame.width}
+                        frameHeight={frame.height}
+                        src={element.imageUrl}
+                        text={element.text}
+                        shapeType={element.shapeType}
+                        fill={element.fill}
+                        stroke={element.stroke}
+                        pathData={element.pathData}
+                        strokeWidth={element.strokeWidth}
+                        strokeOpacity={element.strokeOpacity}
+                        strokePosition={element.strokePosition}
+                        fillOpacity={element.fillOpacity}
+                        opacity={element.opacity}
+                        blendMode={element.blendMode}
+                        cornerRadius={element.cornerRadius}
+                        brightness={element.brightness}
+                        contrast={element.contrast}
+                        saturation={element.saturation}
+                        blur={element.blur}
+                        imageFit={element.imageFit}
+                        fontSize={element.fontSize}
+                        fontFamily={element.fontFamily}
+                        fontWeight={element.fontWeight}
+                        textAlign={element.textAlign}
+                        color={element.color}
+                        fillType={element.fillType}
+                        fillImage={element.fillImage}
+                        fillImageFit={element.fillImageFit}
+                        gradientType={element.gradientType}
+                        gradientAngle={element.gradientAngle}
+                        gradientStops={element.gradientStops}
+                        patternFrameId={element.patternFrameId}
+                         videoUrl={element.videoUrl}
+                         iconName={element.iconName}
+                         iconFamily={element.iconFamily}
+                         iconStrokeWidth={element.iconStrokeWidth}
+                         shader={element.shader}
+                        lineStyle={element.lineStyle}
+                        lineCap={element.lineCap}
+                        lineJoin={element.lineJoin}
+                        dashArray={element.dashArray}
+                        controlPoints={element.controlPoints}
+                         rotation={element.rotation}
+                         animations={element.animations}
+                         useFlexLayout={false}
+                        isLocked={element.isLocked}
+                        isSelected={selectedElementIds.includes(element.id)}
+                        zoom={zoom}
+                        currentTime={currentTime}
+                         isPlaying={isPlayingAnimation}
+                         onUpdate={handleElementUpdate}
+                         onSelect={(e) => handleElementSelect(element.id, e?.shiftKey || e?.ctrlKey || e?.metaKey)}
+                         onDelete={() => handleElementDelete(element.id)}
+                         onDuplicate={() => handleElementDuplicate(element.id)}
+                          globalAnimationTrigger={animationGlobalKey as any}
+                          snapToGrid={snapToGrid}
+                          gridSize={gridSize}
+                          qrValue={element.qrValue}
+                          qrFgColor={element.qrFgColor}
+                          qrBgColor={element.qrBgColor}
+                          qrLevel={element.qrLevel}
+                          interactivity={element.interactivity}
+                          readOnly={readOnly}
+                          onElementInteraction={() => onElementInteraction?.(element)}
+                       />
                     </CanvasContextMenu>
                 )})}
                 
@@ -2976,6 +2983,22 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
+          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+            showInteractivityPanel 
+              ? 'bg-primary/20 text-primary shadow-primary/20' 
+              : 'bg-card hover:shadow-md'
+          }`}
+          onClick={() => setShowInteractivityPanel(!showInteractivityPanel)}
+          title="Interactivity"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showInteractivityPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`}>
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           className="h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
@@ -3185,6 +3208,21 @@ export default function CanvasContainerNew({
           }
         }}
       />
+
+      {showInteractivityPanel && (
+        <DraggablePanel
+          title="Interactivity"
+          onClose={() => setShowInteractivityPanel(false)}
+          defaultPosition={{ x: window.innerWidth - 420, y: 100 }}
+        >
+          <InteractivityPanel
+            selectedElements={selectedElementIds
+              .map((id) => selectedFrame?.elements?.find((e) => e.id === id))
+              .filter((e): e is Element => !!e)}
+            onUpdate={handleElementUpdate}
+          />
+        </DraggablePanel>
+      )}
 
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
 

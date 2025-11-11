@@ -154,6 +154,20 @@ export interface Element {
     category: "in" | "out" | "custom";
   }>;
   
+  // Interactivity properties
+  interactivity?: {
+    enabled: boolean;
+    actionType: "link" | "info" | "animation";
+    // For links
+    url?: string;
+    openInNewTab?: boolean;
+    // For info popups
+    infoTitle?: string;
+    infoContent?: string;
+    // For animations
+    triggerAnimations?: boolean;
+  };
+  
   // Nesting support
   children?: Element[];
 }
