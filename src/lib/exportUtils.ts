@@ -79,6 +79,30 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
     ctx.translate(frame.x, frame.y);
   }
 
+  // Draw interactive indicator on exported images
+  if (element.interactivity?.enabled) {
+    ctx.globalAlpha = 1;
+    const indicatorSize = 20;
+    const indicatorX = x + width - indicatorSize / 2;
+    const indicatorY = y - indicatorSize / 2;
+    
+    // White circle with blue border
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#3b82f6";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(indicatorX, indicatorY, indicatorSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Blue icon inside
+    ctx.fillStyle = "#3b82f6";
+    ctx.font = "bold 10px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("🔗", indicatorX, indicatorY);
+  }
+
   ctx.restore();
 }
 

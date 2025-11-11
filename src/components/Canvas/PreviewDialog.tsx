@@ -170,6 +170,15 @@ export default function PreviewDialog({
                 }}
                 onClick={isInteractive ? () => handleElementInteraction(element) : undefined}
               >
+                {/* Interactive indicator */}
+                {element.interactivity?.enabled && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-blue-500 shadow-lg flex items-center justify-center pointer-events-none z-10">
+                    <svg className="w-2.5 h-2.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                    </svg>
+                  </div>
+                )}
                 {element.type === "text" ? (
                   <div
                     className="w-full h-full flex items-center px-2"
