@@ -203,7 +203,24 @@ export default function CanvasContainerNew({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const captionImageInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedFrame = frames.find((f) => f.id === selectedFrameId);
+  // Helper function to find a frame (top-level or nested)
+  const findFrame = (frameId: string): { frame: Frame | null, parentId: string | null } => {
+    // Check top-level frames
+    const topFrame = frames.find(f => f.id === frameId);
+    if (topFrame) return { frame: topFrame, parentId: null };
+    
+    // Check nested frames
+    for (const parentFrame of frames) {
+      const nestedFrame = parentFrame.frames?.find(nf => nf.id === frameId);
+      if (nestedFrame) return { frame: nestedFrame, parentId: parentFrame.id };
+    }
+    
+    return { frame: null, parentId: null };
+  };
+
+  // Find selected frame (works for both top-level and nested frames)
+  const selectedFrameResult = selectedFrameId ? findFrame(selectedFrameId) : { frame: null, parentId: null };
+  const selectedFrame = selectedFrameResult.frame;
   const selectedElements = selectedFrame?.elements?.filter((e) => selectedElementIds.includes(e.id)) || [];
   const selectedElement = selectedElements.length === 1 ? selectedElements[0] : null;
   
@@ -492,21 +509,6 @@ export default function CanvasContainerNew({
       return f;
     }));
     toast.success("Nested frame added!");
-  };
-
-  // Helper function to find a frame (top-level or nested)
-  const findFrame = (frameId: string): { frame: Frame | null, parentId: string | null } => {
-    // Check top-level frames
-    const topFrame = frames.find(f => f.id === frameId);
-    if (topFrame) return { frame: topFrame, parentId: null };
-    
-    // Check nested frames
-    for (const parentFrame of frames) {
-      const nestedFrame = parentFrame.frames?.find(nf => nf.id === frameId);
-      if (nestedFrame) return { frame: nestedFrame, parentId: parentFrame.id };
-    }
-    
-    return { frame: null, parentId: null };
   };
 
   const handleFrameUpdate = (id: string, updates: Partial<Frame>) => {
