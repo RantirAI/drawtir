@@ -127,7 +127,7 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     particleCount,
     rangeY,
     baseHue,
-    baseSpeed: speed * 0.5,
+    baseSpeed: speed,
     rangeSpeed,
     baseRadius,
     rangeRadius,

@@ -157,7 +157,7 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
           particleCount={(props as any).particleCount || 700}
           rangeY={(props as any).rangeY || 100}
           baseHue={(props as any).baseHue || 220}
-          baseSpeed={props.speed * 0.5 || 0.5}
+          baseSpeed={props.speed || 1.0}
           rangeSpeed={(props as any).rangeSpeed || 1.5}
           baseRadius={(props as any).baseRadius || 1}
           rangeRadius={(props as any).rangeRadius || 2}
@@ -580,6 +580,76 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
                       onValueChange={([value]) => setShaderProps({ ...shaderProps, lightMovement: value })}
                       min={0.0}
                       max={3.0}
+                      step={0.1}
+                    />
+                  </div>
+                </>
+              )}
+
+              {shader.type === "vortex" && (
+                <>
+                  <div>
+                    <Label>Particle Count: {(shaderProps as any).particleCount || 700}</Label>
+                    <Slider
+                      value={[(shaderProps as any).particleCount || 700]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, particleCount: Math.round(value) } as any)}
+                      min={100}
+                      max={2000}
+                      step={50}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Vertical Range: {(shaderProps as any).rangeY || 100}</Label>
+                    <Slider
+                      value={[(shaderProps as any).rangeY || 100]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, rangeY: value } as any)}
+                      min={50}
+                      max={300}
+                      step={10}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Base Hue: {(shaderProps as any).baseHue || 220}</Label>
+                    <Slider
+                      value={[(shaderProps as any).baseHue || 220]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, baseHue: value } as any)}
+                      min={0}
+                      max={360}
+                      step={1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Speed Range: {(shaderProps as any).rangeSpeed?.toFixed(2) || "1.50"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).rangeSpeed || 1.5]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, rangeSpeed: value } as any)}
+                      min={0.1}
+                      max={5.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Base Radius: {(shaderProps as any).baseRadius?.toFixed(1) || "1.0"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).baseRadius || 1]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, baseRadius: value } as any)}
+                      min={0.5}
+                      max={5.0}
+                      step={0.1}
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Radius Range: {(shaderProps as any).rangeRadius?.toFixed(1) || "2.0"}</Label>
+                    <Slider
+                      value={[(shaderProps as any).rangeRadius || 2]}
+                      onValueChange={([value]) => setShaderProps({ ...shaderProps, rangeRadius: value } as any)}
+                      min={0.5}
+                      max={10.0}
                       step={0.1}
                     />
                   </div>

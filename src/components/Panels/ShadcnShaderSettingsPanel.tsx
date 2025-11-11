@@ -530,6 +530,88 @@ export const ShadcnShaderSettingsPanel: React.FC<ShadcnShaderSettingsPanelProps>
           </div>
         </>
       )}
+
+      {shader.type === "vortex" && (
+        <>
+          <div>
+            <Label>Particle Count: {shader.particleCount || 700}</Label>
+            <Slider
+              value={[shader.particleCount || 700]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, particleCount: Math.round(value) }
+              })}
+              min={100}
+              max={2000}
+              step={50}
+            />
+          </div>
+
+          <div>
+            <Label>Vertical Range: {shader.rangeY || 100}</Label>
+            <Slider
+              value={[shader.rangeY || 100]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, rangeY: value }
+              })}
+              min={50}
+              max={300}
+              step={10}
+            />
+          </div>
+
+          <div>
+            <Label>Base Hue: {shader.baseHue || 220}</Label>
+            <Slider
+              value={[shader.baseHue || 220]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, baseHue: value }
+              })}
+              min={0}
+              max={360}
+              step={1}
+            />
+          </div>
+
+          <div>
+            <Label>Speed Range: {shader.rangeSpeed?.toFixed(2) || "1.50"}</Label>
+            <Slider
+              value={[shader.rangeSpeed || 1.5]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, rangeSpeed: value }
+              })}
+              min={0.1}
+              max={5.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Base Radius: {shader.baseRadius?.toFixed(1) || "1.0"}</Label>
+            <Slider
+              value={[shader.baseRadius || 1]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, baseRadius: value }
+              })}
+              min={0.5}
+              max={5.0}
+              step={0.1}
+            />
+          </div>
+
+          <div>
+            <Label>Radius Range: {shader.rangeRadius?.toFixed(1) || "2.0"}</Label>
+            <Slider
+              value={[shader.rangeRadius || 2]}
+              onValueChange={([value]) => onUpdate({
+                shader: { ...shader, rangeRadius: value }
+              })}
+              min={0.5}
+              max={10.0}
+              step={0.1}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };
