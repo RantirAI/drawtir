@@ -2107,7 +2107,7 @@ export default function CanvasContainerNew({
       {/* Canvas Area */}
       <div 
         ref={canvasAreaRef}
-        className="flex-1 overflow-hidden relative"
+        className="flex-1 overflow-visible relative"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
