@@ -4,22 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Eye, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { ShaderPreviewDialog } from "./ShaderPreviewDialog";
-import { Kaleidoscope } from "@/components/ui/kaleidoscope";
-import { Plasma } from "@/components/ui/plasma";
-import { Nebula } from "@/components/ui/nebula";
-import { Aurora } from "@/components/ui/aurora";
-import { CosmicWaves } from "@/components/ui/cosmic-waves";
-import { CosmicFlowShaders } from "@/components/ui/shadcn-io/cosmic-flow-shaders";
-import { DigitalTunnel } from "@/components/ui/digital-tunnel";
-import { Glitch } from "@/components/ui/glitch";
-import { SingularityShaders } from "@/components/ui/shadcn-io/singularity-shaders";
-import { ExtrudedMobiusSpiralShaders } from "@/components/ui/shadcn-io/extruded-mobius-spiral-shaders";
-import { Fire3DShaders } from "@/components/ui/shadcn-io/fire-3d-shaders";
-import { PyramidPatternShaders } from "@/components/ui/shadcn-io/pyramid-pattern-shaders";
-import { Vortex } from "@/components/ui/vortex";
-import { BackgroundBeams } from "@/components/ui/background-beams";
-import { BackgroundLines } from "@/components/ui/background-lines";
-import { World } from "@/components/ui/globe";
 
 interface ShaderOption {
   type: "kaleidoscope" | "plasma" | "nebula" | "aurora" | "cosmic-waves" | "cosmic-flow" | "digital-tunnel" | "singularity" | "mobius-spiral" | "fire-3d" | "pyramid-pattern" | "vortex" | "background-beams" | "background-lines" | "globe";
@@ -259,65 +243,27 @@ interface ShaderLibraryModalProps {
 export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryModalProps) {
   const [previewShader, setPreviewShader] = useState<ShaderOption | null>(null);
 
-  const renderShaderPreview = (type: ShaderOption['type']) => {
-    // Smaller canvas for better performance in grid view
-    const commonProps = { 
-      className: "w-full h-full rounded-md overflow-hidden",
-      style: { width: '80px', height: '80px' }
+  const getShaderGradient = (type: ShaderOption['type']) => {
+    // Static gradient previews to avoid creating multiple WebGL contexts
+    const gradients: Record<ShaderOption['type'], string> = {
+      "kaleidoscope": "bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500",
+      "plasma": "bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500",
+      "nebula": "bg-gradient-to-br from-indigo-900 via-purple-600 to-pink-500",
+      "aurora": "bg-gradient-to-br from-green-400 via-blue-500 to-purple-600",
+      "cosmic-waves": "bg-gradient-to-br from-blue-600 via-cyan-500 to-teal-400",
+      "cosmic-flow": "bg-gradient-to-br from-violet-600 via-fuchsia-500 to-pink-500",
+      "digital-tunnel": "bg-gradient-to-br from-blue-900 via-cyan-600 to-blue-400",
+      "singularity": "bg-gradient-to-br from-orange-600 via-red-600 to-purple-900",
+      "mobius-spiral": "bg-gradient-to-br from-indigo-600 via-purple-500 to-pink-500",
+      "fire-3d": "bg-gradient-to-t from-red-600 via-orange-500 to-yellow-400",
+      "pyramid-pattern": "bg-gradient-to-br from-amber-500 via-orange-600 to-red-600",
+      "vortex": "bg-gradient-to-br from-blue-600 via-purple-500 to-pink-600",
+      "background-beams": "bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600",
+      "background-lines": "bg-gradient-to-br from-teal-400 via-cyan-500 to-blue-500",
+      "globe": "bg-gradient-to-br from-blue-900 via-blue-600 to-cyan-400"
     };
     
-    switch (type) {
-      case "kaleidoscope":
-        return <Kaleidoscope {...commonProps} />;
-      case "plasma":
-        return <Plasma {...commonProps} />;
-      case "nebula":
-        return <Nebula {...commonProps} />;
-      case "aurora":
-        return <Aurora {...commonProps} />;
-      case "cosmic-waves":
-        return <CosmicWaves {...commonProps} />;
-      case "cosmic-flow":
-        return <CosmicFlowShaders {...commonProps} />;
-      case "digital-tunnel":
-        return <DigitalTunnel {...commonProps} />;
-      case "singularity":
-        return <SingularityShaders {...commonProps} />;
-      case "mobius-spiral":
-        return <ExtrudedMobiusSpiralShaders {...commonProps} />;
-      case "fire-3d":
-        return <Fire3DShaders {...commonProps} />;
-      case "pyramid-pattern":
-        return <PyramidPatternShaders {...commonProps} />;
-      case "vortex":
-        return <Vortex {...commonProps} particleCount={200} />;
-      case "background-beams":
-        return <BackgroundBeams {...commonProps} />;
-      case "background-lines":
-        return <BackgroundLines {...commonProps} svgOptions={{ duration: 5 }} />;
-      case "globe":
-        return (
-          <div {...commonProps}>
-            <World 
-              data={[
-                { order: 1, startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1278, arcAlt: 0.3, color: "#06b6d4" },
-                { order: 1, startLat: 35.6762, startLng: 139.6503, endLat: -33.8688, endLng: 151.2093, arcAlt: 0.4, color: "#3b82f6" },
-                { order: 2, startLat: 22.3193, startLng: 114.1694, endLat: 1.3521, endLng: 103.8198, arcAlt: 0.2, color: "#06b6d4" },
-              ]}
-              globeConfig={{
-                pointSize: 2,
-                globeColor: "#062056",
-                showAtmosphere: true,
-                atmosphereColor: "#FFFFFF",
-                autoRotate: true,
-                autoRotateSpeed: 0.5
-              }}
-            />
-          </div>
-        );
-      default:
-        return null;
-    }
+    return gradients[type];
   };
 
   return (
@@ -336,8 +282,10 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
               <Card key={shader.type} className="group border-border/50 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all cursor-pointer">
                 <div className="flex gap-3 p-3">
                   {/* Preview on left */}
-                  <div className="relative rounded-md overflow-hidden border border-border/50 flex-shrink-0" style={{ width: '80px', height: '80px' }}>
-                    {renderShaderPreview(shader.type)}
+                  <div className={`relative rounded-md overflow-hidden border border-border/50 flex-shrink-0 ${getShaderGradient(shader.type)} animate-pulse`} style={{ width: '80px', height: '80px' }}>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Eye className="w-6 h-6 text-white/80" />
+                    </div>
                   </div>
                   
                   {/* Content on right */}
