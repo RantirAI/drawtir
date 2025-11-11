@@ -247,7 +247,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
             {SHADER_OPTIONS.map((shader) => (
-              <Card key={shader.type} className="border-border/50 hover:border-primary/50 transition-colors">
+              <Card key={shader.type} className="group border-border/50 hover:border-primary hover:bg-primary hover:text-primary-foreground transition-all cursor-pointer">
                 <div className="flex gap-3 p-3">
                   {/* Preview on left */}
                   <div className="relative rounded-md overflow-hidden border border-border/50 flex-shrink-0" style={{ width: '80px', height: '80px' }}>
@@ -258,7 +258,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                   <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex-1">
                       <CardTitle className="text-sm mb-0.5">{shader.name}</CardTitle>
-                      <CardDescription className="text-xs line-clamp-2">
+                      <CardDescription className="text-xs line-clamp-2 group-hover:text-primary-foreground/90">
                         {shader.description}
                       </CardDescription>
                     </div>
