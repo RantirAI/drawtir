@@ -2110,7 +2110,7 @@ export default function CanvasContainerNew({
 
       {/* Canvas Area */}
       <div 
-        className="flex-1 overflow-hidden relative canvas-background"
+        className="flex-1 relative overflow-visible canvas-background"
         onMouseDown={(e) => {
           // Only start panning if clicking directly on canvas background (not on frames or elements)
           const target = e.target as HTMLElement;
