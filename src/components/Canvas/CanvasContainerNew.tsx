@@ -2194,6 +2194,11 @@ export default function CanvasContainerNew({
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
               onDuplicate={() => frame.id === selectedFrameId && handleDuplicate()}
+              onAddNestedFrame={() => {
+                if (frame.id === selectedFrameId) {
+                  handleAddNestedFrame();
+                }
+              }}
               onBringToFront={() => handleArrange('toFront', [], frame.id)}
               onSendToBack={() => handleArrange('toBack', [], frame.id)}
               onBringForward={() => handleArrange('forward', [], frame.id)}
