@@ -79,20 +79,20 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-[#18181B] border-white/10">
-        <DialogHeader>
-          <DialogTitle className="text-white">
+      <DialogContent className="sm:max-w-md bg-primary border-primary/20 shadow-[0_20px_40px_rgba(59,130,246,0.3),0_10px_20px_rgba(0,0,0,0.5)]">
+        <DialogHeader className="space-y-1">
+          <DialogTitle className="text-white text-base">
             {isLogin ? "Login" : "Sign Up"}
           </DialogTitle>
-          <DialogDescription className="text-white/60">
+          <DialogDescription className="text-white/70 text-xs">
             {isLogin
               ? "Welcome back! Please login to your account."
               : "Create a new account to get started."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white/80">Email</Label>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="email" className="text-white/80 text-xs">Email</Label>
             <Input
               id="email"
               type="email"
@@ -100,11 +100,11 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-8 text-sm"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white/80">Password</Label>
+          <div className="space-y-1">
+            <Label htmlFor="password" className="text-white/80 text-xs">Password</Label>
             <Input
               id="password"
               type="password"
@@ -112,13 +112,13 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-white/10 border-white/20 text-white placeholder:text-white/40 h-8 text-sm"
             />
           </div>
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-black hover:bg-white/90"
+            className="w-full bg-white text-primary hover:bg-white/90 text-sm h-9"
           >
             {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
           </Button>
@@ -127,7 +127,7 @@ export default function AuthModal({ open, onOpenChange }: AuthModalProps) {
           <button
             type="button"
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm text-white/60 hover:text-white/80 transition-colors"
+            className="text-xs text-white/70 hover:text-white/90 transition-colors"
           >
             {isLogin
               ? "Don't have an account? Sign up"

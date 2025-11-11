@@ -11,6 +11,7 @@ import HomeNav from "@/components/HomePage/HomeNav";
 import AuthModal from "@/components/HomePage/AuthModal";
 import DraggablePanel from "@/components/HomePage/DraggablePanel";
 import DrawtirFooter from "@/components/Footer/DrawtirFooter";
+import EditableTitle from "@/components/Canvas/EditableTitle";
 import homeBackground from "@/assets/home-background.svg";
 import panel1 from "@/assets/panel-1-home.svg";
 import panel2 from "@/assets/panel-2-home.svg";
@@ -24,6 +25,7 @@ const Index = () => {
   const [snapshot, setSnapshot] = useState<CanvasSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [frameTitle, setFrameTitle] = useState("Frame 1");
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -96,20 +98,23 @@ const Index = () => {
       <HomeNav onOpenAuth={() => setAuthModalOpen(true)} />
       
       <div className="relative min-h-[calc(100vh-60px)] overflow-hidden flex items-center justify-center" style={{ paddingTop: '80px' }}>
-        {/* Gradient Background */}
+        {/* Gradient Background with Dots */}
         <div 
           className="absolute inset-0"
           style={{
             background: "radial-gradient(circle at top left, rgba(30, 41, 59, 0.4) 0%, rgba(10, 10, 11, 1) 50%)",
+            backgroundImage: `radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, rgba(10, 10, 11, 1) 50%), 
+                             radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px)`,
+            backgroundSize: `100% 100%, 20px 20px`,
           }}
         />
 
-        {/* Background Frame */}
+        {/* Background Frame - Pushed down 45px */}
         <div className="absolute" style={{ 
           width: '1317px', 
           height: '824px',
           left: '50%',
-          top: '50%',
+          top: 'calc(50% + 45px)',
           transform: 'translate(-50%, -50%)'
         }}>
           <img src={homeBackground} alt="" className="w-full h-full opacity-20" />
@@ -129,10 +134,10 @@ const Index = () => {
             backgroundColor: 'rgba(59, 130, 246, 0.05)',
             position: 'relative'
           }}>
-            {/* Frame Title */}
-            <div className="absolute -top-6 left-0 right-0 flex justify-center pointer-events-none">
+            {/* Frame Title - Editable */}
+            <div className="absolute -top-6 left-0 right-0 flex justify-center pointer-events-auto">
               <div className="text-white text-sm font-medium bg-[#0A0A0B] px-3 py-1 rounded">
-                Frame 1
+                <EditableTitle value={frameTitle} onChange={setFrameTitle} />
               </div>
             </div>
 

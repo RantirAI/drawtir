@@ -1,5 +1,6 @@
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import rantirLogo from "@/assets/rantir-logo.png";
 
 interface HomeNavProps {
   onOpenAuth: () => void;
@@ -54,28 +55,14 @@ export default function HomeNav({ onOpenAuth }: HomeNavProps) {
             </svg>
           </div>
           <div className="flex items-center gap-4">
-            <svg 
-              width="126" 
-              height="20" 
-              viewBox="0 0 126 20" 
-              fill="none" 
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <g clipPath="url(#clip0_40_4234)">
-                <path d="M82.0488 16.9147V10.0135H84.0379V11.6373H84.0785V16.9147H82.0488ZM84.0785 13.3152L83.9026 11.6779C84.065 11.0915 84.3311 10.645 84.701 10.3383C85.0709 10.0315 85.5309 9.87817 86.0812 9.87817C86.2526 9.87817 86.3789 9.89622 86.4601 9.9323V11.8267C86.415 11.8087 86.3519 11.7997 86.2707 11.7997C86.1895 11.7907 86.0903 11.7862 85.973 11.7862C85.3235 11.7862 84.8453 11.9034 84.5386 12.138C84.2319 12.3635 84.0785 12.7559 84.0785 13.3152Z" fill="white"/>
-                <path d="M79.0781 16.9146V10.0134H81.1079V16.9146H79.0781Z" fill="white"/>
-                <path d="M77.4 17.0636C76.5159 17.0636 75.8573 16.8516 75.4243 16.4276C75.0003 15.9946 74.7883 15.3406 74.7883 14.4655V8.47095L76.8181 7.82312V14.5332C76.8181 14.8399 76.9038 15.0699 77.0752 15.2233C77.2466 15.3767 77.5127 15.4533 77.8736 15.4533C78.0089 15.4533 78.1352 15.4398 78.2525 15.4127C78.3697 15.3857 78.487 15.3541 78.6043 15.318V16.8606C78.487 16.9238 78.3201 16.9734 78.1036 17.0095C77.8961 17.0456 77.6616 17.0636 77.4 17.0636ZM73.5028 11.5562V10.0136H78.6043V11.5562H73.5028Z" fill="white"/>
-                <path d="M81.7178 10.983L80.3336 7.98038C79.9218 7.1613 79.1808 6.47648 78.1197 6.85174L62.6175 12.2631L77.7219 5.82805C78.541 5.41628 79.003 4.52175 78.8505 3.61414L78.2792 0.0482181L79.8742 3.21635C80.286 4.03543 81.1805 4.4975 82.0881 4.34498L85.654 3.77363L82.4859 5.36868C81.6668 5.78045 81.2953 6.89897 81.3573 7.58258L81.7178 10.983Z" fill="white"/>
-              </g>
-              <defs>
-                <clipPath id="clip0_40_4234">
-                  <rect width="74.4247" height="17.3376" fill="white" transform="translate(51.4116)"/>
-                </clipPath>
-              </defs>
-            </svg>
+            <img 
+              src={rantirLogo} 
+              alt="Rantir Studio" 
+              className="h-5 w-auto opacity-90"
+            />
             <Button 
               onClick={onOpenAuth}
-              className="bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              className="bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs px-4"
             >
               Login / Sign Up
             </Button>
