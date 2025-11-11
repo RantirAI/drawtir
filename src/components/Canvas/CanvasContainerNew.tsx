@@ -432,6 +432,62 @@ export default function CanvasContainerNew({
     toast.success("Frame added!");
   };
 
+  const handleAddNestedFrame = () => {
+    const selectedFrame = frames.find(f => f.id === selectedFrameId);
+    if (!selectedFrame) {
+      toast.error("Please select a parent frame first");
+      return;
+    }
+
+    const newNestedFrame: Frame = {
+      id: `nested-frame-${Date.now()}`,
+      name: `Nested Frame`,
+      x: 20,
+      y: 20,
+      width: Math.max(100, selectedFrame.width - 40),
+      height: Math.max(100, selectedFrame.height - 40),
+      sizeUnit: "px",
+      initialWidth: Math.max(100, selectedFrame.width - 40),
+      initialHeight: Math.max(100, selectedFrame.height - 40),
+      enableDynamicScale: false,
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      backgroundType: "solid",
+      image: null,
+      topCaption: "",
+      bottomCaption: "",
+      textColor: "#000000",
+      textAlign: "center",
+      textSize: 3,
+      textOpacity: 100,
+      imageStyle: "cover",
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      blur: 0,
+      linkText: "",
+      linkPosition: "top-right",
+      gradientIntensity: 80,
+      flexDirection: undefined,
+      justifyContent: undefined,
+      alignItems: undefined,
+      gap: 0,
+      elements: [],
+      frames: [],
+      cornerRadius: 8,
+      opacity: 100,
+      fillOpacity: 90,
+      blendMode: "normal",
+    };
+
+    setFrames(prevFrames => prevFrames.map(f => {
+      if (f.id === selectedFrameId) {
+        return { ...f, frames: [...(f.frames || []), newNestedFrame] };
+      }
+      return f;
+    }));
+    toast.success("Nested frame added!");
+  };
+
   const handleFrameUpdate = (id: string, updates: Partial<Frame>) => {
     setFrames(frames.map((f) => (f.id === id ? { ...f, ...updates } : f)));
   };
@@ -3058,6 +3114,7 @@ export default function CanvasContainerNew({
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
         onAddFrame={handleAddFrame}
+        onAddNestedFrame={handleAddNestedFrame}
         onAddRichText={handleAddRichText}
         onDuplicate={handleDuplicate}
         onDelete={handleDelete}
