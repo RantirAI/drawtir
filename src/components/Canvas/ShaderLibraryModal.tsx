@@ -263,12 +263,12 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                       </CardDescription>
                     </div>
                     
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex gap-1.5 mt-2 justify-end">
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => setPreviewShader(shader)}
-                        className="flex-1 h-7 text-xs"
+                        className="h-6 text-xs px-2"
                       >
                         Preview
                       </Button>
@@ -278,7 +278,7 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
                           onSelect(shader);
                           onClose();
                         }}
-                        className="flex-1 h-7 text-xs"
+                        className="h-6 text-xs px-2"
                       >
                         Use
                       </Button>
