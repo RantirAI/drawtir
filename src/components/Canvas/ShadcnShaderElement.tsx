@@ -18,6 +18,20 @@ import { BackgroundLines } from "@/components/ui/background-lines";
 import { World } from "@/components/ui/globe";
 import type { Element } from "@/types/elements";
 
+// Sample globe connection data
+const SAMPLE_GLOBE_ARCS = [
+  { order: 1, startLat: -19.885592, startLng: -43.951191, endLat: -22.9068, endLng: -43.1729, arcAlt: 0.1, color: "#06b6d4" },
+  { order: 1, startLat: 28.6139, startLng: 77.209, endLat: 3.139, endLng: 101.6869, arcAlt: 0.2, color: "#3b82f6" },
+  { order: 2, startLat: 1.3521, startLng: 103.8198, endLat: 35.6762, endLng: 139.6503, arcAlt: 0.2, color: "#06b6d4" },
+  { order: 2, startLat: 51.5072, startLng: -0.1276, endLat: 3.139, endLng: 101.6869, arcAlt: 0.3, color: "#3b82f6" },
+  { order: 3, startLat: -33.8688, startLng: 151.2093, endLat: 22.3193, endLng: 114.1694, arcAlt: 0.3, color: "#06b6d4" },
+  { order: 3, startLat: 21.3099, startLng: -157.8581, endLat: 40.7128, endLng: -74.006, arcAlt: 0.3, color: "#3b82f6" },
+  { order: 4, startLat: 11.986597, startLng: 8.571831, endLat: -15.595412, endLng: -56.05918, arcAlt: 0.5, color: "#06b6d4" },
+  { order: 4, startLat: -34.6037, startLng: -58.3816, endLat: 22.3193, endLng: 114.1694, arcAlt: 0.7, color: "#3b82f6" },
+  { order: 5, startLat: 14.5995, startLng: 120.9842, endLat: 51.5072, endLng: -0.1276, arcAlt: 0.3, color: "#06b6d4" },
+  { order: 5, startLat: 1.3521, startLng: 103.8198, endLat: -33.8688, endLng: 151.2093, arcAlt: 0.2, color: "#3b82f6" },
+];
+
 interface ShadcnShaderElementProps {
   element: Element;
 }
@@ -182,7 +196,7 @@ export const ShadcnShaderElement: React.FC<ShadcnShaderElementProps> = ({ elemen
     case "globe":
       return (
         <World 
-          data={[]}
+          data={SAMPLE_GLOBE_ARCS}
           globeConfig={{
             pointSize,
             globeColor,

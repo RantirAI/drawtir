@@ -185,7 +185,12 @@ export function ShaderPreviewDialog({ shader, open, onClose, onUse }: ShaderPrev
         return (
           <div className="h-full w-full">
             <World 
-              data={[]}
+              data={[
+                { order: 1, startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1278, arcAlt: 0.3, color: "#06b6d4" },
+                { order: 1, startLat: 35.6762, startLng: 139.6503, endLat: -33.8688, endLng: 151.2093, arcAlt: 0.4, color: "#3b82f6" },
+                { order: 2, startLat: 22.3193, startLng: 114.1694, endLat: 1.3521, endLng: 103.8198, arcAlt: 0.2, color: "#06b6d4" },
+                { order: 2, startLat: -22.9068, startLng: -43.1729, endLat: 28.6139, endLng: 77.209, arcAlt: 0.5, color: "#3b82f6" },
+              ]}
               globeConfig={{
                 pointSize: (props as any).pointSize || 4,
                 globeColor: (props as any).globeColor || "#062056",

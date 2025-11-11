@@ -322,7 +322,11 @@ export function ShaderLibraryModal({ open, onClose, onSelect }: ShaderLibraryMod
         return (
           <div {...commonProps}>
             <World 
-              data={[]}
+              data={[
+                { order: 1, startLat: 40.7128, startLng: -74.006, endLat: 51.5074, endLng: -0.1278, arcAlt: 0.3, color: "#06b6d4" },
+                { order: 1, startLat: 35.6762, startLng: 139.6503, endLat: -33.8688, endLng: 151.2093, arcAlt: 0.4, color: "#3b82f6" },
+                { order: 2, startLat: 22.3193, startLng: 114.1694, endLat: 1.3521, endLng: 103.8198, arcAlt: 0.2, color: "#06b6d4" },
+              ]}
               globeConfig={{
                 pointSize: 2,
                 globeColor: "#062056",
