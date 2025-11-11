@@ -77,30 +77,79 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
     ctx.translate(-frame.x, -frame.y);
     drawPenPath(ctx, element);
     ctx.translate(frame.x, frame.y);
+  } else if (element.type === "shader" && element.shader) {
+    // Draw shader as gradient placeholder for static exports
+    ctx.globalAlpha = (element.opacity ?? 100) / 100;
+    const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+    
+    switch (element.shader.type) {
+      case "plasma":
+        gradient.addColorStop(0, "#6366f1");
+        gradient.addColorStop(0.5, "#a855f7");
+        gradient.addColorStop(1, "#ec4899");
+        break;
+      case "nebula":
+        gradient.addColorStop(0, "#1e1b4b");
+        gradient.addColorStop(0.5, "#1e3a8a");
+        gradient.addColorStop(1, "#000000");
+        break;
+      case "aurora":
+        gradient.addColorStop(0, "#34d399");
+        gradient.addColorStop(0.5, "#60a5fa");
+        gradient.addColorStop(1, "#a78bfa");
+        break;
+      case "vortex":
+        gradient.addColorStop(0, "#2563eb");
+        gradient.addColorStop(0.5, "#9333ea");
+        gradient.addColorStop(1, "#db2777");
+        break;
+      default:
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(0.5, "#8b5cf6");
+        gradient.addColorStop(1, "#ec4899");
+    }
+    
+    ctx.fillStyle = gradient;
+    const radius = element.cornerRadius || 0;
+    if (radius > 0) {
+      ctx.beginPath();
+      roundedRect(ctx, x, y, width, height, radius);
+      ctx.fill();
+    } else {
+      ctx.fillRect(x, y, width, height);
+    }
   }
 
   // Draw interactive indicator on exported images
   if (element.interactivity?.enabled) {
     ctx.globalAlpha = 1;
-    const indicatorSize = 20;
+    const indicatorSize = 22;
     const indicatorX = x + width - indicatorSize / 2;
     const indicatorY = y - indicatorSize / 2;
     
-    // White circle with blue border
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#3b82f6";
-    ctx.lineWidth = 2;
+    // Blue solid circle
+    ctx.fillStyle = "#3b82f6";
     ctx.beginPath();
     ctx.arc(indicatorX, indicatorY, indicatorSize / 2, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
     
-    // Blue icon inside
-    ctx.fillStyle = "#3b82f6";
-    ctx.font = "bold 10px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText("🔗", indicatorX, indicatorY);
+    // White icon inside (click/pointer icon)
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    
+    // Draw cursor/pointer icon
+    ctx.beginPath();
+    ctx.moveTo(indicatorX - 3, indicatorY - 2);
+    ctx.lineTo(indicatorX - 1, indicatorY + 3);
+    ctx.lineTo(indicatorX + 1, indicatorY + 2);
+    ctx.lineTo(indicatorX + 3, indicatorY + 4);
+    ctx.moveTo(indicatorX + 1, indicatorY + 2);
+    ctx.lineTo(indicatorX + 4, indicatorY - 1);
+    ctx.lineTo(indicatorX - 1, indicatorY - 4);
+    ctx.lineTo(indicatorX - 3, indicatorY - 2);
+    ctx.stroke();
   }
 
   ctx.restore();
@@ -527,6 +576,49 @@ async function drawAnimatedElement(
     const el = { ...element, opacity: effectiveOpacity } as Element;
     drawPenPath(ctx, el);
     ctx.translate(frame.x, frame.y);
+  } else if (element.type === "shader" && element.shader) {
+    // Draw shader as gradient for animated exports
+    ctx.globalAlpha = effectiveOpacity;
+    const gradient = ctx.createLinearGradient(x, y, x + element.width, y + element.height);
+    
+    switch (element.shader.type) {
+      case "plasma":
+        gradient.addColorStop(0, "#6366f1");
+        gradient.addColorStop(0.5, "#a855f7");
+        gradient.addColorStop(1, "#ec4899");
+        break;
+      case "nebula":
+        gradient.addColorStop(0, "#1e1b4b");
+        gradient.addColorStop(0.5, "#1e3a8a");
+        gradient.addColorStop(1, "#000000");
+        break;
+      case "aurora":
+        gradient.addColorStop(0, "#34d399");
+        gradient.addColorStop(0.5, "#60a5fa");
+        gradient.addColorStop(1, "#a78bfa");
+        break;
+      case "vortex":
+        gradient.addColorStop(0, "#2563eb");
+        gradient.addColorStop(0.5, "#9333ea");
+        gradient.addColorStop(1, "#db2777");
+        break;
+      default:
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(0.5, "#8b5cf6");
+        gradient.addColorStop(1, "#ec4899");
+    }
+    
+    ctx.fillStyle = gradient;
+    const radius = element.cornerRadius || 0;
+    if (radius > 0) {
+      ctx.beginPath();
+      ctx.save();
+      roundedRect(ctx, x, y, element.width, element.height, radius);
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.fillRect(x, y, element.width, element.height);
+    }
   }
 
   ctx.restore();

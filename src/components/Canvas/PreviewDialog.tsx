@@ -172,10 +172,9 @@ export default function PreviewDialog({
               >
                 {/* Interactive indicator */}
                 {element.interactivity?.enabled && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full border-2 border-blue-500 shadow-lg flex items-center justify-center pointer-events-none z-10">
-                    <svg className="w-2.5 h-2.5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full shadow-lg flex items-center justify-center pointer-events-none z-10">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
                     </svg>
                   </div>
                 )}
@@ -223,6 +222,27 @@ export default function PreviewDialog({
                           : "0",
                     }}
                   />
+                ) : element.type === "shader" && element.shader ? (
+                  <div className="w-full h-full">
+                    {element.shader.type === "kaleidoscope" && (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-blue-500 animate-pulse" />
+                    )}
+                    {element.shader.type === "plasma" && (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500" style={{ animation: "pulse 3s ease-in-out infinite" }} />
+                    )}
+                    {element.shader.type === "nebula" && (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-900 via-blue-900 to-black" style={{ animation: "pulse 4s ease-in-out infinite" }} />
+                    )}
+                    {element.shader.type === "aurora" && (
+                      <div className="w-full h-full bg-gradient-to-t from-green-400 via-blue-400 to-purple-500" style={{ animation: "pulse 5s ease-in-out infinite" }} />
+                    )}
+                    {element.shader.type === "vortex" && (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 animate-spin" style={{ animationDuration: "20s" }} />
+                    )}
+                    {!["kaleidoscope", "plasma", "nebula", "aurora", "vortex"].includes(element.shader.type) && (
+                      <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 animate-pulse" />
+                    )}
+                  </div>
                 ) : null}
               </div>
             );

@@ -62,7 +62,10 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
 
   const isAnimatedFormat = format === "GIF" || format === "MP4";
   const hasAnimations = frames.some(f => 
-    f.elements.some(el => el.animation && el.animation !== 'none')
+    f.elements.some(el => 
+      (el.animation && el.animation !== 'none') || 
+      (el.type === 'shader' && el.shader)
+    )
   );
 
   const handleFrameToggle = (frameId: string) => {
