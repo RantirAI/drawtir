@@ -2189,6 +2189,8 @@ export default function CanvasContainerNew({
                 gridSize={gridSize}
                 gridStyle={gridStyle}
                 snapToGrid={snapToGrid}
+                zoom={zoom}
+                panOffset={panOffset}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);
@@ -2375,6 +2377,8 @@ export default function CanvasContainerNew({
                         enableDynamicScale={nestedFrame.enableDynamicScale}
                         isSelected={false}
                         isLocked={nestedFrame.isLocked}
+                        zoom={zoom}
+                        panOffset={panOffset}
                         onUpdate={(id, updates) => {
                           setFrames(frames.map(f => 
                             f.id === frame.id 

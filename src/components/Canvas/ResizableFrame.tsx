@@ -48,6 +48,8 @@ interface ResizableFrameProps {
   gridStyle?: "lines" | "dots"; // Grid visual style
   snapToGrid?: boolean; // Snap positioning to grid
   isLocked?: boolean; // Prevent dragging/resizing
+  zoom?: number; // Canvas zoom level
+  panOffset?: { x: number; y: number }; // Canvas pan offset
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -98,6 +100,8 @@ export default function ResizableFrame({
   gridStyle = "lines",
   snapToGrid = false,
   isLocked = false,
+  zoom = 1,
+  panOffset = { x: 0, y: 0 },
   onUpdate,
   isSelected,
   onSelect,
@@ -113,13 +117,25 @@ export default function ResizableFrame({
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        const dx = e.clientX - dragStart.x;
-        const dy = e.clientY - dragStart.y;
-        onUpdate(id, { x: x + dx, y: y + dy });
+        // Account for zoom when calculating delta
+        const dx = (e.clientX - dragStart.x) / zoom;
+        const dy = (e.clientY - dragStart.y) / zoom;
+        
+        let newX = x + dx;
+        let newY = y + dy;
+        
+        // Snap to grid if enabled
+        if (snapToGrid) {
+          newX = Math.round(newX / gridSize) * gridSize;
+          newY = Math.round(newY / gridSize) * gridSize;
+        }
+        
+        onUpdate(id, { x: newX, y: newY });
         setDragStart({ x: e.clientX, y: e.clientY });
       } else if (isResizing) {
-        const dx = e.clientX - dragStart.x;
-        const dy = e.clientY - dragStart.y;
+        // Account for zoom when calculating delta
+        const dx = (e.clientX - dragStart.x) / zoom;
+        const dy = (e.clientY - dragStart.y) / zoom;
         
         if (isResizing === "se") {
           onUpdate(id, { width: Math.max(1, width + dx), height: Math.max(1, height + dy) });
@@ -149,13 +165,25 @@ export default function ResizableFrame({
       const touch = e.touches[0];
       
       if (isDragging) {
-        const dx = touch.clientX - dragStart.x;
-        const dy = touch.clientY - dragStart.y;
-        onUpdate(id, { x: x + dx, y: y + dy });
+        // Account for zoom when calculating delta
+        const dx = (touch.clientX - dragStart.x) / zoom;
+        const dy = (touch.clientY - dragStart.y) / zoom;
+        
+        let newX = x + dx;
+        let newY = y + dy;
+        
+        // Snap to grid if enabled
+        if (snapToGrid) {
+          newX = Math.round(newX / gridSize) * gridSize;
+          newY = Math.round(newY / gridSize) * gridSize;
+        }
+        
+        onUpdate(id, { x: newX, y: newY });
         setDragStart({ x: touch.clientX, y: touch.clientY });
       } else if (isResizing) {
-        const dx = touch.clientX - dragStart.x;
-        const dy = touch.clientY - dragStart.y;
+        // Account for zoom when calculating delta
+        const dx = (touch.clientX - dragStart.x) / zoom;
+        const dy = (touch.clientY - dragStart.y) / zoom;
         
         if (isResizing === "se") {
           onUpdate(id, { width: Math.max(1, width + dx), height: Math.max(1, height + dy) });
