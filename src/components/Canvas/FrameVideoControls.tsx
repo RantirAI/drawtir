@@ -84,54 +84,56 @@ export default function FrameVideoControls({
 
   return (
     <div 
-      className="absolute z-40 pointer-events-auto flex flex-col items-center gap-1"
+      className="absolute z-40 pointer-events-auto"
       style={{ 
         left: `${frameX + frameWidth / 2}px`,
         top: `${frameY + frameHeight + 8}px`,
         transform: 'translateX(-50%)',
       }}
     >
-      {/* Time Badge - Top */}
-      <Badge variant="secondary" className="text-xs font-medium whitespace-nowrap px-2 py-1">
-        {formatTime(currentTime)} / {formatTime(duration)}
-      </Badge>
-
-      {/* Controls Container */}
       <div className="relative">
+        {/* Time Badge - Attached to top */}
+        <Badge 
+          className="absolute -top-3 left-1/2 -translate-x-1/2 z-10 text-xs font-medium whitespace-nowrap px-3 py-1 bg-primary text-primary-foreground"
+        >
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </Badge>
+
         {/* Subtle glow */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-radial from-blue-500/20 via-blue-400/10 to-transparent blur-2xl scale-150" />
         </div>
 
-      <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]">
-        {/* Play/Pause */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={togglePlay}
-          className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
-        >
-          {isPlaying ? (
-            <Pause size={14} className="transition-transform duration-300 group-hover:rotate-6" />
-          ) : (
-            <Play size={14} className="ml-0.5 transition-transform duration-300 group-hover:rotate-6" />
-          )}
-        </Button>
+        {/* Controls Container */}
+        <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]">
+          {/* Play/Pause */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={togglePlay}
+            className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
+          >
+            {isPlaying ? (
+              <Pause size={14} className="transition-transform duration-300 group-hover:rotate-6" />
+            ) : (
+              <Play size={14} className="ml-0.5 transition-transform duration-300 group-hover:rotate-6" />
+            )}
+          </Button>
 
-        {/* Mute/Unmute */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleMute}
-          className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
-        >
-          {isMuted ? (
-            <VolumeX size={14} className="transition-transform duration-300 group-hover:rotate-6" />
-          ) : (
-            <Volume2 size={14} className="transition-transform duration-300 group-hover:rotate-6" />
-          )}
-        </Button>
-      </div>
+          {/* Mute/Unmute */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMute}
+            className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
+          >
+            {isMuted ? (
+              <VolumeX size={14} className="transition-transform duration-300 group-hover:rotate-6" />
+            ) : (
+              <Volume2 size={14} className="transition-transform duration-300 group-hover:rotate-6" />
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
