@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, Loader2 } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Voice {
   id: string;
@@ -42,33 +44,74 @@ interface VoiceSelectorProps {
 }
 
 export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
+  const { toast } = useToast();
   const [playingVoice, setPlayingVoice] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
-  const handlePreviewVoice = (voiceId: string, voiceName: string) => {
-    // Play a sample "Hello" with the voice
-    const utterance = new SpeechSynthesisUtterance("Hello, this is " + voiceName);
-    
-    // Try to find a matching voice in available voices
-    const voices = speechSynthesis.getVoices();
-    const matchedVoice = voices.find(v => 
-      v.name.toLowerCase().includes(voiceName.toLowerCase())
-    );
-    
-    if (matchedVoice) {
-      utterance.voice = matchedVoice;
-    }
-    
-    setPlayingVoice(voiceId);
-    speechSynthesis.speak(utterance);
-    
-    utterance.onend = () => {
+  const handlePreviewVoice = async (voiceId: string, voiceName: string) => {
+    try {
+      // Stop any currently playing audio
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+
+      setPlayingVoice(voiceId);
+
+      const { data, error } = await supabase.functions.invoke('preview-voice', {
+        body: { voiceId }
+      });
+
+      if (error) throw error;
+
+      if (!data?.audioContent) {
+        throw new Error('No audio content received');
+      }
+
+      // Convert base64 to blob and play
+      const binaryString = atob(data.audioContent);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(blob);
+
+      const audio = new Audio(audioUrl);
+      setAudioElement(audio);
+      
+      audio.onended = () => {
+        setPlayingVoice(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+
+      audio.onerror = () => {
+        setPlayingVoice(null);
+        toast({
+          title: "Playback failed",
+          description: "Could not play voice preview",
+          variant: "destructive",
+        });
+      };
+
+      await audio.play();
+    } catch (error) {
+      console.error('Error previewing voice:', error);
       setPlayingVoice(null);
-    };
+      toast({
+        title: "Preview failed",
+        description: error instanceof Error ? error.message : "Failed to preview voice",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSelectVoice = (voiceId: string, voiceName: string) => {
-    speechSynthesis.cancel(); // Stop any playing preview
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+    }
     setPlayingVoice(null);
     onSelectVoice(voiceId, voiceName);
     setOpen(false);
@@ -86,7 +129,7 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
           <Volume2 className="h-3 w-3" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-64 p-2" align="start">
+      <PopoverContent className="w-64 p-2" align="center" side="top" sideOffset={8}>
         <div className="space-y-2">
           <h4 className="text-sm font-medium">Select Voice</h4>
           <p className="text-xs text-muted-foreground">
@@ -97,7 +140,7 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
               {VOICE_OPTIONS.map((voice) => (
                 <div
                   key={voice.id}
-                  className="flex items-center justify-between p-2 rounded-md hover:bg-accent group"
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-accent group border border-border"
                 >
                   <Button
                     variant="ghost"
@@ -111,14 +154,18 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-6 w-6"
                     onClick={(e) => {
                       e.stopPropagation();
                       handlePreviewVoice(voice.id, voice.name);
                     }}
                     disabled={playingVoice === voice.id}
                   >
-                    <Volume2 className={`h-3 w-3 ${playingVoice === voice.id ? 'animate-pulse text-primary' : ''}`} />
+                    {playingVoice === voice.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                    ) : (
+                      <Volume2 className="h-3 w-3" />
+                    )}
                   </Button>
                 </div>
               ))}
