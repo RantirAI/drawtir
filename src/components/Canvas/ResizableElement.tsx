@@ -5,7 +5,6 @@ import { ShadcnShaderElement } from "./ShadcnShaderElement";
 import { BendableLine } from "./BendableLine";
 import RichTextEditor from "./RichTextEditor";
 import { QRCodeSVG } from 'qrcode.react';
-import VideoPlayer from "./VideoPlayer";
 import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
@@ -147,6 +146,7 @@ interface ResizableElementProps {
   onSelect: (e?: React.MouseEvent) => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
+  onVideoRefUpdate?: (ref: HTMLVideoElement) => void;
 }
 
 export default function ResizableElement({
@@ -216,6 +216,7 @@ export default function ResizableElement({
   onSelect,
   onDelete,
   onDuplicate,
+  onVideoRefUpdate,
   ...rest
 }: ResizableElementProps & React.HTMLAttributes<HTMLDivElement>) {
   const [isDragging, setIsDragging] = useState(false);
@@ -946,15 +947,22 @@ export default function ResizableElement({
           )}
         </div>
       ) : type === "video" && src ? (
-        // Video element with custom player
-        <VideoPlayer
+        // Video element (controls managed by frame)
+        <video
+          ref={el => {
+            if (el && onVideoRefUpdate) {
+              onVideoRefUpdate(el);
+            }
+          }}
           src={src}
-          className="w-full h-full"
-          style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}
-          brightness={brightness}
-          contrast={contrast}
-          saturation={saturation}
-          blur={blur}
+          className="w-full h-full pointer-events-none"
+          style={{
+            borderRadius: cornerRadius ? `${cornerRadius}px` : '0',
+            objectFit: imageFit === "fill" ? "fill" : imageFit === "contain" ? "contain" : imageFit === "crop" ? "cover" : "cover",
+            filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`,
+          }}
+          loop
+          playsInline
         />
       ) : type === "text" ? (
         isEditing ? (

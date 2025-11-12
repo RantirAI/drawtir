@@ -63,6 +63,10 @@ export default function CanvasContainerNew({
   const [history, setHistory] = useState<Frame[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isUndoRedoing, setIsUndoRedoing] = useState(false);
+  
+  // Video ref tracking for frame-level controls
+  const videoRefsMap = useRef<Map<string, HTMLVideoElement>>(new Map());
+  
   const [frames, setFrames] = useState<Frame[]>([
     {
       id: "frame-1",
@@ -2398,6 +2402,8 @@ export default function CanvasContainerNew({
                 zoom={zoom}
                 panOffset={panOffset}
                 onUpdate={handleFrameUpdate}
+                hasVideoElement={(frame.elements || []).some(el => el.type === "video")}
+                videoRef={{ current: videoRefsMap.current.get(frame.id) || null } as React.RefObject<HTMLVideoElement>}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);
                   setSelectedElementIds([]);
@@ -2507,6 +2513,7 @@ export default function CanvasContainerNew({
                           interactivity={element.interactivity}
                           readOnly={readOnly}
                           onElementInteraction={() => onElementInteraction?.(element)}
+                          onVideoRefUpdate={element.type === "video" ? (ref) => videoRefsMap.current.set(frame.id, ref) : undefined}
                        />
                     </CanvasContextMenu>
                 )})}
@@ -2596,6 +2603,8 @@ export default function CanvasContainerNew({
                         snapToGrid={snapToGrid}
                         zoom={zoom}
                         panOffset={panOffset}
+                        hasVideoElement={(nestedFrame.elements || []).some(el => el.type === "video")}
+                        videoRef={{ current: videoRefsMap.current.get(nestedFrame.id) || null } as React.RefObject<HTMLVideoElement>}
                         onUpdate={(id, updates) => {
                           setFrames(frames.map(f => 
                             f.id === frame.id 
@@ -2849,6 +2858,7 @@ export default function CanvasContainerNew({
                               }}
                               globalAnimationTrigger={animationGlobalKey as any}
                               onElementInteraction={() => onElementInteraction?.(element)}
+                              onVideoRefUpdate={element.type === "video" ? (ref) => videoRefsMap.current.set(nestedFrame.id, ref) : undefined}
                             />
                           </CanvasContextMenu>
                         ))}
