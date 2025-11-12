@@ -84,26 +84,27 @@ export default function FrameVideoControls({
 
   return (
     <div 
-      className="absolute z-40 pointer-events-auto"
+      className="absolute z-40 pointer-events-auto flex flex-col items-center gap-1"
       style={{ 
         left: `${frameX + frameWidth / 2}px`,
         top: `${frameY + frameHeight + 8}px`,
         transform: 'translateX(-50%)',
-        maxWidth: `${frameWidth}px`
       }}
     >
-      {/* Subtle glow */}
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-radial from-blue-500/20 via-blue-400/10 to-transparent blur-2xl scale-150" />
-      </div>
+      {/* Time Badge - Top */}
+      <Badge variant="secondary" className="text-xs font-medium whitespace-nowrap px-2 py-1">
+        {formatTime(currentTime)} / {formatTime(duration)}
+      </Badge>
+
+      {/* Controls Container */}
+      <div className="relative">
+        {/* Subtle glow */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute inset-0 bg-gradient-radial from-blue-500/20 via-blue-400/10 to-transparent blur-2xl scale-150" />
+        </div>
 
       <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]">
-        {/* Time Display - Left as Badge */}
-        <Badge variant="secondary" className="text-xs font-medium whitespace-nowrap px-2 py-1">
-          {formatTime(currentTime)} / {formatTime(duration)}
-        </Badge>
-
-        {/* Play/Pause - Center */}
+        {/* Play/Pause */}
         <Button
           variant="ghost"
           size="icon"
@@ -117,7 +118,7 @@ export default function FrameVideoControls({
           )}
         </Button>
 
-        {/* Mute/Unmute - Right */}
+        {/* Mute/Unmute */}
         <Button
           variant="ghost"
           size="icon"
@@ -130,6 +131,7 @@ export default function FrameVideoControls({
             <Volume2 size={14} className="transition-transform duration-300 group-hover:rotate-6" />
           )}
         </Button>
+      </div>
       </div>
     </div>
   );
