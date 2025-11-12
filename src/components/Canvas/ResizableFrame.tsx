@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, ReactNode } from "react";
 import PosterPreview from "./PosterPreview";
 import { generateGradientCSS, getFitStyle } from "@/lib/utils";
-import FrameVideoControls from "./FrameVideoControls";
 
 interface ResizableFrameProps {
   id: string;
@@ -55,8 +54,6 @@ interface ResizableFrameProps {
   isSelected: boolean;
   onSelect: () => void;
   children?: ReactNode;
-  hasVideoElement?: boolean;
-  videoRef?: React.RefObject<HTMLVideoElement>;
 }
 
 export default function ResizableFrame({
@@ -109,8 +106,6 @@ export default function ResizableFrame({
   isSelected,
   onSelect,
   children,
-  hasVideoElement = false,
-  videoRef,
 }: ResizableFrameProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<string | null>(null);
@@ -495,11 +490,6 @@ export default function ResizableFrame({
           {children}
         </div>
       </div>
-
-      {/* Frame-level video controls */}
-      {hasVideoElement && videoRef?.current && (
-        <FrameVideoControls videoRef={videoRef} frameWidth={width} />
-      )}
       
       {isSelected && !isLocked && (
         <>

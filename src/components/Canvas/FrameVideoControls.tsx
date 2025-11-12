@@ -5,10 +5,21 @@ import { Button } from "@/components/ui/button";
 
 interface FrameVideoControlsProps {
   videoRef: React.RefObject<HTMLVideoElement>;
+  frameX: number;
+  frameY: number;
   frameWidth: number;
+  frameHeight: number;
+  zoom: number;
 }
 
-export default function FrameVideoControls({ videoRef, frameWidth }: FrameVideoControlsProps) {
+export default function FrameVideoControls({ 
+  videoRef, 
+  frameX, 
+  frameY, 
+  frameWidth, 
+  frameHeight,
+  zoom 
+}: FrameVideoControlsProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -100,8 +111,13 @@ export default function FrameVideoControls({ videoRef, frameWidth }: FrameVideoC
 
   return (
     <div 
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40 pointer-events-auto"
-      style={{ maxWidth: `${frameWidth - 32}px` }}
+      className="absolute z-40 pointer-events-auto"
+      style={{ 
+        left: `${frameX + frameWidth / 2}px`,
+        top: `${frameY + frameHeight + 8}px`,
+        transform: 'translateX(-50%)',
+        maxWidth: `${frameWidth}px`
+      }}
     >
       {/* Subtle glow */}
       <div className="absolute inset-0 -z-10">

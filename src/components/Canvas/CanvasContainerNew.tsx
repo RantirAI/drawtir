@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Video, Gallery, Colorfilter } from "iconsax-react";
 import ResizableFrame from "./ResizableFrame";
+import FrameVideoControls from "./FrameVideoControls";
 import DraggablePanel from "../Panels/DraggablePanel";
 import ShapeSettingsPanel from "../Panels/ShapeSettingsPanel";
 import { ShadcnShaderSettingsPanel } from "../Panels/ShadcnShaderSettingsPanel";
@@ -2402,8 +2403,6 @@ export default function CanvasContainerNew({
                 zoom={zoom}
                 panOffset={panOffset}
                 onUpdate={handleFrameUpdate}
-                hasVideoElement={(frame.elements || []).some(el => el.type === "video")}
-                videoRef={{ current: videoRefsMap.current.get(frame.id) || null } as React.RefObject<HTMLVideoElement>}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);
                   setSelectedElementIds([]);
@@ -2603,8 +2602,6 @@ export default function CanvasContainerNew({
                         snapToGrid={snapToGrid}
                         zoom={zoom}
                         panOffset={panOffset}
-                        hasVideoElement={(nestedFrame.elements || []).some(el => el.type === "video")}
-                        videoRef={{ current: videoRefsMap.current.get(nestedFrame.id) || null } as React.RefObject<HTMLVideoElement>}
                         onUpdate={(id, updates) => {
                           setFrames(frames.map(f => 
                             f.id === frame.id 
@@ -2870,6 +2867,47 @@ export default function CanvasContainerNew({
             </CanvasContextMenu>
           </div>
         ))}
+        
+        {/* Video controls for frames with video elements */}
+        {frames.map((frame) => {
+          const hasVideo = (frame.elements || []).some(el => el.type === "video");
+          const videoRef = videoRefsMap.current.get(frame.id);
+          if (!hasVideo || !videoRef) return null;
+          
+          return (
+            <FrameVideoControls
+              key={`video-controls-${frame.id}`}
+              videoRef={{ current: videoRef } as React.RefObject<HTMLVideoElement>}
+              frameX={frame.x}
+              frameY={frame.y}
+              frameWidth={frame.width}
+              frameHeight={frame.height}
+              zoom={zoom}
+            />
+          );
+        })}
+        
+        {/* Nested frame video controls */}
+        {frames.map((frame) => 
+          (frame.frames || []).map((nestedFrame) => {
+            const hasVideo = (nestedFrame.elements || []).some(el => el.type === "video");
+            const videoRef = videoRefsMap.current.get(nestedFrame.id);
+            if (!hasVideo || !videoRef) return null;
+            
+            return (
+              <FrameVideoControls
+                key={`video-controls-${nestedFrame.id}`}
+                videoRef={{ current: videoRef } as React.RefObject<HTMLVideoElement>}
+                frameX={frame.x + nestedFrame.x}
+                frameY={frame.y + nestedFrame.y}
+                frameWidth={nestedFrame.width}
+                frameHeight={nestedFrame.height}
+                zoom={zoom}
+              />
+            );
+          })
+        )}
+        
         {/* Pen drawing overlay inside transformed canvas */}
         {selectedFrame && (
           <DrawingLayer
