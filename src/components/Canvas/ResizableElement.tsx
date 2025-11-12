@@ -9,7 +9,7 @@ import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
   id: string;
-  type: "image" | "shape" | "text" | "shader" | "richtext" | "qrcode";
+  type: "image" | "video" | "shape" | "text" | "shader" | "richtext" | "qrcode";
   x: number;
   y: number;
   width: number;
@@ -943,6 +943,21 @@ export default function ResizableElement({
           {imageFit === "crop" && (
             <div className="absolute inset-0 border border-dashed border-blue-500 pointer-events-none" />
           )}
+        </div>
+      ) : type === "video" && src ? (
+        // Video element
+        <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
+          <video 
+            src={src} 
+            className="w-full h-full"
+            controls
+            loop
+            style={{ 
+              objectFit: getObjectFitStyle(imageFit || "cover") as any,
+              objectPosition: "center",
+              filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`,
+            }}
+          />
         </div>
       ) : type === "text" ? (
         isEditing ? (

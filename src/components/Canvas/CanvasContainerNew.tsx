@@ -537,6 +537,11 @@ export default function CanvasContainerNew({
     setShowMediaLibrary(true);
   };
 
+  const handleVideoUpload = () => {
+    // Open media library panel for video selection
+    setShowMediaLibrary(true);
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && selectedFrameId) {
@@ -2430,13 +2435,13 @@ export default function CanvasContainerNew({
                        setShowAnimationsPanel(true);
                      }}
                     >
-                       <ResizableElement
-                        id={element.id}
-                         type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type}
-                        x={element.x}
-                        y={element.y}
-                        width={element.width}
-                        height={element.height}
+                        <ResizableElement
+                         id={element.id}
+                          type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "video" ? "video" : element.type}
+                         x={element.x}
+                         y={element.y}
+                         width={element.width}
+                         height={element.height}
                         sizeUnit={element.sizeUnit}
                         frameWidth={frame.width}
                         frameHeight={frame.height}
@@ -2710,7 +2715,7 @@ export default function CanvasContainerNew({
                           >
                             <ResizableElement
                               id={element.id}
-                              type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "qrcode" ? "shape" : element.type}
+                              type={element.type === "drawing" ? "shape" : element.type === "icon" ? "shape" : element.type === "shader" ? "shader" : element.type === "qrcode" ? "shape" : element.type === "video" ? "video" : element.type}
                               x={element.x}
                               y={element.y}
                               width={element.width}
@@ -3257,11 +3262,14 @@ export default function CanvasContainerNew({
               return;
             }
             
-            // Add image as an editable image element to the canvas
-            const newImageElement: Element = {
-              id: `image-${Date.now()}`,
-              type: "image",
-              name: "Image",
+            // Detect if the URL is a video based on file extension or type
+            const isVideo = url.match(/\.(mp4|webm|ogg|mov)$/i) || url.includes('video');
+            
+            // Add as either video or image element
+            const newElement: Element = {
+              id: `${isVideo ? 'video' : 'image'}-${Date.now()}`,
+              type: isVideo ? "video" : "image",
+              name: isVideo ? "Video" : "Image",
               x: selectedFrame.width / 2 - 100,
               y: selectedFrame.height / 2 - 100,
               width: 200,
@@ -3283,7 +3291,7 @@ export default function CanvasContainerNew({
                 frame.id === selectedFrameId
                   ? {
                       ...frame,
-                      elements: [...(frame.elements || []), newImageElement],
+                      elements: [...(frame.elements || []), newElement],
                     }
                   : frame
               )
@@ -3462,6 +3470,7 @@ export default function CanvasContainerNew({
         onShaderAdd={() => setShowShaderLibrary(true)}
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
+        onVideoUpload={handleVideoUpload}
         onAddFrame={handleAddFrame}
         onAddNestedFrame={handleAddNestedFrame}
         onAddRichText={handleAddRichText}

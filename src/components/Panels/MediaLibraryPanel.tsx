@@ -303,17 +303,26 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                     {media.map((item) => (
                       <div key={item.id} className="relative group">
                         <div
-                          className="aspect-square rounded-md overflow-hidden cursor-pointer hover:ring-1 hover:ring-primary transition-all"
+                          className="aspect-square rounded-md overflow-hidden cursor-pointer hover:ring-1 hover:ring-primary transition-all relative"
                           onClick={() => {
                             onSelectImage?.(item.file_url);
                             onClose?.();
                           }}
                         >
                           {item.file_type.startsWith('video/') ? (
-                            <video
-                              src={item.file_url}
-                              className="w-full h-full object-cover bg-muted/30"
-                            />
+                            <>
+                              <video
+                                src={item.file_url}
+                                className="w-full h-full object-cover bg-muted/30"
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                                <div className="bg-white/90 rounded-full p-2">
+                                  <svg className="w-4 h-4 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z"/>
+                                  </svg>
+                                </div>
+                              </div>
+                            </>
                           ) : (
                             <img
                               src={item.file_url}

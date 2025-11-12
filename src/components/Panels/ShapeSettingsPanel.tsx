@@ -80,7 +80,7 @@ const GOOGLE_FONTS = [
 ];
 
 interface ShapeSettingsPanelProps {
-  elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null;
+  elementType?: "frame" | "shape" | "text" | "richtext" | "image" | "video" | "drawing" | "icon" | "shader" | "qrcode" | null;
   elementName?: string;
   shapeType?: "rectangle" | "line" | "arrow" | "ellipse" | "polygon" | "star" | "custom";
   iconName?: string;
@@ -204,13 +204,14 @@ interface ShapeSettingsPanelProps {
   onOpenBrandKit?: () => void;
 }
 
-const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "drawing" | "icon" | "shader" | "qrcode" | null) => {
+const getElementIcon = (type?: "frame" | "shape" | "text" | "richtext" | "image" | "video" | "drawing" | "icon" | "shader" | "qrcode" | null) => {
   switch (type) {
     case "frame": return Box;
     case "shape": return Square;
     case "text": return Type;
     case "richtext": return Heading1;
     case "image": return Image;
+    case "video": return Image; // Using Image icon for video
     case "drawing": return Pen;
     case "icon": return Smile;
     case "shader": return Sparkles;

@@ -1,6 +1,6 @@
 import { 
   Brush2, TextBlock, Gallery as GalleryIcon, Add,
-  Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2
+  Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2, Video
 } from "iconsax-react";
 import { MousePointer2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ interface BottomToolbarProps {
   activeTool?: string;
   onToolChange?: (tool: string) => void;
   onImageUpload: () => void;
+  onVideoUpload?: () => void;
   onAddFrame: () => void;
   onAddNestedFrame?: () => void;
   onDuplicate?: () => void;
@@ -30,7 +31,8 @@ interface BottomToolbarProps {
 export default function BottomToolbar({ 
   activeTool = "select",
   onToolChange,
-  onImageUpload, 
+  onImageUpload,
+  onVideoUpload,
   onAddFrame,
   onAddNestedFrame,
   onDuplicate,
@@ -134,6 +136,15 @@ export default function BottomToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Image</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onVideoUpload}>
+                <Video size={16} className="transition-transform duration-300 group-hover:rotate-6" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">Video</TooltipContent>
           </Tooltip>
 
           <IconSelector onIconSelect={(iconName, iconFamily) => {
