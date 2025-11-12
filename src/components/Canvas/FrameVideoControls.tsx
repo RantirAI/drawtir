@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface FrameVideoControlsProps {
   videoRef: React.RefObject<HTMLVideoElement>;
@@ -97,10 +98,10 @@ export default function FrameVideoControls({
       </div>
 
       <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]">
-        {/* Time Display - Left */}
-        <span className="text-xs text-foreground/80 font-medium whitespace-nowrap">
+        {/* Time Display - Left as Badge */}
+        <Badge variant="secondary" className="text-xs font-medium whitespace-nowrap px-2 py-1">
           {formatTime(currentTime)} / {formatTime(duration)}
-        </span>
+        </Badge>
 
         {/* Play/Pause - Center */}
         <Button
