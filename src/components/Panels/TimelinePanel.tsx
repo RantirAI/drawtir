@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
+import { Play, Pause, RotateCcw } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,14 +14,9 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import AnimationSettingsDialog from "./AnimationSettingsDialog";
-import VoicePanel from "./VoicePanel";
+import VoiceSelector from "./VoiceSelector";
+import VoiceTextDrawer from "./VoiceTextDrawer";
 
 interface TimelinePanelProps {
   frame: Frame | null;
@@ -52,7 +47,7 @@ export default function TimelinePanel({
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
-  const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
   const [voiceAudios, setVoiceAudios] = useState<{ id: string; url: string; text: string; delay: number; duration: number }[]>([]);
   const [draggingAnimation, setDraggingAnimation] = useState<{
     elementId: string;
@@ -240,7 +235,7 @@ export default function TimelinePanel({
       };
       setVoiceAudios(prev => [...prev, newVoice]);
     });
-    setIsVoicePanelOpen(false);
+    setSelectedVoice(null);
   };
 
   // Play voices at appropriate times
@@ -263,15 +258,7 @@ export default function TimelinePanel({
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <h3 className="text-sm font-medium">Timeline</h3>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6"
-            onClick={() => setIsVoicePanelOpen(true)}
-            title="Add voice"
-          >
-            <Volume2 className="h-3 w-3" />
-          </Button>
+          <VoiceSelector onSelectVoice={(voiceId, voiceName) => setSelectedVoice({ id: voiceId, name: voiceName })} />
           <Button
             variant="ghost"
             size="icon"
@@ -530,14 +517,13 @@ export default function TimelinePanel({
       </ScrollArea>
     </div>
 
-    <Dialog open={isVoicePanelOpen} onOpenChange={setIsVoicePanelOpen}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Generate Voice</DialogTitle>
-        </DialogHeader>
-        <VoicePanel onVoiceGenerated={handleVoiceGenerated} />
-      </DialogContent>
-    </Dialog>
+    <VoiceTextDrawer
+      open={!!selectedVoice}
+      onClose={() => setSelectedVoice(null)}
+      voiceId={selectedVoice?.id || ""}
+      voiceName={selectedVoice?.name || ""}
+      onVoiceGenerated={handleVoiceGenerated}
+    />
     </>
   );
 }
