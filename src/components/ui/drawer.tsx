@@ -3,8 +3,12 @@ import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
 
-const Drawer = ({ shouldScaleBackground = true, ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) => (
-  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} {...props} />
+const Drawer = ({ 
+  shouldScaleBackground = true, 
+  direction = "bottom",
+  ...props 
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & { direction?: "top" | "bottom" | "left" | "right" }) => (
+  <DrawerPrimitive.Root shouldScaleBackground={shouldScaleBackground} direction={direction} {...props} />
 );
 Drawer.displayName = "Drawer";
 
@@ -31,12 +35,20 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-[10px] border bg-background",
+        "fixed z-50 flex flex-col border bg-background",
+        // Default bottom drawer
+        "data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:rounded-t-[10px]",
+        // Right drawer
+        "data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:h-full data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:rounded-l-[10px] data-[vaul-drawer-direction=right]:sm:max-w-md",
+        // Left drawer
+        "data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:h-full data-[vaul-drawer-direction=left]:w-full data-[vaul-drawer-direction=left]:rounded-r-[10px] data-[vaul-drawer-direction=left]:sm:max-w-md",
+        // Top drawer
+        "data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:rounded-b-[10px]",
         className,
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted data-[vaul-drawer-direction=right]:hidden data-[vaul-drawer-direction=left]:hidden" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
