@@ -3009,9 +3009,9 @@ export default function CanvasContainerNew({
           fill={selectedElement?.fill || penColor}
           fillImage={selectedElement?.fillImage}
           fillImageFit={selectedElement?.fillImageFit}
-          gradientType={selectedElement?.gradientType}
-          gradientAngle={selectedElement?.gradientAngle}
-          gradientStops={selectedElement?.gradientStops}
+          gradientType={selectedElement?.gradientType || selectedFrame?.gradientType}
+          gradientAngle={selectedElement?.gradientAngle || selectedFrame?.gradientAngle}
+          gradientStops={selectedElement?.gradientStops || selectedFrame?.gradientStops}
           patternFrameId={selectedElement?.patternFrameId}
           videoUrl={selectedElement?.videoUrl}
           stroke={selectedElement?.stroke || penColor}
@@ -3152,9 +3152,27 @@ export default function CanvasContainerNew({
           onBlurChange={(val) => selectedElement && handleElementUpdate(selectedElement.id, { blur: val })}
           onFillImageChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { fillImage: url })}
           onFillImageFitChange={(fit) => selectedElement && handleElementUpdate(selectedElement.id, { fillImageFit: fit })}
-          onGradientTypeChange={(type) => selectedElement && handleElementUpdate(selectedElement.id, { gradientType: type })}
-          onGradientAngleChange={(angle) => selectedElement && handleElementUpdate(selectedElement.id, { gradientAngle: angle })}
-          onGradientStopsChange={(stops) => selectedElement && handleElementUpdate(selectedElement.id, { gradientStops: stops })}
+          onGradientTypeChange={(type) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { gradientType: type });
+            } else if (selectedFrameId) {
+              handleFrameUpdate(selectedFrameId, { gradientType: type });
+            }
+          }}
+          onGradientAngleChange={(angle) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { gradientAngle: angle });
+            } else if (selectedFrameId) {
+              handleFrameUpdate(selectedFrameId, { gradientAngle: angle });
+            }
+          }}
+          onGradientStopsChange={(stops) => {
+            if (selectedElement) {
+              handleElementUpdate(selectedElement.id, { gradientStops: stops });
+            } else if (selectedFrameId) {
+              handleFrameUpdate(selectedFrameId, { gradientStops: stops });
+            }
+          }}
           onPatternFrameIdChange={(frameId) => selectedElement && handleElementUpdate(selectedElement.id, { patternFrameId: frameId })}
           onVideoUrlChange={(url) => selectedElement && handleElementUpdate(selectedElement.id, { videoUrl: url })}
           availableFrames={frames.map(f => ({ id: f.id, name: f.name }))}

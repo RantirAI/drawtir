@@ -217,7 +217,23 @@ export default function ColorPicker({
 
       {/* Hex and Opacity Input Row */}
       <div className="flex items-center gap-1.5 pt-1">
-        <Pipette className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <button
+          onClick={async () => {
+            if ('EyeDropper' in window) {
+              try {
+                const eyeDropper = new (window as any).EyeDropper();
+                const result = await eyeDropper.open();
+                onChange(result.sRGBHex);
+              } catch (e) {
+                // User cancelled or error occurred
+              }
+            }
+          }}
+          className="p-1 hover:bg-accent rounded transition-colors flex-shrink-0"
+          title="Pick color from screen"
+        >
+          <Pipette className="w-4 h-4 text-muted-foreground" />
+        </button>
         <Input
           type="text"
           value={color.toUpperCase()}
