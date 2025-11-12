@@ -1,42 +1,49 @@
 import { useState } from "react";
 import { Volume2, Loader2 } from "lucide-react";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import maleAvatar from "@/assets/male-voice-avatar.png";
+import femaleAvatar from "@/assets/female-voice-avatar.png";
 
 interface Voice {
   id: string;
   name: string;
-  preview?: string; // Preview audio URL if available
+  gender: "male" | "female";
+  preview?: string;
 }
 
 const VOICE_OPTIONS: Voice[] = [
-  { id: "9BWtsMINqrJLrRacOk9x", name: "Aria" },
-  { id: "CwhRBWXzGAHq8TQ4Fs17", name: "Roger" },
-  { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah" },
-  { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura" },
-  { id: "IKne3meq5aSn9XLyUdCD", name: "Charlie" },
-  { id: "JBFqnCBsd6RMkjVDRZzb", name: "George" },
-  { id: "N2lVS1w4EtoT3dr4eOWO", name: "Callum" },
-  { id: "SAz9YHcvj6GT2YYXdXww", name: "River" },
-  { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam" },
-  { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte" },
-  { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice" },
-  { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda" },
-  { id: "bIHbv24MWmeRgasZH58o", name: "Will" },
-  { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica" },
-  { id: "cjVigY5qzO86Huf0OWal", name: "Eric" },
-  { id: "iP95p4xoKVk53GoZ742B", name: "Chris" },
-  { id: "nPczCjzI2devNBz1zQrb", name: "Brian" },
-  { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel" },
-  { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily" },
-  { id: "pqHfZKP75CvOlQylNhV4", name: "Bill" },
+  { id: "9BWtsMINqrJLrRacOk9x", name: "Aria", gender: "female" },
+  { id: "CwhRBWXzGAHq8TQ4Fs17", name: "Roger", gender: "male" },
+  { id: "EXAVITQu4vr4xnSDxMaL", name: "Sarah", gender: "female" },
+  { id: "FGY2WhTYpPnrIDTdsKH5", name: "Laura", gender: "female" },
+  { id: "IKne3meq5aSn9XLyUdCD", name: "Charlie", gender: "male" },
+  { id: "JBFqnCBsd6RMkjVDRZzb", name: "George", gender: "male" },
+  { id: "N2lVS1w4EtoT3dr4eOWO", name: "Callum", gender: "male" },
+  { id: "SAz9YHcvj6GT2YYXdXww", name: "River", gender: "female" },
+  { id: "TX3LPaxmHKxFdv7VOQHJ", name: "Liam", gender: "male" },
+  { id: "XB0fDUnXU5powFXDhCwa", name: "Charlotte", gender: "female" },
+  { id: "Xb7hH8MSUJpSbSDYk0k2", name: "Alice", gender: "female" },
+  { id: "XrExE9yKIg1WjnnlVkGX", name: "Matilda", gender: "female" },
+  { id: "bIHbv24MWmeRgasZH58o", name: "Will", gender: "male" },
+  { id: "cgSgspJ2msm6clMCkdW9", name: "Jessica", gender: "female" },
+  { id: "cjVigY5qzO86Huf0OWal", name: "Eric", gender: "male" },
+  { id: "iP95p4xoKVk53GoZ742B", name: "Chris", gender: "male" },
+  { id: "nPczCjzI2devNBz1zQrb", name: "Brian", gender: "male" },
+  { id: "onwK4e9ZLuTAKqWW03F9", name: "Daniel", gender: "male" },
+  { id: "pFZP5JQG7iQjIQuC4Bku", name: "Lily", gender: "female" },
+  { id: "pqHfZKP75CvOlQylNhV4", name: "Bill", gender: "male" },
 ];
 
 interface VoiceSelectorProps {
@@ -118,8 +125,8 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
@@ -128,51 +135,58 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
         >
           <Volume2 className="h-3 w-3" />
         </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64 p-2" align="center" side="top" sideOffset={8}>
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Select Voice</h4>
-          <p className="text-xs text-muted-foreground">
-            Click the speaker icon to preview
-          </p>
-          <ScrollArea className="h-64">
-            <div className="space-y-1">
-              {VOICE_OPTIONS.map((voice) => (
-                <div
-                  key={voice.id}
-                  className="flex items-center justify-between p-2 rounded-md hover:bg-accent group border border-border"
+      </DrawerTrigger>
+      <DrawerContent className="h-[85vh]">
+        <DrawerHeader>
+          <DrawerTitle>Select Voice</DrawerTitle>
+          <DrawerDescription>
+            Click the speaker icon to preview the voice
+          </DrawerDescription>
+        </DrawerHeader>
+        <ScrollArea className="flex-1 px-4">
+          <div className="space-y-2 pb-4">
+            {VOICE_OPTIONS.map((voice) => (
+              <div
+                key={voice.id}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors group"
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage 
+                    src={voice.gender === "male" ? maleAvatar : femaleAvatar} 
+                    alt={voice.name}
+                  />
+                  <AvatarFallback>{voice.name[0]}</AvatarFallback>
+                </Avatar>
+                
+                <Button
+                  variant="ghost"
+                  className="flex-1 justify-start h-auto py-2 px-2 font-medium hover:bg-transparent"
+                  onClick={() => handleSelectVoice(voice.id, voice.name)}
                 >
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="flex-1 justify-start h-auto py-1 px-2 font-normal"
-                    onClick={() => handleSelectVoice(voice.id, voice.name)}
-                  >
-                    {voice.name}
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handlePreviewVoice(voice.id, voice.name);
-                    }}
-                    disabled={playingVoice === voice.id}
-                  >
-                    {playingVoice === voice.id ? (
-                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                    ) : (
-                      <Volume2 className="h-3 w-3" />
-                    )}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        </div>
-      </PopoverContent>
-    </Popover>
+                  {voice.name}
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePreviewVoice(voice.id, voice.name);
+                  }}
+                  disabled={playingVoice === voice.id}
+                >
+                  {playingVoice === voice.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </DrawerContent>
+    </Drawer>
   );
 }
