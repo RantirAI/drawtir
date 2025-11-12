@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Volume2 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -14,7 +14,14 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import AnimationSettingsDialog from "./AnimationSettingsDialog";
+import VoicePanel from "./VoicePanel";
 
 interface TimelinePanelProps {
   frame: Frame | null;
@@ -45,6 +52,8 @@ export default function TimelinePanel({
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
+  const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(false);
+  const [voiceAudios, setVoiceAudios] = useState<{ id: string; url: string; text: string; delay: number; duration: number }[]>([]);
   const [draggingAnimation, setDraggingAnimation] = useState<{
     elementId: string;
     animationId: string;
@@ -219,11 +228,50 @@ export default function TimelinePanel({
     return clickTime;
   };
 
+  const handleVoiceGenerated = (audioUrl: string, text: string) => {
+    const audio = new Audio(audioUrl);
+    audio.addEventListener('loadedmetadata', () => {
+      const newVoice = {
+        id: `voice-${Date.now()}`,
+        url: audioUrl,
+        text,
+        delay: currentTime,
+        duration: audio.duration,
+      };
+      setVoiceAudios(prev => [...prev, newVoice]);
+    });
+    setIsVoicePanelOpen(false);
+  };
+
+  // Play voices at appropriate times
+  useEffect(() => {
+    voiceAudios.forEach(voice => {
+      if (currentTime >= voice.delay && currentTime < voice.delay + voice.duration) {
+        const audio = new Audio(voice.url);
+        const offset = currentTime - voice.delay;
+        audio.currentTime = offset;
+        if (isPlaying) {
+          audio.play();
+        }
+      }
+    });
+  }, [currentTime, isPlaying, voiceAudios]);
+
   return (
+    <>
     <div className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <h3 className="text-sm font-medium">Timeline</h3>
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={() => setIsVoicePanelOpen(true)}
+            title="Add voice"
+          >
+            <Volume2 className="h-3 w-3" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -282,6 +330,40 @@ export default function TimelinePanel({
 
           {/* Element tracks */}
           <div className="space-y-2 mt-4">
+            {/* Voice tracks */}
+            {voiceAudios.map((voice) => {
+              const startPercent = (voice.delay / maxDuration) * 100;
+              const widthPercent = (voice.duration / maxDuration) * 100;
+              
+              return (
+                <div key={voice.id} className="flex items-center gap-2 p-1 rounded">
+                  <div className="w-32 flex-shrink-0">
+                    <div className="text-xs truncate font-medium">
+                      Voice
+                    </div>
+                    <div className="text-[10px] text-muted-foreground truncate">
+                      {voice.text.substring(0, 20)}...
+                    </div>
+                  </div>
+                  <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                    <div
+                      className="absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-colors"
+                      style={{
+                        left: `${startPercent}%`,
+                        width: `${widthPercent}%`,
+                      }}
+                    >
+                      <div className="h-full flex items-center justify-between px-1">
+                        <div className="text-[10px] text-white font-medium truncate">
+                          Voice
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            
             {elements.map((element) => {
               const isSelected = selectedElementIds.includes(element.id);
               const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
@@ -447,5 +529,15 @@ export default function TimelinePanel({
         </div>
       </ScrollArea>
     </div>
+
+    <Dialog open={isVoicePanelOpen} onOpenChange={setIsVoicePanelOpen}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Generate Voice</DialogTitle>
+        </DialogHeader>
+        <VoicePanel onVoiceGenerated={handleVoiceGenerated} />
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

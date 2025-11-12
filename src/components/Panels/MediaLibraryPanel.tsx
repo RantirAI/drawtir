@@ -110,10 +110,10 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
       toast({
         title: "Invalid file",
-        description: "Please upload an image file",
+        description: "Please upload an image or video file",
         variant: "destructive",
       });
       return;
@@ -282,7 +282,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                     <label className="relative aspect-square rounded-md overflow-hidden cursor-pointer group border border-dashed border-border/50 bg-card hover:border-primary/50 hover:bg-primary/5 transition-all">
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*"
                         onChange={handleUpload}
                         className="hidden"
                         disabled={uploading}
@@ -299,7 +299,7 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                       </div>
                     </label>
 
-                    {/* Existing images */}
+                    {/* Existing media */}
                     {media.map((item) => (
                       <div key={item.id} className="relative group">
                         <div
@@ -309,11 +309,18 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
                             onClose?.();
                           }}
                         >
-                          <img
-                            src={item.file_url}
-                            alt={item.file_name}
-                            className="w-full h-full object-cover bg-muted/30"
-                          />
+                          {item.file_type.startsWith('video/') ? (
+                            <video
+                              src={item.file_url}
+                              className="w-full h-full object-cover bg-muted/30"
+                            />
+                          ) : (
+                            <img
+                              src={item.file_url}
+                              alt={item.file_name}
+                              className="w-full h-full object-cover bg-muted/30"
+                            />
+                          )}
                         </div>
                         <div className="absolute -bottom-4 left-0 right-0 flex items-center justify-between px-0.5 opacity-0 group-hover:opacity-100 transition-opacity pt-1">
                           <p className="text-[9px] text-muted-foreground truncate flex-1 max-w-[80%]">{item.file_name}</p>
