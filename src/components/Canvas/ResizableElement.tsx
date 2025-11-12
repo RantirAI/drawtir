@@ -5,6 +5,7 @@ import { ShadcnShaderElement } from "./ShadcnShaderElement";
 import { BendableLine } from "./BendableLine";
 import RichTextEditor from "./RichTextEditor";
 import { QRCodeSVG } from 'qrcode.react';
+import VideoPlayer from "./VideoPlayer";
 import type { Element } from "@/types/elements";
 
 interface ResizableElementProps {
@@ -945,20 +946,16 @@ export default function ResizableElement({
           )}
         </div>
       ) : type === "video" && src ? (
-        // Video element
-        <div className="w-full h-full relative overflow-hidden" style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}>
-          <video 
-            src={src} 
-            className="w-full h-full"
-            controls
-            loop
-            style={{ 
-              objectFit: getObjectFitStyle(imageFit || "cover") as any,
-              objectPosition: "center",
-              filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) blur(${blur}px)`,
-            }}
-          />
-        </div>
+        // Video element with custom player
+        <VideoPlayer
+          src={src}
+          className="w-full h-full"
+          style={{ borderRadius: cornerRadius ? `${cornerRadius}px` : '0' }}
+          brightness={brightness}
+          contrast={contrast}
+          saturation={saturation}
+          blur={blur}
+        />
       ) : type === "text" ? (
         isEditing ? (
           <textarea
