@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -109,7 +109,7 @@ export default function Workspaces() {
     try {
       const { data, error } = await supabase
         .from('workspace_members')
-        .select('id, user_id, role, joined_at, profiles(email, display_name, avatar_url)')
+        .select('id, user_id, role, joined_at, profiles:profiles!workspace_members_user_id_fkey(email, display_name, avatar_url)')
         .eq('workspace_id', workspaceId)
         .order('joined_at', { ascending: true });
 
@@ -249,6 +249,46 @@ export default function Workspaces() {
     return { label: 'Pending', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' };
   };
 
+  // Show only one invitation per email within this workspace.
+  // Preference order: Accepted > Latest pending. This avoids showing older pending invites
+  // after the user has already accepted.
+  const dedupedInvitations = useMemo(() => {
+    const groups = new Map<string, WorkspaceInvitation[]>();
+    for (const inv of invitations) {
+      const key = inv.email.toLowerCase();
+      const arr = groups.get(key) || [];
+      arr.push(inv);
+      groups.set(key, arr);
+    }
+
+    const result: WorkspaceInvitation[] = [];
+    groups.forEach((arr) => {
+      const accepted = arr
+        .filter((i) => i.accepted_at)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+      if (accepted) {
+        result.push(accepted);
+      } else {
+        const latest = arr.sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )[0];
+        result.push(latest);
+      }
+    });
+
+    return result.sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }, [invitations]);
+
+  const pendingCount = useMemo(
+    () =>
+      dedupedInvitations.filter(
+        (i) => !i.accepted_at && new Date(i.expires_at) > new Date()
+      ).length,
+    [dedupedInvitations]
+  );
+
   const cancelInvitation = async (invitationId: string) => {
     try {
       const { error } = await supabase
@@ -369,7 +409,7 @@ export default function Workspaces() {
                   <div>
                     <CardTitle>{selectedWorkspace.name}</CardTitle>
                     <CardDescription>
-                      {members.length} member{members.length !== 1 ? 's' : ''} · {invitations.filter(i => !i.accepted_at).length} pending invitation{invitations.filter(i => !i.accepted_at).length !== 1 ? 's' : ''}
+                      {members.length} member{members.length !== 1 ? 's' : ''} · {pendingCount} pending invitation{pendingCount !== 1 ? 's' : ''}
                     </CardDescription>
                   </div>
                   
@@ -490,11 +530,11 @@ export default function Workspaces() {
                   </div>
 
                   {/* Invitations */}
-                  {invitations.length > 0 && (
+                  {dedupedInvitations.length > 0 && (
                     <div>
                       <h3 className="text-sm font-medium text-muted-foreground mb-3">Invitations</h3>
                       <div className="space-y-2">
-                        {invitations.map((invitation) => {
+                        {dedupedInvitations.map((invitation) => {
                           const status = getInvitationStatus(invitation);
                           return (
                             <div
