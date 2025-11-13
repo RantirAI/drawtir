@@ -11,6 +11,7 @@ export interface UserPresence {
   cursorY: number;
   color: string;
   lastSeen: number;
+  isActive: boolean; // Flag to track if cursor should be visible
 }
 
 const CURSOR_COLORS = [
@@ -22,11 +23,14 @@ const CURSOR_COLORS = [
   'hsl(48, 96%, 53%)', // yellow
 ];
 
+const CURSOR_HIDE_DELAY = 500; // Hide cursor after 500ms of inactivity
+const BROADCAST_THROTTLE = 50; // Throttle broadcasts to every 50ms (20fps is smooth enough)
+
 export const useCollaborativePresence = (projectId: string | null, enabled: boolean = true) => {
   const [activeUsers, setActiveUsers] = useState<Map<string, UserPresence>>(new Map());
   const [currentUser, setCurrentUser] = useState<{ id: string; name: string; avatar: string | null } | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
-  const throttleRef = useRef<NodeJS.Timeout | null>(null);
+  const lastBroadcastRef = useRef<number>(0);
   const cleanupIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch current user info
@@ -37,13 +41,18 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, avatar_url, email')
+        .select('display_name, avatar_url, email, first_name, last_name')
         .eq('id', user.id)
         .single();
 
+      const displayName = profile?.display_name || 
+                         (profile?.first_name && profile?.last_name 
+                           ? `${profile.first_name} ${profile.last_name}` 
+                           : profile?.first_name || profile?.email || 'Anonymous');
+
       setCurrentUser({
         id: user.id,
-        name: profile?.display_name || profile?.email || 'Anonymous',
+        name: displayName,
         avatar: profile?.avatar_url || null,
       });
     };
@@ -59,26 +68,26 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
     return CURSOR_COLORS[Math.abs(hash) % CURSOR_COLORS.length];
   }, []);
 
-  // Broadcast cursor position (throttled)
+  // Broadcast cursor position (properly throttled)
   const broadcastCursor = useCallback((x: number, y: number) => {
     if (!channelRef.current || !currentUser || !enabled) return;
 
-    if (throttleRef.current) {
-      clearTimeout(throttleRef.current);
-    }
+    const now = Date.now();
+    if (now - lastBroadcastRef.current < BROADCAST_THROTTLE) return;
+    
+    lastBroadcastRef.current = now;
 
-    throttleRef.current = setTimeout(() => {
-      channelRef.current?.track({
-        userId: currentUser.id,
-        userName: currentUser.name,
-        displayName: currentUser.name,
-        avatarUrl: currentUser.avatar,
-        cursorX: x,
-        cursorY: y,
-        color: getUserColor(currentUser.id),
-        lastSeen: Date.now(),
-      });
-    }, 16); // ~60fps
+    channelRef.current.track({
+      userId: currentUser.id,
+      userName: currentUser.name,
+      displayName: currentUser.name,
+      avatarUrl: currentUser.avatar,
+      cursorX: x,
+      cursorY: y,
+      color: getUserColor(currentUser.id),
+      lastSeen: Date.now(),
+      isActive: true,
+    });
   }, [currentUser, enabled, getUserColor]);
 
   // Setup presence channel
@@ -121,22 +130,24 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
+          // Don't broadcast cursor on initial subscription
           await channel.track({
             userId: currentUser.id,
             userName: currentUser.name,
             displayName: currentUser.name,
             avatarUrl: currentUser.avatar,
-            cursorX: 0,
-            cursorY: 0,
+            cursorX: -1000, // Off-screen initially
+            cursorY: -1000,
             color: getUserColor(currentUser.id),
             lastSeen: Date.now(),
+            isActive: false,
           });
         }
       });
 
     channelRef.current = channel;
 
-    // Cleanup stale cursors every 3 seconds
+    // Cleanup stale cursors faster (every 500ms)
     cleanupIntervalRef.current = setInterval(() => {
       const now = Date.now();
       setActiveUsers(prev => {
@@ -144,7 +155,15 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
         let changed = false;
 
         next.forEach((user, userId) => {
-          if (now - user.lastSeen > 3000) {
+          if (now - user.lastSeen > CURSOR_HIDE_DELAY) {
+            // Mark as inactive instead of removing
+            if (user.isActive) {
+              next.set(userId, { ...user, isActive: false });
+              changed = true;
+            }
+          }
+          // Remove completely after 5 seconds
+          if (now - user.lastSeen > 5000) {
             next.delete(userId);
             changed = true;
           }
@@ -152,12 +171,9 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
         return changed ? next : prev;
       });
-    }, 3000);
+    }, 200); // Check more frequently
 
     return () => {
-      if (throttleRef.current) {
-        clearTimeout(throttleRef.current);
-      }
       if (cleanupIntervalRef.current) {
         clearInterval(cleanupIntervalRef.current);
       }
@@ -167,7 +183,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
   }, [projectId, currentUser, enabled, getUserColor]);
 
   return {
-    activeUsers: Array.from(activeUsers.values()),
+    activeUsers: Array.from(activeUsers.values()).filter(u => u.isActive), // Only return active cursors
     broadcastCursor,
     currentUser,
   };
