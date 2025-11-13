@@ -318,17 +318,27 @@ export default function TimelinePanel({
 
   // Play voices at appropriate times
   useEffect(() => {
+    if (!isPlaying) return;
+    
+    const activeAudios: HTMLAudioElement[] = [];
+    
     voiceAudios.forEach(voice => {
       if (currentTime >= voice.delay && currentTime < voice.delay + voice.duration) {
         const audio = new Audio(voice.url);
         const offset = currentTime - voice.delay;
         audio.currentTime = offset;
-        if (isPlaying) {
-          audio.play();
-        }
+        audio.play().catch(err => console.error('Audio play error:', err));
+        activeAudios.push(audio);
       }
     });
-  }, [currentTime, isPlaying, voiceAudios]);
+    
+    return () => {
+      activeAudios.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+    };
+  }, [currentTime, isPlaying]);
 
   return (
     <>
@@ -336,7 +346,13 @@ export default function TimelinePanel({
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <h3 className="text-sm font-medium">Timeline</h3>
         <div className="flex items-center gap-2">
-          <VoiceSelector onSelectVoice={(voiceId, voiceName) => setSelectedVoice({ id: voiceId, name: voiceName })} />
+          <VoiceSelector 
+            onSelectVoice={(voiceId, voiceName) => {
+              setSelectedVoice({ id: voiceId, name: voiceName });
+              setVoiceDrawerTimestamp(currentTime);
+              setVoiceDrawerOpen(true);
+            }} 
+          />
           <Button
             variant="ghost"
             size="icon"
