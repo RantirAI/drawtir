@@ -270,12 +270,12 @@ export default function Workspaces() {
     return { label: 'Pending', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' };
   };
 
-  // Show only one invitation per email within this workspace.
-  // Preference order: Accepted > Latest pending. This avoids showing older pending invites
-  // after the user has already accepted.
+  // Show only pending or expired invitations, not accepted ones
+  // Accepted invitations should result in the user being in Active Members
   const dedupedInvitations = useMemo(() => {
     const groups = new Map<string, WorkspaceInvitation[]>();
-    for (const inv of invitations) {
+    // Filter out accepted invitations - they should be in members list
+    for (const inv of invitations.filter(i => !i.accepted_at)) {
       const key = inv.email.toLowerCase();
       const arr = groups.get(key) || [];
       arr.push(inv);
@@ -284,17 +284,11 @@ export default function Workspaces() {
 
     const result: WorkspaceInvitation[] = [];
     groups.forEach((arr) => {
-      const accepted = arr
-        .filter((i) => i.accepted_at)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
-      if (accepted) {
-        result.push(accepted);
-      } else {
-        const latest = arr.sort(
-          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )[0];
-        result.push(latest);
-      }
+      // Get the latest invitation for this email
+      const latest = arr.sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )[0];
+      result.push(latest);
     });
 
     return result.sort(
