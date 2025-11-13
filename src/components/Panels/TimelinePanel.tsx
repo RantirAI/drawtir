@@ -68,6 +68,7 @@ export default function TimelinePanel({
   } | null>(null);
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
+  const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   // Sync external voice audios
   useEffect(() => {
@@ -318,27 +319,50 @@ export default function TimelinePanel({
 
   // Play voices at appropriate times
   useEffect(() => {
-    if (!isPlaying) return;
-    
-    const activeAudios: HTMLAudioElement[] = [];
+    if (!isPlaying) {
+      // Stop all playing audios when paused
+      playingAudiosRef.current.forEach((audio) => {
+        audio.pause();
+      });
+      playingAudiosRef.current.clear();
+      return;
+    }
     
     voiceAudios.forEach(voice => {
-      if (currentTime >= voice.delay && currentTime < voice.delay + voice.duration) {
+      const shouldPlay = currentTime >= voice.delay && currentTime < voice.delay + voice.duration;
+      const isCurrentlyPlaying = playingAudiosRef.current.has(voice.id);
+      
+      if (shouldPlay && !isCurrentlyPlaying) {
+        // Start playing this voice
         const audio = new Audio(voice.url);
         const offset = currentTime - voice.delay;
         audio.currentTime = offset;
         audio.play().catch(err => console.error('Audio play error:', err));
-        activeAudios.push(audio);
+        playingAudiosRef.current.set(voice.id, audio);
+        
+        // Clean up when audio ends
+        audio.onended = () => {
+          playingAudiosRef.current.delete(voice.id);
+        };
+      } else if (!shouldPlay && isCurrentlyPlaying) {
+        // Stop playing this voice
+        const audio = playingAudiosRef.current.get(voice.id);
+        if (audio) {
+          audio.pause();
+          playingAudiosRef.current.delete(voice.id);
+        }
       }
     });
     
     return () => {
-      activeAudios.forEach(audio => {
-        audio.pause();
-        audio.currentTime = 0;
-      });
+      if (!isPlaying) {
+        playingAudiosRef.current.forEach((audio) => {
+          audio.pause();
+        });
+        playingAudiosRef.current.clear();
+      }
     };
-  }, [currentTime, isPlaying]);
+  }, [currentTime, isPlaying, voiceAudios]);
 
   return (
     <>
