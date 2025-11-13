@@ -7,12 +7,20 @@ interface CollaborativeCursorProps {
   user: UserPresence;
   zoom: number;
   panOffset: { x: number; y: number };
+  canvasRect: DOMRect | null;
 }
 
-export const CollaborativeCursor = memo(({ user, zoom, panOffset }: CollaborativeCursorProps) => {
-  // Transform cursor position based on canvas pan and zoom
-  const x = user.cursorX * zoom + panOffset.x;
-  const y = user.cursorY * zoom + panOffset.y;
+export const CollaborativeCursor = memo(({ user, zoom, panOffset, canvasRect }: CollaborativeCursorProps) => {
+  if (!canvasRect) return null;
+
+  // Transform canvas coordinates to screen coordinates
+  // user.cursorX/Y are in canvas space (unzoomed, unpanned)
+  // We need to convert them to screen space accounting for:
+  // 1. Canvas container position (canvasRect.left, canvasRect.top)
+  // 2. Current zoom level
+  // 3. Current pan offset
+  const x = canvasRect.left + (user.cursorX * zoom + panOffset.x);
+  const y = canvasRect.top + (user.cursorY * zoom + panOffset.y);
 
   // Always show cursor even when idle
 

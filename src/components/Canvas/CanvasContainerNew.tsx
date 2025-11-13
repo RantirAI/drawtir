@@ -3776,14 +3776,18 @@ export default function CanvasContainerNew({
       {/* Collaborative Cursors Overlay */}
       {enableCollaboration && activeUsers.length > 0 && (
         <div className="pointer-events-none fixed inset-0 z-[9998]">
-          {activeUsers.map((user) => (
-            <CollaborativeCursor
-              key={user.userId}
-              user={user}
-              zoom={zoom}
-              panOffset={panOffset}
-            />
-          ))}
+          {activeUsers.map((user) => {
+            const canvasRect = canvasAreaRef.current?.getBoundingClientRect() || null;
+            return (
+              <CollaborativeCursor
+                key={user.userId}
+                user={user}
+                zoom={zoom}
+                panOffset={panOffset}
+                canvasRect={canvasRect}
+              />
+            );
+          })}
         </div>
       )}
 
