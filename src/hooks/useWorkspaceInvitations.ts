@@ -12,11 +12,13 @@ export interface WorkspaceInvitation {
   invited_by: string;
   workspaces: {
     name: string;
-  };
+  } | null;
   inviter: {
     display_name: string | null;
     email: string;
-  };
+    first_name: string | null;
+    last_name: string | null;
+  } | null;
 }
 
 export const useWorkspaceInvitations = () => {
@@ -40,8 +42,8 @@ export const useWorkspaceInvitations = () => {
         .from('workspace_invitations')
         .select(`
           *,
-          workspaces(name),
-          inviter:profiles!workspace_invitations_invited_by_fkey(display_name, email)
+          workspaces!workspace_invitations_workspace_id_fkey(name),
+          inviter:profiles!workspace_invitations_invited_by_fkey(display_name, email, first_name, last_name)
         `)
         .eq('email', profile.email)
         .is('accepted_at', null)

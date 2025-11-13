@@ -67,7 +67,12 @@ export const WorkspaceNotifications = () => {
                       {invitation.workspaces?.name || 'Workspace'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Invited by {invitation.inviter?.display_name || invitation.inviter?.email || 'Unknown'}
+                      Invited by {
+                        invitation.inviter?.display_name || 
+                        (invitation.inviter?.first_name && invitation.inviter?.last_name 
+                          ? `${invitation.inviter.first_name} ${invitation.inviter.last_name}`
+                          : invitation.inviter?.email || 'Unknown')
+                      }
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Role: <span className="font-medium">{invitation.role}</span>
