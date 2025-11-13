@@ -18,12 +18,14 @@ interface VoiceTextDrawerProps {
 }
 
 const emotionControls = [
-  { tag: "[laughs]", label: "Laughs", color: "hsl(var(--chart-1))" },
-  { tag: "[chuckles]", label: "Chuckles", color: "hsl(var(--chart-2))" },
-  { tag: "[whispers]", label: "Whispers", color: "hsl(var(--chart-3))" },
-  { tag: "[sighs]", label: "Sighs", color: "hsl(var(--chart-4))" },
-  { tag: "[excited]", label: "Excited", color: "hsl(var(--chart-5))" },
-  { tag: "[curious]", label: "Curious", color: "hsl(280 65% 60%)" },
+  { tag: "[laughs]", label: "Laughs", color: "rgb(255, 220, 220)" },
+  { tag: "[chuckles]", label: "Chuckles", color: "rgb(255, 240, 200)" },
+  { tag: "[whispers]", label: "Whispers", color: "rgb(220, 230, 255)" },
+  { tag: "[sighs]", label: "Sighs", color: "rgb(230, 220, 255)" },
+  { tag: "[excited]", label: "Excited", color: "rgb(255, 200, 200)" },
+  { tag: "[curious]", label: "Curious", color: "rgb(200, 240, 255)" },
+  { tag: "[sarcastic]", label: "Sarcastic", color: "rgb(220, 255, 220)" },
+  { tag: "[crying]", label: "Crying", color: "rgb(200, 220, 255)" },
 ];
 
 export default function VoiceTextDrawer({
@@ -210,11 +212,12 @@ export default function VoiceTextDrawer({
                     <Badge
                       key={control.tag}
                       onClick={() => insertEmotionTag(control.tag)}
-                      className="cursor-pointer px-4 py-2 text-sm font-medium transition-all hover:scale-105 active:scale-95"
+                      className="cursor-pointer px-2 py-0.5 text-xs font-medium transition-all hover:scale-105 active:scale-95"
                       style={{
                         backgroundColor: control.color,
-                        color: 'white',
-                        borderRadius: '2px',
+                        color: 'rgb(80, 80, 80)',
+                        borderRadius: '4px',
+                        border: 'none',
                       }}
                     >
                       {control.label}
