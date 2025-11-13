@@ -36,16 +36,25 @@ export const useWorkspaces = () => {
 
       setWorkspaces(workspacesData);
 
-      // Auto-select first workspace if none selected
-      if (workspacesData.length > 0 && !selectedWorkspaceId) {
-        const savedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
-        if (savedWorkspaceId && savedWorkspaceId !== 'personal') {
-          const validWorkspace = workspacesData.find(w => w.id === savedWorkspaceId);
-          setSelectedWorkspaceId(validWorkspace?.id || workspacesData[0].id);
+      // Auto-select workspace based on saved preference or first workspace
+      const savedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
+      
+      if (savedWorkspaceId && savedWorkspaceId !== 'personal') {
+        const validWorkspace = workspacesData.find(w => w.id === savedWorkspaceId);
+        if (validWorkspace) {
+          setSelectedWorkspaceId(validWorkspace.id);
         } else {
-          // Default to first available workspace
-          setSelectedWorkspaceId(workspacesData[0].id);
+          // Saved workspace no longer exists, select first or null
+          const newSelection = workspacesData.length > 0 ? workspacesData[0].id : null;
+          setSelectedWorkspaceId(newSelection);
+          if (newSelection) {
+            localStorage.setItem('selectedWorkspaceId', newSelection);
+          }
         }
+      } else if (workspacesData.length > 0 && !selectedWorkspaceId) {
+        // No valid saved workspace and user has workspaces - select first
+        setSelectedWorkspaceId(workspacesData[0].id);
+        localStorage.setItem('selectedWorkspaceId', workspacesData[0].id);
       }
     } catch (error) {
       console.error('Error fetching workspaces:', error);
@@ -87,6 +96,17 @@ export const useWorkspaces = () => {
 
   useEffect(() => {
     fetchWorkspaces();
+    
+    // Listen for invitation acceptance to refresh workspaces
+    const handleInvitationAccepted = () => {
+      fetchWorkspaces();
+    };
+    
+    window.addEventListener('workspaceInvitationAccepted', handleInvitationAccepted);
+    
+    return () => {
+      window.removeEventListener('workspaceInvitationAccepted', handleInvitationAccepted);
+    };
   }, []);
 
   // Listen for workspace changes broadcasted from other components

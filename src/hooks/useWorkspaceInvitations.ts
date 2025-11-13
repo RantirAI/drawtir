@@ -92,7 +92,12 @@ export const useWorkspaceInvitations = () => {
 
       if (updateError) throw updateError;
 
+      // Refresh invitations list
       await fetchInvitations();
+      
+      // Force workspace selection to refresh
+      window.dispatchEvent(new Event('workspaceInvitationAccepted'));
+      
       return true;
     } catch (error) {
       console.error('Error accepting invitation:', error);
