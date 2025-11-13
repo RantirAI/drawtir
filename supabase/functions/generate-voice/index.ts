@@ -20,29 +20,39 @@ Deno.serve(async (req) => {
       throw new Error('ElevenLabs API key not configured');
     }
 
-    console.log('Generating voice with ElevenLabs for text:', text.substring(0, 50));
+    console.log('Generating voice with ElevenLabs for text:', text.substring(0, 100));
 
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Accept': 'audio/mpeg',
-          'Content-Type': 'application/json',
-          'xi-api-key': ELEVENLABS_API_KEY,
-        },
-        body: JSON.stringify({
-          text,
-          model_id: 'eleven_turbo_v2_5',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.5,
-            use_speaker_boost: true,
+    async function tts(modelId: string) {
+      return fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': String(ELEVENLABS_API_KEY),
           },
-        }),
-      }
-    );
+          body: JSON.stringify({
+            text,
+            model_id: modelId,
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.75,
+              style: 0.5,
+              use_speaker_boost: true,
+            },
+          }),
+        }
+      );
+    }
+
+    // Try Eleven v3 first (supports Audio Tags). Fallback to turbo v2.5 if unavailable.
+    let response = await tts('eleven_v3');
+    if (!response.ok) {
+      const errTxt = await response.text();
+      console.warn('eleven_v3 failed, falling back to eleven_turbo_v2_5:', response.status, errTxt);
+      response = await tts('eleven_turbo_v2_5');
+    }
 
     if (!response.ok) {
       const errorText = await response.text();
