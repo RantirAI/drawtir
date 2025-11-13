@@ -477,6 +477,18 @@ export type Database = {
         Args: { _project_id: string; _user_id: string }
         Returns: undefined
       }
+      user_can_view_invitation: {
+        Args: { _invitation_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_has_invitation_to_workspace: {
+        Args: { _user_id: string; _workspace_id: string }
+        Returns: boolean
+      }
+      user_invited_by: {
+        Args: { _inviter_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       workspace_role: "owner" | "editor" | "viewer"
