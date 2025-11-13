@@ -1,5 +1,5 @@
 import type { Frame } from "@/types/elements";
-import type { CanvasSnapshot } from "@/types/snapshot";
+import type { CanvasSnapshot, VoiceAudio } from "@/types/snapshot";
 
 export const SNAPSHOT_VERSION = "1.0.0";
 
@@ -8,7 +8,8 @@ export function createSnapshot(
   title: string,
   zoom: number = 1,
   panOffset: { x: number; y: number } = { x: 0, y: 0 },
-  backgroundColor: string = "#ffffff"
+  backgroundColor: string = "#ffffff",
+  voiceAudios: VoiceAudio[] = []
 ): CanvasSnapshot {
   return {
     version: SNAPSHOT_VERSION,
@@ -23,6 +24,7 @@ export function createSnapshot(
       panOffset,
     },
     frames: JSON.parse(JSON.stringify(frames)), // Deep clone
+    voiceAudios: JSON.parse(JSON.stringify(voiceAudios)), // Deep clone
   };
 }
 

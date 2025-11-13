@@ -1,5 +1,13 @@
 import type { Frame } from "./elements";
 
+export interface VoiceAudio {
+  id: string;
+  url: string;
+  text: string;
+  delay: number;
+  duration: number;
+}
+
 export interface CanvasMetadata {
   title: string;
   createdAt: string;
@@ -17,6 +25,7 @@ export interface CanvasSnapshot {
   metadata: CanvasMetadata;
   canvas: CanvasSettings;
   frames: Frame[];
+  voiceAudios?: VoiceAudio[];
 }
 
 export interface SavedProject {

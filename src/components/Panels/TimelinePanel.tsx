@@ -30,6 +30,8 @@ interface TimelinePanelProps {
   onReset?: () => void;
   selectedElementIds?: string[];
   onElementSelect?: (elementId: string) => void;
+  voiceAudios?: Array<{ id: string; url: string; text: string; delay: number; duration: number }>;
+  onVoiceAudiosChange?: (voiceAudios: Array<{ id: string; url: string; text: string; delay: number; duration: number }>) => void;
 }
 
 export default function TimelinePanel({
@@ -44,11 +46,13 @@ export default function TimelinePanel({
   onReset,
   selectedElementIds = [],
   onElementSelect,
+  voiceAudios: externalVoiceAudios = [],
+  onVoiceAudiosChange,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
-  const [voiceAudios, setVoiceAudios] = useState<{ id: string; url: string; text: string; delay: number; duration: number }[]>([]);
+  const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
   const [draggingAnimation, setDraggingAnimation] = useState<{
     elementId: string;
     animationId: string;
@@ -64,6 +68,16 @@ export default function TimelinePanel({
   } | null>(null);
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
+
+  // Sync external voice audios
+  useEffect(() => {
+    setVoiceAudios(externalVoiceAudios);
+  }, [externalVoiceAudios]);
+
+  // Notify parent of voice audios changes
+  useEffect(() => {
+    onVoiceAudiosChange?.(voiceAudios);
+  }, [voiceAudios, onVoiceAudiosChange]);
 
   const parseDuration = (duration: string): number => {
     if (duration.endsWith('ms')) {

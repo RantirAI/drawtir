@@ -39,7 +39,7 @@ export default function VoiceTextDrawer({
   const [voiceId, setVoiceId] = useState(initialVoiceId);
   const [voiceName, setVoiceName] = useState(initialVoiceName);
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
-  const [previewingEmotion, setPreviewingEmotion] = useState<string | null>(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -67,14 +67,14 @@ export default function VoiceTextDrawer({
     setShowVoiceSelector(false);
   };
 
-  const handlePreviewEmotion = async (tag: string) => {
-    if (previewingEmotion) return;
+  const handlePreview = async () => {
+    if (!text.trim() || isPreviewing) return;
     
-    setPreviewingEmotion(tag);
+    setIsPreviewing(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('preview-voice', {
-        body: { voiceId }
+      const { data, error } = await supabase.functions.invoke('generate-voice', {
+        body: { text, voiceId }
       });
 
       if (error) throw error;
@@ -103,19 +103,19 @@ export default function VoiceTextDrawer({
       audioRef.current = audio;
       
       audio.onended = () => {
-        setPreviewingEmotion(null);
+        setIsPreviewing(false);
         URL.revokeObjectURL(audioUrl);
       };
       
       await audio.play();
     } catch (error) {
-      console.error('Error previewing emotion:', error);
+      console.error('Error previewing voice:', error);
       toast({
         title: "Preview failed",
         description: error instanceof Error ? error.message : "Failed to preview voice",
         variant: "destructive",
       });
-      setPreviewingEmotion(null);
+      setIsPreviewing(false);
     }
   };
 
@@ -200,40 +200,25 @@ export default function VoiceTextDrawer({
 
             {/* Emotion Controls */}
             <div className="space-y-3">
-              <Label className="text-base font-semibold">Emotion Controls</Label>
+              <Label className="text-base font-semibold">Emotion Tags</Label>
               <p className="text-sm text-muted-foreground">
-                Click to insert emotion tags or preview the sound
+                Click to insert emotion tags at cursor position
               </p>
               <div className="flex flex-wrap gap-2">
                 {emotionControls.map((control) => {
-                  const isPreviewing = previewingEmotion === control.tag;
                   return (
-                    <div key={control.tag} className="flex items-center gap-1">
-                      <Badge
-                        onClick={() => insertEmotionTag(control.tag)}
-                        className="cursor-pointer px-3 py-1.5 text-sm font-medium transition-all hover:opacity-80"
-                        style={{
-                          backgroundColor: control.color,
-                          color: 'white',
-                          borderRadius: '0px',
-                        }}
-                      >
-                        {control.label}
-                      </Badge>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => handlePreviewEmotion(control.tag)}
-                        disabled={isPreviewing}
-                      >
-                        {isPreviewing ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Play className="h-3 w-3" />
-                        )}
-                      </Button>
-                    </div>
+                    <Badge
+                      key={control.tag}
+                      onClick={() => insertEmotionTag(control.tag)}
+                      className="cursor-pointer px-4 py-2 text-sm font-medium transition-all hover:scale-105 active:scale-95"
+                      style={{
+                        backgroundColor: control.color,
+                        color: 'white',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      {control.label}
+                    </Badge>
                   );
                 })}
               </div>
@@ -257,6 +242,25 @@ export default function VoiceTextDrawer({
             {/* Action Buttons */}
             <div className="flex gap-2 pt-2">
               <Button
+                onClick={handlePreview}
+                disabled={isPreviewing || !text.trim()}
+                variant="outline"
+                size="lg"
+              >
+                {isPreviewing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Playing...
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 mr-2" />
+                    Preview
+                  </>
+                )}
+              </Button>
+              
+              <Button
                 onClick={handleGenerate}
                 disabled={isGenerating || !text.trim()}
                 className="flex-1"
@@ -265,17 +269,17 @@ export default function VoiceTextDrawer({
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating...
+                    Adding...
                   </>
                 ) : (
-                  "Generate Voice"
+                  "Add Voice"
                 )}
               </Button>
               
               <Button
                 variant="outline"
                 onClick={onClose}
-                disabled={isGenerating}
+                disabled={isGenerating || isPreviewing}
                 size="lg"
               >
                 <X className="w-4 h-4" />

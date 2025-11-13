@@ -192,6 +192,7 @@ export default function CanvasContainerNew({
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
   const [animationGlobalKey, setAnimationGlobalKey] = useState(0);
+  const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number }>>([]);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -723,7 +724,7 @@ export default function CanvasContainerNew({
       const canvasHeight = selectedFrame?.height || 1200;
 
       // Get current snapshot for iterative updates
-      const currentSnapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      const currentSnapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
 
       // Full AI poster generation with streaming
       const { data: { session } } = await supabase.auth.getSession();
@@ -1029,7 +1030,7 @@ export default function CanvasContainerNew({
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+            const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
             await supabase.from('ai_conversations').insert({
               project_id: projectId,
               user_id: user.id,
@@ -1062,7 +1063,7 @@ export default function CanvasContainerNew({
 
   const saveToCloud = async () => {
     if (isEmbedded && onSaveRequest) {
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
       await onSaveRequest(snapshot);
       return;
     }
@@ -1074,7 +1075,7 @@ export default function CanvasContainerNew({
         return;
       }
 
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
       const thumbnail = await generateThumbnail(frames);
 
       const posterData = {
@@ -1122,10 +1123,10 @@ export default function CanvasContainerNew({
   // Notify parent of changes in embedded mode
   useEffect(() => {
     if (isEmbedded && onSnapshotChange) {
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff");
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
       onSnapshotChange(snapshot);
     }
-  }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange]);
+  }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange, voiceAudios]);
 
   // Load initial snapshot
   // Load or update from provided snapshot (supports prop changes)
@@ -1133,6 +1134,11 @@ export default function CanvasContainerNew({
     if (initialSnapshot && validateSnapshot(initialSnapshot)) {
       setProjectTitle(initialSnapshot.metadata.title || "Untitled Poster");
       setFrames(initialSnapshot.frames);
+      
+      // Restore voice audios if available
+      if (initialSnapshot.voiceAudios) {
+        setVoiceAudios(initialSnapshot.voiceAudios);
+      }
 
       const firstId = initialSnapshot.frames?.[0]?.id;
       if (firstId) {
@@ -2949,7 +2955,7 @@ export default function CanvasContainerNew({
       {showGeneratePanel && (
         <AIGeneratorPanel
           projectId={projectId}
-          currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff")}
+          currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios)}
           frames={frames}
           selectedFrameId={selectedFrameId}
           onFrameSelect={setSelectedFrameId}
@@ -3655,6 +3661,8 @@ export default function CanvasContainerNew({
               setShowAnimationsPanel(true);
               setAnimatingElementId(elementId);
             }}
+            voiceAudios={voiceAudios}
+            onVoiceAudiosChange={setVoiceAudios}
           />
         </div>
       )}
