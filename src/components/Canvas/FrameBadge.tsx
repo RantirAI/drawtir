@@ -141,6 +141,26 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange, onS
         >
           <Edit2 size={12} className="text-muted-foreground group-hover/edit:text-primary transition-colors" />
         </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate?.();
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/duplicate"
+          aria-label="Duplicate frame"
+        >
+          <Copy size={12} className="text-muted-foreground group-hover/duplicate:text-primary transition-colors" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete?.();
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/delete"
+          aria-label="Delete frame"
+        >
+          <Trash2 size={12} className="text-muted-foreground group-hover/delete:text-destructive transition-colors" />
+        </button>
       </div>
     </CanvasContextMenu>
   );
