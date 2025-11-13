@@ -275,14 +275,14 @@ export default function Workspaces() {
                   No workspaces yet. Create one to get started!
                 </p>
               ) : (
-                workspaces.map((workspace) => (
+                 workspaces.map((workspace) => (
                   <button
                     key={workspace.id}
                     onClick={() => setSelectedWorkspace(workspace)}
                     className={`w-full text-left p-3 rounded-lg border transition-colors ${
                       selectedWorkspace?.id === workspace.id
-                        ? 'bg-primary/10 border-primary'
-                        : 'hover:bg-muted border-transparent'
+                        ? 'bg-primary/10 border-primary/30'
+                        : 'hover:bg-muted border-border/10'
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -382,7 +382,7 @@ export default function Workspaces() {
                   {members.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between p-3 rounded-lg border"
+                      className="flex items-center justify-between p-3 rounded-lg border border-border/10"
                     >
                       <div className="flex items-center gap-3">
                         <Avatar>
