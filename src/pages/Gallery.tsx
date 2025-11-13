@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter, Plus, Clock, AlertCircle } from "lucide-react";
+import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter, Plus, Clock, AlertCircle, FolderInput } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { useWorkspaces } from "@/hooks/useWorkspaces";
 import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useActivityLog } from "@/hooks/useActivityLog";
+import { MoveProjectDialog } from "@/components/Gallery/MoveProjectDialog";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { formatDistanceToNow } from 'date-fns';
 
@@ -27,6 +28,8 @@ interface Project {
   created_at: string;
   is_public: boolean;
   is_template: boolean;
+  workspace_id?: string | null;
+  user_id?: string;
 }
 
 export default function Gallery() {
@@ -37,6 +40,8 @@ export default function Gallery() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "name">("date");
   const [filterBy, setFilterBy] = useState<"all" | "public" | "private">("all");
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false);
+  const [projectToMove, setProjectToMove] = useState<{ id: string; name: string; workspaceId: string | null } | null>(null);
   const { templates, isLoading: templatesLoading } = useTemplates();
   const { selectedWorkspaceId, selectedWorkspace } = useWorkspaces();
   const { recentProjects, trackProjectView } = useRecentlyViewed();
@@ -57,9 +62,17 @@ export default function Gallery() {
 
   const fetchProjects = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/');
+        return;
+      }
+
+      // Always filter by user_id to show only user's own projects
       let query = supabase
         .from('posters')
-        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template, workspace_id');
+        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template, workspace_id, user_id')
+        .eq('user_id', user.id);
 
       // Filter by workspace if one is selected
       if (selectedWorkspaceId) {
@@ -246,6 +259,22 @@ export default function Gallery() {
                 ) : (
                   <Globe className="w-4 h-4" />
                 )}
+              </Button>
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setProjectToMove({
+                    id: project.id,
+                    name: project.project_name,
+                    workspaceId: project.workspace_id || null
+                  });
+                  setMoveDialogOpen(true);
+                }}
+                size="sm"
+                className="bg-white/95 hover:bg-primary hover:text-primary-foreground text-black h-8 w-8 p-0 shadow-lg"
+                title="Move to Workspace"
+              >
+                <FolderInput className="w-4 h-4" />
               </Button>
               <Button
                 onClick={(e) => deleteProject(project.id, e)}
@@ -462,6 +491,20 @@ export default function Gallery() {
         </div>
       </main>
       <PageFooter />
+      
+      {projectToMove && (
+        <MoveProjectDialog
+          projectId={projectToMove.id}
+          projectName={projectToMove.name}
+          currentWorkspaceId={projectToMove.workspaceId}
+          open={moveDialogOpen}
+          onOpenChange={setMoveDialogOpen}
+          onSuccess={() => {
+            fetchProjects();
+            setProjectToMove(null);
+          }}
+        />
+      )}
     </div>
   );
 }
