@@ -169,7 +169,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
     channelRef.current = channel;
 
-    // Cleanup stale cursors
+    // Keep cursors visible while online; prune only after long idle
     cleanupIntervalRef.current = setInterval(() => {
       const now = Date.now();
       setActiveUsers(prev => {
@@ -177,13 +177,8 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
         let changed = false;
 
         next.forEach((user, userId) => {
-          // Mark as inactive after delay
-          if (now - user.lastSeen > CURSOR_HIDE_DELAY && user.isActive) {
-            next.set(userId, { ...user, isActive: false });
-            changed = true;
-          }
-          // Remove completely after 3 seconds
-          if (now - user.lastSeen > 3000) {
+          // Remove only after 60s of no updates to avoid ghost cursors
+          if (now - user.lastSeen > 60000) {
             next.delete(userId);
             changed = true;
           }
@@ -191,7 +186,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
         return changed ? next : prev;
       });
-    }, 300); // Check every 300ms
+    }, 2000); // Light periodic cleanup
 
     return () => {
       if (cleanupIntervalRef.current) {

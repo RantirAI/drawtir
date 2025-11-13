@@ -14,8 +14,7 @@ export const CollaborativeCursor = memo(({ user, zoom, panOffset }: Collaborativ
   const x = user.cursorX * zoom + panOffset.x;
   const y = user.cursorY * zoom + panOffset.y;
 
-  // Only show cursor if user is active
-  if (!user.isActive) return null;
+  // Always show cursor even when idle
 
   return (
     <motion.div
