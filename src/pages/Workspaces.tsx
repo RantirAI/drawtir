@@ -263,8 +263,7 @@ export default function Workspaces() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Workspaces List */}
-          <Card>
+          <Card className="border-border/10">
             <CardHeader>
               <CardTitle className="text-lg">Your Workspaces</CardTitle>
               <CardDescription>Select a workspace to manage</CardDescription>
@@ -302,7 +301,7 @@ export default function Workspaces() {
 
           {/* Members List */}
           {selectedWorkspace && (
-            <Card className="lg:col-span-2">
+            <Card className="lg:col-span-2 border-border/10">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
