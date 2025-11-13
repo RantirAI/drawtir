@@ -435,7 +435,7 @@ export default function Workspaces() {
                   </div>
                   
                   <div className="flex gap-2">
-                    {selectedWorkspace.your_role === 'owner' && (
+                    {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'admin') && (
                       <>
                         <Button
                           size="sm"
@@ -535,7 +535,7 @@ export default function Workspaces() {
                               {member.role}
                             </div>
                             
-                            {selectedWorkspace.your_role === 'owner' && member.role !== 'owner' && (
+                            {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'admin') && member.role !== 'owner' && (
                               <Popover>
                                 <PopoverTrigger asChild>
                                   <Button size="sm" variant="ghost">
@@ -619,7 +619,7 @@ export default function Workspaces() {
                                   {invitation.role}
                                 </div>
                                 
-                                {selectedWorkspace.your_role === 'owner' && !invitation.accepted_at && (
+                                {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'admin') && !invitation.accepted_at && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
