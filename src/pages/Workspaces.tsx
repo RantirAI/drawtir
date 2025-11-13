@@ -1,0 +1,420 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
+import { Plus, Users, Mail, Trash2, Crown } from 'lucide-react';
+import HorizontalNav from '@/components/Navigation/HorizontalNav';
+
+interface Workspace {
+  id: string;
+  name: string;
+  owner_id: string;
+  created_at: string;
+  member_count?: number;
+  your_role?: string;
+}
+
+interface WorkspaceMember {
+  id: string;
+  user_id: string;
+  role: string;
+  joined_at: string;
+  profiles: {
+    email: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  };
+}
+
+export default function Workspaces() {
+  const navigate = useNavigate();
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  const [members, setMembers] = useState<WorkspaceMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'viewer' | 'editor'>('editor');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWorkspace) {
+      fetchMembers(selectedWorkspace.id);
+    }
+  }, [selectedWorkspace]);
+
+  const fetchWorkspaces = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/');
+        return;
+      }
+
+      // Fetch workspaces where user is a member
+      const { data: memberWorkspaces, error: membersError } = await supabase
+        .from('workspace_members')
+        .select('workspace_id, role, workspaces(id, name, owner_id, created_at)')
+        .eq('user_id', user.id);
+
+      if (membersError) throw membersError;
+
+      const workspacesData = memberWorkspaces?.map(m => ({
+        ...(m.workspaces as any),
+        your_role: m.role,
+      })) || [];
+
+      setWorkspaces(workspacesData);
+      if (workspacesData.length > 0 && !selectedWorkspace) {
+        setSelectedWorkspace(workspacesData[0]);
+      }
+    } catch (error) {
+      console.error('Error fetching workspaces:', error);
+      toast.error('Failed to load workspaces');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMembers = async (workspaceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('workspace_members')
+        .select('id, user_id, role, joined_at, profiles(email, display_name, avatar_url)')
+        .eq('workspace_id', workspaceId)
+        .order('joined_at', { ascending: true });
+
+      if (error) throw error;
+      setMembers((data as any) || []);
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      toast.error('Failed to load members');
+    }
+  };
+
+  const createWorkspace = async () => {
+    if (!newWorkspaceName.trim()) {
+      toast.error('Please enter a workspace name');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Create workspace
+      const { data: workspace, error: workspaceError } = await supabase
+        .from('workspaces')
+        .insert({ name: newWorkspaceName, owner_id: user.id })
+        .select()
+        .single();
+
+      if (workspaceError) throw workspaceError;
+
+      // Add creator as owner member
+      const { error: memberError } = await supabase
+        .from('workspace_members')
+        .insert({
+          workspace_id: workspace.id,
+          user_id: user.id,
+          role: 'owner',
+        });
+
+      if (memberError) throw memberError;
+
+      toast.success('Workspace created!');
+      setNewWorkspaceName('');
+      setShowCreateDialog(false);
+      fetchWorkspaces();
+    } catch (error) {
+      console.error('Error creating workspace:', error);
+      toast.error('Failed to create workspace');
+    }
+  };
+
+  const sendInvite = async () => {
+    if (!inviteEmail.trim() || !selectedWorkspace) {
+      toast.error('Please enter an email address');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const token = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiration
+
+      const { error } = await supabase
+        .from('workspace_invitations')
+        .insert({
+          workspace_id: selectedWorkspace.id,
+          email: inviteEmail,
+          role: inviteRole,
+          invited_by: user.id,
+          token,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (error) throw error;
+
+      toast.success(`Invitation sent to ${inviteEmail}`);
+      setInviteEmail('');
+      setShowInviteDialog(false);
+    } catch (error: any) {
+      console.error('Error sending invite:', error);
+      if (error.code === '23505') {
+        toast.error('An invitation for this email already exists');
+      } else {
+        toast.error('Failed to send invitation');
+      }
+    }
+  };
+
+  const removeMember = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from('workspace_members')
+        .delete()
+        .eq('id', memberId);
+
+      if (error) throw error;
+
+      toast.success('Member removed');
+      if (selectedWorkspace) {
+        fetchMembers(selectedWorkspace.id);
+      }
+    } catch (error) {
+      console.error('Error removing member:', error);
+      toast.error('Failed to remove member');
+    }
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'owner':
+        return 'bg-primary text-primary-foreground';
+      case 'editor':
+        return 'bg-secondary text-secondary-foreground';
+      case 'viewer':
+        return 'bg-muted text-muted-foreground';
+      default:
+        return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading workspaces...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <HorizontalNav />
+      
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold">Workspaces</h1>
+            <p className="text-muted-foreground mt-1">
+              Collaborate with your team on design projects
+            </p>
+          </div>
+          
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Workspace
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Workspace</DialogTitle>
+                <DialogDescription>
+                  Create a workspace to collaborate with your team
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="workspace-name">Workspace Name</Label>
+                  <Input
+                    id="workspace-name"
+                    value={newWorkspaceName}
+                    onChange={(e) => setNewWorkspaceName(e.target.value)}
+                    placeholder="My Team Workspace"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={createWorkspace}>Create</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Workspaces List */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Your Workspaces</CardTitle>
+              <CardDescription>Select a workspace to manage</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {workspaces.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">
+                  No workspaces yet. Create one to get started!
+                </p>
+              ) : (
+                workspaces.map((workspace) => (
+                  <button
+                    key={workspace.id}
+                    onClick={() => setSelectedWorkspace(workspace)}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      selectedWorkspace?.id === workspace.id
+                        ? 'bg-primary/10 border-primary'
+                        : 'hover:bg-muted border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{workspace.name}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {workspace.your_role}
+                        </p>
+                      </div>
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </button>
+                ))
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Members List */}
+          {selectedWorkspace && (
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{selectedWorkspace.name}</CardTitle>
+                    <CardDescription>{members.length} members</CardDescription>
+                  </div>
+                  
+                  {selectedWorkspace.your_role === 'owner' && (
+                    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+                      <DialogTrigger asChild>
+                        <Button size="sm">
+                          <Mail className="h-4 w-4 mr-2" />
+                          Invite
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Invite to Workspace</DialogTitle>
+                          <DialogDescription>
+                            Send an invitation to collaborate on this workspace
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div>
+                            <Label htmlFor="invite-email">Email Address</Label>
+                            <Input
+                              id="invite-email"
+                              type="email"
+                              value={inviteEmail}
+                              onChange={(e) => setInviteEmail(e.target.value)}
+                              placeholder="colleague@example.com"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="invite-role">Role</Label>
+                            <Select value={inviteRole} onValueChange={(val: any) => setInviteRole(val)}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="viewer">Viewer</SelectItem>
+                                <SelectItem value="editor">Editor</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button onClick={sendInvite}>Send Invitation</Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {members.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-3 rounded-lg border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage src={member.profiles.avatar_url || undefined} />
+                          <AvatarFallback>
+                            {(member.profiles.display_name || member.profiles.email).charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">
+                            {member.profiles.display_name || member.profiles.email}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.profiles.email}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
+                          {member.role === 'owner' && <Crown className="h-3 w-3 inline mr-1" />}
+                          {member.role}
+                        </div>
+                        
+                        {selectedWorkspace.your_role === 'owner' && member.role !== 'owner' && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => removeMember(member.id)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

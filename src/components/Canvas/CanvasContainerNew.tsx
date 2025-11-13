@@ -4,6 +4,10 @@ import BrandKitPanel from "@/components/Panels/BrandKitPanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Video, Gallery, Colorfilter } from "iconsax-react";
+import { useCollaborativePresence } from "@/hooks/useCollaborativePresence";
+import { useCollaborativeCanvas } from "@/hooks/useCollaborativeCanvas";
+import { CollaborativeCursor } from "./CollaborativeCursor";
+import { CollaborativeUsersBar } from "./CollaborativeUsersBar";
 import ResizableFrame from "./ResizableFrame";
 import FrameVideoControls from "./FrameVideoControls";
 import DraggablePanel from "../Panels/DraggablePanel";
@@ -208,6 +212,24 @@ export default function CanvasContainerNew({
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const captionImageInputRef = useRef<HTMLInputElement>(null);
+
+  // Collaborative features
+  const enableCollaboration = !isEmbedded && projectId !== null;
+  const { activeUsers, broadcastCursor, currentUser } = useCollaborativePresence(
+    projectId,
+    enableCollaboration
+  );
+  
+  const { isSaving: isCollaborativeSaving } = useCollaborativeCanvas(
+    projectId,
+    frames,
+    (remoteFrames) => {
+      console.log('Received remote canvas update, merging...');
+      setFrames(remoteFrames);
+      toast.info('Canvas updated by collaborator');
+    },
+    enableCollaboration
+  );
 
   // Helper function to find a frame (top-level or nested)
   const findFrame = (frameId: string): { frame: Frame | null, parentId: string | null } => {
@@ -2325,6 +2347,17 @@ export default function CanvasContainerNew({
           if (isPanning && e.buttons === 1 && activeTool !== 'pen') {
             setPanOffset({ x: e.clientX - panStart.x, y: e.clientY - panStart.y });
           }
+          
+          // Broadcast cursor position for collaboration
+          if (enableCollaboration) {
+            const rect = canvasAreaRef.current?.getBoundingClientRect();
+            if (rect) {
+              // Transform screen coordinates to canvas coordinates
+              const x = (e.clientX - rect.left - panOffset.x) / zoom;
+              const y = (e.clientY - rect.top - panOffset.y) / zoom;
+              broadcastCursor(x, y);
+            }
+          }
         }}
         style={{
           transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
@@ -3705,6 +3738,30 @@ export default function CanvasContainerNew({
       )}
 
       {/* Removed TopProgressBar - now integrated into EditorTopBar */}
+
+      {/* Collaborative Cursors Overlay */}
+      {enableCollaboration && activeUsers.length > 0 && (
+        <div className="pointer-events-none fixed inset-0 z-[9998]">
+          {activeUsers.map((user) => (
+            <CollaborativeCursor
+              key={user.userId}
+              user={user}
+              zoom={zoom}
+              panOffset={panOffset}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Collaborative Users Bar */}
+      {enableCollaboration && currentUser && (
+        <div className="fixed top-20 right-4 z-50">
+          <CollaborativeUsersBar
+            activeUsers={activeUsers}
+            currentUser={currentUser}
+          />
+        </div>
+      )}
 
       <DrawtirFooter />
 
