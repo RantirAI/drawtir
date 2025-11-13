@@ -21,21 +21,19 @@ export const CollaborativeCursor = memo(({ user, zoom, panOffset }: Collaborativ
     <motion.div
       key={user.userId}
       className="pointer-events-none fixed z-[9999]"
-      style={{
-        left: `${x}px`,
-        top: `${y}px`,
-      }}
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0, opacity: 0, x, y }}
       animate={{ 
         scale: 1, 
         opacity: 1,
+        x,
+        y,
       }}
       exit={{ scale: 0, opacity: 0 }}
       transition={{ 
-        type: "spring",
-        stiffness: 500,
-        damping: 30,
-        mass: 0.5,
+        scale: { type: "spring", stiffness: 500, damping: 30, mass: 0.5 },
+        opacity: { duration: 0.2 },
+        x: { duration: 0 }, // Instant position update
+        y: { duration: 0 }, // Instant position update
       }}
     >
       {/* Cursor SVG */}

@@ -24,7 +24,7 @@ const CURSOR_COLORS = [
 ];
 
 const CURSOR_HIDE_DELAY = 500; // Hide cursor after 500ms of inactivity
-const BROADCAST_THROTTLE = 50; // Throttle broadcasts to every 50ms (20fps is smooth enough)
+const BROADCAST_THROTTLE = 16; // Throttle broadcasts to ~60fps for smooth real-time movement
 
 export const useCollaborativePresence = (projectId: string | null, enabled: boolean = true) => {
   const [activeUsers, setActiveUsers] = useState<Map<string, UserPresence>>(new Map());
