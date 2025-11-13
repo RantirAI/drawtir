@@ -3784,11 +3784,9 @@ export default function CanvasContainerNew({
         </div>
       )}
 
-      {/* Collaborative Users Bar - Above bottom toolbar */}
+      {/* Collaborative Users Bar - Bottom middle of top toolbar */}
       {enableCollaboration && currentUser && (
-        <div className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-          showTimelinePanel ? 'bottom-[350px]' : 'bottom-24'
-        }`}>
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50">
           <CollaborativeUsersBar
             activeUsers={activeUsers}
             currentUser={currentUser}
