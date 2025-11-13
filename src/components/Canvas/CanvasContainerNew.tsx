@@ -2363,6 +2363,9 @@ export default function CanvasContainerNew({
         isGenerating={isGenerating}
         generationProgress={generationProgressPercent}
         generationMessage={generationProgress}
+        activeUsers={activeUsers}
+        currentUser={currentUser}
+        enableCollaboration={enableCollaboration}
       />
 
       {/* Canvas Area */}
