@@ -69,18 +69,17 @@ export default function Gallery() {
         return;
       }
 
-      // Always filter by user_id to show only user's own projects
       let query = supabase
         .from('posters')
-        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template, workspace_id, user_id')
-        .eq('user_id', user.id);
+        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template, workspace_id, user_id');
 
       // Filter by workspace if one is selected
       if (selectedWorkspaceId) {
+        // Show all projects in the workspace (RLS handles access control)
         query = query.eq('workspace_id', selectedWorkspaceId);
       } else {
-        // Show projects without workspace_id (personal projects)
-        query = query.is('workspace_id', null);
+        // Show only user's own projects without workspace_id (personal projects)
+        query = query.eq('user_id', user.id).is('workspace_id', null);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
