@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { More2, Edit2, MouseSquare } from "iconsax-react";
+import { Edit2, Copy, Trash2, GripVertical } from "lucide-react";
+import { MouseSquare } from "iconsax-react";
+import CanvasContextMenu from "./ContextMenu";
 
 interface FrameBadgeProps {
   name: string;
@@ -9,9 +11,11 @@ interface FrameBadgeProps {
   onChange: (name: string) => void;
   onPositionChange?: (x: number, y: number) => void;
   onSelect?: () => void;
+  onDuplicate?: () => void;
+  onDelete?: () => void;
 }
 
-export default function FrameBadge({ name, x, y, onChange, onPositionChange, onSelect }: FrameBadgeProps) {
+export default function FrameBadge({ name, x, y, onChange, onPositionChange, onSelect, onDuplicate, onDelete }: FrameBadgeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [tempName, setTempName] = useState(name);
   const [isDragging, setIsDragging] = useState(false);
@@ -105,34 +109,39 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange, onS
   }
 
   return (
-    <div
-      className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border-border/50 border text-[10px] font-medium hover:bg-card/90 transition-colors group"
-      style={{ left: x, top: y - 28 }}
-      onDoubleClick={handleDoubleClick}
+    <CanvasContextMenu
+      onDuplicate={onDuplicate}
+      onDelete={onDelete}
     >
-      <More2 
-        size={12}
-        className="text-muted-foreground cursor-grab active:cursor-grabbing" 
-        onMouseDown={handleDragStart}
-      />
-      <span className="cursor-text">{name}</span>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onSelect?.();
-        }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/select"
-        aria-label="Select frame"
+      <div
+        className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border-border/50 border text-[10px] font-medium hover:bg-card/90 transition-colors group"
+        style={{ left: x, top: y - 28 }}
+        onDoubleClick={handleDoubleClick}
       >
-        <MouseSquare size={12} className="text-muted-foreground group-hover/select:text-primary transition-colors" />
-      </button>
-      <button
-        onClick={handleEditClick}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/edit"
-        aria-label="Edit frame name"
-      >
-        <Edit2 size={12} className="text-muted-foreground group-hover/edit:text-primary transition-colors" />
-      </button>
-    </div>
+        <GripVertical 
+          size={14}
+          className="text-muted-foreground cursor-grab active:cursor-grabbing" 
+          onMouseDown={handleDragStart}
+        />
+        <span className="cursor-text">{name}</span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect?.();
+          }}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/select"
+          aria-label="Select frame"
+        >
+          <MouseSquare size={12} className="text-muted-foreground group-hover/select:text-primary transition-colors" />
+        </button>
+        <button
+          onClick={handleEditClick}
+          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded group/edit"
+          aria-label="Edit frame name"
+        >
+          <Edit2 size={12} className="text-muted-foreground group-hover/edit:text-primary transition-colors" />
+        </button>
+      </div>
+    </CanvasContextMenu>
   );
 }

@@ -2393,6 +2393,28 @@ export default function CanvasContainerNew({
             }
           }
         }}
+        onWheel={(e) => {
+          e.preventDefault();
+          
+          if (e.ctrlKey || e.metaKey) {
+            // Zoom with Ctrl/Cmd + scroll
+            const delta = e.deltaY > 0 ? -0.1 : 0.1;
+            const newZoom = Math.max(0.1, Math.min(5, zoom + delta));
+            setZoom(newZoom);
+          } else if (e.shiftKey) {
+            // Horizontal scroll with Shift + scroll
+            setPanOffset({ 
+              x: panOffset.x - e.deltaY, 
+              y: panOffset.y 
+            });
+          } else {
+            // Vertical scroll (default)
+            setPanOffset({ 
+              x: panOffset.x, 
+              y: panOffset.y - e.deltaY 
+            });
+          }
+        }}
         style={{
           transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
           transformOrigin: 'center',
@@ -2409,6 +2431,16 @@ export default function CanvasContainerNew({
               onChange={(name) => handleFrameUpdate(frame.id, { name })}
               onPositionChange={(newX, newY) => handleFrameUpdate(frame.id, { x: newX, y: newY })}
               onSelect={() => setSelectedFrameId(frame.id)}
+              onDuplicate={() => {
+                if (frame.id === selectedFrameId) {
+                  handleDuplicate();
+                }
+              }}
+              onDelete={() => {
+                if (frame.id === selectedFrameId) {
+                  handleDelete();
+                }
+              }}
             />
             <CanvasContextMenu
               onDelete={() => frame.id === selectedFrameId && handleDelete()}
@@ -3595,8 +3627,6 @@ export default function CanvasContainerNew({
         onAddFrame={handleAddFrame}
         onAddNestedFrame={handleAddNestedFrame}
         onAddRichText={handleAddRichText}
-        onDuplicate={handleDuplicate}
-        onDelete={handleDelete}
         onDisablePanMode={() => setIsPanning(false)}
       />
       
