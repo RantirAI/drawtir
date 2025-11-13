@@ -35,11 +35,25 @@ interface WorkspaceMember {
   };
 }
 
+interface WorkspaceInvitation {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
+  accepted_at: string | null;
+  expires_at: string;
+  inviter: {
+    email: string;
+    display_name: string | null;
+  } | null;
+}
+
 export default function Workspaces() {
   const navigate = useNavigate();
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const [members, setMembers] = useState<WorkspaceMember[]>([]);
+  const [invitations, setInvitations] = useState<WorkspaceInvitation[]>([]);
   const [loading, setLoading] = useState(true);
   const [newWorkspaceName, setNewWorkspaceName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
@@ -54,6 +68,7 @@ export default function Workspaces() {
   useEffect(() => {
     if (selectedWorkspace) {
       fetchMembers(selectedWorkspace.id);
+      fetchInvitations(selectedWorkspace.id);
     }
   }, [selectedWorkspace]);
 
@@ -103,6 +118,21 @@ export default function Workspaces() {
     } catch (error) {
       console.error('Error fetching members:', error);
       toast.error('Failed to load members');
+    }
+  };
+
+  const fetchInvitations = async (workspaceId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('workspace_invitations')
+        .select('id, email, role, created_at, accepted_at, expires_at, inviter:profiles!workspace_invitations_invited_by_fkey(email, display_name)')
+        .eq('workspace_id', workspaceId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setInvitations((data as any) || []);
+    } catch (error) {
+      console.error('Error fetching invitations:', error);
     }
   };
 
@@ -164,6 +194,9 @@ export default function Workspaces() {
       toast.success(`Invitation sent to ${inviteEmail}`);
       setInviteEmail('');
       setShowInviteDialog(false);
+      if (selectedWorkspace) {
+        fetchInvitations(selectedWorkspace.id);
+      }
     } catch (error: any) {
       console.error('Error sending invite:', error);
       if (error.code === '23505') {
@@ -203,6 +236,35 @@ export default function Workspaces() {
         return 'bg-muted text-muted-foreground';
       default:
         return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getInvitationStatus = (invitation: WorkspaceInvitation) => {
+    if (invitation.accepted_at) {
+      return { label: 'Accepted', color: 'bg-green-500/10 text-green-600 dark:text-green-400' };
+    }
+    if (new Date(invitation.expires_at) < new Date()) {
+      return { label: 'Expired', color: 'bg-destructive/10 text-destructive' };
+    }
+    return { label: 'Pending', color: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400' };
+  };
+
+  const cancelInvitation = async (invitationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('workspace_invitations')
+        .delete()
+        .eq('id', invitationId);
+
+      if (error) throw error;
+
+      toast.success('Invitation cancelled');
+      if (selectedWorkspace) {
+        fetchInvitations(selectedWorkspace.id);
+      }
+    } catch (error) {
+      console.error('Error cancelling invitation:', error);
+      toast.error('Failed to cancel invitation');
     }
   };
 
@@ -306,7 +368,9 @@ export default function Workspaces() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>{selectedWorkspace.name}</CardTitle>
-                    <CardDescription>{members.length} members</CardDescription>
+                    <CardDescription>
+                      {members.length} member{members.length !== 1 ? 's' : ''} · {invitations.filter(i => !i.accepted_at).length} pending invitation{invitations.filter(i => !i.accepted_at).length !== 1 ? 's' : ''}
+                    </CardDescription>
                   </div>
                   
                   <div className="flex gap-2">
@@ -377,47 +441,104 @@ export default function Workspaces() {
                 
                 <TabsContent value="members">
               <CardContent>
-                <div className="space-y-3">
-                  {members.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between p-3 rounded-lg border border-border/10"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={member.profiles.avatar_url || undefined} />
-                          <AvatarFallback>
-                            {(member.profiles.display_name || member.profiles.email).charAt(0).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">
-                            {member.profiles.display_name || member.profiles.email}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {member.profiles.email}
-                          </p>
+                <div className="space-y-4">
+                  {/* Active Members */}
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground mb-3">Active Members</h3>
+                    <div className="space-y-2">
+                      {members.map((member) => (
+                        <div
+                          key={member.id}
+                          className="flex items-center justify-between p-3 rounded-lg border border-border/10"
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={member.profiles.avatar_url || undefined} />
+                              <AvatarFallback>
+                                {(member.profiles.display_name || member.profiles.email).charAt(0).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="font-medium">
+                                {member.profiles.display_name || member.profiles.email}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {member.profiles.email}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
+                              {member.role === 'owner' && <Crown className="h-3 w-3 inline mr-1" />}
+                              {member.role}
+                            </div>
+                            
+                            {selectedWorkspace.your_role === 'owner' && member.role !== 'owner' && (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => removeMember(member.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
-                          {member.role === 'owner' && <Crown className="h-3 w-3 inline mr-1" />}
-                          {member.role}
-                        </div>
-                        
-                        {selectedWorkspace.your_role === 'owner' && member.role !== 'owner' && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => removeMember(member.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        )}
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Invitations */}
+                  {invitations.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Invitations</h3>
+                      <div className="space-y-2">
+                        {invitations.map((invitation) => {
+                          const status = getInvitationStatus(invitation);
+                          return (
+                            <div
+                              key={invitation.id}
+                              className="flex items-center justify-between p-3 rounded-lg border border-border/10 bg-muted/30"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Avatar>
+                                  <AvatarFallback>
+                                    <Mail className="h-4 w-4" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{invitation.email}</p>
+                                  <p className="text-xs text-muted-foreground">
+                                    Invited by {invitation.inviter?.display_name || invitation.inviter?.email || 'Unknown'}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2">
+                                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                                  {status.label}
+                                </div>
+                                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(invitation.role)}`}>
+                                  {invitation.role}
+                                </div>
+                                
+                                {selectedWorkspace.your_role === 'owner' && !invitation.accepted_at && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => cancelInvitation(invitation.id)}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
                 </TabsContent>
