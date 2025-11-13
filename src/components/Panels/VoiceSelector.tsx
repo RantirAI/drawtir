@@ -74,13 +74,25 @@ const FEMALE_VOICES = VOICE_OPTIONS.filter(v => v.gender === "female");
 
 interface VoiceSelectorProps {
   onSelectVoice: (voiceId: string, voiceName: string) => void;
+  open?: boolean;
+  onClose?: () => void;
 }
 
-export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
+export default function VoiceSelector({ onSelectVoice, open: controlledOpen, onClose }: VoiceSelectorProps) {
   const { toast } = useToast();
   const [playingVoice, setPlayingVoice] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
+  // Use controlled open state if provided, otherwise use internal state
+  const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setIsOpen = (value: boolean) => {
+    if (controlledOpen !== undefined && onClose) {
+      if (!value) onClose();
+    } else {
+      setInternalOpen(value);
+    }
+  };
 
   const handlePreviewVoice = async (voiceId: string, voiceName: string) => {
     try {
@@ -147,7 +159,7 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
     }
     setPlayingVoice(null);
     onSelectVoice(voiceId, voiceName);
-    setOpen(false);
+    setIsOpen(false);
   };
 
   const renderVoiceList = (voices: Voice[]) => (
@@ -195,7 +207,7 @@ export default function VoiceSelector({ onSelectVoice }: VoiceSelectorProps) {
   );
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction="right">
+    <Drawer open={isOpen} onOpenChange={setIsOpen} direction="right">
       <DrawerTrigger asChild>
         <Button
           variant="ghost"
