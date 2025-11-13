@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Plus, Users, Mail, Trash2, Crown, Settings } from 'lucide-react';
+import { Plus, Users, Mail, Trash2, Crown, Settings, MoreVertical } from 'lucide-react';
 import HorizontalNav from '@/components/Navigation/HorizontalNav';
 import { ActivityLogPanel } from '@/components/Workspace/ActivityLogPanel';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Badge } from '@/components/ui/badge';
 
 interface Workspace {
   id: string;
@@ -223,6 +225,25 @@ export default function Workspaces() {
     } catch (error) {
       console.error('Error removing member:', error);
       toast.error('Failed to remove member');
+    }
+  };
+
+  const updateMemberRole = async (memberId: string, newRole: 'owner' | 'editor' | 'viewer') => {
+    try {
+      const { error } = await supabase
+        .from('workspace_members')
+        .update({ role: newRole })
+        .eq('id', memberId);
+
+      if (error) throw error;
+
+      toast.success('Member role updated');
+      if (selectedWorkspace) {
+        fetchMembers(selectedWorkspace.id);
+      }
+    } catch (error) {
+      console.error('Error updating member role:', error);
+      toast.error('Failed to update member role');
     }
   };
 
@@ -515,13 +536,48 @@ export default function Workspaces() {
                             </div>
                             
                             {selectedWorkspace.your_role === 'owner' && member.role !== 'owner' && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removeMember(member.id)}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button size="sm" variant="ghost">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-48 p-2" align="end">
+                                  <div className="space-y-1">
+                                    <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                                      Change Role
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start text-sm"
+                                      onClick={() => updateMemberRole(member.id, 'editor')}
+                                      disabled={member.role === 'editor'}
+                                    >
+                                      Editor
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start text-sm"
+                                      onClick={() => updateMemberRole(member.id, 'viewer')}
+                                      disabled={member.role === 'viewer'}
+                                    >
+                                      Viewer
+                                    </Button>
+                                    <div className="h-px bg-border my-1" />
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      onClick={() => removeMember(member.id)}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
                             )}
                           </div>
                         </div>
