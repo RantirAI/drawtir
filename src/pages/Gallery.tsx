@@ -44,7 +44,7 @@ export default function Gallery() {
   const [projectToMove, setProjectToMove] = useState<{ id: string; name: string; workspaceId: string | null } | null>(null);
   const { templates, isLoading: templatesLoading } = useTemplates();
   const { selectedWorkspaceId, selectedWorkspace } = useWorkspaces();
-  const { recentProjects, trackProjectView } = useRecentlyViewed();
+  const { recentProjects, trackProjectView } = useRecentlyViewed(selectedWorkspaceId);
   const { canCreate, canEdit, canDelete } = usePermissions();
   const { logActivity } = useActivityLog(selectedWorkspaceId);
 
@@ -61,6 +61,7 @@ export default function Gallery() {
   }, [navigate, selectedWorkspaceId]);
 
   const fetchProjects = async () => {
+    setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {

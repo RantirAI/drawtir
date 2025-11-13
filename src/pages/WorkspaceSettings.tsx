@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { AvatarUpload } from '@/components/Settings/AvatarUpload';
 import { toast } from 'sonner';
 import { ArrowLeft, Building2, Palette, Save } from 'lucide-react';
 import HorizontalNav from '@/components/Navigation/HorizontalNav';
@@ -166,23 +167,12 @@ export default function WorkspaceSettings() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="avatar">Workspace Avatar URL</Label>
-                <Input
-                  id="avatar"
-                  type="url"
-                  value={workspace.avatar_url}
-                  onChange={(e) => setWorkspace({ ...workspace, avatar_url: e.target.value })}
-                  placeholder="https://example.com/avatar.png"
+                <Label>Workspace Avatar</Label>
+                <AvatarUpload
+                  currentAvatarUrl={workspace.avatar_url}
+                  onUploadComplete={(url) => setWorkspace({ ...workspace, avatar_url: url })}
+                  fallbackText={workspace.name?.[0]?.toUpperCase() || "W"}
                 />
-                {workspace.avatar_url && (
-                  <div className="mt-3">
-                    <img
-                      src={workspace.avatar_url}
-                      alt="Workspace avatar preview"
-                      className="h-16 w-16 rounded-lg object-cover border"
-                    />
-                  </div>
-                )}
               </div>
 
               <div>

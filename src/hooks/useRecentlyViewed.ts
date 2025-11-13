@@ -9,7 +9,7 @@ export interface RecentProject {
   workspace_id: string | null;
 }
 
-export const useRecentlyViewed = () => {
+export const useRecentlyViewed = (workspaceId?: string | null) => {
   const [recentProjects, setRecentProjects] = useState<RecentProject[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,7 +18,7 @@ export const useRecentlyViewed = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('project_views')
         .select(`
           viewed_at,
@@ -33,10 +33,20 @@ export const useRecentlyViewed = () => {
         .order('viewed_at', { ascending: false })
         .limit(5);
 
+      const { data, error } = await query;
+
       if (error) throw error;
 
       const projects = data
-        ?.filter(item => item.posters)
+        ?.filter(item => {
+          if (!item.posters) return false;
+          const poster = item.posters as any;
+          // Filter by workspace if workspaceId is provided
+          if (workspaceId !== undefined) {
+            return poster.workspace_id === workspaceId;
+          }
+          return true;
+        })
         .map(item => ({
           ...(item.posters as any),
           viewed_at: item.viewed_at,
@@ -69,7 +79,7 @@ export const useRecentlyViewed = () => {
 
   useEffect(() => {
     fetchRecentlyViewed();
-  }, []);
+  }, [workspaceId]);
 
   return {
     recentProjects,

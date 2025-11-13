@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { AvatarUpload } from "@/components/Settings/AvatarUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -21,6 +22,7 @@ export default function Settings() {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
   
   // Password data
   const [currentPassword, setCurrentPassword] = useState("");
@@ -42,7 +44,7 @@ export default function Settings() {
       // Fetch profile data
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('email, first_name, last_name')
+        .select('email, first_name, last_name, avatar_url')
         .eq('id', session.user.id)
         .single();
 
@@ -52,6 +54,7 @@ export default function Settings() {
         setEmail(profile.email || "");
         setFirstName(profile.first_name || "");
         setLastName(profile.last_name || "");
+        setAvatarUrl(profile.avatar_url || "");
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
@@ -76,6 +79,7 @@ export default function Settings() {
         .update({
           first_name: firstName,
           last_name: lastName,
+          avatar_url: avatarUrl,
         })
         .eq('id', session.user.id);
 
@@ -172,6 +176,11 @@ export default function Settings() {
               <CardDescription>Manage your profile information</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                onUploadComplete={(url) => setAvatarUrl(url)}
+                fallbackText={(firstName?.[0] || email?.[0] || "U").toUpperCase()}
+              />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name</Label>
