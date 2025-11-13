@@ -4,8 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, X, Laugh, Mic, MessageSquare, Wind, Heart, Frown, Smile } from "lucide-react";
+import { Loader2, X, Mic, Play } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Badge } from "@/components/ui/badge";
 import VoiceSelector from "./VoiceSelector";
 
 interface VoiceTextDrawerProps {
@@ -17,12 +18,12 @@ interface VoiceTextDrawerProps {
 }
 
 const emotionControls = [
-  { tag: "[laughs]", label: "Laughs", icon: Laugh },
-  { tag: "[chuckles]", label: "Chuckles", icon: Smile },
-  { tag: "[whispers]", label: "Whispers", icon: Wind },
-  { tag: "[sighs]", label: "Sighs", icon: Frown },
-  { tag: "[excited]", label: "Excited", icon: Heart },
-  { tag: "[curious]", label: "Curious", icon: MessageSquare },
+  { tag: "[laughs]", label: "Laughs", color: "hsl(var(--chart-1))" },
+  { tag: "[chuckles]", label: "Chuckles", color: "hsl(var(--chart-2))" },
+  { tag: "[whispers]", label: "Whispers", color: "hsl(var(--chart-3))" },
+  { tag: "[sighs]", label: "Sighs", color: "hsl(var(--chart-4))" },
+  { tag: "[excited]", label: "Excited", color: "hsl(var(--chart-5))" },
+  { tag: "[curious]", label: "Curious", color: "hsl(280 65% 60%)" },
 ];
 
 export default function VoiceTextDrawer({
@@ -38,7 +39,9 @@ export default function VoiceTextDrawer({
   const [voiceId, setVoiceId] = useState(initialVoiceId);
   const [voiceName, setVoiceName] = useState(initialVoiceName);
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
+  const [previewingEmotion, setPreviewingEmotion] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const insertEmotionTag = (tag: string) => {
     const textarea = textareaRef.current;
@@ -62,6 +65,58 @@ export default function VoiceTextDrawer({
     setVoiceId(id);
     setVoiceName(name);
     setShowVoiceSelector(false);
+  };
+
+  const handlePreviewEmotion = async (tag: string) => {
+    if (previewingEmotion) return;
+    
+    setPreviewingEmotion(tag);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('preview-voice', {
+        body: { voiceId }
+      });
+
+      if (error) throw error;
+
+      if (!data?.audioContent) {
+        throw new Error('No audio content received');
+      }
+
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
+      // Convert base64 to blob
+      const binaryString = atob(data.audioContent);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(blob);
+
+      // Play the audio
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        setPreviewingEmotion(null);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      await audio.play();
+    } catch (error) {
+      console.error('Error previewing emotion:', error);
+      toast({
+        title: "Preview failed",
+        description: error instanceof Error ? error.message : "Failed to preview voice",
+        variant: "destructive",
+      });
+      setPreviewingEmotion(null);
+    }
   };
 
   const handleGenerate = async () => {
@@ -125,7 +180,7 @@ export default function VoiceTextDrawer({
             <SheetTitle className="text-2xl">Generate Voice</SheetTitle>
           </SheetHeader>
 
-          <div className="mt-6 space-y-6">
+          <div className="mt-6 space-y-6 flex flex-col h-[calc(100vh-8rem)]">
             {/* Voice Selection */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -147,39 +202,55 @@ export default function VoiceTextDrawer({
             <div className="space-y-3">
               <Label className="text-base font-semibold">Emotion Controls</Label>
               <p className="text-sm text-muted-foreground">
-                Click to insert emotion tags at cursor position
+                Click to insert emotion tags or preview the sound
               </p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-wrap gap-2">
                 {emotionControls.map((control) => {
-                  const Icon = control.icon;
+                  const isPreviewing = previewingEmotion === control.tag;
                   return (
-                    <Button
-                      key={control.tag}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => insertEmotionTag(control.tag)}
-                      className="flex flex-col h-auto py-3 gap-1"
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="text-xs">{control.label}</span>
-                    </Button>
+                    <div key={control.tag} className="flex items-center gap-1">
+                      <Badge
+                        onClick={() => insertEmotionTag(control.tag)}
+                        className="cursor-pointer px-3 py-1.5 text-sm font-medium transition-all hover:opacity-80"
+                        style={{
+                          backgroundColor: control.color,
+                          color: 'white',
+                          borderRadius: '0px',
+                        }}
+                      >
+                        {control.label}
+                      </Badge>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        onClick={() => handlePreviewEmotion(control.tag)}
+                        disabled={isPreviewing}
+                      >
+                        {isPreviewing ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Play className="h-3 w-3" />
+                        )}
+                      </Button>
+                    </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Text Input */}
-            <div className="space-y-2">
+            {/* Text Input - at bottom */}
+            <div className="space-y-2 flex-1 flex flex-col mt-auto">
               <Label className="text-base font-semibold">Voice Text</Label>
               <Textarea
                 ref={textareaRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Enter the text you want to convert to speech... Use the buttons above to add emotion tags!"
-                className="min-h-[250px] resize-none"
+                className="flex-1 resize-none"
               />
               <p className="text-xs text-muted-foreground">
-                Tip: Place cursor where you want to add emotions, then click the buttons above
+                Tip: Place cursor where you want to add emotions, then click the chips above
               </p>
             </div>
 
