@@ -52,6 +52,8 @@ export const useWorkspaces = () => {
   const selectWorkspace = (workspaceId: string) => {
     setSelectedWorkspaceId(workspaceId);
     localStorage.setItem('selectedWorkspaceId', workspaceId);
+    // Broadcast change to all components using this hook
+    window.dispatchEvent(new CustomEvent<string>('workspaceChanged', { detail: workspaceId }));
   };
 
   const createWorkspace = async (name: string) => {
@@ -78,6 +80,28 @@ export const useWorkspaces = () => {
 
   useEffect(() => {
     fetchWorkspaces();
+  }, []);
+
+  // Listen for workspace changes broadcasted from other components
+  useEffect(() => {
+    const handleWorkspaceChanged = (e: Event) => {
+      const id = (e as CustomEvent<string>).detail;
+      if (id) setSelectedWorkspaceId(id);
+    };
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === 'selectedWorkspaceId') {
+        setSelectedWorkspaceId(e.newValue);
+      }
+    };
+
+    window.addEventListener('workspaceChanged', handleWorkspaceChanged as EventListener);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('workspaceChanged', handleWorkspaceChanged as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   const selectedWorkspace = workspaces.find(w => w.id === selectedWorkspaceId);
