@@ -329,6 +329,24 @@ export default function Workspaces() {
     }
   };
 
+  const updateInvitationRole = async (invitationId: string, role: 'viewer' | 'editor') => {
+    try {
+      const { error } = await supabase
+        .from('workspace_invitations')
+        .update({ role })
+        .eq('id', invitationId);
+
+      if (error) throw error;
+
+      toast.success('Invitation role updated');
+      if (selectedWorkspace) {
+        fetchInvitations(selectedWorkspace.id);
+      }
+    } catch (error) {
+      console.error('Error updating invitation role:', error);
+      toast.error('Failed to update invitation role');
+    }
+  };
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -618,15 +636,54 @@ export default function Workspaces() {
                                 <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(invitation.role)}`}>
                                   {invitation.role}
                                 </div>
-                                
-                                {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'admin') && !invitation.accepted_at && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    onClick={() => cancelInvitation(invitation.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                  </Button>
+
+                                {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'admin') && (
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <Button size="sm" variant="ghost">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-56 p-2" align="end">
+                                      <div className="space-y-1">
+                                        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                                          Invitation Actions
+                                        </div>
+                                        {!invitation.accepted_at && (
+                                          <>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="w-full justify-start text-sm"
+                                              onClick={() => updateInvitationRole(invitation.id, 'editor')}
+                                              disabled={invitation.role === 'editor'}
+                                            >
+                                              Set role: Editor
+                                            </Button>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              className="w-full justify-start text-sm"
+                                              onClick={() => updateInvitationRole(invitation.id, 'viewer')}
+                                              disabled={invitation.role === 'viewer'}
+                                            >
+                                              Set role: Viewer
+                                            </Button>
+                                            <div className="h-px bg-border my-1" />
+                                          </>
+                                        )}
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+                                          onClick={() => cancelInvitation(invitation.id)}
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                          Cancel Invitation
+                                        </Button>
+                                      </div>
+                                    </PopoverContent>
+                                  </Popover>
                                 )}
                               </div>
                             </div>
