@@ -59,27 +59,17 @@ export const useWorkspaces = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data: workspace, error: workspaceError } = await supabase
-        .from('workspaces')
-        .insert({ name, owner_id: user.id })
-        .select()
-        .single();
-
-      if (workspaceError) throw workspaceError;
-
-      const { error: memberError } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: workspace.id,
-          user_id: user.id,
-          role: 'owner',
+      const { data: workspaceId, error } = await supabase
+        .rpc('create_workspace_with_member', {
+          workspace_name: name,
+          user_id: user.id
         });
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       await fetchWorkspaces();
-      selectWorkspace(workspace.id);
-      return workspace;
+      selectWorkspace(workspaceId);
+      return { id: workspaceId };
     } catch (error) {
       console.error('Error creating workspace:', error);
       return null;

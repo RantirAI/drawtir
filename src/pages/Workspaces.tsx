@@ -116,25 +116,13 @@ export default function Workspaces() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Create workspace
-      const { data: workspace, error: workspaceError } = await supabase
-        .from('workspaces')
-        .insert({ name: newWorkspaceName, owner_id: user.id })
-        .select()
-        .single();
-
-      if (workspaceError) throw workspaceError;
-
-      // Add creator as owner member
-      const { error: memberError } = await supabase
-        .from('workspace_members')
-        .insert({
-          workspace_id: workspace.id,
-          user_id: user.id,
-          role: 'owner',
+      const { data: workspaceId, error } = await supabase
+        .rpc('create_workspace_with_member', {
+          workspace_name: newWorkspaceName,
+          user_id: user.id
         });
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
       toast.success('Workspace created!');
       setNewWorkspaceName('');
