@@ -96,7 +96,7 @@ export const WorkspaceSelector = () => {
 
   return (
     <div className="flex items-center gap-2">
-      <Select value={selectedWorkspaceId || undefined} onValueChange={selectWorkspace}>
+      <Select value={selectedWorkspaceId || 'personal'} onValueChange={selectWorkspace}>
         <SelectTrigger className="w-[200px] bg-background/95 backdrop-blur">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4" />
@@ -104,6 +104,14 @@ export const WorkspaceSelector = () => {
           </div>
         </SelectTrigger>
         <SelectContent>
+          <SelectItem value="personal">
+            <div className="flex items-center justify-between w-full">
+              <span>Personal</span>
+              {!selectedWorkspaceId && (
+                <Check className="h-4 w-4 ml-2" />
+              )}
+            </div>
+          </SelectItem>
           {workspaces.map((workspace) => (
             <SelectItem key={workspace.id} value={workspace.id}>
               <div className="flex items-center justify-between w-full">

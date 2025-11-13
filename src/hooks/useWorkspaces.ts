@@ -39,8 +39,13 @@ export const useWorkspaces = () => {
       // Auto-select first workspace if none selected
       if (workspacesData.length > 0 && !selectedWorkspaceId) {
         const savedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
-        const validWorkspace = workspacesData.find(w => w.id === savedWorkspaceId);
-        setSelectedWorkspaceId(validWorkspace?.id || workspacesData[0].id);
+        if (savedWorkspaceId && savedWorkspaceId !== 'personal') {
+          const validWorkspace = workspacesData.find(w => w.id === savedWorkspaceId);
+          setSelectedWorkspaceId(validWorkspace?.id || null);
+        } else {
+          // Default to Personal workspace (null)
+          setSelectedWorkspaceId(null);
+        }
       }
     } catch (error) {
       console.error('Error fetching workspaces:', error);
@@ -50,10 +55,12 @@ export const useWorkspaces = () => {
   };
 
   const selectWorkspace = (workspaceId: string) => {
-    setSelectedWorkspaceId(workspaceId);
+    // Handle "personal" workspace selection
+    const actualWorkspaceId = workspaceId === 'personal' ? null : workspaceId;
+    setSelectedWorkspaceId(actualWorkspaceId);
     localStorage.setItem('selectedWorkspaceId', workspaceId);
     // Broadcast change to all components using this hook
-    window.dispatchEvent(new CustomEvent<string>('workspaceChanged', { detail: workspaceId }));
+    window.dispatchEvent(new CustomEvent<string | null>('workspaceChanged', { detail: actualWorkspaceId }));
   };
 
   const createWorkspace = async (name: string) => {
@@ -85,13 +92,13 @@ export const useWorkspaces = () => {
   // Listen for workspace changes broadcasted from other components
   useEffect(() => {
     const handleWorkspaceChanged = (e: Event) => {
-      const id = (e as CustomEvent<string>).detail;
-      if (id) setSelectedWorkspaceId(id);
+      const id = (e as CustomEvent<string | null>).detail;
+      setSelectedWorkspaceId(id);
     };
 
     const handleStorage = (e: StorageEvent) => {
       if (e.key === 'selectedWorkspaceId') {
-        setSelectedWorkspaceId(e.newValue);
+        setSelectedWorkspaceId(e.newValue === 'personal' ? null : e.newValue);
       }
     };
 
