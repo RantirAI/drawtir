@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock, Film, Edit2 } from "lucide-react";
+import { Layers, Eye, EyeOff, Trash2, Square, Circle, Type, Image as ImageIcon, Pen, GripVertical, Lock, Unlock, Film, Edit2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import DraggablePanel from "./DraggablePanel";
 import { Element, Frame } from "@/types/elements";
+import CanvasContextMenu from "@/components/Canvas/ContextMenu";
 
 interface LayersPanelProps {
   frames: Frame[];
@@ -18,6 +19,8 @@ interface LayersPanelProps {
   onFrameReorder?: (sourceFrameId: string, targetFrameId: string, position: 'before' | 'after' | 'inside') => void;
   onFrameUpdate?: (frameId: string, updates: Partial<Frame>) => void;
   onFrameDelete?: (frameId: string) => void;
+  onFrameDuplicate?: (frameId: string) => void;
+  onElementDuplicate?: (frameId: string, elementId: string) => void;
   onClose: () => void;
 }
 
@@ -49,6 +52,8 @@ export default function LayersPanel({
   onFrameReorder,
   onFrameUpdate,
   onFrameDelete,
+  onFrameDuplicate,
+  onElementDuplicate,
   onClose,
 }: LayersPanelProps) {
   const [collapsedFrames, setCollapsedFrames] = useState<Set<string>>(new Set());
@@ -80,6 +85,10 @@ export default function LayersPanel({
     return (
       <div key={frame.id} className="space-y-0.5">
         {/* Frame Layer */}
+        <CanvasContextMenu
+          onDuplicate={() => onFrameDuplicate?.(frame.id)}
+          onDelete={() => onFrameDelete?.(frame.id)}
+        >
         <div
           draggable={onFrameReorder !== undefined}
           onDragStart={(e) => {
@@ -235,6 +244,7 @@ export default function LayersPanel({
             )}
           </div>
         </div>
+        </CanvasContextMenu>
 
         {/* Nested frames and elements inside frame */}
         {!isCollapsed && (

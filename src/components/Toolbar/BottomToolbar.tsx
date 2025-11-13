@@ -1,6 +1,6 @@
 import { 
   Brush2, TextBlock, Gallery as GalleryIcon, Add,
-  Copy, Trash, EmojiHappy, BrushBig, Text, ScanBarcode, Edit2, Video
+  EmojiHappy, BrushBig, Text, ScanBarcode, Edit2, Video
 } from "iconsax-react";
 import { MousePointer2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,8 +16,6 @@ interface BottomToolbarProps {
   onVideoUpload?: () => void;
   onAddFrame: () => void;
   onAddNestedFrame?: () => void;
-  onDuplicate?: () => void;
-  onDelete?: () => void;
   onShapeSelect?: (shapeType: string) => void;
   onIconSelect?: (iconName: string, iconFamily: string) => void;
   onShaderAdd?: () => void;
@@ -35,8 +33,6 @@ export default function BottomToolbar({
   onVideoUpload,
   onAddFrame,
   onAddNestedFrame,
-  onDuplicate,
-  onDelete,
   onShapeSelect,
   onIconSelect,
   onShaderAdd,
@@ -244,24 +240,6 @@ export default function BottomToolbar({
               </Button>
             </TooltipTrigger>
             <TooltipContent side="top">Add Nested Frame</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onDuplicate}>
-                <Copy size={16} className="transition-transform duration-300 group-hover:rotate-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Duplicate</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(239,68,68,0.4)] hover:bg-destructive hover:text-destructive-foreground group" onClick={onDelete}>
-                <Trash size={16} className="transition-transform duration-300 group-hover:rotate-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">Delete</TooltipContent>
           </Tooltip>
         </div>
       </div>
