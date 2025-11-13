@@ -459,7 +459,7 @@ export default function Gallery() {
                   <p className="text-base text-muted-foreground mb-4">
                     {searchQuery || filterBy !== "all" ? "No projects match your filters" : "No projects yet"}
                   </p>
-                  <Button onClick={() => navigate("/")} variant="default">
+                  <Button onClick={() => navigate("/?new=true")} variant="default">
                     Create your first project
                   </Button>
                 </div>
