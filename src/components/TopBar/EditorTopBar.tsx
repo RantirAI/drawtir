@@ -305,10 +305,10 @@ export default function EditorTopBar({
                 {allUsers.slice(0, 5).map((user, index) => (
                   <div
                     key={user.userId}
-                    className="absolute blur-xl scale-125 opacity-30 w-8 h-8 rounded-full transition-all duration-300"
+                    className="absolute blur-xl scale-125 opacity-30 w-10 h-10 rounded-full transition-all duration-300"
                     style={{
                       backgroundColor: user.color,
-                      right: `${index * 24}px`,
+                      right: `${index * 28}px`,
                     }}
                   />
                 ))}
@@ -329,7 +329,7 @@ export default function EditorTopBar({
                           style={{ zIndex: allUsers.length - index }}
                         >
                           <Avatar 
-                            className="h-6 w-6 border-2 ring-2 ring-background/50"
+                            className="h-8 w-8 border-2 ring-2 ring-background/50 cursor-pointer"
                             style={{
                               borderColor: user.color,
                               boxShadow: `0 0 16px ${user.color}40`,
@@ -337,7 +337,7 @@ export default function EditorTopBar({
                           >
                             <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                             <AvatarFallback 
-                              className="text-[9px] font-semibold"
+                              className="text-[10px] font-semibold"
                               style={{
                                 backgroundColor: user.color,
                                 color: 'white',
@@ -347,11 +347,11 @@ export default function EditorTopBar({
                             </AvatarFallback>
                           </Avatar>
                           {user.userId === currentUser?.id && (
-                            <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary border border-background animate-pulse" />
+                            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary border border-background animate-pulse" />
                           )}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom">
+                      <TooltipContent side="top" className="bg-card/95 backdrop-blur-xl border-border/50">
                         <p className="text-xs font-medium">{user.displayName}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -360,11 +360,11 @@ export default function EditorTopBar({
                   {allUsers.length > 5 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-muted text-[9px] font-semibold text-muted-foreground ring-2 ring-background/50 transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50">
+                        <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-border bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-background/50 transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50 cursor-pointer">
                           +{allUsers.length - 5}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom">
+                      <TooltipContent side="top" className="bg-card/95 backdrop-blur-xl border-border/50">
                         <p className="text-xs font-medium">
                           {allUsers.slice(5).map(u => u.displayName).join(', ')}
                         </p>
@@ -524,14 +524,14 @@ export default function EditorTopBar({
                     style={{ zIndex: allUsers.length - index }}
                   >
                     <Avatar 
-                      className="h-6 w-6 border-2 ring-2 ring-white/50"
+                      className="h-8 w-8 border-2 ring-2 ring-white/50"
                       style={{
                         borderColor: user.color,
                       }}
                     >
                       <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                       <AvatarFallback 
-                        className="text-[9px] font-semibold"
+                        className="text-[10px] font-semibold"
                         style={{
                           backgroundColor: user.color,
                           color: 'white',
@@ -541,13 +541,13 @@ export default function EditorTopBar({
                       </AvatarFallback>
                     </Avatar>
                     {user.userId === currentUser?.id && (
-                      <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-white border border-primary" />
+                      <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-white border border-primary" />
                     )}
                   </div>
                 ))}
                 
                 {allUsers.length > 5 && (
-                  <div className="relative flex h-6 w-6 items-center justify-center rounded-full border-2 border-white/50 bg-white/20 text-[9px] font-semibold ring-2 ring-white/50">
+                  <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-white/50 bg-white/20 text-[10px] font-semibold ring-2 ring-white/50">
                     +{allUsers.length - 5}
                   </div>
                 )}
