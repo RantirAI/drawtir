@@ -1188,31 +1188,51 @@ export default function CanvasContainerNew({
       const params = new URLSearchParams(window.location.search);
       const projectIdFromUrl = params.get('project');
       
+      console.log("🔍 Checking for project in URL:", projectIdFromUrl, "isEmbedded:", isEmbedded);
+      
       if (projectIdFromUrl && !isEmbedded) {
         try {
+          console.log("📥 Loading project:", projectIdFromUrl);
           const { data, error } = await supabase
             .from('posters')
-            .select('canvas_data')
+            .select('canvas_data, project_name')
             .eq('id', projectIdFromUrl)
             .single();
           
-          if (error) throw error;
+          if (error) {
+            console.error("❌ Error fetching project:", error);
+            throw error;
+          }
+          
+          console.log("📦 Project data received:", data);
           
           if (data?.canvas_data) {
             const snapshot = data.canvas_data as any as CanvasSnapshot;
+            console.log("🔍 Validating snapshot:", snapshot);
+            
             if (validateSnapshot(snapshot)) {
-              setProjectTitle(snapshot.metadata.title);
+              console.log("✅ Snapshot is valid, loading project");
+              setProjectTitle(snapshot.metadata?.title || data.project_name || "Untitled Project");
               setFrames(snapshot.frames);
-              setZoom(snapshot.canvas.zoom);
-              setPanOffset(snapshot.canvas.panOffset);
+              if (snapshot.canvas?.zoom !== undefined) setZoom(snapshot.canvas.zoom);
+              if (snapshot.canvas?.panOffset) setPanOffset(snapshot.canvas.panOffset);
               setProjectId(projectIdFromUrl);
               console.log("✅ Loaded project from URL:", projectIdFromUrl);
+              toast.success(`Opened: ${snapshot.metadata?.title || data.project_name}`);
+            } else {
+              console.error("❌ Snapshot validation failed:", snapshot);
+              toast.error("Project data is invalid");
             }
+          } else {
+            console.error("❌ No canvas_data found in project");
+            toast.error("Project has no canvas data");
           }
         } catch (error) {
-          console.error("Error loading project:", error);
+          console.error("❌ Error loading project:", error);
           toast.error("Failed to load project");
         }
+      } else {
+        console.log("⏭️ Skipping project load - no project ID or embedded mode");
       }
     };
     
