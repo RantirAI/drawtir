@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw } from "lucide-react";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -195,6 +195,19 @@ export default function TimelinePanel({
   }, [isDraggingPlayhead, draggingAnimation, draggingVoice, maxDuration, voiceAudios]);
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
+
+  // Get icon for element type
+  const getElementIcon = (element: Element) => {
+    if (element.type === "text") return Type;
+    if (element.type === "image") return Image;
+    if (element.type === "video") return Video;
+    if (element.type === "drawing") return Pen;
+    if (element.type === "shape") {
+      if (element.shapeType === "ellipse") return Circle;
+      return Square;
+    }
+    return Square; // default
+  };
 
   // Animation presets organized by category
   const animationsByCategory = {
@@ -399,7 +412,10 @@ export default function TimelinePanel({
                   }}
                 >
                   <div className="w-32 flex-shrink-0">
-                    <div className="text-xs truncate font-medium">Voice</div>
+                    <div className="flex items-center gap-1">
+                      <Mic className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <div className="text-xs truncate font-medium">Voice</div>
+                    </div>
                     <div className="text-[10px] text-muted-foreground">
                       {voiceAudios.length} clip{voiceAudios.length !== 1 ? 's' : ''}
                     </div>
@@ -474,6 +490,7 @@ export default function TimelinePanel({
               const isSelected = selectedElementIds.includes(element.id);
               const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
               const elementAnimations = element.animations || [];
+              const ElementIcon = getElementIcon(element);
 
               return (
                 <ContextMenu key={element.id}>
@@ -486,6 +503,7 @@ export default function TimelinePanel({
                     >
                   <div className="w-32 flex-shrink-0">
                     <div className="flex items-center gap-1">
+                      <ElementIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                       <div className="text-xs truncate font-medium">
                         {elementName}
                       </div>
