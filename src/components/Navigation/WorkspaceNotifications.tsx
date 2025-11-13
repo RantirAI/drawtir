@@ -64,10 +64,10 @@ export const WorkspaceNotifications = () => {
                 <div className="space-y-2">
                   <div>
                     <p className="font-medium text-sm">
-                      {invitation.workspaces.name}
+                      {invitation.workspaces?.name || 'Workspace'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Invited by {invitation.inviter?.display_name || invitation.inviter?.email}
+                      Invited by {invitation.inviter?.display_name || invitation.inviter?.email || 'Unknown'}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Role: <span className="font-medium">{invitation.role}</span>
@@ -81,7 +81,7 @@ export const WorkspaceNotifications = () => {
                     <Button
                       size="sm"
                       className="flex-1"
-                      onClick={() => handleAccept(invitation.id, invitation.workspace_id, invitation.workspaces.name)}
+                      onClick={() => handleAccept(invitation.id, invitation.workspace_id, invitation.workspaces?.name || 'Workspace')}
                     >
                       <Check className="h-3 w-3 mr-1" />
                       Accept
