@@ -63,7 +63,7 @@ export default function CanvasContainerNew({
   readOnly = false,
   onElementInteraction,
 }: CanvasContainerNewProps = {}) {
-  const [projectTitle, setProjectTitle] = useState(initialSnapshot?.metadata.title || "Untitled Poster");
+  const [projectTitle, setProjectTitle] = useState(initialSnapshot?.metadata?.title || "Untitled Poster");
   const [projectId, setProjectId] = useState<string | null>(null);
   const [history, setHistory] = useState<Frame[][]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
@@ -1160,7 +1160,7 @@ export default function CanvasContainerNew({
   // Load or update from provided snapshot (supports prop changes)
   useEffect(() => {
     if (initialSnapshot && validateSnapshot(initialSnapshot)) {
-      setProjectTitle(initialSnapshot.metadata.title || "Untitled Poster");
+      setProjectTitle(initialSnapshot.metadata?.title || "Untitled Poster");
       setFrames(initialSnapshot.frames);
       
       // Restore voice audios if available
