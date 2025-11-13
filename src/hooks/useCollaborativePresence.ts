@@ -118,15 +118,12 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
         setActiveUsers(users);
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('User joined:', key, newPresences);
+        console.log('User joined:', key);
+        // Let sync handle the update
       })
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('User left:', key, leftPresences);
-        setActiveUsers(prev => {
-          const next = new Map(prev);
-          next.delete(key);
-          return next;
-        });
+        console.log('User left:', key);
+        // Let sync handle the update - don't manually delete to prevent flicker
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -147,7 +144,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
     channelRef.current = channel;
 
-    // Cleanup stale cursors faster (every 500ms)
+    // Cleanup stale cursors
     cleanupIntervalRef.current = setInterval(() => {
       const now = Date.now();
       setActiveUsers(prev => {
@@ -155,15 +152,13 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
         let changed = false;
 
         next.forEach((user, userId) => {
-          if (now - user.lastSeen > CURSOR_HIDE_DELAY) {
-            // Mark as inactive instead of removing
-            if (user.isActive) {
-              next.set(userId, { ...user, isActive: false });
-              changed = true;
-            }
+          // Mark as inactive after delay
+          if (now - user.lastSeen > CURSOR_HIDE_DELAY && user.isActive) {
+            next.set(userId, { ...user, isActive: false });
+            changed = true;
           }
-          // Remove completely after 5 seconds
-          if (now - user.lastSeen > 5000) {
+          // Remove completely after 3 seconds
+          if (now - user.lastSeen > 3000) {
             next.delete(userId);
             changed = true;
           }
@@ -171,7 +166,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
         return changed ? next : prev;
       });
-    }, 200); // Check more frequently
+    }, 300); // Check every 300ms
 
     return () => {
       if (cleanupIntervalRef.current) {
