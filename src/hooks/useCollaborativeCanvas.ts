@@ -13,6 +13,7 @@ export const useCollaborativeCanvas = (
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastLocalUpdateRef = useRef<number>(0);
   const lastBroadcastRef = useRef<number>(0);
+  const localChangeIdRef = useRef<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
   // Debounced save to database
@@ -50,6 +51,11 @@ export const useCollaborativeCanvas = (
     if (now - lastBroadcastRef.current < 100) return;
 
     lastBroadcastRef.current = now;
+    // Generate a unique ID for this local change
+    const changeId = `${Date.now()}-${Math.random()}`;
+    localChangeIdRef.current = changeId;
+
+    console.log('📤 Broadcasting canvas update with changeId:', changeId);
 
     channelRef.current.send({
       type: 'broadcast',
@@ -57,6 +63,7 @@ export const useCollaborativeCanvas = (
       payload: {
         frames: framesToBroadcast,
         timestamp: now,
+        changeId,
       }
     });
   }, [enabled, projectId]);
@@ -94,16 +101,23 @@ export const useCollaborativeCanvas = (
         'broadcast',
         { event: 'canvas-update' },
         (payload: any) => {
-          const { frames: newFrames, timestamp } = payload.payload;
+          const { frames: newFrames, timestamp, changeId } = payload.payload;
           
-          // Ignore updates that we just sent
+          // Ignore updates that originated from us
+          if (changeId && changeId === localChangeIdRef.current) {
+            console.log('📥 Ignoring own broadcast with changeId:', changeId);
+            return;
+          }
+
+          // Also ignore very recent broadcasts as a fallback
           const timeSinceLastBroadcast = Date.now() - lastBroadcastRef.current;
-          if (timeSinceLastBroadcast < 200) {
+          if (timeSinceLastBroadcast < 300) {
+            console.log('📥 Ignoring broadcast due to timing (< 300ms)');
             return;
           }
 
           if (newFrames && Array.isArray(newFrames)) {
-            console.log('Received real-time canvas update via broadcast');
+            console.log('📥 Received real-time canvas update via broadcast from another user');
             onRemoteUpdate(newFrames);
           }
         }
