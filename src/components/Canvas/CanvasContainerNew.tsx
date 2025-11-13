@@ -1102,13 +1102,15 @@ export default function CanvasContainerNew({
 
       // Get selected workspace ID from localStorage
       const selectedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
+      // Normalize "personal" to null and handle empty values
+      const workspaceId = selectedWorkspaceId && selectedWorkspaceId !== 'personal' ? selectedWorkspaceId : null;
 
       const posterData = {
         user_id: user.id,
         project_name: projectTitle,
         canvas_data: snapshot as any,
         thumbnail_url: thumbnail,
-        workspace_id: selectedWorkspaceId || null,
+        workspace_id: workspaceId,
       };
 
       if (projectId) {

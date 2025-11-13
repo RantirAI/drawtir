@@ -41,10 +41,10 @@ export const useWorkspaces = () => {
         const savedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
         if (savedWorkspaceId && savedWorkspaceId !== 'personal') {
           const validWorkspace = workspacesData.find(w => w.id === savedWorkspaceId);
-          setSelectedWorkspaceId(validWorkspace?.id || null);
+          setSelectedWorkspaceId(validWorkspace?.id || workspacesData[0].id);
         } else {
-          // Default to Personal workspace (null)
-          setSelectedWorkspaceId(null);
+          // Default to first available workspace
+          setSelectedWorkspaceId(workspacesData[0].id);
         }
       }
     } catch (error) {
