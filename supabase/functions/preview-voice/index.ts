@@ -33,8 +33,8 @@ serve(async (req) => {
           "xi-api-key": ELEVENLABS_API_KEY,
         },
         body: JSON.stringify({
-          text: "What did the hat say to the scarf? You hang around while I move on ahead! [laughing]",
-          model_id: "eleven_multilingual_v2",
+          text: "What did the hat say to the scarf? [chuckles] You hang around while I move on ahead!",
+          model_id: "eleven_v3",
           voice_settings: {
             stability: 0.5,
             similarity_boost: 0.75,
