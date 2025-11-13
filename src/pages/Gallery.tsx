@@ -12,6 +12,7 @@ import HorizontalNav from "@/components/Navigation/HorizontalNav";
 import PageFooter from "@/components/Footer/PageFooter";
 import { generateThumbnail } from "@/lib/snapshot";
 import { useTemplates } from "@/hooks/useTemplates";
+import { useWorkspaces } from "@/hooks/useWorkspaces";
 import type { CanvasSnapshot } from "@/types/snapshot";
 
 interface Project {
@@ -33,6 +34,7 @@ export default function Gallery() {
   const [sortBy, setSortBy] = useState<"date" | "name">("date");
   const [filterBy, setFilterBy] = useState<"all" | "public" | "private">("all");
   const { templates, isLoading: templatesLoading } = useTemplates();
+  const { selectedWorkspaceId, selectedWorkspace } = useWorkspaces();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -44,14 +46,23 @@ export default function Gallery() {
       fetchProjects();
     };
     checkAuth();
-  }, [navigate]);
+  }, [navigate, selectedWorkspaceId]);
 
   const fetchProjects = async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('posters')
-        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template')
-        .order('created_at', { ascending: false });
+        .select('id, project_name, thumbnail_url, canvas_data, created_at, is_public, is_template, workspace_id');
+
+      // Filter by workspace if one is selected
+      if (selectedWorkspaceId) {
+        query = query.eq('workspace_id', selectedWorkspaceId);
+      } else {
+        // Show projects without workspace_id (personal projects)
+        query = query.is('workspace_id', null);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       const rows = data || [];
@@ -259,11 +270,34 @@ export default function Gallery() {
                 className="gap-2"
               >
                 <Plus className="w-4 h-4" />
-                Create New Design
+                {selectedWorkspace ? `New Project in ${selectedWorkspace.name}` : 'Create New Design'}
               </Button>
             </div>
 
             <TabsContent value="projects" className="space-y-4">
+              {/* Workspace Info Banner */}
+              {selectedWorkspace && (
+                <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-sm">
+                        Workspace: {selectedWorkspace.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Projects in this workspace • Role: {selectedWorkspace.your_role}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => navigate('/workspaces')}
+                    >
+                      Manage Workspace
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
               {/* Search and Filter Bar */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">

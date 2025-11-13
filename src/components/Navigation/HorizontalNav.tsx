@@ -4,6 +4,8 @@ import { ThemeToggle } from "../ThemeToggle";
 import { Button } from "../ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { WorkspaceSelector } from "./WorkspaceSelector";
+import { WorkspaceNotifications } from "./WorkspaceNotifications";
 
 export default function HorizontalNav() {
   const navigate = useNavigate();
@@ -21,9 +23,9 @@ export default function HorizontalNav() {
   };
 
   return (
-    <nav className="bg-background">
-      <div className="container mx-auto px-4 py-2">
-        <div className="flex items-center justify-between">
+    <nav className="bg-background border-b">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
             {/* Drawtir Logo */}
             <Link to="/" className="flex items-center">
@@ -80,12 +82,19 @@ export default function HorizontalNav() {
               <Link to="/sdk-demo" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Embed
               </Link>
+              <Link to="/workspaces" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Workspaces
+              </Link>
               <Link to="/settings" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Settings
               </Link>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          
+          <div className="flex items-center gap-3">
+            <WorkspaceSelector />
+            <div className="h-6 w-px bg-border" />
+            <WorkspaceNotifications />
             <ThemeToggle />
             <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={handleSignOut}>
               Sign Out

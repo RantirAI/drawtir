@@ -1100,11 +1100,15 @@ export default function CanvasContainerNew({
       const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
       const thumbnail = await generateThumbnail(frames);
 
+      // Get selected workspace ID from localStorage
+      const selectedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
+
       const posterData = {
         user_id: user.id,
         project_name: projectTitle,
         canvas_data: snapshot as any,
         thumbnail_url: thumbnail,
+        workspace_id: selectedWorkspaceId || null,
       };
 
       if (projectId) {
