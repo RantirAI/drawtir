@@ -12,6 +12,7 @@ export const useCollaborativeCanvas = (
   const channelRef = useRef<RealtimeChannel | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastLocalUpdateRef = useRef<number>(0);
+  const lastBroadcastRef = useRef<number>(0);
   const [isSaving, setIsSaving] = useState(false);
 
   // Debounced save to database
@@ -40,10 +41,34 @@ export const useCollaborativeCanvas = (
     }
   }, [projectId]);
 
-  // Trigger debounced save when frames change
+  // Broadcast canvas changes immediately for real-time updates
+  const broadcastCanvasUpdate = useCallback((framesToBroadcast: Frame[]) => {
+    if (!channelRef.current || !enabled || !projectId) return;
+
+    const now = Date.now();
+    // Throttle broadcasts to every 100ms to avoid overwhelming the network
+    if (now - lastBroadcastRef.current < 100) return;
+
+    lastBroadcastRef.current = now;
+
+    channelRef.current.send({
+      type: 'broadcast',
+      event: 'canvas-update',
+      payload: {
+        frames: framesToBroadcast,
+        timestamp: now,
+      }
+    });
+  }, [enabled, projectId]);
+
+  // Trigger debounced save and immediate broadcast when frames change
   useEffect(() => {
     if (!enabled || !projectId) return;
 
+    // Broadcast immediately for real-time updates
+    broadcastCanvasUpdate(frames);
+
+    // Save to database after delay for persistence
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
@@ -57,7 +82,7 @@ export const useCollaborativeCanvas = (
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [frames, projectId, enabled, saveToDatabase]);
+  }, [frames, projectId, enabled, saveToDatabase, broadcastCanvasUpdate]);
 
   // Subscribe to realtime updates
   useEffect(() => {
@@ -65,6 +90,24 @@ export const useCollaborativeCanvas = (
 
     const channel = supabase
       .channel(`project:${projectId}:canvas`)
+      .on(
+        'broadcast',
+        { event: 'canvas-update' },
+        (payload: any) => {
+          const { frames: newFrames, timestamp } = payload.payload;
+          
+          // Ignore updates that we just sent
+          const timeSinceLastBroadcast = Date.now() - lastBroadcastRef.current;
+          if (timeSinceLastBroadcast < 200) {
+            return;
+          }
+
+          if (newFrames && Array.isArray(newFrames)) {
+            console.log('Received real-time canvas update via broadcast');
+            onRemoteUpdate(newFrames);
+          }
+        }
+      )
       .on(
         'postgres_changes',
         {
@@ -82,7 +125,7 @@ export const useCollaborativeCanvas = (
 
           const newCanvasData = payload.new.canvas_data as any;
           if (newCanvasData?.frames) {
-            console.log('Received remote canvas update');
+            console.log('Received canvas update from database (fallback sync)');
             onRemoteUpdate(newCanvasData.frames);
           }
         }

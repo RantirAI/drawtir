@@ -22,6 +22,15 @@ export const CollaborativeCursor = memo(({ user, zoom, panOffset, canvasRect }: 
   const x = canvasRect.left + (user.cursorX * zoom + panOffset.x);
   const y = canvasRect.top + (user.cursorY * zoom + panOffset.y);
 
+  console.log('🎯 Rendering cursor:', {
+    userId: user.userId,
+    canvasSpace: { x: user.cursorX, y: user.cursorY },
+    screenSpace: { x, y },
+    canvasRect: { left: canvasRect.left, top: canvasRect.top },
+    zoom,
+    panOffset
+  });
+
   // Always show cursor even when idle
 
   return (

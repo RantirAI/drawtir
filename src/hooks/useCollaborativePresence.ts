@@ -77,6 +77,8 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
     lastBroadcastRef.current = now;
 
+    console.log('📍 Broadcasting cursor position:', { x, y, userId: currentUser.id });
+
     channelRef.current.send({
       type: 'broadcast',
       event: 'cursor',
@@ -132,6 +134,13 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
       .on('broadcast', { event: 'cursor' }, (payload: any) => {
         const p = payload?.payload as Partial<UserPresence> & { userId: string };
         if (!p?.userId || p.userId === currentUser.id) return;
+        
+        console.log('📍 Received cursor position:', { 
+          userId: p.userId, 
+          cursorX: p.cursorX, 
+          cursorY: p.cursorY 
+        });
+        
         setActiveUsers(prev => {
           const next = new Map(prev);
           const existing = next.get(p.userId);
