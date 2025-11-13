@@ -29,14 +29,13 @@ export function createSnapshot(
 }
 
 export function validateSnapshot(snapshot: any): snapshot is CanvasSnapshot {
+  // More lenient validation to support older project formats
   return (
     snapshot &&
     typeof snapshot === "object" &&
-    "version" in snapshot &&
-    "metadata" in snapshot &&
-    "canvas" in snapshot &&
     "frames" in snapshot &&
-    Array.isArray(snapshot.frames)
+    Array.isArray(snapshot.frames) &&
+    snapshot.frames.length > 0
   );
 }
 

@@ -1212,16 +1212,22 @@ export default function CanvasContainerNew({
             
             if (validateSnapshot(snapshot)) {
               console.log("✅ Snapshot is valid, loading project");
-              setProjectTitle(snapshot.metadata?.title || data.project_name || "Untitled Project");
+              // Extract title from metadata or fallback to project_name
+              const title = snapshot.metadata?.title || data.project_name || "Untitled Project";
+              setProjectTitle(title);
               setFrames(snapshot.frames);
+              
+              // Load canvas settings if they exist
               if (snapshot.canvas?.zoom !== undefined) setZoom(snapshot.canvas.zoom);
               if (snapshot.canvas?.panOffset) setPanOffset(snapshot.canvas.panOffset);
+              
               setProjectId(projectIdFromUrl);
-              console.log("✅ Loaded project from URL:", projectIdFromUrl);
-              toast.success(`Opened: ${snapshot.metadata?.title || data.project_name}`);
+              console.log("✅ Loaded project from URL:", projectIdFromUrl, "with", snapshot.frames.length, "frames");
+              toast.success(`Opened: ${title}`);
             } else {
               console.error("❌ Snapshot validation failed:", snapshot);
-              toast.error("Project data is invalid");
+              console.error("Snapshot structure:", JSON.stringify(snapshot, null, 2));
+              toast.error("Project data is invalid or has no frames");
             }
           } else {
             console.error("❌ No canvas_data found in project");
