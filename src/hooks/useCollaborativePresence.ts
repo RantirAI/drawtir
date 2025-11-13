@@ -68,25 +68,29 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
     return CURSOR_COLORS[Math.abs(hash) % CURSOR_COLORS.length];
   }, []);
 
-  // Broadcast cursor position (properly throttled)
+  // Broadcast cursor position via broadcast events (not presence) for smooth updates
   const broadcastCursor = useCallback((x: number, y: number) => {
     if (!channelRef.current || !currentUser || !enabled) return;
 
     const now = Date.now();
     if (now - lastBroadcastRef.current < BROADCAST_THROTTLE) return;
-    
+
     lastBroadcastRef.current = now;
 
-    channelRef.current.track({
-      userId: currentUser.id,
-      userName: currentUser.name,
-      displayName: currentUser.name,
-      avatarUrl: currentUser.avatar,
-      cursorX: x,
-      cursorY: y,
-      color: getUserColor(currentUser.id),
-      lastSeen: Date.now(),
-      isActive: true,
+    channelRef.current.send({
+      type: 'broadcast',
+      event: 'cursor',
+      payload: {
+        userId: currentUser.id,
+        userName: currentUser.name,
+        displayName: currentUser.name,
+        avatarUrl: currentUser.avatar,
+        cursorX: x,
+        cursorY: y,
+        color: getUserColor(currentUser.id),
+        lastSeen: now,
+        isActive: true,
+      }
     });
   }, [currentUser, enabled, getUserColor]);
 
@@ -117,17 +121,38 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
 
         setActiveUsers(users);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+      .on('presence', { event: 'join' }, ({ key }) => {
         console.log('User joined:', key);
         // Let sync handle the update
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+      .on('presence', { event: 'leave' }, ({ key }) => {
         console.log('User left:', key);
         // Let sync handle the update - don't manually delete to prevent flicker
       })
+      .on('broadcast', { event: 'cursor' }, (payload: any) => {
+        const p = payload?.payload as Partial<UserPresence> & { userId: string };
+        if (!p?.userId || p.userId === currentUser.id) return;
+        setActiveUsers(prev => {
+          const next = new Map(prev);
+          const existing = next.get(p.userId);
+          const merged: UserPresence = {
+            userId: p.userId,
+            userName: p.userName || existing?.userName || '',
+            displayName: p.displayName || existing?.displayName || '',
+            avatarUrl: p.avatarUrl ?? existing?.avatarUrl ?? null,
+            cursorX: typeof p.cursorX === 'number' ? p.cursorX : existing?.cursorX || -1000,
+            cursorY: typeof p.cursorY === 'number' ? p.cursorY : existing?.cursorY || -1000,
+            color: p.color || existing?.color || getUserColor(p.userId),
+            lastSeen: Date.now(),
+            isActive: true,
+          };
+          next.set(p.userId, merged);
+          return next;
+        });
+      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
-          // Don't broadcast cursor on initial subscription
+          // Track static presence info once (no frequent updates here)
           await channel.track({
             userId: currentUser.id,
             userName: currentUser.name,
