@@ -109,7 +109,7 @@ export default function Workspaces() {
     try {
       const { data, error } = await supabase
         .from('workspace_members')
-        .select('id, user_id, role, joined_at, profiles:profiles!workspace_members_user_id_fkey(email, display_name, avatar_url)')
+        .select('id, user_id, role, joined_at, profiles!workspace_members_user_id_fkey(email, display_name, avatar_url)')
         .eq('workspace_id', workspaceId)
         .order('joined_at', { ascending: true });
 
