@@ -226,7 +226,6 @@ export default function CanvasContainerNew({
     (remoteFrames) => {
       console.log('Received remote canvas update, merging...');
       setFrames(remoteFrames);
-      toast.info('Canvas updated by collaborator');
     },
     enableCollaboration
   );
@@ -3787,7 +3786,7 @@ export default function CanvasContainerNew({
 
       {/* Collaborative Users Bar */}
       {enableCollaboration && currentUser && (
-        <div className="fixed top-20 right-4 z-50">
+        <div className="fixed bottom-20 right-4 z-50">
           <CollaborativeUsersBar
             activeUsers={activeUsers}
             currentUser={currentUser}
