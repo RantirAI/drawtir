@@ -96,7 +96,10 @@ export default function TimelinePanel({
   onVoiceAudiosChange,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1); // 1 = 100%, 2 = 200%, etc.
+  const [audioLayers, setAudioLayers] = useState<number[]>([0]); // Track IDs for audio layers
   const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
   const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
   const [draggingAnimation, setDraggingAnimation] = useState<{
@@ -461,7 +464,12 @@ export default function TimelinePanel({
                     <span>{marker}s</span>
                     <div className="w-px h-2 bg-border mt-1" />
                   </div>
-                ))}
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
               </div>
 
               {/* Playhead */}
@@ -760,9 +768,10 @@ export default function TimelinePanel({
             </ContextMenu>
               );
             })}
+            </div>
           </div>
         </div>
-      </ScrollArea>
+      </div>
     </div>
 
       <VoiceTextDrawer
