@@ -278,15 +278,6 @@ export default function VoiceTextDrawer({
                   "Add Voice"
                 )}
               </Button>
-              
-              <Button
-                variant="outline"
-                onClick={onClose}
-                disabled={isGenerating || isPreviewing}
-                size="lg"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </SheetContent>
