@@ -56,6 +56,14 @@ export default function TimelinePanel({
     startDelay: number;
     mode: 'move' | 'resize';
   } | null>(null);
+  const [draggingVoice, setDraggingVoice] = useState<{
+    voiceId: string;
+    startX: number;
+    startDelay: number;
+    mode: 'move' | 'resize';
+  } | null>(null);
+  const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
+  const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
 
   const parseDuration = (duration: string): number => {
     if (duration.endsWith('ms')) {
@@ -118,21 +126,50 @@ export default function TimelinePanel({
     }
   };
 
+  const handleVoiceDrag = (e: MouseEvent) => {
+    if (!timelineRef.current || !draggingVoice) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const timeAtMouse = (x / rect.width) * maxDuration;
+
+    const voice = voiceAudios.find(v => v.id === draggingVoice.voiceId);
+    if (!voice) return;
+
+    if (draggingVoice.mode === 'move') {
+      const deltaX = x - draggingVoice.startX;
+      const deltaTime = (deltaX / rect.width) * maxDuration;
+      const newDelay = Math.max(0, Math.min(draggingVoice.startDelay + deltaTime, maxDuration - voice.duration));
+      
+      setVoiceAudios(prev => prev.map(v =>
+        v.id === draggingVoice.voiceId ? { ...v, delay: newDelay } : v
+      ));
+    } else if (draggingVoice.mode === 'resize') {
+      const newDuration = Math.max(0.1, Math.min(timeAtMouse - voice.delay, maxDuration - voice.delay));
+      
+      setVoiceAudios(prev => prev.map(v =>
+        v.id === draggingVoice.voiceId ? { ...v, duration: newDuration } : v
+      ));
+    }
+  };
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDraggingPlayhead) {
         handlePlayheadDrag(e as any);
       } else if (draggingAnimation) {
         handleAnimationDrag(e);
+      } else if (draggingVoice) {
+        handleVoiceDrag(e);
       }
     };
 
     const handleMouseUp = () => {
       setIsDraggingPlayhead(false);
       setDraggingAnimation(null);
+      setDraggingVoice(null);
     };
 
-    if (isDraggingPlayhead || draggingAnimation) {
+    if (isDraggingPlayhead || draggingAnimation || draggingVoice) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     }
@@ -141,7 +178,7 @@ export default function TimelinePanel({
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDraggingPlayhead, draggingAnimation, maxDuration]);
+  }, [isDraggingPlayhead, draggingAnimation, draggingVoice, maxDuration, voiceAudios]);
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
@@ -230,12 +267,26 @@ export default function TimelinePanel({
         id: `voice-${Date.now()}`,
         url: audioUrl,
         text,
-        delay: currentTime,
+        delay: voiceDrawerTimestamp,
         duration: audio.duration,
       };
       setVoiceAudios(prev => [...prev, newVoice]);
     });
     setSelectedVoice(null);
+    setVoiceDrawerOpen(false);
+  };
+
+  const handleRemoveVoice = (voiceId: string) => {
+    setVoiceAudios(prev => prev.filter(v => v.id !== voiceId));
+  };
+
+  const handleVoiceTrackRightClick = (e: React.MouseEvent) => {
+    if (!timelineRef.current) return;
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const clickTime = Math.max(0, (x / rect.width) * maxDuration);
+    setVoiceDrawerTimestamp(clickTime);
+    setVoiceDrawerOpen(true);
   };
 
   // Play voices at appropriate times
@@ -317,39 +368,93 @@ export default function TimelinePanel({
 
           {/* Element tracks */}
           <div className="space-y-2 mt-4">
-            {/* Voice tracks */}
-            {voiceAudios.map((voice) => {
-              const startPercent = (voice.delay / maxDuration) * 100;
-              const widthPercent = (voice.duration / maxDuration) * 100;
-              
-              return (
-                <div key={voice.id} className="flex items-center gap-2 p-1 rounded">
+            {/* Voice track row */}
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <div 
+                  className="flex items-center gap-2 p-1 rounded hover:bg-muted/50 transition-colors"
+                  onContextMenu={(e) => {
+                    const trackElement = e.currentTarget.querySelector('.flex-1.relative') as HTMLElement;
+                    if (trackElement && timelineRef.current) {
+                      const rect = timelineRef.current.getBoundingClientRect();
+                      const trackRect = trackElement.getBoundingClientRect();
+                      const x = e.clientX - trackRect.left;
+                      const clickTime = Math.max(0, (x / trackRect.width) * maxDuration);
+                      setVoiceDrawerTimestamp(clickTime);
+                    }
+                  }}
+                >
                   <div className="w-32 flex-shrink-0">
-                    <div className="text-xs truncate font-medium">
-                      Voice
-                    </div>
-                    <div className="text-[10px] text-muted-foreground truncate">
-                      {voice.text.substring(0, 20)}...
+                    <div className="text-xs truncate font-medium">Voice</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {voiceAudios.length} clip{voiceAudios.length !== 1 ? 's' : ''}
                     </div>
                   </div>
                   <div className="flex-1 relative h-8 bg-muted/30 rounded">
-                    <div
-                      className="absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-colors"
-                      style={{
-                        left: `${startPercent}%`,
-                        width: `${widthPercent}%`,
-                      }}
-                    >
-                      <div className="h-full flex items-center justify-between px-1">
-                        <div className="text-[10px] text-white font-medium truncate">
-                          Voice
-                        </div>
-                      </div>
-                    </div>
+                    {voiceAudios.map((voice) => {
+                      const startPercent = (voice.delay / maxDuration) * 100;
+                      const widthPercent = (voice.duration / maxDuration) * 100;
+                      
+                      return (
+                        <ContextMenu key={voice.id}>
+                          <ContextMenuTrigger asChild>
+                            <div
+                              className="absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-colors group"
+                              style={{
+                                left: `${startPercent}%`,
+                                width: `${widthPercent}%`,
+                              }}
+                              onMouseDown={(e) => {
+                                if (!timelineRef.current) return;
+                                e.stopPropagation();
+                                
+                                const rect = timelineRef.current.getBoundingClientRect();
+                                const barRect = e.currentTarget.getBoundingClientRect();
+                                const clickX = e.clientX - barRect.left;
+                                const isResizeZone = clickX > barRect.width - 8;
+                                
+                                if (isResizeZone) {
+                                  setDraggingVoice({
+                                    voiceId: voice.id,
+                                    startX: e.clientX - rect.left,
+                                    startDelay: voice.delay,
+                                    mode: 'resize',
+                                  });
+                                } else {
+                                  setDraggingVoice({
+                                    voiceId: voice.id,
+                                    startX: e.clientX - rect.left,
+                                    startDelay: voice.delay,
+                                    mode: 'move',
+                                  });
+                                }
+                              }}
+                            >
+                              <div className="h-full flex items-center justify-between px-1">
+                                <div className="text-[10px] text-white font-medium truncate">
+                                  {voice.text.substring(0, 15)}...
+                                </div>
+                                <div className="w-1 h-full bg-white/20 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onClick={() => handleRemoveVoice(voice.id)}>
+                              Remove Voice
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      );
+                    })}
                   </div>
                 </div>
-              );
-            })}
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => setVoiceDrawerOpen(true)}>
+                  Add Voice Here
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
             
             {elements.map((element) => {
               const isSelected = selectedElementIds.includes(element.id);
@@ -517,13 +622,13 @@ export default function TimelinePanel({
       </ScrollArea>
     </div>
 
-    <VoiceTextDrawer
-      open={!!selectedVoice}
-      onClose={() => setSelectedVoice(null)}
-      voiceId={selectedVoice?.id || ""}
-      voiceName={selectedVoice?.name || ""}
-      onVoiceGenerated={handleVoiceGenerated}
-    />
+      <VoiceTextDrawer
+        open={voiceDrawerOpen}
+        onClose={() => setVoiceDrawerOpen(false)}
+        voiceId={selectedVoice?.id || "9BWtsMINqrJLrRacOk9x"}
+        voiceName={selectedVoice?.name || "Aria"}
+        onVoiceGenerated={handleVoiceGenerated}
+      />
     </>
   );
 }
