@@ -23,7 +23,7 @@ export default function HorizontalNav() {
   };
 
   return (
-    <nav className="bg-background border-b">
+    <nav className="bg-background border-b border-border/10 dark:border-transparent">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-6">
@@ -93,7 +93,7 @@ export default function HorizontalNav() {
           
           <div className="flex items-center gap-3">
             <WorkspaceSelector />
-            <div className="h-6 w-px bg-border" />
+            <div className="h-6 w-px bg-border/10 dark:bg-transparent" />
             <WorkspaceNotifications />
             <ThemeToggle />
             <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={handleSignOut}>
