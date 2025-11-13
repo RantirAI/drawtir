@@ -493,17 +493,17 @@ export default function Workspaces() {
                         >
                           <div className="flex items-center gap-3">
                             <Avatar>
-                              <AvatarImage src={member.profiles.avatar_url || undefined} />
+                              <AvatarImage src={member.profiles?.avatar_url || undefined} />
                               <AvatarFallback>
-                                {(member.profiles.display_name || member.profiles.email).charAt(0).toUpperCase()}
+                                {(member.profiles?.display_name || member.profiles?.email || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div>
                               <p className="font-medium">
-                                {member.profiles.display_name || member.profiles.email}
+                                {member.profiles?.display_name || member.profiles?.email || 'Unknown User'}
                               </p>
                               <p className="text-xs text-muted-foreground">
-                                {member.profiles.email}
+                                {member.profiles?.email || 'No email'}
                               </p>
                             </div>
                           </div>
