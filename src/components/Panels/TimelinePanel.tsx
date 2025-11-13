@@ -514,6 +514,13 @@ export default function TimelinePanel({
                       const widthPercent = (voice.duration / maxDuration) * 100;
                       const isPlaying = playingAudiosRef.current.has(voice.id);
                       const voiceAvatar = VOICE_AVATARS[voice.voiceId];
+
+                      // Strip [audio tags] for display snippet
+                      const snippet = (voice.text || "")
+                        .replace(/\[[^\]]+\]/g, "")
+                        .replace(/\s+/g, " ")
+                        .trim()
+                        .slice(0, 40) + (voice.text && voice.text.length > 40 ? "…" : "");
                       
                       return (
                         <ContextMenu key={voice.id}>
@@ -552,17 +559,23 @@ export default function TimelinePanel({
                                 }
                               }}
                             >
-                              <div className="h-full flex items-center gap-1 px-1">
+                              {/* Top label with avatar + name */}
+                              <div className="absolute -top-4 left-0 flex items-center gap-1 text-[10px] text-foreground/80">
                                 {voiceAvatar && (
                                   <Avatar className="w-4 h-4 border border-white/20">
                                     <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
-                                    <AvatarFallback className="text-[8px]">{voice.voiceName[0]}</AvatarFallback>
+                                    <AvatarFallback className="text-[8px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
                                   </Avatar>
                                 )}
-                                <div className="text-[10px] text-white font-medium truncate flex-1">
-                                  {voice.voiceName}
+                                <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
+                              </div>
+
+                              {/* Inside bar: snippet of text */}
+                              <div className="h-full flex items-center justify-between px-2">
+                                <div className="text-[10px] text-white/95 font-medium truncate flex-1">
+                                  {snippet || voice.voiceName}
                                 </div>
-                                <div className="w-1 h-full bg-white/20 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                                <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
                             </div>
                           </ContextMenuTrigger>
