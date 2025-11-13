@@ -1,5 +1,5 @@
 import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2 } from "iconsax-react";
-import { Save, Share2, Hand } from "lucide-react";
+import { Save, Share2, Hand, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import {
@@ -23,6 +23,9 @@ import { toast } from "sonner";
 import EditableTitle from "@/components/Canvas/EditableTitle";
 import SettingsDialog from "@/components/Canvas/SettingsDialog";
 import { useState } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { UserPresence } from "@/hooks/useCollaborativePresence";
 
 interface EditorTopBarProps {
   projectName?: string;
@@ -52,6 +55,9 @@ interface EditorTopBarProps {
   isGenerating?: boolean;
   generationProgress?: number;
   generationMessage?: string;
+  activeUsers?: UserPresence[];
+  currentUser?: { id: string; name: string; avatar: string | null } | null;
+  enableCollaboration?: boolean;
 }
 
 export default function EditorTopBar({ 
@@ -82,6 +88,9 @@ export default function EditorTopBar({
   isGenerating = false,
   generationProgress = 0,
   generationMessage = "Generating...",
+  activeUsers = [],
+  currentUser = null,
+  enableCollaboration = false,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -92,11 +101,23 @@ export default function EditorTopBar({
     navigate("/auth");
   };
 
+  const allUsers = enableCollaboration && currentUser ? [
+    {
+      userId: currentUser.id,
+      displayName: 'You',
+      avatarUrl: currentUser.avatar,
+      color: 'hsl(var(--primary))',
+    },
+    ...activeUsers,
+  ] : [];
+
+  const hasActiveUsers = allUsers.length > 1;
+
   return (
-    <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
+    <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-1">
       {/* Floating generation message */}
       {isGenerating && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
           <Magicpen size={12} className="text-primary animate-pulse" />
           <span className="text-xs font-medium text-foreground drop-shadow-lg whitespace-nowrap">
             {generationMessage}
@@ -406,6 +427,87 @@ export default function EditorTopBar({
           </div>
         )}
       </div>
+
+      {/* Collaborative Users Bar - Below toolbar when active */}
+      {enableCollaboration && hasActiveUsers && (
+        <div className="relative animate-in fade-in slide-in-from-top-2 duration-300">
+          {/* Glow effects behind each avatar */}
+          <div className="absolute inset-0 -z-10 flex items-center justify-center">
+            {allUsers.slice(0, 5).map((user, index) => (
+              <div
+                key={user.userId}
+                className="absolute blur-2xl scale-150 opacity-40 w-12 h-12 rounded-full transition-all duration-300"
+                style={{
+                  backgroundColor: user.color,
+                  left: `${index * 32}px`,
+                }}
+              />
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/40 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_0_rgba(59,130,246,0.2)]">
+            <Users className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium text-muted-foreground">
+              {allUsers.length}
+            </span>
+            
+            <div className="flex -space-x-2">
+              <TooltipProvider>
+                {allUsers.slice(0, 5).map((user, index) => (
+                  <Tooltip key={user.userId}>
+                    <TooltipTrigger asChild>
+                      <div
+                        className="relative transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50"
+                        style={{ zIndex: allUsers.length - index }}
+                      >
+                        <Avatar 
+                          className="h-7 w-7 border-2 ring-2 ring-background/50"
+                          style={{
+                            borderColor: user.color,
+                            boxShadow: `0 0 20px ${user.color}40`,
+                          }}
+                        >
+                          <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
+                          <AvatarFallback 
+                            className="text-[10px] font-semibold"
+                            style={{
+                              backgroundColor: user.color,
+                              color: 'white',
+                            }}
+                          >
+                            {user.displayName.charAt(0).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {user.userId === currentUser?.id && (
+                          <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary border-2 border-background animate-pulse" />
+                        )}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p className="text-xs font-medium">{user.displayName}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+                
+                {allUsers.length > 5 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="relative flex h-7 w-7 items-center justify-center rounded-full border-2 border-border bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-background/50 transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50">
+                        +{allUsers.length - 5}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p className="text-xs font-medium">
+                        {allUsers.slice(5).map(u => u.displayName).join(', ')}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </TooltipProvider>
+            </div>
+          </div>
+        </div>
+      )}
 
       <SettingsDialog 
         open={showSettings} 

@@ -3784,16 +3784,6 @@ export default function CanvasContainerNew({
         </div>
       )}
 
-      {/* Collaborative Users Bar - Bottom middle of top toolbar */}
-      {enableCollaboration && currentUser && (
-        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50">
-          <CollaborativeUsersBar
-            activeUsers={activeUsers}
-            currentUser={currentUser}
-          />
-        </div>
-      )}
-
       <DrawtirFooter />
 
       {/* Shader Library Modal */}
