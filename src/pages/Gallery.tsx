@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter, Plus } from "lucide-react";
+import { Trash2, Loader2, FolderOpen, Globe, Lock, Search, Filter, Plus, Clock, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,11 @@ import PageFooter from "@/components/Footer/PageFooter";
 import { generateThumbnail } from "@/lib/snapshot";
 import { useTemplates } from "@/hooks/useTemplates";
 import { useWorkspaces } from "@/hooks/useWorkspaces";
+import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
+import { usePermissions } from "@/hooks/usePermissions";
+import { useActivityLog } from "@/hooks/useActivityLog";
 import type { CanvasSnapshot } from "@/types/snapshot";
+import { formatDistanceToNow } from 'date-fns';
 
 interface Project {
   id: string;
@@ -35,6 +39,9 @@ export default function Gallery() {
   const [filterBy, setFilterBy] = useState<"all" | "public" | "private">("all");
   const { templates, isLoading: templatesLoading } = useTemplates();
   const { selectedWorkspaceId, selectedWorkspace } = useWorkspaces();
+  const { recentProjects, trackProjectView } = useRecentlyViewed();
+  const { canCreate, canEdit, canDelete } = usePermissions();
+  const { logActivity } = useActivityLog(selectedWorkspaceId);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -93,13 +100,21 @@ export default function Gallery() {
   };
 
   const openProject = (id: string) => {
+    trackProjectView(id);
     navigate(`/?project=${id}`);
   };
 
   const deleteProject = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    
+    if (!canDelete) {
+      toast.error('You do not have permission to delete projects');
+      return;
+    }
+
     setDeletingId(id);
     try {
+      const project = projects.find(p => p.id === id);
       const { error } = await supabase
         .from('posters')
         .delete()
@@ -108,6 +123,17 @@ export default function Gallery() {
       if (error) throw error;
       setProjects(projects.filter(p => p.id !== id));
       toast.success("Project deleted");
+      
+      // Log activity
+      if (selectedWorkspaceId && project) {
+        await logActivity(
+          selectedWorkspaceId,
+          'deleted',
+          'project',
+          id,
+          project.project_name
+        );
+      }
     } catch (error) {
       console.error('Error deleting:', error);
       toast.error("Failed to delete project");
@@ -264,17 +290,63 @@ export default function Gallery() {
                   Templates ({templates.length})
                 </TabsTrigger>
               </TabsList>
-              <Button 
-                onClick={() => navigate("/?new=true")}
-                size="default"
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                {selectedWorkspace ? `New Project in ${selectedWorkspace.name}` : 'Create New Design'}
-              </Button>
+              {canCreate ? (
+                <Button 
+                  onClick={() => navigate("/?new=true")}
+                  size="default"
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  {selectedWorkspace ? `New Project in ${selectedWorkspace.name}` : 'Create New Design'}
+                </Button>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>Viewers cannot create projects</span>
+                </div>
+              )}
             </div>
 
             <TabsContent value="projects" className="space-y-4">
+              {/* Recently Viewed Section */}
+              {recentProjects.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold">Recently Viewed</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    {recentProjects.map((project) => (
+                      <Card 
+                        key={project.id}
+                        className="group overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 border-border/50"
+                        onClick={() => openProject(project.id)}
+                      >
+                        <div className="relative h-32 bg-muted overflow-hidden">
+                          {project.thumbnail_url ? (
+                            <img 
+                              src={project.thumbnail_url} 
+                              alt={project.project_name}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+                              <FolderOpen className="w-12 h-12 text-muted-foreground/50" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-2 bg-card border-t border-border/50">
+                          <h4 className="font-medium text-xs truncate">{project.project_name}</h4>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(project.viewed_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Workspace Info Banner */}
               {selectedWorkspace && (
                 <div className="bg-muted/50 rounded-lg p-4 border border-border/50">
@@ -294,6 +366,20 @@ export default function Gallery() {
                     >
                       Manage Workspace
                     </Button>
+                  </div>
+                </div>
+              )}
+
+              {!canEdit && selectedWorkspace && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-sm">Viewer Mode</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        You have view-only access to this workspace. Contact the workspace owner to request edit permissions.
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}

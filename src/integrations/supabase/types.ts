@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          resource_id: string | null
+          resource_name: string | null
+          resource_type: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_name?: string | null
+          resource_type?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_conversations: {
         Row: {
           created_at: string
@@ -220,6 +271,42 @@ export type Database = {
         }
         Relationships: []
       }
+      project_views: {
+        Row: {
+          id: string
+          project_id: string
+          user_id: string
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          user_id: string
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          user_id?: string
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_views_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "posters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_invitations: {
         Row: {
           accepted_at: string | null
@@ -322,24 +409,33 @@ export type Database = {
       }
       workspaces: {
         Row: {
+          avatar_url: string | null
           created_at: string
+          description: string | null
           id: string
           name: string
           owner_id: string
+          primary_color: string | null
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name: string
           owner_id: string
+          primary_color?: string | null
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           name?: string
           owner_id?: string
+          primary_color?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -372,6 +468,10 @@ export type Database = {
       is_workspace_member: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
+      }
+      upsert_project_view: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: undefined
       }
     }
     Enums: {

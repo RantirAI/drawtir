@@ -8,9 +8,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Plus, Users, Mail, Trash2, Crown } from 'lucide-react';
+import { Plus, Users, Mail, Trash2, Crown, Settings } from 'lucide-react';
 import HorizontalNav from '@/components/Navigation/HorizontalNav';
+import { ActivityLogPanel } from '@/components/Workspace/ActivityLogPanel';
 
 interface Workspace {
   id: string;
@@ -320,14 +322,24 @@ export default function Workspaces() {
                     <CardDescription>{members.length} members</CardDescription>
                   </div>
                   
-                  {selectedWorkspace.your_role === 'owner' && (
-                    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-                      <DialogTrigger asChild>
-                        <Button size="sm">
-                          <Mail className="h-4 w-4 mr-2" />
-                          Invite
+                  <div className="flex gap-2">
+                    {selectedWorkspace.your_role === 'owner' && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => navigate(`/workspaces/${selectedWorkspace.id}/settings`)}
+                        >
+                          <Settings className="h-4 w-4 mr-2" />
+                          Settings
                         </Button>
-                      </DialogTrigger>
+                        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+                        <DialogTrigger asChild>
+                          <Button size="sm">
+                            <Mail className="h-4 w-4 mr-2" />
+                            Invite
+                          </Button>
+                        </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Invite to Workspace</DialogTitle>
@@ -364,9 +376,19 @@ export default function Workspaces() {
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
-                  )}
+                  </>
+                )}
+                  </div>
                 </div>
               </CardHeader>
+              
+              <Tabs defaultValue="members" className="w-full">
+                <TabsList className="mx-6">
+                  <TabsTrigger value="members">Members</TabsTrigger>
+                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="members">
               <CardContent>
                 <div className="space-y-3">
                   {members.map((member) => (
@@ -411,6 +433,14 @@ export default function Workspaces() {
                   ))}
                 </div>
               </CardContent>
+                </TabsContent>
+                
+                <TabsContent value="activity">
+                  <div className="p-6">
+                    <ActivityLogPanel workspaceId={selectedWorkspace.id} />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </Card>
           )}
         </div>

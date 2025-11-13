@@ -11,6 +11,7 @@ import Settings from "./pages/Settings";
 import PublicPoster from "./pages/PublicPoster";
 import SDKDemo from "./pages/SDKDemo";
 import Workspaces from "./pages/Workspaces";
+import WorkspaceSettings from "./pages/WorkspaceSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/documentation" element={<Documentation />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/workspaces" element={<Workspaces />} />
+          <Route path="/workspaces/:id/settings" element={<WorkspaceSettings />} />
           <Route path="/public/:id" element={<PublicPoster />} />
           <Route path="/sdk-demo" element={<SDKDemo />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
