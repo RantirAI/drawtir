@@ -183,7 +183,7 @@ export const useCollaborativePresence = (projectId: string | null, enabled: bool
   }, [projectId, currentUser, enabled, getUserColor]);
 
   return {
-    activeUsers: Array.from(activeUsers.values()).filter(u => u.isActive), // Only return active cursors
+    activeUsers: Array.from(activeUsers.values()), // Return all users, let component handle visibility
     broadcastCursor,
     currentUser,
   };
