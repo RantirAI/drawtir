@@ -192,7 +192,7 @@ export default function CanvasContainerNew({
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
   const [animationGlobalKey, setAnimationGlobalKey] = useState(0);
-  const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number }>>([]);
+  const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>>([]);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);

@@ -14,7 +14,7 @@ interface VoiceTextDrawerProps {
   onClose: () => void;
   voiceId: string;
   voiceName: string;
-  onVoiceGenerated: (audioUrl: string, text: string) => void;
+  onVoiceGenerated: (audioUrl: string, text: string, voiceId: string, voiceName: string) => void;
 }
 
 const emotionControls = [
@@ -26,6 +26,10 @@ const emotionControls = [
   { tag: "[curious]", label: "Curious", color: "rgb(200, 240, 255)" },
   { tag: "[sarcastic]", label: "Sarcastic", color: "rgb(220, 255, 220)" },
   { tag: "[crying]", label: "Crying", color: "rgb(200, 220, 255)" },
+  { tag: "[exhales]", label: "Exhales", color: "rgb(240, 220, 255)" },
+  { tag: "[snorts]", label: "Snorts", color: "rgb(255, 230, 210)" },
+  { tag: "[gulps]", label: "Gulps", color: "rgb(210, 240, 255)" },
+  { tag: "[mischievously]", label: "Mischievous", color: "rgb(255, 210, 230)" },
 ];
 
 export default function VoiceTextDrawer({
@@ -153,7 +157,7 @@ export default function VoiceTextDrawer({
       const blob = new Blob([bytes], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(blob);
 
-      onVoiceGenerated(audioUrl, text);
+      onVoiceGenerated(audioUrl, text, voiceId, voiceName);
 
       toast({
         title: "Voice generated",

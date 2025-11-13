@@ -6,6 +6,8 @@ export interface VoiceAudio {
   text: string;
   delay: number;
   duration: number;
+  voiceId: string;
+  voiceName: string;
 }
 
 export interface CanvasMetadata {

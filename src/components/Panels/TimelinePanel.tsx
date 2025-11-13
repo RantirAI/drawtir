@@ -3,6 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic } from "lucide-react";
 import {
   ContextMenu,
@@ -18,6 +19,51 @@ import AnimationSettingsDialog from "./AnimationSettingsDialog";
 import VoiceSelector from "./VoiceSelector";
 import VoiceTextDrawer from "./VoiceTextDrawer";
 
+// Voice avatars
+import ariaAvatar from "@/assets/voices/aria-avatar.png";
+import sarahAvatar from "@/assets/voices/sarah-avatar.png";
+import lauraAvatar from "@/assets/voices/laura-avatar.png";
+import riverAvatar from "@/assets/voices/river-avatar.png";
+import charlotteAvatar from "@/assets/voices/charlotte-avatar.png";
+import aliceAvatar from "@/assets/voices/alice-avatar.png";
+import matildaAvatar from "@/assets/voices/matilda-avatar.png";
+import jessicaAvatar from "@/assets/voices/jessica-avatar.png";
+import lilyAvatar from "@/assets/voices/lily-avatar.png";
+import rogerAvatar from "@/assets/voices/roger-avatar.png";
+import charlieAvatar from "@/assets/voices/charlie-avatar.png";
+import georgeAvatar from "@/assets/voices/george-avatar.png";
+import callumAvatar from "@/assets/voices/callum-avatar.png";
+import liamAvatar from "@/assets/voices/liam-avatar.png";
+import willAvatar from "@/assets/voices/will-avatar.png";
+import ericAvatar from "@/assets/voices/eric-avatar.png";
+import chrisAvatar from "@/assets/voices/chris-avatar.png";
+import brianAvatar from "@/assets/voices/brian-avatar.png";
+import danielAvatar from "@/assets/voices/daniel-avatar.png";
+import billAvatar from "@/assets/voices/bill-avatar.png";
+
+const VOICE_AVATARS: Record<string, string> = {
+  "9BWtsMINqrJLrRacOk9x": ariaAvatar,
+  "CwhRBWXzGAHq8TQ4Fs17": rogerAvatar,
+  "EXAVITQu4vr4xnSDxMaL": sarahAvatar,
+  "FGY2WhTYpPnrIDTdsKH5": lauraAvatar,
+  "IKne3meq5aSn9XLyUdCD": charlieAvatar,
+  "JBFqnCBsd6RMkjVDRZzb": georgeAvatar,
+  "N2lVS1w4EtoT3dr4eOWO": callumAvatar,
+  "SAz9YHcvj6GT2YYXdXww": riverAvatar,
+  "TX3LPaxmHKxFdv7VOQHJ": liamAvatar,
+  "XB0fDUnXU5powFXDhCwa": charlotteAvatar,
+  "Xb7hH8MSUJpSbSDYk0k2": aliceAvatar,
+  "XrExE9yKIg1WjnnlVkGX": matildaAvatar,
+  "bIHbv24MWmeRgasZH58o": willAvatar,
+  "cgSgspJ2msm6clMCkdW9": jessicaAvatar,
+  "cjVigY5qzO86Huf0OWal": ericAvatar,
+  "iP95p4xoKVk53GoZ742B": chrisAvatar,
+  "nPczCjzI2devNBz1zQrb": brianAvatar,
+  "onwK4e9ZLuTAKqWW03F9": danielAvatar,
+  "pFZP5JQG7iQjIQuC4Bku": lilyAvatar,
+  "pqHfZKP75CvOlQylNhV4": billAvatar,
+};
+
 interface TimelinePanelProps {
   frame: Frame | null;
   elements: Element[];
@@ -30,8 +76,8 @@ interface TimelinePanelProps {
   onReset?: () => void;
   selectedElementIds?: string[];
   onElementSelect?: (elementId: string) => void;
-  voiceAudios?: Array<{ id: string; url: string; text: string; delay: number; duration: number }>;
-  onVoiceAudiosChange?: (voiceAudios: Array<{ id: string; url: string; text: string; delay: number; duration: number }>) => void;
+  voiceAudios?: Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>;
+  onVoiceAudiosChange?: (voiceAudios: Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>) => void;
 }
 
 export default function TimelinePanel({
@@ -288,7 +334,7 @@ export default function TimelinePanel({
     return clickTime;
   };
 
-  const handleVoiceGenerated = (audioUrl: string, text: string) => {
+  const handleVoiceGenerated = (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
     const audio = new Audio(audioUrl);
     audio.addEventListener('loadedmetadata', () => {
       const newVoice = {
@@ -297,6 +343,8 @@ export default function TimelinePanel({
         text,
         delay: voiceDrawerTimestamp,
         duration: audio.duration,
+        voiceId,
+        voiceName,
       };
       setVoiceAudios(prev => [...prev, newVoice]);
     });
@@ -464,12 +512,16 @@ export default function TimelinePanel({
                     {voiceAudios.map((voice) => {
                       const startPercent = (voice.delay / maxDuration) * 100;
                       const widthPercent = (voice.duration / maxDuration) * 100;
+                      const isPlaying = playingAudiosRef.current.has(voice.id);
+                      const voiceAvatar = VOICE_AVATARS[voice.voiceId];
                       
                       return (
                         <ContextMenu key={voice.id}>
                           <ContextMenuTrigger asChild>
                             <div
-                              className="absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-colors group"
+                              className={`absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-all group ${
+                                isPlaying ? 'ring-2 ring-purple-300 ring-offset-1 animate-pulse' : ''
+                              }`}
                               style={{
                                 left: `${startPercent}%`,
                                 width: `${widthPercent}%`,
@@ -500,9 +552,15 @@ export default function TimelinePanel({
                                 }
                               }}
                             >
-                              <div className="h-full flex items-center justify-between px-1">
-                                <div className="text-[10px] text-white font-medium truncate">
-                                  {voice.text.substring(0, 15)}...
+                              <div className="h-full flex items-center gap-1 px-1">
+                                {voiceAvatar && (
+                                  <Avatar className="w-4 h-4 border border-white/20">
+                                    <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
+                                    <AvatarFallback className="text-[8px]">{voice.voiceName[0]}</AvatarFallback>
+                                  </Avatar>
+                                )}
+                                <div className="text-[10px] text-white font-medium truncate flex-1">
+                                  {voice.voiceName}
                                 </div>
                                 <div className="w-1 h-full bg-white/20 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
                               </div>
