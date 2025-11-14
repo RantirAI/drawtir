@@ -9,6 +9,24 @@ export interface VoiceAudio {
   voiceId: string;
   voiceName: string;
   track?: number; // Track/row index for timeline layering
+  waveformData?: number[]; // Audio waveform peaks for visualization
+}
+
+export interface TimelineMarker {
+  id: string;
+  time: number;
+  label: string;
+  color?: string;
+}
+
+export interface BackgroundMusic {
+  id: string;
+  url: string;
+  fileName: string;
+  duration: number;
+  volume: number;
+  startTime: number;
+  waveformData?: number[];
 }
 
 export interface CanvasMetadata {
@@ -29,6 +47,8 @@ export interface CanvasSnapshot {
   canvas: CanvasSettings;
   frames: Frame[];
   voiceAudios?: VoiceAudio[];
+  timelineMarkers?: TimelineMarker[];
+  backgroundMusic?: BackgroundMusic[];
 }
 
 export interface SavedProject {

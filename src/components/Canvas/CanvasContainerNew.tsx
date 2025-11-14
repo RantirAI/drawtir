@@ -198,7 +198,9 @@ export default function CanvasContainerNew({
   const [maxDuration, setMaxDuration] = useState(5);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
   const [animationGlobalKey, setAnimationGlobalKey] = useState(0);
-  const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>>([]);
+  const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string; track?: number; waveformData?: number[] }>>([]);
+  const [timelineMarkers, setTimelineMarkers] = useState<Array<{ id: string; time: number; label: string; color?: string }>>([]);
+  const [backgroundMusic, setBackgroundMusic] = useState<Array<{ id: string; url: string; fileName: string; duration: number; volume: number; startTime: number; waveformData?: number[] }>>([]);
 
   const [description, setDescription] = useState("");
   const [captionImage, setCaptionImage] = useState<string[]>([]);
@@ -3799,6 +3801,10 @@ export default function CanvasContainerNew({
             }}
             voiceAudios={voiceAudios}
             onVoiceAudiosChange={setVoiceAudios}
+            timelineMarkers={timelineMarkers}
+            onTimelineMarkersChange={setTimelineMarkers}
+            backgroundMusic={backgroundMusic}
+            onBackgroundMusicChange={setBackgroundMusic}
           />
         </div>
       )}
