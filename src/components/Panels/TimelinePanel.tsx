@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic } from "lucide-react";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -117,6 +117,19 @@ export default function TimelinePanel({
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
   const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const [playheadLeft, setPlayheadLeft] = useState(0);
+  const [timelineZoom, setTimelineZoom] = useState(1);
+
+  const handleZoomIn = () => {
+    setTimelineZoom((prev) => Math.min(4, prev * 1.25));
+  };
+
+  const handleZoomOut = () => {
+    setTimelineZoom((prev) => Math.max(0.25, prev / 1.25));
+  };
+
+  const handleResetZoom = () => {
+    setTimelineZoom(1);
+  };
 
   // Keep playhead aligned across the full timeline height/width using measured offsets
   useEffect(() => {
@@ -464,12 +477,47 @@ export default function TimelinePanel({
             {currentTime.toFixed(2)}s / {maxDuration}s
           </span>
         </div>
+        
+        {/* Zoom controls */}
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleZoomOut}
+            disabled={timelineZoom <= 0.25}
+            title="Zoom out"
+          >
+            <ZoomOut className="h-3 w-3" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2"
+            onClick={handleResetZoom}
+            title="Reset zoom"
+          >
+            <span className="text-xs">{Math.round(timelineZoom * 100)}%</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6"
+            onClick={handleZoomIn}
+            disabled={timelineZoom >= 4}
+            title="Zoom in"
+          >
+            <ZoomIn className="h-3 w-3" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="h-48">
         <div className="p-4 relative" ref={containerRef}>
-          {/* Header with time markers - aligned with timeline track */}
-          <div className="flex items-start gap-2 mb-2">
+          {/* Timeline container with zoom */}
+          <div style={{ width: `${100 * timelineZoom}%`, minWidth: '100%' }}>
+            {/* Header with time markers - aligned with timeline track */}
+            <div className="flex items-start gap-2 mb-2">
             <div className="w-32 flex-shrink-0 h-6" /> {/* Spacer for layer names */}
             <div className="flex-1 relative h-6" ref={timelineRef}>
               <div className="absolute inset-0 flex justify-between text-xs text-muted-foreground">
@@ -778,6 +826,7 @@ export default function TimelinePanel({
             </ContextMenu>
               );
             })}
+          </div>
           </div>
         </div>
       </ScrollArea>
