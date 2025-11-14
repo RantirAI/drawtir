@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Element, Frame } from "@/types/elements";
-import { VoiceAudio } from "@/types/snapshot";
+import { VoiceAudio, TimelineMarker, BackgroundMusic } from "@/types/snapshot";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut, Volume2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut, Volume2, Flag, Upload, Trash2, Music } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -16,9 +17,18 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import AnimationSettingsDialog from "./AnimationSettingsDialog";
 import VoiceSelector from "./VoiceSelector";
 import VoiceTextDrawer from "./VoiceTextDrawer";
+import { extractWaveform, renderWaveformPath } from "@/lib/audioWaveform";
+import { toast } from "sonner";
 
 // Voice avatars
 import ariaAvatar from "@/assets/voices/aria-avatar.png";
@@ -79,6 +89,10 @@ interface TimelinePanelProps {
   onElementSelect?: (elementId: string) => void;
   voiceAudios?: VoiceAudio[];
   onVoiceAudiosChange?: (voiceAudios: VoiceAudio[]) => void;
+  timelineMarkers?: TimelineMarker[];
+  onTimelineMarkersChange?: (markers: TimelineMarker[]) => void;
+  backgroundMusic?: BackgroundMusic[];
+  onBackgroundMusicChange?: (music: BackgroundMusic[]) => void;
 }
 
 export default function TimelinePanel({
@@ -95,12 +109,22 @@ export default function TimelinePanel({
   onElementSelect,
   voiceAudios: externalVoiceAudios = [],
   onVoiceAudiosChange,
+  timelineMarkers: externalMarkers = [],
+  onTimelineMarkersChange,
+  backgroundMusic: externalMusic = [],
+  onBackgroundMusicChange,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
   const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
+  const [markers, setMarkers] = useState<TimelineMarker[]>(externalMarkers);
+  const [music, setMusic] = useState<BackgroundMusic[]>(externalMusic);
+  const [showMarkerDialog, setShowMarkerDialog] = useState(false);
+  const [newMarkerTime, setNewMarkerTime] = useState(0);
+  const [newMarkerLabel, setNewMarkerLabel] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [draggingAnimation, setDraggingAnimation] = useState<{
     elementId: string;
     animationId: string;
@@ -119,6 +143,7 @@ export default function TimelinePanel({
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
   const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [playheadLeft, setPlayheadLeft] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(1);
 
@@ -226,6 +251,144 @@ export default function TimelinePanel({
   useEffect(() => {
     onVoiceAudiosChange?.(voiceAudios);
   }, [voiceAudios, onVoiceAudiosChange]);
+
+  // Sync markers
+  useEffect(() => {
+    setMarkers(externalMarkers);
+  }, [externalMarkers]);
+
+  // Sync background music
+  useEffect(() => {
+    setMusic(externalMusic);
+  }, [externalMusic]);
+
+  // Notify parent of markers changes
+  useEffect(() => {
+    onTimelineMarkersChange?.(markers);
+  }, [markers, onTimelineMarkersChange]);
+
+  // Notify parent of music changes
+  useEffect(() => {
+    onBackgroundMusicChange?.(music);
+  }, [music, onBackgroundMusicChange]);
+
+  // Extract waveforms for voice audios that don't have them
+  useEffect(() => {
+    voiceAudios.forEach(async (voice) => {
+      if (!voice.waveformData && voice.url) {
+        try {
+          const waveform = await extractWaveform(voice.url, 80);
+          setVoiceAudios(prev => 
+            prev.map(v => v.id === voice.id ? { ...v, waveformData: waveform } : v)
+          );
+        } catch (error) {
+          console.error('Failed to extract waveform for voice:', error);
+        }
+      }
+    });
+  }, [voiceAudios]);
+
+  // Extract waveforms for background music that doesn't have them
+  useEffect(() => {
+    music.forEach(async (track) => {
+      if (!track.waveformData && track.url) {
+        try {
+          const waveform = await extractWaveform(track.url, 120);
+          setMusic(prev => 
+            prev.map(m => m.id === track.id ? { ...m, waveformData: waveform } : m)
+          );
+        } catch (error) {
+          console.error('Failed to extract waveform for music:', error);
+        }
+      }
+    });
+  }, [music]);
+
+  // Handle marker operations
+  const handleAddMarker = (time?: number) => {
+    const markerTime = time !== undefined ? time : currentTime;
+    setNewMarkerTime(markerTime);
+    setNewMarkerLabel("");
+    setShowMarkerDialog(true);
+  };
+
+  const handleCreateMarker = () => {
+    if (!newMarkerLabel.trim()) {
+      toast.error("Please enter a label for the marker");
+      return;
+    }
+    
+    const newMarker: TimelineMarker = {
+      id: `marker-${Date.now()}`,
+      time: newMarkerTime,
+      label: newMarkerLabel.trim(),
+      color: '#3b82f6',
+    };
+    
+    setMarkers(prev => [...prev, newMarker].sort((a, b) => a.time - b.time));
+    setShowMarkerDialog(false);
+    setNewMarkerLabel("");
+    toast.success("Marker added");
+  };
+
+  const handleRemoveMarker = (markerId: string) => {
+    setMarkers(prev => prev.filter(m => m.id !== markerId));
+    toast.success("Marker removed");
+  };
+
+  const handleJumpToMarker = (time: number) => {
+    onTimeChange(time);
+  };
+
+  // Handle background music upload
+  const handleMusicUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('audio/')) {
+      toast.error("Please upload an audio file");
+      return;
+    }
+
+    try {
+      // Create object URL for the audio file
+      const url = URL.createObjectURL(file);
+      
+      // Get audio duration
+      const audio = new Audio(url);
+      await new Promise((resolve) => {
+        audio.onloadedmetadata = resolve;
+      });
+
+      const newTrack: BackgroundMusic = {
+        id: `music-${Date.now()}`,
+        url,
+        fileName: file.name,
+        duration: audio.duration,
+        volume: 0.5,
+        startTime: 0,
+      };
+
+      setMusic(prev => [...prev, newTrack]);
+      toast.success(`Added ${file.name}`);
+    } catch (error) {
+      console.error('Failed to upload music:', error);
+      toast.error("Failed to upload music");
+    }
+  };
+
+  const handleRemoveMusic = (musicId: string) => {
+    const track = music.find(m => m.id === musicId);
+    if (track?.url.startsWith('blob:')) {
+      URL.revokeObjectURL(track.url);
+    }
+    setMusic(prev => prev.filter(m => m.id !== musicId));
+    toast.success("Background music removed");
+  };
+
+  const handleMusicVolumeChange = (musicId: string, volume: number) => {
+    setMusic(prev => prev.map(m => m.id === musicId ? { ...m, volume } : m));
+  };
 
   const parseDuration = (duration: string): number => {
     if (duration.endsWith('ms')) {
@@ -737,13 +900,27 @@ export default function TimelinePanel({
                                           <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
                                         </div>
 
-                                        {/* Inside bar: snippet of text */}
-                                        <div className="h-full flex items-center justify-between px-2 gap-1.5">
-                                          <Volume2 className="h-3 w-3 text-white/90 flex-shrink-0" />
-                                          <div className="text-[10px] text-white/95 font-medium truncate flex-1">
+                                        {/* Inside bar: snippet of text + waveform */}
+                                        <div className="h-full flex items-center justify-between px-2 gap-1.5 relative overflow-hidden">
+                                          {/* Waveform background */}
+                                          {voice.waveformData && (
+                                            <svg
+                                              className="absolute inset-0 w-full h-full opacity-30"
+                                              preserveAspectRatio="none"
+                                              viewBox="0 0 100 100"
+                                            >
+                                              <path
+                                                d={renderWaveformPath(voice.waveformData, 100, 100)}
+                                                fill="white"
+                                                opacity="0.4"
+                                              />
+                                            </svg>
+                                          )}
+                                          <Volume2 className="h-3 w-3 text-white/90 flex-shrink-0 relative z-10" />
+                                          <div className="text-[10px] text-white/95 font-medium truncate flex-1 relative z-10">
                                             {snippet || "No text"}
                                           </div>
-                                          <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                                          <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity relative z-10" />
                                         </div>
                                       </div>
                                     </ContextMenuTrigger>
@@ -933,6 +1110,148 @@ export default function TimelinePanel({
             </ContextMenu>
               );
             })}
+            {/* Markers Section */}
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <div className="flex items-start gap-2 py-2 hover:bg-muted/20 transition-colors">
+                  <div className="w-32 flex-shrink-0">
+                    <div className="flex items-center gap-1">
+                      <Flag className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <div className="text-xs truncate font-medium">Markers</div>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {markers.length} marker{markers.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                    {markers.map((marker) => {
+                      const leftPercent = (marker.time / maxDuration) * 100;
+                      
+                      return (
+                        <ContextMenu key={marker.id}>
+                          <ContextMenuTrigger asChild>
+                            <div
+                              className="absolute top-0 bottom-0 w-1 bg-blue-500 hover:bg-blue-600 cursor-pointer group"
+                              style={{ left: `${leftPercent}%` }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleJumpToMarker(marker.time);
+                              }}
+                            >
+                              <Flag className="absolute -top-3 left-1/2 -translate-x-1/2 w-3 h-3 text-blue-500" fill="currentColor" />
+                              <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-[9px] bg-blue-500 text-white px-1.5 py-0.5 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                {marker.label}
+                              </div>
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuItem onClick={() => handleJumpToMarker(marker.time)}>
+                              Jump to Marker
+                            </ContextMenuItem>
+                            <ContextMenuItem onClick={() => handleRemoveMarker(marker.id)} className="text-destructive">
+                              Remove Marker
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      );
+                    })}
+                  </div>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => handleAddMarker()}>
+                  Add Marker at Playhead
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+
+            {/* Background Music Section */}
+            <ContextMenu>
+              <ContextMenuTrigger asChild>
+                <div className="flex items-start gap-2 py-2 hover:bg-muted/20 transition-colors">
+                  <div className="w-32 flex-shrink-0">
+                    <div className="flex items-center gap-1">
+                      <Music className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                      <div className="text-xs truncate font-medium">Music</div>
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {music.length} track{music.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                    {music.map((track) => {
+                      const startPercent = (track.startTime / maxDuration) * 100;
+                      const widthPercent = Math.min((track.duration / maxDuration) * 100, 100 - startPercent);
+                      
+                      return (
+                        <ContextMenu key={track.id}>
+                          <ContextMenuTrigger asChild>
+                            <div
+                              className="absolute top-1 bottom-1 rounded bg-cyan-500 hover:bg-cyan-600 cursor-move transition-all group"
+                              style={{
+                                left: `${startPercent}%`,
+                                width: `${widthPercent}%`,
+                              }}
+                            >
+                              {/* Top label with filename */}
+                              <div className="absolute -top-4 left-0 text-[10px] text-foreground/80">
+                                <span className="font-medium truncate max-w-[120px] inline-block">{track.fileName}</span>
+                              </div>
+
+                              {/* Inside bar: waveform + volume */}
+                              <div className="h-full flex items-center justify-between px-2 gap-1.5 relative overflow-hidden">
+                                {/* Waveform background */}
+                                {track.waveformData && (
+                                  <svg
+                                    className="absolute inset-0 w-full h-full opacity-30"
+                                    preserveAspectRatio="none"
+                                    viewBox="0 0 100 100"
+                                  >
+                                    <path
+                                      d={renderWaveformPath(track.waveformData, 100, 100)}
+                                      fill="white"
+                                      opacity="0.4"
+                                    />
+                                  </svg>
+                                )}
+                                <Music className="h-3 w-3 text-white/90 flex-shrink-0 relative z-10" />
+                                <div className="text-[10px] text-white/95 font-medium truncate flex-1 relative z-10">
+                                  Vol: {Math.round(track.volume * 100)}%
+                                </div>
+                                <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity relative z-10" />
+                              </div>
+                            </div>
+                          </ContextMenuTrigger>
+                          <ContextMenuContent>
+                            <ContextMenuSub>
+                              <ContextMenuSubTrigger>Volume</ContextMenuSubTrigger>
+                              <ContextMenuSubContent className="w-48 p-2">
+                                <Slider
+                                  value={[track.volume * 100]}
+                                  max={100}
+                                  step={5}
+                                  onValueChange={(values) => handleMusicVolumeChange(track.id, values[0] / 100)}
+                                />
+                              </ContextMenuSubContent>
+                            </ContextMenuSub>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem onClick={() => handleRemoveMusic(track.id)} className="text-destructive">
+                              Remove Track
+                            </ContextMenuItem>
+                          </ContextMenuContent>
+                        </ContextMenu>
+                      );
+                    })}
+                  </div>
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-3 h-3 mr-2" />
+                  Upload Music
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
           </div>
           </div>
         </div>
@@ -946,6 +1265,48 @@ export default function TimelinePanel({
         voiceName={selectedVoice?.name || "Aria"}
         onVoiceGenerated={handleVoiceGenerated}
       />
+
+      {/* Hidden file input for music upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={handleMusicUpload}
+      />
+
+      {/* Marker creation dialog */}
+      <Dialog open={showMarkerDialog} onOpenChange={setShowMarkerDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Timeline Marker</DialogTitle>
+            <DialogDescription>
+              Add a labeled marker at {newMarkerTime.toFixed(2)}s
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Marker Label</label>
+              <Input
+                placeholder="e.g., Scene 1, Intro, Main Point"
+                value={newMarkerLabel}
+                onChange={(e) => setNewMarkerLabel(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateMarker();
+                }}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowMarkerDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateMarker}>
+              Add Marker
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
