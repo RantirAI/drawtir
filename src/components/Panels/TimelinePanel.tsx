@@ -5,7 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut } from "lucide-react";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut, Volume2 } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -729,18 +729,19 @@ export default function TimelinePanel({
                                         {/* Top label with avatar + name */}
                                         <div className="absolute -top-4 left-0 flex items-center gap-1 text-[10px] text-foreground/80">
                                           {voiceAvatar && (
-                                            <Avatar className="w-4 h-4 border border-white/20">
+                                            <Avatar className="w-6 h-6 border-2 border-white/80">
                                               <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
-                                              <AvatarFallback className="text-[8px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
+                                              <AvatarFallback className="text-[10px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
                                             </Avatar>
                                           )}
                                           <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
                                         </div>
 
                                         {/* Inside bar: snippet of text */}
-                                        <div className="h-full flex items-center justify-between px-2">
+                                        <div className="h-full flex items-center justify-between px-2 gap-1.5">
+                                          <Volume2 className="h-3 w-3 text-white/90 flex-shrink-0" />
                                           <div className="text-[10px] text-white/95 font-medium truncate flex-1">
-                                            {snippet || voice.voiceName}
+                                            {snippet || "No text"}
                                           </div>
                                           <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </div>
