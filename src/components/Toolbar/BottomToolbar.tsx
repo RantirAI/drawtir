@@ -22,6 +22,7 @@ interface BottomToolbarProps {
   onLineAdd?: () => void;
   onQRCodeAdd?: () => void;
   timelinePanelOpen?: boolean;
+  timelinePanelHeight?: number;
   onAddRichText?: () => void;
   onDisablePanMode?: () => void;
 }
@@ -39,15 +40,17 @@ export default function BottomToolbar({
   onLineAdd,
   onQRCodeAdd,
   timelinePanelOpen = false,
+  timelinePanelHeight = 300,
   onAddRichText,
   onDisablePanMode
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
       <div 
-        className={`fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-          timelinePanelOpen ? 'bottom-[300px]' : 'bottom-12'
-        }`}
+        className="fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-300"
+        style={{ 
+          bottom: timelinePanelOpen ? `${timelinePanelHeight}px` : '48px'
+        }}
       >
         {/* Subtle light source glow behind toolbar */}
         <div className="absolute inset-0 -z-10">
