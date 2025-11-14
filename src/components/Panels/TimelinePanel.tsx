@@ -131,7 +131,38 @@ export default function TimelinePanel({
     setTimelineZoom(1);
   };
 
-  // Keep playhead aligned across the full timeline height/width using measured offsets
+  // Shift + mouse wheel to zoom, centered around the cursor position
+  const handleWheel = (e: React.WheelEvent) => {
+    if (!e.shiftKey) return; // only intercept when Shift is held
+    e.preventDefault();
+
+    if (!timelineRef.current || !containerRef.current) return;
+    const viewport = containerRef.current.parentElement as HTMLElement | null;
+    if (!viewport) return;
+
+    const timelineRect = timelineRef.current.getBoundingClientRect();
+    if (timelineRect.width <= 0) return;
+
+    // Ratio of cursor along the timeline (0..1)
+    const cursorRatio = Math.max(0, Math.min(1, (e.clientX - timelineRect.left) / timelineRect.width));
+
+    // Smooth zoom factor based on wheel delta
+    const prevZoom = timelineZoom;
+    const factor = Math.exp(-e.deltaY * 0.002); // negative deltaY -> zoom in
+    const nextZoom = Math.min(4, Math.max(0.25, prevZoom * factor));
+    if (nextZoom === prevZoom) return;
+
+    setTimelineZoom(nextZoom);
+
+    // After layout updates, adjust scroll so the cursor stays over the same time
+    requestAnimationFrame(() => {
+      if (!timelineRef.current || !viewport) return;
+      const newRect = timelineRef.current.getBoundingClientRect();
+      const desiredClientX = newRect.left + newRect.width * cursorRatio;
+      const dx = desiredClientX - e.clientX;
+      viewport.scrollLeft += dx;
+    });
+  };
   useEffect(() => {
     const update = () => {
       if (!timelineRef.current || !containerRef.current) return;
@@ -141,10 +172,21 @@ export default function TimelinePanel({
       const leftPx = (timelineRect.left - containerRect.left) + timelineRect.width * ratio;
       setPlayheadLeft(leftPx);
     };
+
     update();
-    window.addEventListener('resize', update);
-    return () => window.removeEventListener('resize', update);
-  }, [currentTime, maxDuration]);
+
+    const onResize = () => update();
+    window.addEventListener('resize', onResize);
+
+    const viewport = containerRef.current?.parentElement as HTMLElement | null;
+    const onScroll = () => update();
+    viewport?.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      viewport?.removeEventListener('scroll', onScroll);
+    };
+  }, [currentTime, maxDuration, timelineZoom]);
 
   // Sync external voice audios
   useEffect(() => {
@@ -512,7 +554,7 @@ export default function TimelinePanel({
         </div>
       </div>
 
-      <ScrollArea className="h-48">
+      <ScrollArea className="h-48" onWheel={handleWheel}>
         <div className="p-4 relative" ref={containerRef}>
           {/* Timeline container with zoom */}
           <div style={{ width: `${100 * timelineZoom}%`, minWidth: '100%' }}>
