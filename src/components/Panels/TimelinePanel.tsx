@@ -450,7 +450,7 @@ export default function TimelinePanel({
       </div>
 
       <ScrollArea className="h-48">
-        <div className="p-4">
+        <div className="p-4 relative">
           {/* Header with time markers - aligned with timeline track */}
           <div className="flex items-start gap-2 mb-2">
             <div className="w-32 flex-shrink-0 h-6" /> {/* Spacer for layer names */}
@@ -464,21 +464,22 @@ export default function TimelinePanel({
                 ))}
               </div>
 
-              {/* Playhead */}
-              <div
-                className="absolute top-0 bottom-0 w-px bg-destructive z-10 cursor-ew-resize"
-                style={{ left: `${(currentTime / maxDuration) * 100}%` }}
-                onMouseDown={handleMouseDown}
-              >
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-destructive rounded-full -mt-1" />
-              </div>
-
               {/* Click area for playhead positioning */}
               <div
                 className="absolute inset-0 cursor-pointer"
                 onMouseDown={handleMouseDown}
               />
             </div>
+          </div>
+
+          {/* Playhead - spans full timeline height */}
+          <div
+            className="absolute top-0 bottom-0 w-0.5 bg-blue-500 z-50 cursor-ew-resize pointer-events-auto"
+            style={{ left: `calc(8.5rem + (100% - 8.5rem) * ${currentTime / maxDuration})` }}
+            onMouseDown={handleMouseDown}
+          >
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full -mt-1 pointer-events-auto" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full -mb-1 pointer-events-auto" />
           </div>
 
           {/* Element tracks */}
