@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Element, Frame } from "@/types/elements";
+import { VoiceAudio } from "@/types/snapshot";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,8 @@ interface TimelinePanelProps {
   onReset?: () => void;
   selectedElementIds?: string[];
   onElementSelect?: (elementId: string) => void;
-  voiceAudios?: Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>;
-  onVoiceAudiosChange?: (voiceAudios: Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string }>) => void;
+  voiceAudios?: VoiceAudio[];
+  onVoiceAudiosChange?: (voiceAudios: VoiceAudio[]) => void;
 }
 
 export default function TimelinePanel({
@@ -110,7 +111,9 @@ export default function TimelinePanel({
   const [draggingVoice, setDraggingVoice] = useState<{
     voiceId: string;
     startX: number;
+    startY: number;
     startDelay: number;
+    startTrack: number;
     mode: 'move' | 'resize';
   } | null>(null);
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
@@ -188,9 +191,35 @@ export default function TimelinePanel({
     };
   }, [currentTime, maxDuration, timelineZoom]);
 
-  // Sync external voice audios
+  // Auto-assign tracks to avoid overlap and sync external voice audios
   useEffect(() => {
-    setVoiceAudios(externalVoiceAudios);
+    // Assign tracks to prevent overlap
+    const withTracks = externalVoiceAudios.map((voice, index) => {
+      // If already has a track, keep it
+      if (voice.track !== undefined) return voice;
+      
+      // Find an available track where this voice doesn't overlap with others
+      let track = 0;
+      let hasOverlap = true;
+      
+      while (hasOverlap) {
+        hasOverlap = externalVoiceAudios.some((other, otherIndex) => {
+          if (otherIndex >= index) return false; // Only check already processed voices
+          if ((other.track ?? 0) !== track) return false; // Different track
+          
+          // Check time overlap
+          const voiceEnd = voice.delay + voice.duration;
+          const otherEnd = other.delay + other.duration;
+          return !(voiceEnd <= other.delay || voice.delay >= otherEnd);
+        });
+        
+        if (hasOverlap) track++;
+      }
+      
+      return { ...voice, track };
+    });
+    
+    setVoiceAudios(withTracks);
   }, [externalVoiceAudios]);
 
   // Notify parent of voice audios changes
@@ -273,8 +302,14 @@ export default function TimelinePanel({
       const deltaTime = (deltaX / rect.width) * maxDuration;
       const newDelay = Math.max(0, Math.min(draggingVoice.startDelay + deltaTime, maxDuration - voice.duration));
       
+      // Calculate track change based on vertical mouse movement
+      const deltaY = e.clientY - draggingVoice.startY;
+      const trackHeight = 36; // 32px track + 4px gap
+      const trackDelta = Math.round(deltaY / trackHeight);
+      const newTrack = Math.max(0, draggingVoice.startTrack + trackDelta);
+      
       setVoiceAudios(prev => prev.map(v =>
-        v.id === draggingVoice.voiceId ? { ...v, delay: newDelay } : v
+        v.id === draggingVoice.voiceId ? { ...v, delay: newDelay, track: newTrack } : v
       ));
     } else if (draggingVoice.mode === 'resize') {
       const newDuration = Math.max(0.1, Math.min(timeAtMouse - voice.delay, maxDuration - voice.delay));
@@ -591,119 +626,148 @@ export default function TimelinePanel({
 
           {/* Element tracks */}
           <div className="space-y-2 mt-4">
-            {/* Voice track row */}
-            <ContextMenu>
-              <ContextMenuTrigger asChild>
-                <div 
-                  className="flex items-center gap-2 p-1 rounded hover:bg-muted/50 transition-colors"
-                  onContextMenu={(e) => {
-                    const trackElement = e.currentTarget.querySelector('.flex-1.relative') as HTMLElement;
-                    if (trackElement && timelineRef.current) {
-                      const rect = timelineRef.current.getBoundingClientRect();
-                      const trackRect = trackElement.getBoundingClientRect();
-                      const x = e.clientX - trackRect.left;
-                      const clickTime = Math.max(0, (x / trackRect.width) * maxDuration);
-                      setVoiceDrawerTimestamp(clickTime);
-                    }
-                  }}
-                >
-                  <div className="w-32 flex-shrink-0">
-                    <div className="flex items-center gap-1">
-                      <Mic className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <div className="text-xs truncate font-medium">Voice</div>
-                    </div>
-                    <div className="text-[10px] text-muted-foreground">
-                      {voiceAudios.length} clip{voiceAudios.length !== 1 ? 's' : ''}
-                    </div>
-                  </div>
-                  <div className="flex-1 relative h-8 bg-muted/30 rounded">
-                    {voiceAudios.map((voice) => {
-                      const startPercent = (voice.delay / maxDuration) * 100;
-                      const widthPercent = (voice.duration / maxDuration) * 100;
-                      const isPlaying = playingAudiosRef.current.has(voice.id);
-                      const voiceAvatar = VOICE_AVATARS[voice.voiceId];
-
-                      // Strip [audio tags] for display snippet
-                      const snippet = (voice.text || "")
-                        .replace(/\[[^\]]+\]/g, "")
-                        .replace(/\s+/g, " ")
-                        .trim()
-                        .slice(0, 40) + (voice.text && voice.text.length > 40 ? "…" : "");
-                      
-                      return (
-                        <ContextMenu key={voice.id}>
-                          <ContextMenuTrigger asChild>
-                            <div
-                              className={`absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-all group ${
-                                isPlaying ? 'ring-2 ring-purple-300 ring-offset-1 animate-pulse' : ''
-                              }`}
-                              style={{
-                                left: `${startPercent}%`,
-                                width: `${widthPercent}%`,
-                              }}
-                              onMouseDown={(e) => {
-                                if (!timelineRef.current) return;
-                                e.stopPropagation();
-                                
+            {/* Voice tracks - multiple rows */}
+            {voiceAudios.length > 0 && (() => {
+              // Calculate number of tracks needed
+              const maxTrack = Math.max(...voiceAudios.map(v => v.track ?? 0), 0);
+              const trackCount = maxTrack + 1;
+              
+              return (
+                <>
+                  {Array.from({ length: trackCount }).map((_, trackIndex) => {
+                    const tracksVoices = voiceAudios.filter(v => (v.track ?? 0) === trackIndex);
+                    
+                    return (
+                      <ContextMenu key={trackIndex}>
+                        <ContextMenuTrigger asChild>
+                          <div
+                            className="flex items-start gap-2 py-2 hover:bg-muted/20 transition-colors"
+                            onClick={(e) => {
+                              const trackElement = e.currentTarget.querySelector('.flex-1.relative') as HTMLElement;
+                              if (trackElement && timelineRef.current) {
                                 const rect = timelineRef.current.getBoundingClientRect();
-                                const barRect = e.currentTarget.getBoundingClientRect();
-                                const clickX = e.clientX - barRect.left;
-                                const isResizeZone = clickX > barRect.width - 8;
-                                
-                                if (isResizeZone) {
-                                  setDraggingVoice({
-                                    voiceId: voice.id,
-                                    startX: e.clientX - rect.left,
-                                    startDelay: voice.delay,
-                                    mode: 'resize',
-                                  });
-                                } else {
-                                  setDraggingVoice({
-                                    voiceId: voice.id,
-                                    startX: e.clientX - rect.left,
-                                    startDelay: voice.delay,
-                                    mode: 'move',
-                                  });
-                                }
-                              }}
-                            >
-                              {/* Top label with avatar + name */}
-                              <div className="absolute -top-4 left-0 flex items-center gap-1 text-[10px] text-foreground/80">
-                                {voiceAvatar && (
-                                  <Avatar className="w-4 h-4 border border-white/20">
-                                    <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
-                                    <AvatarFallback className="text-[8px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
-                              </div>
-
-                              {/* Inside bar: snippet of text */}
-                              <div className="h-full flex items-center justify-between px-2">
-                                <div className="text-[10px] text-white/95 font-medium truncate flex-1">
-                                  {snippet || voice.voiceName}
+                                const trackRect = trackElement.getBoundingClientRect();
+                                const x = e.clientX - trackRect.left;
+                                const clickTime = Math.max(0, (x / trackRect.width) * maxDuration);
+                                setVoiceDrawerTimestamp(clickTime);
+                              }
+                            }}
+                          >
+                            <div className="w-32 flex-shrink-0">
+                              {trackIndex === 0 && (
+                                <>
+                                  <div className="flex items-center gap-1">
+                                    <Mic className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                    <div className="text-xs truncate font-medium">Voice</div>
+                                  </div>
+                                  <div className="text-[10px] text-muted-foreground">
+                                    {voiceAudios.length} clip{voiceAudios.length !== 1 ? 's' : ''}
+                                  </div>
+                                </>
+                              )}
+                              {trackIndex > 0 && (
+                                <div className="text-[10px] text-muted-foreground pl-4">
+                                  Track {trackIndex + 1}
                                 </div>
-                                <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
-                              </div>
+                              )}
                             </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuContent>
-                            <ContextMenuItem onClick={() => handleRemoveVoice(voice.id)}>
-                              Remove Voice
-                            </ContextMenuItem>
-                          </ContextMenuContent>
-                        </ContextMenu>
-                      );
-                    })}
-                  </div>
-                </div>
-              </ContextMenuTrigger>
-              <ContextMenuContent>
-                <ContextMenuItem onClick={() => setVoiceDrawerOpen(true)}>
-                  Add Voice Here
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
+                            <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                              {tracksVoices.map((voice) => {
+                                const startPercent = (voice.delay / maxDuration) * 100;
+                                const widthPercent = (voice.duration / maxDuration) * 100;
+                                const isPlaying = playingAudiosRef.current.has(voice.id);
+                                const voiceAvatar = VOICE_AVATARS[voice.voiceId];
+
+                                // Strip [audio tags] for display snippet
+                                const snippet = (voice.text || "")
+                                  .replace(/\[[^\]]+\]/g, "")
+                                  .replace(/\s+/g, " ")
+                                  .trim()
+                                  .slice(0, 40) + (voice.text && voice.text.length > 40 ? "…" : "");
+                                
+                                return (
+                                  <ContextMenu key={voice.id}>
+                                    <ContextMenuTrigger asChild>
+                                      <div
+                                        className={`absolute top-1 bottom-1 rounded bg-purple-500 hover:bg-purple-600 cursor-move transition-all group ${
+                                          isPlaying ? 'ring-2 ring-purple-300 ring-offset-1 animate-pulse' : ''
+                                        }`}
+                                        style={{
+                                          left: `${startPercent}%`,
+                                          width: `${widthPercent}%`,
+                                        }}
+                                        onMouseDown={(e) => {
+                                          if (!timelineRef.current) return;
+                                          e.stopPropagation();
+                                          
+                                          const rect = timelineRef.current.getBoundingClientRect();
+                                          const barRect = e.currentTarget.getBoundingClientRect();
+                                          const clickX = e.clientX - barRect.left;
+                                          const isResizeZone = clickX > barRect.width - 8;
+                                          
+                                          if (isResizeZone) {
+                                            setDraggingVoice({
+                                              voiceId: voice.id,
+                                              startX: e.clientX - rect.left,
+                                              startY: e.clientY,
+                                              startDelay: voice.delay,
+                                              startTrack: voice.track ?? 0,
+                                              mode: 'resize',
+                                            });
+                                          } else {
+                                            setDraggingVoice({
+                                              voiceId: voice.id,
+                                              startX: e.clientX - rect.left,
+                                              startY: e.clientY,
+                                              startDelay: voice.delay,
+                                              startTrack: voice.track ?? 0,
+                                              mode: 'move',
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        {/* Top label with avatar + name */}
+                                        <div className="absolute -top-4 left-0 flex items-center gap-1 text-[10px] text-foreground/80">
+                                          {voiceAvatar && (
+                                            <Avatar className="w-4 h-4 border border-white/20">
+                                              <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
+                                              <AvatarFallback className="text-[8px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
+                                            </Avatar>
+                                          )}
+                                          <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
+                                        </div>
+
+                                        {/* Inside bar: snippet of text */}
+                                        <div className="h-full flex items-center justify-between px-2">
+                                          <div className="text-[10px] text-white/95 font-medium truncate flex-1">
+                                            {snippet || voice.voiceName}
+                                          </div>
+                                          <div className="w-1 h-3 bg-white/30 rounded opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        </div>
+                                      </div>
+                                    </ContextMenuTrigger>
+                                    <ContextMenuContent>
+                                      <ContextMenuItem onClick={() => handleRemoveVoice(voice.id)}>
+                                        Remove Voice
+                                      </ContextMenuItem>
+                                    </ContextMenuContent>
+                                  </ContextMenu>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                          <ContextMenuItem onClick={() => setVoiceDrawerOpen(true)}>
+                            Add Voice Here
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    );
+                  })}
+                </>
+              );
+            })()}
             
             {elements.map((element) => {
               const isSelected = selectedElementIds.includes(element.id);
