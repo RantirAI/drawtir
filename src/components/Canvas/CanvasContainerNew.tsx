@@ -188,9 +188,11 @@ export default function CanvasContainerNew({
   const [showTemplatesPanel, setShowTemplatesPanel] = useState(false);
   const [showMediaLibrary, setShowMediaLibrary] = useState(false);
   const [showTimelinePanel, setShowTimelinePanel] = useState(false);
+  const [timelinePanelHeight, setTimelinePanelHeight] = useState(300);
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
   const [showInteractivityPanel, setShowInteractivityPanel] = useState(false);
   const [showShaderLibrary, setShowShaderLibrary] = useState(false);
+  const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
   const [maxDuration, setMaxDuration] = useState(5);
@@ -3620,6 +3622,7 @@ export default function CanvasContainerNew({
         onIconSelect={handleIconSelect}
         onQRCodeAdd={handleQRCodeAdd}
         timelinePanelOpen={showTimelinePanel}
+        timelinePanelHeight={timelinePanelHeight}
         onShaderAdd={() => setShowShaderLibrary(true)}
         onLineAdd={handleLineAdd}
         onImageUpload={handleImageUpload}
@@ -3719,11 +3722,43 @@ export default function CanvasContainerNew({
       {/* Timeline Panel */}
       {selectedFrame && (
         <div 
-          className={`fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ease-out ${
+          className={`fixed bottom-0 left-0 right-0 z-40 transition-all duration-300 ease-out ${
             showTimelinePanel ? 'translate-y-0' : 'translate-y-full'
           }`}
-          style={{ marginBottom: showTimelinePanel ? '0' : '-4px' }}
+          style={{ 
+            marginBottom: showTimelinePanel ? '0' : '-4px',
+            height: showTimelinePanel ? `${timelinePanelHeight}px` : '0px',
+            transition: isResizingTimeline ? 'none' : undefined
+          }}
         >
+          {/* Resize Handle */}
+          <div
+            onMouseDown={(e) => {
+              e.preventDefault();
+              setIsResizingTimeline(true);
+              const startY = e.clientY;
+              const startHeight = timelinePanelHeight;
+
+              const handleMouseMove = (moveEvent: MouseEvent) => {
+                const deltaY = startY - moveEvent.clientY;
+                const newHeight = Math.min(Math.max(200, startHeight + deltaY), window.innerHeight - 100);
+                setTimelinePanelHeight(newHeight);
+              };
+
+              const handleMouseUp = () => {
+                setIsResizingTimeline(false);
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+              };
+
+              document.addEventListener('mousemove', handleMouseMove);
+              document.addEventListener('mouseup', handleMouseUp);
+            }}
+            className="absolute top-0 left-0 right-0 h-1 cursor-ns-resize hover:bg-primary/50 transition-colors group z-50"
+          >
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-border group-hover:bg-primary rounded-full transition-colors" />
+          </div>
+
           {/* Toggle Handle */}
           <button
             onClick={() => setShowTimelinePanel(!showTimelinePanel)}
