@@ -3722,7 +3722,7 @@ export default function CanvasContainerNew({
       {/* Timeline Panel */}
       {selectedFrame && (
         <div 
-          className={`fixed bottom-0 left-0 right-0 z-40 transition-all duration-300 ease-out ${
+          className={`fixed bottom-0 left-0 right-0 z-30 transition-all duration-300 ease-out ${
             showTimelinePanel ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{ 
@@ -3755,7 +3755,7 @@ export default function CanvasContainerNew({
               document.addEventListener('mousemove', handleMouseMove);
               document.addEventListener('mouseup', handleMouseUp);
             }}
-            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/20 transition-colors group z-50 flex items-center justify-center bg-card/80 backdrop-blur-sm border-t border-border"
+            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/20 transition-colors group z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm border-t border-border"
           >
             <div className="flex flex-col items-center gap-0.5">
               <div className="w-16 h-1 bg-border group-hover:bg-primary rounded-full transition-colors" />
@@ -3766,7 +3766,7 @@ export default function CanvasContainerNew({
           {/* Toggle Handle */}
           <button
             onClick={() => setShowTimelinePanel(!showTimelinePanel)}
-            className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border rounded-t-lg px-4 py-1.5 hover:bg-card transition-colors shadow-lg z-50 flex items-center gap-2"
+            className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border rounded-t-lg px-4 py-1.5 hover:bg-card transition-colors shadow-lg z-10 flex items-center gap-2"
           >
             <span className="text-xs font-medium">Timeline</span>
             <svg 
