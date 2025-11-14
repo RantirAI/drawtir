@@ -3728,6 +3728,7 @@ export default function CanvasContainerNew({
           style={{ 
             marginBottom: showTimelinePanel ? '0' : '-4px',
             height: showTimelinePanel ? `${timelinePanelHeight}px` : '0px',
+            minHeight: showTimelinePanel ? `${timelinePanelHeight}px` : '0px',
             transition: isResizingTimeline ? 'none' : undefined
           }}
         >
