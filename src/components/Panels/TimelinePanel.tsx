@@ -521,7 +521,7 @@ export default function TimelinePanel({
 
   return (
     <>
-    <div className="border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="h-full flex flex-col border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between px-4 py-2 border-b border-border">
         <h3 className="text-sm font-medium">Timeline</h3>
         <div className="flex items-center gap-2">
@@ -589,7 +589,7 @@ export default function TimelinePanel({
         </div>
       </div>
 
-      <ScrollArea className="h-48" onWheel={handleWheel}>
+      <ScrollArea className="flex-1 min-h-0" onWheel={handleWheel}>
         <div className="p-4 relative" ref={containerRef}>
           {/* Timeline container with zoom */}
           <div style={{ width: `${100 * timelineZoom}%`, minWidth: '100%' }}>
