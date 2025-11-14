@@ -3755,9 +3755,12 @@ export default function CanvasContainerNew({
               document.addEventListener('mousemove', handleMouseMove);
               document.addEventListener('mouseup', handleMouseUp);
             }}
-            className="absolute top-0 left-0 right-0 h-1 cursor-ns-resize hover:bg-primary/50 transition-colors group z-50"
+            className="absolute top-0 left-0 right-0 h-3 cursor-ns-resize hover:bg-primary/20 transition-colors group z-50 flex items-center justify-center bg-card/80 backdrop-blur-sm border-t border-border"
           >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-border group-hover:bg-primary rounded-full transition-colors" />
+            <div className="flex flex-col items-center gap-0.5">
+              <div className="w-16 h-1 bg-border group-hover:bg-primary rounded-full transition-colors" />
+              <div className="w-16 h-1 bg-border group-hover:bg-primary rounded-full transition-colors" />
+            </div>
           </div>
 
           {/* Toggle Handle */}
