@@ -3,7 +3,7 @@ import { Element, Frame } from "@/types/elements";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, Plus, Trash2 } from "lucide-react";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, Plus, Trash2, ZoomIn, ZoomOut } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -96,272 +96,181 @@ export default function TimelinePanel({
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
+  const [draggingPlayhead, setDraggingPlayhead] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
-  const [audioLayers, setAudioLayers] = useState<number[]>([0]);
-  const [selectedVoice, setSelectedVoice] = useState<string | null>(null);
-  const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
-  const [draggingAnimation, setDraggingAnimation] = useState<string | null>(null);
-  const [draggingVoice, setDraggingVoice] = useState<string | null>(null);
-  const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
-  const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
-  const [editingAnimation, setEditingAnimation] = useState<{
-    elementId: string;
-    animIndex: number;
-  } | null>(null);
-  const [contextMenuElement, setContextMenuElement] = useState<string | null>(null);
-  const [audioRefs] = useState<Map<string, HTMLAudioElement>>(new Map());
+  const [audioLayers, setAudioLayers] = useState<number[]>([1]);
 
-  const timelineWidth = 800 * zoomLevel;
-  const pixelsPerSecond = timelineWidth / maxDuration;
+  // Fixed timeline container width
+  const timelineWidth = 800;
+  // Content scales with zoom
+  const contentWidth = timelineWidth * zoomLevel;
+  // Pixels per second scales with zoom
+  const pixelsPerSecond = (timelineWidth / maxDuration) * zoomLevel;
+
+  const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
+  const [selectedAnimation, setSelectedAnimation] = useState<{ element: Element; animation: any } | null>(null);
+  const [contextMenuElement, setContextMenuElement] = useState<Element | null>(null);
+  const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
+  const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     setVoiceAudios(externalVoiceAudios);
   }, [externalVoiceAudios]);
 
-  useEffect(() => {
-    if (onVoiceAudiosChange) {
-      onVoiceAudiosChange(voiceAudios);
-    }
-  }, [voiceAudios, onVoiceAudiosChange]);
-
-  useEffect(() => {
-    if (isDraggingPlayhead || draggingAnimation || draggingVoice) {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (isDraggingPlayhead) {
-          handlePlayheadDrag(e.clientX);
-        }
-      };
-
-      const handleMouseUp = () => {
-        setIsDraggingPlayhead(false);
-        setDraggingAnimation(null);
-        setDraggingVoice(null);
-      };
-
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isDraggingPlayhead, draggingAnimation, draggingVoice, maxDuration]);
-
-  useEffect(() => {
-    voiceAudios.forEach((voice) => {
-      if (!audioRefs.has(voice.id)) {
-        const audio = new Audio(voice.url);
-        audioRefs.set(voice.id, audio);
-      }
-    });
-
-    audioRefs.forEach((audio, id) => {
-      if (!voiceAudios.find(v => v.id === id)) {
-        audio.pause();
-        audioRefs.delete(id);
-      }
-    });
-
-    if (isPlaying) {
-      voiceAudios.forEach((voice) => {
-        const audio = audioRefs.get(voice.id);
-        if (audio) {
-          const startTime = voice.delay;
-          const endTime = voice.delay + voice.duration;
-
-          if (currentTime >= startTime && currentTime <= endTime) {
-            const audioTime = currentTime - startTime;
-            if (Math.abs(audio.currentTime - audioTime) > 0.1) {
-              audio.currentTime = audioTime;
-            }
-            if (audio.paused) {
-              audio.play().catch(console.error);
-            }
-          } else {
-            if (!audio.paused) {
-              audio.pause();
-            }
-          }
-        }
-      });
-    } else {
-      audioRefs.forEach((audio) => {
-        if (!audio.paused) {
-          audio.pause();
-        }
-      });
-    }
-  }, [currentTime, isPlaying, voiceAudios, audioRefs]);
-
-  const parseDuration = (duration?: string): number => {
-    if (!duration) return 1;
-    const match = duration.match(/(\d+(?:\.\d+)?)/);
-    if (!match) return 1;
-    return parseFloat(match[1]);
-  };
-
-  const parseDelay = (delay?: string): number => {
-    if (!delay) return 0;
-    const match = delay.match(/(\d+(?:\.\d+)?)/);
-    if (!match) return 0;
-    return parseFloat(match[1]);
-  };
-
-  const handlePlayheadDrag = (clientX: number) => {
+  const handlePlayheadDrag = (e: React.MouseEvent) => {
     if (!timelineRef.current || !scrollContainerRef.current) return;
+    
     const rect = timelineRef.current.getBoundingClientRect();
     const scrollLeft = scrollContainerRef.current.scrollLeft;
-    const x = clientX - rect.left + scrollLeft;
-    const time = (x / timelineWidth) * maxDuration;
-    onTimeChange(Math.max(0, Math.min(maxDuration, time)));
+    const x = e.clientX - rect.left + scrollLeft;
+    const newTime = Math.max(0, Math.min((x / contentWidth) * maxDuration, maxDuration));
+    onTimeChange(newTime);
   };
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.timeline-bg')) {
-      setIsDraggingPlayhead(true);
-      handlePlayheadDrag(e.clientX);
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setDraggingPlayhead(true);
+    handlePlayheadDrag(e);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (draggingPlayhead) {
+        handlePlayheadDrag(e as any);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setDraggingPlayhead(false);
+    };
+
+    if (draggingPlayhead) {
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     }
-  };
 
-  const handleAnimationDrag = (e: React.MouseEvent, elementId: string, animIndex: number) => {
-    e.preventDefault();
-    setDraggingAnimation(`${elementId}-${animIndex}`);
-    
-    const element = elements.find(el => el.id === elementId);
-    if (!element || !element.animations) return;
-    
-    const animation = element.animations[animIndex];
-    const startX = e.clientX;
-    const startDelay = parseDelay(animation.delay);
-    
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!timelineRef.current || !scrollContainerRef.current) return;
-      
-      const deltaX = moveEvent.clientX - startX;
-      const deltaTime = (deltaX / pixelsPerSecond);
-      const newDelay = Math.max(0, startDelay + deltaTime);
-      
-      const updatedAnimations = [...(element.animations || [])];
-      updatedAnimations[animIndex] = {
-        ...animation,
-        delay: `${newDelay}s`,
-      };
-      
-      onUpdateElement(elementId, { animations: updatedAnimations });
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
-    
-    const handleMouseUp = () => {
-      setDraggingAnimation(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-    
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  };
-
-  const handleVoiceDrag = (e: React.MouseEvent, voice: any) => {
-    e.preventDefault();
-    setDraggingVoice(voice.id);
-    
-    const startX = e.clientX;
-    const startDelay = voice.delay;
-    
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!timelineRef.current || !scrollContainerRef.current) return;
-      
-      const deltaX = moveEvent.clientX - startX;
-      const deltaTime = (deltaX / pixelsPerSecond);
-      const newDelay = Math.max(0, Math.min(maxDuration - voice.duration, startDelay + deltaTime));
-      
-      setVoiceAudios(prev => 
-        prev.map(v => v.id === voice.id ? { ...v, delay: newDelay } : v)
-      );
-    };
-    
-    const handleMouseUp = () => {
-      setDraggingVoice(null);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-    
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-  };
+  }, [draggingPlayhead]);
 
   const getElementIcon = (element: Element) => {
-    switch (element.type) {
-      case "text":
-        return <Type className="h-4 w-4" />;
-      case "image":
-        return <Image className="h-4 w-4" />;
-      case "shape":
-        return element.shapeType === "ellipse" ? (
-          <Circle className="h-4 w-4" />
-        ) : (
-          <Square className="h-4 w-4" />
-        );
-      case "video":
-        return <Video className="h-4 w-4" />;
-      case "drawing":
-        return <Pen className="h-4 w-4" />;
-      default:
-        return <Square className="h-4 w-4" />;
+    if (element.type === "text") return <Type className="w-3 h-3" />;
+    if (element.type === "image") return <Image className="w-3 h-3" />;
+    if (element.type === "video") return <Video className="w-3 h-3" />;
+    if (element.type === "drawing") return <Pen className="w-3 h-3" />;
+    if (element.type === "shape") {
+      if (element.shapeType === "rectangle") return <Square className="w-3 h-3" />;
+      if (element.shapeType === "ellipse") return <Circle className="w-3 h-3" />;
     }
+    return <Square className="w-3 h-3" />;
   };
 
   const animationsByCategory = {
-    "Entrance": [
-      { id: `anim-${Date.now()}-1`, type: "fade-in" as const, duration: "1s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "in" as const },
-      { id: `anim-${Date.now()}-2`, type: "zoom-in" as const, duration: "0.5s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "in" as const },
-      { id: `anim-${Date.now()}-3`, type: "slide-in-from-right" as const, duration: "0.5s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "in" as const },
+    entrance: [
+      { id: "fade-in", type: "fade-in", name: "Fade In", delay: 0, duration: 1 },
+      { id: "slide-in", type: "slide-in", name: "Slide In", delay: 0, duration: 1 },
+      { id: "zoom-in", type: "zoom-in", name: "Zoom In", delay: 0, duration: 1 },
     ],
-    "Exit": [
-      { id: `anim-${Date.now()}-4`, type: "fade-out" as const, duration: "1s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "out" as const },
-      { id: `anim-${Date.now()}-5`, type: "zoom-out" as const, duration: "0.5s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "out" as const },
-      { id: `anim-${Date.now()}-6`, type: "slide-out-to-right" as const, duration: "0.5s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "out" as const },
+    exit: [
+      { id: "fade-out", type: "fade-out", name: "Fade Out", delay: 0, duration: 1 },
+      { id: "slide-out", type: "slide-out", name: "Slide Out", delay: 0, duration: 1 },
+      { id: "zoom-out", type: "zoom-out", name: "Zoom Out", delay: 0, duration: 1 },
     ],
-    "Attention": [
-      { id: `anim-${Date.now()}-7`, type: "pulse" as const, duration: "2s", delay: "0s", timingFunction: "ease-in-out", iterationCount: "infinite", category: "custom" as const },
-      { id: `anim-${Date.now()}-8`, type: "bounce" as const, duration: "1s", delay: "0s", timingFunction: "ease-out", iterationCount: "1", category: "custom" as const },
+    emphasis: [
+      { id: "pulse", type: "pulse", name: "Pulse", delay: 0, duration: 1 },
+      { id: "shake", type: "shake", name: "Shake", delay: 0, duration: 1 },
+      { id: "bounce", type: "bounce", name: "Bounce", delay: 0, duration: 1 },
     ],
   };
 
-  const handleAddAnimation = (elementId: string, preset: any) => {
-    const element = elements.find(el => el.id === elementId);
-    if (!element) return;
-
+  const handleAddAnimation = (element: Element, animation: any) => {
     const newAnimation = {
-      ...preset,
-      id: `anim-${Date.now()}`,
-      delay: `${currentTime}s`,
+      ...animation,
+      id: `${animation.type}-${Date.now()}`,
     };
-
-    const updatedAnimations = [...(element.animations || []), newAnimation];
-    onUpdateElement(elementId, { animations: updatedAnimations });
+    const currentAnimations = element.animations || [];
+    onUpdateElement(element.id, {
+      animations: [...currentAnimations, newAnimation],
+    });
   };
 
-  const handleUpdateAnimation = (elementId: string, animIndex: number, updates: any) => {
-    const element = elements.find(el => el.id === elementId);
-    if (!element || !element.animations) return;
-
-    const updatedAnimations = [...element.animations];
-    updatedAnimations[animIndex] = {
-      ...updatedAnimations[animIndex],
-      ...updates,
-    };
-
-    onUpdateElement(elementId, { animations: updatedAnimations });
+  const handleAnimationClick = (element: Element, animation: any) => {
+    setSelectedAnimation({ element, animation });
   };
 
-  const handleRemoveAnimation = (elementId: string, animIndex: number) => {
-    const element = elements.find(el => el.id === elementId);
-    if (!element || !element.animations) return;
+  const handleAnimationDrag = (
+    element: Element,
+    animation: any,
+    e: React.MouseEvent
+  ) => {
+    if (!timelineRef.current || !scrollContainerRef.current) return;
 
-    const updatedAnimations = element.animations.filter((_, idx) => idx !== animIndex);
-    onUpdateElement(elementId, { animations: updatedAnimations });
+    const rect = timelineRef.current.getBoundingClientRect();
+    const scrollLeft = scrollContainerRef.current.scrollLeft;
+    const startX = e.clientX;
+    const startDelay = animation.delay || 0;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaTime = deltaX / pixelsPerSecond;
+      const newDelay = Math.max(0, Math.min(startDelay + deltaTime, maxDuration));
+
+      const updatedAnimations = (element.animations || []).map((anim: any) =>
+        anim.id === animation.id ? { ...anim, delay: newDelay } : anim
+      );
+
+      onUpdateElement(element.id, { animations: updatedAnimations });
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleVoiceDrag = (voice: any, e: React.MouseEvent) => {
+    if (!timelineRef.current || !scrollContainerRef.current) return;
+
+    const startX = e.clientX;
+    const startDelay = voice.delay || 0;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const deltaX = moveEvent.clientX - startX;
+      const deltaTime = deltaX / pixelsPerSecond;
+      const newDelay = Math.max(0, Math.min(startDelay + deltaTime, maxDuration));
+
+      const updatedVoices = voiceAudios.map((v) =>
+        v.id === voice.id ? { ...v, delay: newDelay } : v
+      );
+
+      setVoiceAudios(updatedVoices);
+      onVoiceAudiosChange?.(updatedVoices);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  const handleRemoveAnimation = (element: Element, animationId: string) => {
+    const updatedAnimations = (element.animations || []).filter(
+      (anim: any) => anim.id !== animationId
+    );
+    onUpdateElement(element.id, { animations: updatedAnimations });
+  };
+
+  const handleRemoveVoice = (voiceId: string) => {
+    const updatedVoices = voiceAudios.filter((v) => v.id !== voiceId);
+    setVoiceAudios(updatedVoices);
+    onVoiceAudiosChange?.(updatedVoices);
   };
 
   const handleVoiceGenerated = (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
@@ -369,291 +278,341 @@ export default function TimelinePanel({
       id: `voice-${Date.now()}`,
       url: audioUrl,
       text: text,
-      delay: voiceDrawerTimestamp,
-      duration: 5,
+      delay: currentTime,
+      duration: 5, // Default duration, will be updated by audio metadata
       voiceId: voiceId,
       voiceName: voiceName,
-      layerId: 0,
+      layerId: audioLayers[0] || 1,
     };
-    setVoiceAudios(prev => [...prev, newVoice]);
+
+    const updatedVoices = [...voiceAudios, newVoice];
+    setVoiceAudios(updatedVoices);
+    onVoiceAudiosChange?.(updatedVoices);
     setVoiceDrawerOpen(false);
   };
 
-  const handleRemoveVoice = (voiceId: string) => {
-    setVoiceAudios(prev => prev.filter(v => v.id !== voiceId));
-  };
-
-  const handleVoiceTrackRightClick = (layerId: number, timestamp: number) => {
-    setVoiceDrawerTimestamp(timestamp);
-    setVoiceDrawerOpen(true);
-  };
-
   const handleAddLayer = () => {
-    setAudioLayers(prev => [...prev, Math.max(...prev, -1) + 1]);
+    const newLayerId = Math.max(...audioLayers, 0) + 1;
+    setAudioLayers([...audioLayers, newLayerId]);
   };
 
   const handleRemoveLayer = (layerId: number) => {
-    if (audioLayers.length === 1) return;
-    setAudioLayers(prev => prev.filter(id => id !== layerId));
-    setVoiceAudios(prev => prev.filter(v => (v.layerId || 0) !== layerId));
+    if (audioLayers.length <= 1) return;
+    setAudioLayers(audioLayers.filter(id => id !== layerId));
+    const updatedVoices = voiceAudios.filter(v => v.layerId !== layerId);
+    setVoiceAudios(updatedVoices);
+    onVoiceAudiosChange?.(updatedVoices);
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel(prev => Math.min(prev + 0.5, 5));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel(prev => Math.max(prev - 0.5, 0.5));
   };
 
   return (
-    <div className="flex flex-col h-full bg-background border-t border-border">
-      <div className="flex items-center gap-2 p-4 border-b border-border">
-        <Button variant="outline" size="icon" onClick={onPlayPause} className="shrink-0">
-          {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-        </Button>
-        <Button variant="outline" size="icon" onClick={onReset} className="shrink-0">
-          <RotateCcw className="h-4 w-4" />
-        </Button>
-        <div className="flex-1 px-4">
-          <Slider
-            value={[currentTime]}
-            min={0}
-            max={maxDuration}
-            step={0.01}
-            onValueChange={([value]) => onTimeChange(value)}
-            className="w-full"
-          />
-        </div>
-        <span className="text-sm text-muted-foreground shrink-0">
-          {currentTime.toFixed(2)}s / {maxDuration}s
-        </span>
-        <div className="flex items-center gap-2 ml-4 border-l border-border pl-4">
+    <div className="w-full p-4 bg-background border-t border-border">
+      <div className="space-y-4">
+        {/* Playback Controls */}
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.5))}
+            onClick={onPlayPause}
+            className="w-20"
           >
-            -
+            {isPlaying ? (
+              <>
+                <Pause className="w-4 h-4 mr-1" />
+                Pause
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4 mr-1" />
+                Play
+              </>
+            )}
           </Button>
-          <span className="text-sm text-muted-foreground min-w-[60px] text-center">
-            {Math.round(zoomLevel * 100)}%
+          <Button variant="outline" size="sm" onClick={onReset}>
+            <RotateCcw className="w-4 h-4" />
+          </Button>
+          <span className="text-sm text-muted-foreground ml-2">
+            {currentTime.toFixed(2)}s / {maxDuration}s
           </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel(prev => Math.min(5, prev + 0.5))}
-          >
-            +
-          </Button>
-        </div>
-      </div>
 
-      <div className="flex-1 overflow-hidden">
-        <div ref={scrollContainerRef} className="h-full overflow-x-auto overflow-y-auto">
-          <div className="p-4" style={{ minWidth: `${timelineWidth + 32}px` }}>
-            <div
-              ref={timelineRef}
-              className="relative bg-muted/30 rounded-lg p-4 min-h-[400px] timeline-bg"
-              onMouseDown={handleMouseDown}
-              style={{ width: `${timelineWidth}px` }}
+          {/* Zoom Controls */}
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleZoomOut}
+              disabled={zoomLevel <= 0.5}
             >
-              <div className="flex justify-between mb-2 text-xs text-muted-foreground">
-                {Array.from({ length: Math.ceil(maxDuration) + 1 }, (_, i) => (
-                  <span key={i} style={{ position: 'absolute', left: `${(i / maxDuration) * 100}%` }}>{i}s</span>
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+            <span className="text-sm text-muted-foreground min-w-12 text-center">
+              {Math.round(zoomLevel * 100)}%
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleZoomIn}
+              disabled={zoomLevel >= 5}
+            >
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Timeline Slider */}
+        <div className="space-y-2">
+          <div className="text-xs text-muted-foreground mb-1">Playhead Position</div>
+          <div 
+            ref={scrollContainerRef}
+            className="relative overflow-x-auto"
+            style={{ width: `${timelineWidth}px` }}
+          >
+            <div 
+              ref={timelineRef}
+              className="relative bg-secondary/20 rounded cursor-pointer border border-border/50"
+              style={{ 
+                width: `${contentWidth}px`,
+                height: '60px'
+              }}
+              onMouseDown={handleMouseDown}
+            >
+              {/* Time markers */}
+              <div className="absolute top-0 left-0 right-0 h-4 flex">
+                {Array.from({ length: Math.floor(maxDuration) + 1 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="absolute text-xs text-muted-foreground"
+                    style={{ left: `${(i / maxDuration) * 100}%` }}
+                  >
+                    {i}s
+                  </div>
                 ))}
               </div>
 
-              <div
-                className="absolute top-0 bottom-0 w-1 bg-primary pointer-events-none z-10"
-                style={{ left: `${(currentTime / maxDuration) * 100}%` }}
+              {/* Playhead - Blue and full height */}
+              <div 
+                className="absolute top-0 bottom-0 w-0.5 bg-primary z-10 pointer-events-none"
+                style={{ 
+                  left: `${(currentTime / maxDuration) * contentWidth}px`,
+                  height: '100%'
+                }}
               />
+            </div>
+          </div>
+        </div>
 
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Audio Layers</span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAddLayer}
-                    className="h-6 px-2"
+        {/* Audio Layers Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-xs text-muted-foreground">Audio Layers</div>
+            <div className="flex items-center gap-2">
+              <VoiceSelector
+                onSelectVoice={(voiceId, voiceName) => {
+                  setSelectedVoice({ id: voiceId, name: voiceName });
+                  setVoiceDrawerOpen(true);
+                }}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddLayer}
+              >
+                <Plus className="w-3 h-3 mr-1" />
+                Add Layer
+              </Button>
+            </div>
+          </div>
+
+          <div 
+            className="overflow-x-auto"
+            style={{ width: `${timelineWidth}px` }}
+          >
+            <div className="space-y-2">
+              {audioLayers.map((layer) => (
+                <div key={layer} className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 min-w-24">
+                    <span className="text-xs text-muted-foreground">Layer {layer}</span>
+                    {audioLayers.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveLayer(layer)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    )}
+                  </div>
+                  <div
+                    className="relative bg-secondary/10 rounded border border-border/30"
+                    style={{ 
+                      width: `${contentWidth}px`,
+                      height: '48px'
+                    }}
                   >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add Layer
-                  </Button>
+                    {voiceAudios
+                      .filter((voice) => (voice.layerId || 1) === layer)
+                      .map((voice) => {
+                        const avatar = VOICE_AVATARS[voice.voiceId];
+                        return (
+                          <ContextMenu key={voice.id}>
+                            <ContextMenuTrigger>
+                              <div
+                                className="absolute top-1 h-10 bg-accent/80 rounded border border-accent flex items-center px-2 gap-2 cursor-move hover:bg-accent transition-colors"
+                                style={{
+                                  left: `${voice.delay * pixelsPerSecond}px`,
+                                  width: `${voice.duration * pixelsPerSecond}px`,
+                                }}
+                                onMouseDown={(e) => {
+                                  e.stopPropagation();
+                                  handleVoiceDrag(voice, e);
+                                }}
+                              >
+                                <Avatar className="w-6 h-6">
+                                  <AvatarImage src={avatar} />
+                                  <AvatarFallback>
+                                    <Mic className="w-3 h-3" />
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs truncate">{voice.voiceName}</span>
+                              </div>
+                            </ContextMenuTrigger>
+                            <ContextMenuContent>
+                              <ContextMenuItem
+                                onClick={() => handleRemoveVoice(voice.id)}
+                                className="text-destructive"
+                              >
+                                Remove
+                              </ContextMenuItem>
+                            </ContextMenuContent>
+                          </ContextMenu>
+                        );
+                      })}
+                  </div>
                 </div>
-                {audioLayers.map((layerId) => {
-                  const layerVoices = voiceAudios.filter(v => (v.layerId || 0) === layerId);
-                  return (
-                    <div key={layerId} className="mb-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-muted-foreground">Layer {layerId + 1}</span>
-                        {audioLayers.length > 1 && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-4 w-4"
-                            onClick={() => handleRemoveLayer(layerId)}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        )}
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Elements Timeline */}
+        <div className="space-y-2">
+          <div className="text-xs text-muted-foreground mb-2">Element Animations</div>
+          <div 
+            className="overflow-x-auto"
+            style={{ width: `${timelineWidth}px` }}
+          >
+            <div className="space-y-2">
+              {elements.map((element) => (
+                <ContextMenu key={element.id}>
+                  <ContextMenuTrigger>
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex items-center gap-2 min-w-32 px-2 py-1 rounded text-xs cursor-pointer transition-colors ${
+                          selectedElementIds.includes(element.id)
+                            ? "bg-primary/20 text-primary"
+                            : "bg-secondary/30 text-muted-foreground hover:bg-secondary/50"
+                        }`}
+                        onClick={() => onElementSelect?.(element.id)}
+                      >
+                        {getElementIcon(element)}
+                        <span className="truncate">{element.id.slice(0, 8)}</span>
                       </div>
-                      <ContextMenu>
-                        <ContextMenuTrigger>
+                      <div
+                        className="relative bg-secondary/10 rounded border border-border/30"
+                        style={{ 
+                          width: `${contentWidth}px`,
+                          height: '40px'
+                        }}
+                      >
+                        {(element.animations || []).map((animation: any) => (
                           <div
-                            className="relative h-12 bg-muted/50 rounded cursor-crosshair"
-                            onContextMenu={(e) => {
-                              if (!timelineRef.current || !scrollContainerRef.current) return;
-                              const rect = timelineRef.current.getBoundingClientRect();
-                              const scrollLeft = scrollContainerRef.current.scrollLeft;
-                              const x = e.clientX - rect.left + scrollLeft;
-                              const timestamp = (x / timelineWidth) * maxDuration;
-                              handleVoiceTrackRightClick(layerId, Math.max(0, Math.min(maxDuration, timestamp)));
+                            key={animation.id}
+                            className="absolute top-1 h-8 bg-primary/60 rounded border border-primary flex items-center px-2 cursor-move hover:bg-primary/80 transition-colors"
+                            style={{
+                              left: `${(animation.delay || 0) * pixelsPerSecond}px`,
+                              width: `${(animation.duration || 1) * pixelsPerSecond}px`,
+                            }}
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              handleAnimationDrag(element, animation, e);
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAnimationClick(element, animation);
                             }}
                           >
-                            {layerVoices.map((voice) => (
-                              <ContextMenu key={voice.id}>
-                                <ContextMenuTrigger>
-                                  <div
-                                    className={`absolute top-1 h-10 bg-primary/20 border-2 border-primary/40 rounded flex items-center px-2 gap-2 cursor-move hover:bg-primary/30 transition-colors ${
-                                      draggingVoice === voice.id ? 'opacity-50' : ''
-                                    }`}
-                                    style={{
-                                      left: `${(voice.delay / maxDuration) * timelineWidth}px`,
-                                      width: `${(voice.duration / maxDuration) * timelineWidth}px`,
-                                    }}
-                                    onMouseDown={(e) => {
-                                      e.stopPropagation();
-                                      handleVoiceDrag(e, voice);
-                                    }}
-                                  >
-                                    <Avatar className="h-6 w-6 shrink-0">
-                                      <AvatarImage src={VOICE_AVATARS[voice.voiceId]} />
-                                      <AvatarFallback>
-                                        <Mic className="h-3 w-3" />
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-xs truncate flex-1">{voice.text}</span>
-                                  </div>
-                                </ContextMenuTrigger>
-                                <ContextMenuContent>
-                                  <ContextMenuItem onClick={() => handleRemoveVoice(voice.id)}>
-                                    Remove Voice
-                                  </ContextMenuItem>
-                                </ContextMenuContent>
-                              </ContextMenu>
-                            ))}
+                            <span className="text-xs text-primary-foreground truncate">
+                              {animation.type}
+                            </span>
                           </div>
-                        </ContextMenuTrigger>
-                        <ContextMenuContent>
-                          <ContextMenuItem onClick={() => setVoiceDrawerOpen(true)}>
-                            Add Voice
-                          </ContextMenuItem>
-                        </ContextMenuContent>
-                      </ContextMenu>
+                        ))}
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
-
-              <div className="mt-6">
-                <div className="text-sm font-medium mb-2">Elements</div>
-                {elements.map((element) => {
-                  return (
-                    <ContextMenu key={element.id}>
-                      <ContextMenuTrigger>
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex items-center gap-2 w-32 shrink-0">
-                            {getElementIcon(element)}
-                            <span className="text-xs truncate">{element.id.slice(0, 8)}</span>
-                          </div>
-                          <div className="relative flex-1 h-10 bg-muted/50 rounded">
-                            {element.animations && element.animations.map((anim, animIndex) => {
-                              const duration = parseDuration(anim.duration);
-                              const delay = parseDelay(anim.delay);
-                              
-                              return (
-                                <ContextMenu key={animIndex}>
-                                  <ContextMenuTrigger>
-                                    <div
-                                      className={`absolute top-0 h-10 bg-accent/30 border border-accent rounded flex items-center justify-center text-xs cursor-move hover:bg-accent/50 transition-colors ${
-                                        draggingAnimation === `${element.id}-${animIndex}` ? 'opacity-50' : ''
-                                      }`}
-                                      style={{
-                                        left: `${(delay / maxDuration) * timelineWidth}px`,
-                                        width: `${(duration / maxDuration) * timelineWidth}px`,
-                                      }}
-                                      onMouseDown={(e) => {
-                                        e.stopPropagation();
-                                        handleAnimationDrag(e, element.id, animIndex);
-                                      }}
-                                      onClick={() => setEditingAnimation({ elementId: element.id, animIndex })}
-                                    >
-                                      {anim.type}
-                                    </div>
-                                  </ContextMenuTrigger>
-                                  <ContextMenuContent>
-                                    <ContextMenuItem onClick={() => setEditingAnimation({ elementId: element.id, animIndex })}>
-                                      Edit Animation
-                                    </ContextMenuItem>
-                                    <ContextMenuItem onClick={() => handleRemoveAnimation(element.id, animIndex)}>
-                                      Remove Animation
-                                    </ContextMenuItem>
-                                  </ContextMenuContent>
-                                </ContextMenu>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuContent>
-                        {Object.entries(animationsByCategory).map(([category, anims]) => (
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuSub>
+                      <ContextMenuSubTrigger>Add Animation</ContextMenuSubTrigger>
+                      <ContextMenuSubContent>
+                        {Object.entries(animationsByCategory).map(([category, animations]) => (
                           <ContextMenuSub key={category}>
-                            <ContextMenuSubTrigger>{category}</ContextMenuSubTrigger>
+                            <ContextMenuSubTrigger className="capitalize">
+                              {category}
+                            </ContextMenuSubTrigger>
                             <ContextMenuSubContent>
-                              {anims.map((preset) => (
+                              {animations.map((animation) => (
                                 <ContextMenuItem
-                                  key={preset.id}
-                                  onClick={() => handleAddAnimation(element.id, preset)}
+                                  key={animation.id}
+                                  onClick={() => handleAddAnimation(element, animation)}
                                 >
-                                  {preset.type}
+                                  {animation.name}
                                 </ContextMenuItem>
                               ))}
                             </ContextMenuSubContent>
                           </ContextMenuSub>
                         ))}
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  );
-                })}
-              </div>
+                      </ContextMenuSubContent>
+                    </ContextMenuSub>
+                    <ContextMenuSeparator />
+                    {(element.animations || []).length > 0 && (
+                      <ContextMenuSub>
+                        <ContextMenuSubTrigger>Remove Animation</ContextMenuSubTrigger>
+                        <ContextMenuSubContent>
+                          {(element.animations || []).map((animation: any) => (
+                            <ContextMenuItem
+                              key={animation.id}
+                              onClick={() => handleRemoveAnimation(element, animation.id)}
+                              className="text-destructive"
+                            >
+                              {animation.type}
+                            </ContextMenuItem>
+                          ))}
+                        </ContextMenuSubContent>
+                      </ContextMenuSub>
+                    )}
+                  </ContextMenuContent>
+                </ContextMenu>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {editingAnimation && (() => {
-        const element = elements.find(el => el.id === editingAnimation.elementId);
-        const animation = element?.animations?.[editingAnimation.animIndex];
-        if (!element || !animation) return null;
-        
-        return (
-          <AnimationSettingsDialog
-            animation={animation}
-            elementId={element.id}
-            onUpdate={(animId: string, updates: any) => {
-              handleUpdateAnimation(element.id, editingAnimation.animIndex, updates);
-            }}
-            onRemove={(animId: string) => {
-              handleRemoveAnimation(element.id, editingAnimation.animIndex);
-              setEditingAnimation(null);
-            }}
-          />
-        );
-      })()}
-
-      {voiceDrawerOpen && (
-        <VoiceTextDrawer
-          open={voiceDrawerOpen}
-          onClose={() => setVoiceDrawerOpen(false)}
-          voiceId={selectedVoice || "9BWtsMINqrJLrRacOk9x"}
-          voiceName="Aria"
-          onVoiceGenerated={handleVoiceGenerated}
-        />
-      )}
+      {/* Voice Text Drawer */}
+      <VoiceTextDrawer
+        open={voiceDrawerOpen}
+        onClose={() => setVoiceDrawerOpen(false)}
+        voiceId={selectedVoice?.id || ""}
+        voiceName={selectedVoice?.name || ""}
+        onVoiceGenerated={handleVoiceGenerated}
+      />
     </div>
   );
 }
