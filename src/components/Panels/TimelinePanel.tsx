@@ -96,6 +96,7 @@ export default function TimelinePanel({
   onVoiceAudiosChange,
 }: TimelinePanelProps) {
   const timelineRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDraggingPlayhead, setIsDraggingPlayhead] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState<{ id: string; name: string } | null>(null);
   const [voiceAudios, setVoiceAudios] = useState(externalVoiceAudios);
@@ -115,6 +116,22 @@ export default function TimelinePanel({
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
   const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const [playheadLeft, setPlayheadLeft] = useState(0);
+
+  // Keep playhead aligned across the full timeline height/width using measured offsets
+  useEffect(() => {
+    const update = () => {
+      if (!timelineRef.current || !containerRef.current) return;
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const timelineRect = timelineRef.current.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, maxDuration ? currentTime / maxDuration : 0));
+      const leftPx = (timelineRect.left - containerRect.left) + timelineRect.width * ratio;
+      setPlayheadLeft(leftPx);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, [currentTime, maxDuration]);
 
   // Sync external voice audios
   useEffect(() => {
@@ -450,7 +467,7 @@ export default function TimelinePanel({
       </div>
 
       <ScrollArea className="h-48">
-        <div className="p-4 relative">
+        <div className="p-4 relative" ref={containerRef}>
           {/* Header with time markers - aligned with timeline track */}
           <div className="flex items-start gap-2 mb-2">
             <div className="w-32 flex-shrink-0 h-6" /> {/* Spacer for layer names */}
@@ -474,12 +491,12 @@ export default function TimelinePanel({
 
           {/* Playhead - spans full timeline height */}
           <div
-            className="absolute top-0 bottom-0 w-0.5 bg-blue-500 z-50 cursor-ew-resize pointer-events-auto"
-            style={{ left: `calc(8.5rem + (100% - 8.5rem) * ${currentTime / maxDuration})` }}
+            className="absolute top-0 bottom-0 w-0.5 bg-primary z-50 cursor-ew-resize pointer-events-auto"
+            style={{ left: playheadLeft }}
             onMouseDown={handleMouseDown}
           >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full -mt-1 pointer-events-auto" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-blue-500 rounded-full -mb-1 pointer-events-auto" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mt-1 pointer-events-auto" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mb-1 pointer-events-auto" />
           </div>
 
           {/* Element tracks */}
