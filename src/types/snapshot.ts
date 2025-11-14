@@ -8,6 +8,7 @@ export interface VoiceAudio {
   duration: number;
   voiceId: string;
   voiceName: string;
+  track?: number; // Track/row index for timeline layering
 }
 
 export interface CanvasMetadata {
