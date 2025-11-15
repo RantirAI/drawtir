@@ -663,10 +663,14 @@ export default function CanvasContainerNew({
 
     setIsGenerating(true);
     
-    // Check if image generation is requested
+    // Check if image generation or Unsplash search is requested
+    const willSearchUnsplash = generationTypes.includes('search-unsplash');
     const willGenerateImage = generationTypes.includes('generate-image');
     
-    if (willGenerateImage) {
+    if (willSearchUnsplash) {
+      setGenerationProgress("🔍 Searching Unsplash for photos...");
+      toast.info("Finding the perfect photo from Unsplash...");
+    } else if (willGenerateImage) {
       setGenerationProgress("🎨 Generating AI image...");
       toast.info("Creating custom AI image for your poster...");
     } else {
@@ -683,9 +687,13 @@ export default function CanvasContainerNew({
     
     // Initialize generation steps based on selected types
     const steps = [];
+    const shouldSearchUnsplash = generationTypes.includes("search-unsplash");
     const shouldGenerateImage = generationTypes.includes("generate-image");
     const shouldReplicate = generationTypes.includes("replicate");
     
+    if (shouldSearchUnsplash) {
+      steps.push({ id: 'unsplash', label: 'Search Unsplash Photos', status: 'pending' as const });
+    }
     if (shouldGenerateImage) {
       steps.push({ id: 'image', label: 'Generate Image with AI', status: 'pending' as const });
     }

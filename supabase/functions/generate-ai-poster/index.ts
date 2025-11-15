@@ -488,7 +488,7 @@ serve(async (req) => {
       canvasHeight = 1200,
       model = 'gemini-2.5-flash', // Default model
       colorPalette, // Optional color palette preference
-      generationTypes = [], // Array of generation types (e.g., ["generate-image", "create"])
+      generationTypes = [], // Array of generation types (e.g., ["generate-image", "create", "search-unsplash"])
       conversationHistory = [], // Chat conversation history
       currentSnapshot = null, // Current canvas state
       targetFrameId = null // Specific frame to generate in
@@ -510,9 +510,114 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    // Step 1: Generate image if "generate-image" type is selected
+    // Step 1: Search Unsplash if "search-unsplash" type is selected
     let generatedImageBase64: string | null = null;
-    if (generationTypes.includes('generate-image') && prompt) {
+    let unsplashAttribution: any = null;
+    
+    if (generationTypes.includes('search-unsplash') && prompt) {
+      console.log('Searching Unsplash for relevant images...');
+      
+      try {
+        const UNSPLASH_ACCESS_KEY = Deno.env.get('UNSPLASH_ACCESS_KEY');
+        if (!UNSPLASH_ACCESS_KEY) {
+          console.error('UNSPLASH_ACCESS_KEY is not configured');
+        } else {
+          // Extract keywords from prompt using AI
+          const keywordExtractionResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                {
+                  role: "system",
+                  content: "Extract 2-4 keywords for an Unsplash image search from the user's poster prompt. Return only the search query, nothing else. Focus on the main subject or theme."
+                },
+                {
+                  role: "user",
+                  content: prompt
+                }
+              ],
+            }),
+          });
+
+          if (keywordExtractionResponse.ok) {
+            const keywordData = await keywordExtractionResponse.json();
+            const searchQuery = keywordData.choices[0].message.content.trim();
+            console.log('Extracted search query:', searchQuery);
+
+            // Search Unsplash
+            const unsplashResponse = await fetch(
+              `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&page=1&per_page=5&orientation=landscape`,
+              {
+                headers: {
+                  'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+                },
+              }
+            );
+
+            if (unsplashResponse.ok) {
+              const unsplashData = await unsplashResponse.json();
+              
+              if (unsplashData.results && unsplashData.results.length > 0) {
+                // Get the first (most relevant) image
+                const selectedImage = unsplashData.results[0];
+                console.log('Selected Unsplash image:', selectedImage.id);
+
+                // Store attribution info
+                unsplashAttribution = {
+                  photographer: selectedImage.user.name,
+                  photographerUrl: selectedImage.user.links.html,
+                  unsplashUrl: selectedImage.links.html
+                };
+
+                // Download the image and convert to base64
+                const imageUrl = selectedImage.urls.regular;
+                const imageResponse = await fetch(imageUrl);
+                if (imageResponse.ok) {
+                  const imageBlob = await imageResponse.arrayBuffer();
+                  const base64Image = btoa(
+                    new Uint8Array(imageBlob).reduce(
+                      (data, byte) => data + String.fromCharCode(byte),
+                      ''
+                    )
+                  );
+                  
+                  generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
+                  console.log('Successfully fetched and converted Unsplash image to base64');
+
+                  // Trigger download for attribution (as per Unsplash API guidelines)
+                  if (selectedImage.links.download_location) {
+                    fetch(selectedImage.links.download_location, {
+                      headers: {
+                        'Authorization': `Client-ID ${UNSPLASH_ACCESS_KEY}`,
+                      },
+                    }).catch(err => console.error('Failed to trigger download:', err));
+                  }
+                } else {
+                  console.error('Failed to fetch Unsplash image');
+                }
+              } else {
+                console.log('No Unsplash images found for query:', searchQuery);
+              }
+            } else {
+              console.error('Unsplash API error:', unsplashResponse.status);
+            }
+          } else {
+            console.error('Keyword extraction failed:', keywordExtractionResponse.status);
+          }
+        }
+      } catch (error) {
+        console.error('Error searching Unsplash:', error);
+        // Continue without Unsplash image
+      }
+    }
+    
+    // Step 2: Generate image with AI if "generate-image" type is selected and we don't have an image yet
+    if (generationTypes.includes('generate-image') && prompt && !generatedImageBase64) {
       console.log('Generating image with AI first...');
       
       const imageGenResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
