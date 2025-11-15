@@ -98,6 +98,7 @@ export default function AIGeneratorPanel({
 
   const generationTypes = [
     { id: "freeform", label: "Freeform Creation" },
+    { id: "search-unsplash", label: "Search Unsplash", description: "Find real photos from Unsplash to use in poster" },
     { id: "generate-image", label: "Generate Image", description: "Generate image using AI, then create poster" },
     { id: "replicate", label: "Replicate" },
     { id: "import-website", label: "Import a Website", disabled: true },
