@@ -430,6 +430,7 @@ export default function TimelinePanel({
       if (isDraggingPlayhead) {
         handlePlayheadDrag(e as any);
       } else if (draggingAnimation) {
+        e.preventDefault();
         handleAnimationDrag(e);
       } else if (draggingVoice) {
         handleVoiceDrag(e);
@@ -440,9 +441,11 @@ export default function TimelinePanel({
       setIsDraggingPlayhead(false);
       setDraggingAnimation(null);
       setDraggingVoice(null);
+      document.body.style.userSelect = '';
     };
 
     if (isDraggingPlayhead || draggingAnimation || draggingVoice) {
+      document.body.style.userSelect = 'none';
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     }
