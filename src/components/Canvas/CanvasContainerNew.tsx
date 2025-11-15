@@ -2415,7 +2415,7 @@ export default function CanvasContainerNew({
       {/* Canvas Area */}
       <div 
         ref={canvasAreaRef}
-        className="flex-1 overflow-visible relative"
+        className="flex-1 overflow-hidden relative"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
@@ -2437,8 +2437,15 @@ export default function CanvasContainerNew({
             }
           }
         }}
+        onMouseUp={() => {
+          // Ensure panning stops when mouse is released
+          if (isPanning && activeTool !== 'pen') {
+            // Don't disable pan mode, just stop the drag
+          }
+        }}
         onWheel={(e) => {
           e.preventDefault();
+          e.stopPropagation();
           
           if (e.ctrlKey || e.metaKey) {
             // Zoom with Ctrl/Cmd + scroll
@@ -2447,16 +2454,16 @@ export default function CanvasContainerNew({
             setZoom(newZoom);
           } else if (e.shiftKey) {
             // Horizontal scroll with Shift + scroll
-            setPanOffset({ 
-              x: panOffset.x - e.deltaY, 
-              y: panOffset.y 
-            });
+            setPanOffset((prev) => ({ 
+              x: prev.x - e.deltaY, 
+              y: prev.y 
+            }));
           } else {
             // Vertical scroll (default)
-            setPanOffset({ 
-              x: panOffset.x, 
-              y: panOffset.y - e.deltaY 
-            });
+            setPanOffset((prev) => ({ 
+              x: prev.x, 
+              y: prev.y - e.deltaY 
+            }));
           }
         }}
         style={{
