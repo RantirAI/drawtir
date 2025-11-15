@@ -386,6 +386,46 @@ export default function CanvasContainerNew({
     };
   }, [historyIndex, history, selectedElementIds]);
 
+  // Calculate max duration based on all content
+  useEffect(() => {
+    let calculatedMax = 5; // Default minimum duration
+
+    // Check voice clips
+    voiceAudios.forEach(voice => {
+      const endTime = voice.delay + voice.duration;
+      if (endTime > calculatedMax) calculatedMax = endTime;
+    });
+
+    // Check animations on elements
+    const selectedFrame = frames.find(f => f.id === selectedFrameId);
+    if (selectedFrame?.elements) {
+      selectedFrame.elements.forEach(element => {
+        if (element.animations) {
+          element.animations.forEach(anim => {
+            const delay = typeof anim.delay === 'string' ? parseFloat(anim.delay) : anim.delay;
+            const duration = typeof anim.duration === 'string' ? parseFloat(anim.duration) : anim.duration;
+            const endTime = delay + duration;
+            if (endTime > calculatedMax) calculatedMax = endTime;
+          });
+        }
+      });
+    }
+
+    // Check timeline markers
+    timelineMarkers.forEach(marker => {
+      if (marker.time > calculatedMax) calculatedMax = marker.time;
+    });
+
+    // Check background music
+    backgroundMusic.forEach(music => {
+      const endTime = music.startTime + music.duration;
+      if (endTime > calculatedMax) calculatedMax = endTime;
+    });
+
+    // Add 1 second buffer
+    setMaxDuration(Math.ceil(calculatedMax) + 1);
+  }, [voiceAudios, frames, selectedFrameId, timelineMarkers, backgroundMusic]);
+
   // Animation playback
   useEffect(() => {
     if (!isPlayingAnimation) return;
