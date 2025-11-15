@@ -799,7 +799,7 @@ export default function TimelinePanel({
       <ScrollArea className="flex-1 min-h-0" onWheel={handleWheel}>
         <div className="p-4 relative" ref={containerRef}>
           {/* Timeline container with zoom */}
-          <div style={{ width: `${100 * timelineZoom}%`, minWidth: '100%' }}>
+          <div style={{ width: `${100 * timelineZoom}%` }}>
             {/* Header with time markers - aligned with timeline track */}
             <div className="flex items-start gap-2 mb-2">
             <div className="w-32 flex-shrink-0 h-6" /> {/* Spacer for layer names */}
