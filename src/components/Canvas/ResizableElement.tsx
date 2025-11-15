@@ -309,6 +309,29 @@ export default function ResizableElement({
 
   useEffect(() => { setIsLocked(!!isLockedProp); }, [isLockedProp]);
 
+  // Use ref to track drag state for event handlers
+  const isDraggingRef = useRef(false);
+  const isResizingRef = useRef(false);
+  const isRotatingRef = useRef(false);
+  const dragStartRef = useRef(dragStart);
+  const resizeStartRef = useRef(resizeStart);
+  const rotateStartRef = useRef(rotateStart);
+
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+    dragStartRef.current = dragStart;
+  }, [isDragging, dragStart]);
+
+  useEffect(() => {
+    isResizingRef.current = isResizing;
+    resizeStartRef.current = resizeStart;
+  }, [isResizing, resizeStart]);
+
+  useEffect(() => {
+    isRotatingRef.current = isRotating;
+    rotateStartRef.current = rotateStart;
+  }, [isRotating, rotateStart]);
+
   useEffect(() => {
     const snapToGridHelper = (value: number, size: number = 10) => {
       if (!snapToGrid) return value;
@@ -316,57 +339,57 @@ export default function ResizableElement({
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging && !isLocked) {
-        const dx = (e.clientX - dragStart.x) / zoom;
-        const dy = (e.clientY - dragStart.y) / zoom;
+      if (isDraggingRef.current && !isLocked) {
+        const dx = (e.clientX - dragStartRef.current.x) / zoom;
+        const dy = (e.clientY - dragStartRef.current.y) / zoom;
         
         // Hold Shift for fine control
         const multiplier = e.shiftKey ? 0.5 : 1;
         
-        const newX = snapToGridHelper(dragStart.elementX + (dx * multiplier), gridSize);
-        const newY = snapToGridHelper(dragStart.elementY + (dy * multiplier), gridSize);
+        const newX = snapToGridHelper(dragStartRef.current.elementX + (dx * multiplier), gridSize);
+        const newY = snapToGridHelper(dragStartRef.current.elementY + (dy * multiplier), gridSize);
         onUpdate(id, { x: newX, y: newY });
-      } else if (isRotating) {
+      } else if (isRotatingRef.current) {
         const rect = containerRef.current?.getBoundingClientRect();
         if (!rect) return;
         
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         const currentAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * (180 / Math.PI);
-        const angleDelta = currentAngle - rotateStart.mouseAngle;
-        const newRotation = rotateStart.angle + angleDelta;
+        const angleDelta = currentAngle - rotateStartRef.current.mouseAngle;
+        const newRotation = rotateStartRef.current.angle + angleDelta;
         
         onUpdate(id, { rotation: newRotation } as any);
-      } else if (isResizing) {
-        const dx = (e.clientX - resizeStart.x) / zoom;
-        const dy = (e.clientY - resizeStart.y) / zoom;
+      } else if (isResizingRef.current) {
+        const dx = (e.clientX - resizeStartRef.current.x) / zoom;
+        const dy = (e.clientY - resizeStartRef.current.y) / zoom;
         
-        let newWidth = resizeStart.width;
-        let newHeight = resizeStart.height;
-        let newX = resizeStart.elementX;
-        let newY = resizeStart.elementY;
+        let newWidth = resizeStartRef.current.width;
+        let newHeight = resizeStartRef.current.height;
+        let newX = resizeStartRef.current.elementX;
+        let newY = resizeStartRef.current.elementY;
 
         // Hold Shift to maintain aspect ratio
         if (e.shiftKey) {
-          const aspectRatio = resizeStart.width / resizeStart.height;
+          const aspectRatio = resizeStartRef.current.width / resizeStartRef.current.height;
           
-          if (resizeStart.corner.includes("e") || resizeStart.corner.includes("w")) {
+          if (resizeStartRef.current.corner.includes("e") || resizeStartRef.current.corner.includes("w")) {
             // Resize based on width change
-            const widthDelta = resizeStart.corner.includes("e") ? dx : -dx;
-            newWidth = Math.max(1, resizeStart.width + widthDelta);
+            const widthDelta = resizeStartRef.current.corner.includes("e") ? dx : -dx;
+            newWidth = Math.max(1, resizeStartRef.current.width + widthDelta);
             newHeight = newWidth / aspectRatio;
             
-            if (resizeStart.corner.includes("w")) {
-              newX = resizeStart.elementX + (resizeStart.width - newWidth);
+            if (resizeStartRef.current.corner.includes("w")) {
+              newX = resizeStartRef.current.elementX + (resizeStartRef.current.width - newWidth);
             }
-          } else if (resizeStart.corner.includes("n") || resizeStart.corner.includes("s")) {
+          } else if (resizeStartRef.current.corner.includes("n") || resizeStartRef.current.corner.includes("s")) {
             // Resize based on height change
-            const heightDelta = resizeStart.corner.includes("s") ? dy : -dy;
-            newHeight = Math.max(1, resizeStart.height + heightDelta);
+            const heightDelta = resizeStartRef.current.corner.includes("s") ? dy : -dy;
+            newHeight = Math.max(1, resizeStartRef.current.height + heightDelta);
             newWidth = newHeight * aspectRatio;
             
-            if (resizeStart.corner.includes("n")) {
-              newY = resizeStart.elementY + (resizeStart.height - newHeight);
+            if (resizeStartRef.current.corner.includes("n")) {
+              newY = resizeStartRef.current.elementY + (resizeStartRef.current.height - newHeight);
             }
           }
           
@@ -377,21 +400,21 @@ export default function ResizableElement({
           newY = snapToGridHelper(newY, gridSize);
         } else {
           // Normal resize without aspect ratio constraint
-          if (resizeStart.corner.includes("e")) {
-            newWidth = Math.max(1, snapToGridHelper(resizeStart.width + dx, gridSize));
+          if (resizeStartRef.current.corner.includes("e")) {
+            newWidth = Math.max(1, snapToGridHelper(resizeStartRef.current.width + dx, gridSize));
           }
-          if (resizeStart.corner.includes("w")) {
+          if (resizeStartRef.current.corner.includes("w")) {
             const widthDelta = dx;
-            newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
-            newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
+            newWidth = Math.max(1, snapToGridHelper(resizeStartRef.current.width - widthDelta, gridSize));
+            newX = snapToGridHelper(resizeStartRef.current.elementX + widthDelta, gridSize);
           }
-          if (resizeStart.corner.includes("s")) {
-            newHeight = Math.max(1, snapToGridHelper(resizeStart.height + dy, gridSize));
+          if (resizeStartRef.current.corner.includes("s")) {
+            newHeight = Math.max(1, snapToGridHelper(resizeStartRef.current.height + dy, gridSize));
           }
-          if (resizeStart.corner.includes("n")) {
+          if (resizeStartRef.current.corner.includes("n")) {
             const heightDelta = dy;
-            newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
-            newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
+            newHeight = Math.max(1, snapToGridHelper(resizeStartRef.current.height - heightDelta, gridSize));
+            newY = snapToGridHelper(resizeStartRef.current.elementY + heightDelta, gridSize);
           }
         }
 
@@ -400,52 +423,52 @@ export default function ResizableElement({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if ((!isDragging && !isResizing && !isRotating) || isLocked) return;
+      if ((!isDraggingRef.current && !isResizingRef.current && !isRotatingRef.current) || isLocked) return;
       e.preventDefault();
       const touch = e.touches[0];
       
-      if (isDragging) {
-        const dx = (touch.clientX - dragStart.x) / zoom;
-        const dy = (touch.clientY - dragStart.y) / zoom;
+      if (isDraggingRef.current) {
+        const dx = (touch.clientX - dragStartRef.current.x) / zoom;
+        const dy = (touch.clientY - dragStartRef.current.y) / zoom;
         
-        const newX = snapToGridHelper(dragStart.elementX + dx, gridSize);
-        const newY = snapToGridHelper(dragStart.elementY + dy, gridSize);
+        const newX = snapToGridHelper(dragStartRef.current.elementX + dx, gridSize);
+        const newY = snapToGridHelper(dragStartRef.current.elementY + dy, gridSize);
         onUpdate(id, { x: newX, y: newY });
-      } else if (isRotating) {
+      } else if (isRotatingRef.current) {
         const rect = containerRef.current?.getBoundingClientRect();
         if (!rect) return;
         
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         const currentAngle = Math.atan2(touch.clientY - centerY, touch.clientX - centerX) * (180 / Math.PI);
-        const angleDelta = currentAngle - rotateStart.mouseAngle;
-        const newRotation = rotateStart.angle + angleDelta;
+        const angleDelta = currentAngle - rotateStartRef.current.mouseAngle;
+        const newRotation = rotateStartRef.current.angle + angleDelta;
         
         onUpdate(id, { rotation: newRotation } as any);
-      } else if (isResizing) {
-        const dx = (touch.clientX - resizeStart.x) / zoom;
-        const dy = (touch.clientY - resizeStart.y) / zoom;
+      } else if (isResizingRef.current) {
+        const dx = (touch.clientX - resizeStartRef.current.x) / zoom;
+        const dy = (touch.clientY - resizeStartRef.current.y) / zoom;
         
-        let newWidth = resizeStart.width;
-        let newHeight = resizeStart.height;
-        let newX = resizeStart.elementX;
-        let newY = resizeStart.elementY;
+        let newWidth = resizeStartRef.current.width;
+        let newHeight = resizeStartRef.current.height;
+        let newX = resizeStartRef.current.elementX;
+        let newY = resizeStartRef.current.elementY;
 
-        if (resizeStart.corner.includes("e")) {
-          newWidth = Math.max(1, snapToGridHelper(resizeStart.width + dx, gridSize));
+        if (resizeStartRef.current.corner.includes("e")) {
+          newWidth = Math.max(1, snapToGridHelper(resizeStartRef.current.width + dx, gridSize));
         }
-        if (resizeStart.corner.includes("w")) {
+        if (resizeStartRef.current.corner.includes("w")) {
           const widthDelta = dx;
-          newWidth = Math.max(1, snapToGridHelper(resizeStart.width - widthDelta, gridSize));
-          newX = snapToGridHelper(resizeStart.elementX + widthDelta, gridSize);
+          newWidth = Math.max(1, snapToGridHelper(resizeStartRef.current.width - widthDelta, gridSize));
+          newX = snapToGridHelper(resizeStartRef.current.elementX + widthDelta, gridSize);
         }
-        if (resizeStart.corner.includes("s")) {
-          newHeight = Math.max(1, snapToGridHelper(resizeStart.height + dy, gridSize));
+        if (resizeStartRef.current.corner.includes("s")) {
+          newHeight = Math.max(1, snapToGridHelper(resizeStartRef.current.height + dy, gridSize));
         }
-        if (resizeStart.corner.includes("n")) {
+        if (resizeStartRef.current.corner.includes("n")) {
           const heightDelta = dy;
-          newHeight = Math.max(1, snapToGridHelper(resizeStart.height - heightDelta, gridSize));
-          newY = snapToGridHelper(resizeStart.elementY + heightDelta, gridSize);
+          newHeight = Math.max(1, snapToGridHelper(resizeStartRef.current.height - heightDelta, gridSize));
+          newY = snapToGridHelper(resizeStartRef.current.elementY + heightDelta, gridSize);
         }
 
         onUpdate(id, { x: newX, y: newY, width: newWidth, height: newHeight });
@@ -477,7 +500,7 @@ export default function ResizableElement({
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isDragging, isResizing, isRotating, dragStart, resizeStart, rotateStart, id, onUpdate, x, y, zoom]);
+  }, [isDragging, isResizing, isRotating, id, onUpdate, zoom, gridSize, snapToGrid, isLocked]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     // For lines, only handle if NOT in bend mode (shift not held)
