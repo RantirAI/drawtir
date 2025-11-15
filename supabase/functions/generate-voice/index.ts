@@ -58,21 +58,15 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Auto-select model: use v3 by default, switch to multilingual v2 when emotion tags are detected
-    const emotionTagRegex = /\[(laughs|laughing|crying|sob|sobs|whisper|whispering|shouting|angry|sad|happy|giggle|giggling|sigh|sighs)\]/i;
-    const hasEmotionTags = emotionTagRegex.test(text);
-    const selectedModel = modelId || (hasEmotionTags ? 'eleven_multilingual_v2' : 'eleven_turbo_v3');
-    console.log('Selected ElevenLabs model:', selectedModel, 'hasEmotionTags:', hasEmotionTags);
+    // Force Eleven v3 by default (acts on emotion tags); allow override; provide robust fallbacks
+    const selectedModel = modelId || 'eleven_v3';
+    console.log('Selected ElevenLabs model:', selectedModel);
 
     let response = await tts(selectedModel);
     if (!response.ok) {
       const errTxt = await response.text();
       console.warn('Primary model failed, trying fallbacks:', selectedModel, response.status, errTxt);
-      // Fallback preference: if started with v3 -> try multilingual v2, then turbo v2.5; if started with v2 -> try v3, then v2.5
-      const fallbacks = selectedModel === 'eleven_turbo_v3'
-        ? ['eleven_multilingual_v2', 'eleven_turbo_v2_5']
-        : ['eleven_turbo_v3', 'eleven_turbo_v2_5'];
-
+      const fallbacks = ['eleven_multilingual_v2', 'eleven_turbo_v2_5'];
       for (const fb of fallbacks) {
         response = await tts(fb);
         if (response.ok) break;
