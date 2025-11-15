@@ -27,6 +27,7 @@ Deno.serve(async (req) => {
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       try {
+        console.log('Using ElevenLabs model:', modelId);
         const response = await fetch(
           `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
           {
@@ -57,12 +58,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use eleven_turbo_v2_5 which properly supports emotion tags
-    let response = await tts('eleven_turbo_v2_5');
+    // Use eleven_multilingual_v2 which properly supports emotion tags like [crying], [laughs], etc.
+    let response = await tts('eleven_multilingual_v2');
     if (!response.ok) {
       const errTxt = await response.text();
-      console.warn('eleven_turbo_v2_5 failed, trying eleven_multilingual_v2:', response.status, errTxt);
-      response = await tts('eleven_multilingual_v2');
+      console.warn('eleven_multilingual_v2 failed, trying eleven_turbo_v2_5:', response.status, errTxt);
+      response = await tts('eleven_turbo_v2_5');
     }
 
     if (!response.ok) {
