@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Element, Frame } from "@/types/elements";
 import { VoiceAudio, TimelineMarker, BackgroundMusic } from "@/types/snapshot";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -147,6 +147,8 @@ export default function TimelinePanel({
   const [playheadLeft, setPlayheadLeft] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(1);
   const processedWaveformsRef = useRef<Set<string>>(new Set());
+  const isInternalUpdateRef = useRef(false);
+  const parentNotifyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleZoomIn = () => {
     setTimelineZoom((prev) => Math.min(4, prev * 1.25));
@@ -217,8 +219,23 @@ export default function TimelinePanel({
     };
   }, [currentTime, maxDuration, timelineZoom]);
 
-  // Auto-assign tracks to avoid overlap and sync external voice audios
+  // Debounced parent notification to prevent circular updates
+  const notifyParentOfChanges = useCallback((updatedVoices: VoiceAudio[]) => {
+    if (parentNotifyTimeoutRef.current) {
+      clearTimeout(parentNotifyTimeoutRef.current);
+    }
+    parentNotifyTimeoutRef.current = setTimeout(() => {
+      onVoiceAudiosChange?.(updatedVoices);
+    }, 50);
+  }, [onVoiceAudiosChange]);
+
+  // Sync external voice audios to internal state (only when external changes)
   useEffect(() => {
+    if (isInternalUpdateRef.current) {
+      isInternalUpdateRef.current = false;
+      return;
+    }
+
     // Assign tracks to prevent overlap
     const withTracks = externalVoiceAudios.map((voice, index) => {
       // If already has a track, keep it
@@ -230,10 +247,9 @@ export default function TimelinePanel({
       
       while (hasOverlap) {
         hasOverlap = externalVoiceAudios.some((other, otherIndex) => {
-          if (otherIndex >= index) return false; // Only check already processed voices
-          if ((other.track ?? 0) !== track) return false; // Different track
+          if (otherIndex >= index) return false;
+          if ((other.track ?? 0) !== track) return false;
           
-          // Check time overlap
           const voiceEnd = voice.delay + voice.duration;
           const otherEnd = other.delay + other.duration;
           return !(voiceEnd <= other.delay || voice.delay >= otherEnd);
@@ -248,10 +264,11 @@ export default function TimelinePanel({
     setVoiceAudios(withTracks);
   }, [externalVoiceAudios]);
 
-  // Notify parent of voice audios changes
+  // Notify parent of voice changes (debounced)
   useEffect(() => {
-    onVoiceAudiosChange?.(voiceAudios);
-  }, [voiceAudios, onVoiceAudiosChange]);
+    if (isInternalUpdateRef.current) return;
+    notifyParentOfChanges(voiceAudios);
+  }, [voiceAudios, notifyParentOfChanges]);
 
   // Sync markers
   useEffect(() => {
@@ -263,14 +280,13 @@ export default function TimelinePanel({
     onTimelineMarkersChange?.(markers);
   }, [markers, onTimelineMarkersChange]);
 
-  // Extract waveforms and fix duration for voice audios (run once per voice)
+  // Extract waveforms independently (doesn't trigger parent updates)
   useEffect(() => {
     const processVoice = async (voice: VoiceAudio) => {
       if (!voice.waveformData && voice.url && !processedWaveformsRef.current.has(voice.id)) {
         processedWaveformsRef.current.add(voice.id);
         
         try {
-          // Load audio to get actual duration
           const audio = new Audio();
           await new Promise<void>((resolve, reject) => {
             audio.onloadedmetadata = () => resolve();
@@ -281,9 +297,10 @@ export default function TimelinePanel({
           const actualDuration = audio.duration;
           const waveform = await extractWaveform(voice.url, 80);
           
-          // Use functional update to prevent race conditions
+          // Mark as internal update to prevent circular notifications
+          isInternalUpdateRef.current = true;
+          
           setVoiceAudios(prev => {
-            // Only update if the voice still exists and doesn't have waveformData
             const voiceStillExists = prev.find(v => v.id === voice.id);
             if (!voiceStillExists || voiceStillExists.waveformData) {
               return prev;
@@ -292,13 +309,13 @@ export default function TimelinePanel({
           });
         } catch (error) {
           console.error('Failed to extract waveform for voice:', error);
-          processedWaveformsRef.current.delete(voice.id); // Allow retry on error
+          processedWaveformsRef.current.delete(voice.id);
         }
       }
     };
 
     voiceAudios.forEach(processVoice);
-  }, [voiceAudios.length]); // Only depend on length, not the array itself
+  }, [voiceAudios.length]);
 
   // Handle marker operations
   const handleAddMarker = (time?: number) => {
@@ -397,8 +414,12 @@ export default function TimelinePanel({
     }
   };
 
-  const handleVoiceDrag = (e: MouseEvent) => {
+  const handleVoiceDrag = useCallback((e: MouseEvent) => {
     if (!timelineRef.current || !draggingVoice) return;
+    
+    e.preventDefault();
+    document.body.style.userSelect = 'none';
+    
     const rect = timelineRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const timeAtMouse = (x / rect.width) * maxDuration;
@@ -411,9 +432,8 @@ export default function TimelinePanel({
       const deltaTime = (deltaX / rect.width) * maxDuration;
       const newDelay = Math.max(0, Math.min(draggingVoice.startDelay + deltaTime, maxDuration - voice.duration));
       
-      // Calculate track change based on vertical mouse movement
       const deltaY = e.clientY - draggingVoice.startY;
-      const trackHeight = 36; // 32px track + 4px gap
+      const trackHeight = 48;
       const trackDelta = Math.round(deltaY / trackHeight);
       const newTrack = Math.max(0, draggingVoice.startTrack + trackDelta);
       
@@ -427,7 +447,7 @@ export default function TimelinePanel({
         v.id === draggingVoice.voiceId ? { ...v, duration: newDuration } : v
       ));
     }
-  };
+  }, [draggingVoice, maxDuration, voiceAudios]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -444,6 +464,7 @@ export default function TimelinePanel({
       setIsDraggingPlayhead(false);
       setDraggingAnimation(null);
       setDraggingVoice(null);
+      document.body.style.userSelect = '';
     };
 
     if (isDraggingPlayhead || draggingAnimation || draggingVoice) {
@@ -454,8 +475,18 @@ export default function TimelinePanel({
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.userSelect = '';
     };
-  }, [isDraggingPlayhead, draggingAnimation, draggingVoice, maxDuration, voiceAudios]);
+  }, [isDraggingPlayhead, draggingAnimation, draggingVoice, handleVoiceDrag, maxDuration]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (parentNotifyTimeoutRef.current) {
+        clearTimeout(parentNotifyTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
 
@@ -550,14 +581,12 @@ export default function TimelinePanel({
     return clickTime;
   };
 
-  const handleVoiceGenerated = async (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
+  const handleVoiceGenerated = useCallback(async (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
     try {
-      // Create audio and wait for it to fully load
       const audio = new Audio(audioUrl);
       
       await new Promise<void>((resolve, reject) => {
         audio.onloadedmetadata = () => {
-          // Ensure audio is fully loaded by playing it for a tiny moment
           audio.currentTime = 0;
           resolve();
         };
@@ -565,11 +594,9 @@ export default function TimelinePanel({
         audio.load();
       });
       
-      // Get accurate duration
       const actualDuration = audio.duration;
       
       if (editingVoiceId) {
-        // Update existing voice - force waveform re-extraction by setting undefined
         processedWaveformsRef.current.delete(editingVoiceId);
         setVoiceAudios(prev => prev.map(v => 
           v.id === editingVoiceId 
@@ -578,8 +605,8 @@ export default function TimelinePanel({
         ));
         setEditingVoiceId(null);
         setEditingVoiceText("");
+        toast.success("Voice updated successfully");
       } else {
-        // Add new voice with accurate duration
         const newVoice = {
           id: `voice-${Date.now()}`,
           url: audioUrl,
@@ -590,6 +617,7 @@ export default function TimelinePanel({
           voiceName,
         };
         setVoiceAudios(prev => [...prev, newVoice]);
+        toast.success("Voice added successfully");
       }
       
       setSelectedVoice(null);
@@ -598,19 +626,20 @@ export default function TimelinePanel({
       console.error('Error loading audio:', error);
       toast.error("Failed to load audio file");
     }
-  };
+  }, [editingVoiceId, voiceDrawerTimestamp]);
 
-  const handleRemoveVoice = (voiceId: string) => {
+  const handleRemoveVoice = useCallback((voiceId: string) => {
     setVoiceAudios(prev => prev.filter(v => v.id !== voiceId));
     processedWaveformsRef.current.delete(voiceId);
-  };
+    toast.success("Voice removed");
+  }, []);
 
-  const handleEditVoice = (voice: VoiceAudio) => {
+  const handleEditVoice = useCallback((voice: VoiceAudio) => {
     setEditingVoiceId(voice.id);
     setEditingVoiceText(voice.text);
     setSelectedVoice({ id: voice.voiceId, name: voice.voiceName });
     setVoiceDrawerOpen(true);
-  };
+  }, []);
 
   const handleVoiceTrackRightClick = (e: React.MouseEvent) => {
     if (!timelineRef.current) return;
@@ -621,10 +650,15 @@ export default function TimelinePanel({
     setVoiceDrawerOpen(true);
   };
 
-  // Play voices at appropriate times
+  // Memoize voice IDs and URLs to prevent playback restarts
+  const voicePlaybackData = useMemo(() => 
+    voiceAudios.map(v => ({ id: v.id, url: v.url, delay: v.delay, duration: v.duration })),
+    [voiceAudios.map(v => `${v.id}-${v.delay}-${v.duration}`).join(',')]
+  );
+
+  // Play voices at appropriate times (stable dependencies)
   useEffect(() => {
     if (!isPlaying) {
-      // Stop all playing audios when paused
       playingAudiosRef.current.forEach((audio) => {
         audio.pause();
       });
@@ -632,24 +666,21 @@ export default function TimelinePanel({
       return;
     }
     
-    voiceAudios.forEach(voice => {
+    voicePlaybackData.forEach(voice => {
       const shouldPlay = currentTime >= voice.delay && currentTime < voice.delay + voice.duration;
       const isCurrentlyPlaying = playingAudiosRef.current.has(voice.id);
       
       if (shouldPlay && !isCurrentlyPlaying) {
-        // Start playing this voice
         const audio = new Audio(voice.url);
         const offset = currentTime - voice.delay;
         audio.currentTime = offset;
         audio.play().catch(err => console.error('Audio play error:', err));
         playingAudiosRef.current.set(voice.id, audio);
         
-        // Clean up when audio ends
         audio.onended = () => {
           playingAudiosRef.current.delete(voice.id);
         };
       } else if (!shouldPlay && isCurrentlyPlaying) {
-        // Stop playing this voice
         const audio = playingAudiosRef.current.get(voice.id);
         if (audio) {
           audio.pause();
@@ -666,7 +697,7 @@ export default function TimelinePanel({
         playingAudiosRef.current.clear();
       }
     };
-  }, [currentTime, isPlaying, voiceAudios]);
+  }, [currentTime, isPlaying, voicePlaybackData]);
 
   return (
     <>

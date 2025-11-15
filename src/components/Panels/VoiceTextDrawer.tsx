@@ -53,10 +53,24 @@ export default function VoiceTextDrawer({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Update text when initialText changes (for edit mode)
+  // Update text and voice when props change (for edit mode)
   useEffect(() => {
     setText(initialText);
-  }, [initialText]);
+    setVoiceId(initialVoiceId);
+    setVoiceName(initialVoiceName);
+  }, [initialText, initialVoiceId, initialVoiceName, open]);
+
+  // Reset state when drawer closes
+  useEffect(() => {
+    if (!open) {
+      setIsPreviewing(false);
+      setIsGenerating(false);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    }
+  }, [open]);
 
   const insertEmotionTag = (tag: string) => {
     const textarea = textareaRef.current;
