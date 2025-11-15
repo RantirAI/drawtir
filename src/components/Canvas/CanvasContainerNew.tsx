@@ -3765,10 +3765,11 @@ export default function CanvasContainerNew({
             </div>
           </div>
 
-          {/* Toggle Handle */}
+          {/* Toggle Handle - Click to toggle, drag to resize */}
           <button
             onClick={() => setShowTimelinePanel(!showTimelinePanel)}
             className="absolute -top-8 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-xl border border-border rounded-t-lg px-4 py-1.5 hover:bg-card transition-colors shadow-lg z-[80] flex items-center gap-2"
+            title="Click to toggle timeline, or drag the handle below to resize"
           >
             <span className="text-xs font-medium">Timeline</span>
             <svg 

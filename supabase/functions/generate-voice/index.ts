@@ -57,12 +57,12 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Try turbo v2.5 first (faster), fallback to v3 if needed
-    let response = await tts('eleven_turbo_v2_5');
+    // Use eleven_multilingual_v2 which properly supports emotion tags like [crying], [laughs], etc.
+    let response = await tts('eleven_multilingual_v2');
     if (!response.ok) {
       const errTxt = await response.text();
-      console.warn('eleven_turbo_v2_5 failed, trying eleven_multilingual_v2:', response.status, errTxt);
-      response = await tts('eleven_multilingual_v2');
+      console.warn('eleven_multilingual_v2 failed, trying eleven_turbo_v2_5:', response.status, errTxt);
+      response = await tts('eleven_turbo_v2_5');
     }
 
     if (!response.ok) {
