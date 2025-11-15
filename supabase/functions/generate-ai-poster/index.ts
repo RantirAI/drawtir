@@ -514,14 +514,25 @@ serve(async (req) => {
     let generatedImageBase64: string | null = null;
     let unsplashAttribution: any = null;
     
-    if (generationTypes.includes('search-unsplash') && prompt) {
-      console.log('Searching Unsplash for relevant images...');
+    console.log('Generation types check:', generationTypes, 'Prompt:', prompt ? 'exists' : 'missing');
+    
+    if (generationTypes.includes('search-unsplash')) {
+      console.log('🔍 Starting Unsplash search...');
+      
+      if (!prompt || !prompt.trim()) {
+        console.error('Cannot search Unsplash: prompt is empty');
+        throw new Error('A description is required to search Unsplash for images');
+      }
       
       try {
         const UNSPLASH_ACCESS_KEY = Deno.env.get('UNSPLASH_ACCESS_KEY');
         if (!UNSPLASH_ACCESS_KEY) {
-          console.error('UNSPLASH_ACCESS_KEY is not configured');
-        } else {
+          const error = 'UNSPLASH_ACCESS_KEY is not configured in environment';
+          console.error(error);
+          throw new Error(error);
+        }
+        
+        console.log('Unsplash API key found, extracting keywords from prompt...');
           // Extract keywords from prompt using AI
           const keywordExtractionResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
@@ -546,8 +557,11 @@ serve(async (req) => {
 
           if (keywordExtractionResponse.ok) {
             const keywordData = await keywordExtractionResponse.json();
-            const searchQuery = keywordData.choices[0].message.content.trim();
-            console.log('Extracted search query:', searchQuery);
+            const searchQuery = keywordData.choices[0]?.message?.content?.trim();
+            if (!searchQuery) {
+              throw new Error('Failed to extract search keywords from prompt');
+            }
+            console.log('✅ Extracted search query:', searchQuery);
 
             // Search Unsplash
             const unsplashResponse = await fetch(
@@ -561,11 +575,12 @@ serve(async (req) => {
 
             if (unsplashResponse.ok) {
               const unsplashData = await unsplashResponse.json();
+              console.log('Unsplash API response:', unsplashData.results?.length || 0, 'results found');
               
               if (unsplashData.results && unsplashData.results.length > 0) {
                 // Get the first (most relevant) image
                 const selectedImage = unsplashData.results[0];
-                console.log('Selected Unsplash image:', selectedImage.id);
+                console.log('✅ Selected Unsplash image:', selectedImage.id, 'by', selectedImage.user.name);
 
                 // Store attribution info
                 unsplashAttribution = {
@@ -587,7 +602,7 @@ serve(async (req) => {
                   );
                   
                   generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
-                  console.log('Successfully fetched and converted Unsplash image to base64');
+                  console.log('✅ Successfully fetched and converted Unsplash image to base64 (length:', base64Image.length, ')');
 
                   // Trigger download for attribution (as per Unsplash API guidelines)
                   if (selectedImage.links.download_location) {
@@ -598,21 +613,24 @@ serve(async (req) => {
                     }).catch(err => console.error('Failed to trigger download:', err));
                   }
                 } else {
-                  console.error('Failed to fetch Unsplash image');
+                  console.error('❌ Failed to fetch Unsplash image from URL:', imageUrl);
                 }
               } else {
-                console.log('No Unsplash images found for query:', searchQuery);
+                console.log('⚠️ No images found on Unsplash for query:', searchQuery);
               }
             } else {
-              console.error('Unsplash API error:', unsplashResponse.status);
+              const errorText = await unsplashResponse.text();
+              console.error('❌ Unsplash API error:', unsplashResponse.status, errorText);
+              throw new Error(`Unsplash search failed: ${unsplashResponse.status}`);
             }
           } else {
-            console.error('Keyword extraction failed:', keywordExtractionResponse.status);
+            const errorText = await keywordExtractionResponse.text();
+            console.error('❌ Keyword extraction failed:', keywordExtractionResponse.status, errorText);
+            throw new Error('Failed to extract keywords for Unsplash search');
           }
-        }
       } catch (error) {
-        console.error('Error searching Unsplash:', error);
-        // Continue without Unsplash image
+        console.error('❌ Error in Unsplash search:', error);
+        throw error; // Re-throw to let the outer handler deal with it
       }
     }
     
