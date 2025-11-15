@@ -202,7 +202,7 @@ export default function TimelinePanel({
       const containerRect = containerRef.current.getBoundingClientRect();
       const timelineRect = timelineRef.current.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, maxDuration ? currentTime / maxDuration : 0));
-      const leftPx = (timelineRect.left - containerRect.left) + timelineRect.width * ratio;
+      const leftPx = (timelineRect.left - containerRect.left) + (timelineRect.width * timelineZoom) * ratio;
       setPlayheadLeft(leftPx);
     };
 
