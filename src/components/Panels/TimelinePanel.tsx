@@ -391,6 +391,10 @@ export default function TimelinePanel({
 
   const handleVoiceDrag = (e: MouseEvent) => {
     if (!timelineRef.current || !draggingVoice) return;
+    
+    // Prevent selection during drag for smooth movement
+    e.preventDefault();
+    
     const rect = timelineRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
     const timeAtMouse = (x / rect.width) * maxDuration;
@@ -405,7 +409,7 @@ export default function TimelinePanel({
       
       // Calculate track change based on vertical mouse movement
       const deltaY = e.clientY - draggingVoice.startY;
-      const trackHeight = 36; // 32px track + 4px gap
+      const trackHeight = 48; // Updated track height with space for avatar
       const trackDelta = Math.round(deltaY / trackHeight);
       const newTrack = Math.max(0, draggingVoice.startTrack + trackDelta);
       
@@ -561,17 +565,17 @@ export default function TimelinePanel({
       const actualDuration = audio.duration;
       
       if (editingVoiceId) {
-        // Update existing voice
+        // Update existing voice - clear waveform to trigger re-extraction
         setVoiceAudios(prev => prev.map(v => 
           v.id === editingVoiceId 
-            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName }
+            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName, waveformData: undefined }
             : v
         ));
-        processedWaveformsRef.current.delete(editingVoiceId); // Re-extract waveform
+        processedWaveformsRef.current.delete(editingVoiceId); // Allow re-extraction
         setEditingVoiceId(null);
         setEditingVoiceText("");
       } else {
-        // Add new voice with accurate duration
+        // Add new voice with accurate duration at current playhead position
         const newVoice = {
           id: `voice-${Date.now()}`,
           url: audioUrl,
