@@ -149,6 +149,7 @@ export default function TimelinePanel({
   const processedWaveformsRef = useRef<Set<string>>(new Set());
   const isInternalUpdateRef = useRef(false);
   const parentNotifyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [waveformTrigger, setWaveformTrigger] = useState(0);
 
   const handleZoomIn = () => {
     setTimelineZoom((prev) => Math.min(4, prev * 1.25));
@@ -315,7 +316,7 @@ export default function TimelinePanel({
     };
 
     voiceAudios.forEach(processVoice);
-  }, [voiceAudios.length]);
+  }, [voiceAudios.length, waveformTrigger]);
 
   // Handle marker operations
   const handleAddMarker = (time?: number) => {
@@ -603,6 +604,8 @@ export default function TimelinePanel({
             ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName, waveformData: undefined }
             : v
         ));
+        // Trigger waveform extraction for edited voice
+        setWaveformTrigger(prev => prev + 1);
         setEditingVoiceId(null);
         setEditingVoiceText("");
         toast.success("Voice updated successfully");
