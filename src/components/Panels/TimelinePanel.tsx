@@ -143,6 +143,7 @@ export default function TimelinePanel({
   const [editingVoiceId, setEditingVoiceId] = useState<string | null>(null);
   const [editingVoiceText, setEditingVoiceText] = useState("");
   const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const completedVoicesRef = useRef<Set<string>>(new Set());
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [playheadLeft, setPlayheadLeft] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(1);
@@ -690,14 +691,17 @@ export default function TimelinePanel({
         audio.pause();
       });
       playingAudiosRef.current.clear();
+      completedVoicesRef.current.clear(); // Reset completed voices when stopped
       return;
     }
     
     voicePlaybackData.forEach(voice => {
       const shouldPlay = currentTime >= voice.delay && currentTime < voice.delay + voice.duration;
       const isCurrentlyPlaying = playingAudiosRef.current.has(voice.id);
+      const hasCompleted = completedVoicesRef.current.has(voice.id);
       
-      if (shouldPlay && !isCurrentlyPlaying) {
+      // Only play if should play, not currently playing, AND hasn't completed yet
+      if (shouldPlay && !isCurrentlyPlaying && !hasCompleted) {
         const audio = new Audio(voice.url);
         const offset = currentTime - voice.delay;
         audio.currentTime = offset;
@@ -706,6 +710,7 @@ export default function TimelinePanel({
         
         audio.onended = () => {
           playingAudiosRef.current.delete(voice.id);
+          completedVoicesRef.current.add(voice.id); // Mark as completed
         };
       } else if (!shouldPlay && isCurrentlyPlaying) {
         const audio = playingAudiosRef.current.get(voice.id);
@@ -713,6 +718,11 @@ export default function TimelinePanel({
           audio.pause();
           playingAudiosRef.current.delete(voice.id);
         }
+      }
+      
+      // Reset completed flag when playhead moves before the voice start
+      if (currentTime < voice.delay) {
+        completedVoicesRef.current.delete(voice.id);
       }
     });
     
