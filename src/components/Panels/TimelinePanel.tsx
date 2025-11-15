@@ -156,7 +156,7 @@ export default function TimelinePanel({
   };
 
   const handleZoomOut = () => {
-    setTimelineZoom((prev) => Math.max(0.25, prev / 1.25));
+    setTimelineZoom((prev) => Math.max(0.1, prev / 1.25));
   };
 
   const handleResetZoom = () => {
@@ -181,7 +181,7 @@ export default function TimelinePanel({
     // Smooth zoom factor based on wheel delta
     const prevZoom = timelineZoom;
     const factor = Math.exp(-e.deltaY * 0.002); // negative deltaY -> zoom in
-    const nextZoom = Math.min(4, Math.max(0.25, prevZoom * factor));
+    const nextZoom = Math.min(4, Math.max(0.1, prevZoom * factor));
     if (nextZoom === prevZoom) return;
 
     setTimelineZoom(nextZoom);
@@ -489,7 +489,31 @@ export default function TimelinePanel({
     };
   }, []);
 
-  const timeMarkers = Array.from({ length: maxDuration + 1 }, (_, i) => i);
+  // Adaptive time markers based on zoom level
+  const timeMarkers = useMemo(() => {
+    let interval = 1; // Default: every 1 second
+    
+    if (timelineZoom <= 0.2) {
+      interval = 10; // Every 10 seconds when zoomed way out
+    } else if (timelineZoom <= 0.5) {
+      interval = 5; // Every 5 seconds when zoomed out
+    } else if (timelineZoom <= 0.8) {
+      interval = 2; // Every 2 seconds
+    }
+    // else: Every 1 second when zoomed in (>= 0.8)
+    
+    const markers: number[] = [];
+    for (let i = 0; i <= maxDuration; i += interval) {
+      markers.push(i);
+    }
+    
+    // Always include the last marker if not already included
+    if (markers[markers.length - 1] !== maxDuration) {
+      markers.push(maxDuration);
+    }
+    
+    return markers;
+  }, [maxDuration, timelineZoom]);
 
   // Get icon for element type
   const getElementIcon = (element: Element) => {
@@ -745,7 +769,7 @@ export default function TimelinePanel({
             size="icon"
             className="h-6 w-6"
             onClick={handleZoomOut}
-            disabled={timelineZoom <= 0.25}
+            disabled={timelineZoom <= 0.1}
             title="Zoom out"
           >
             <ZoomOut className="h-3 w-3" />
