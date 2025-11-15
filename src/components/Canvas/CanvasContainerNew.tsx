@@ -2467,7 +2467,7 @@ export default function CanvasContainerNew({
           }
         }}
         style={{
-          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+          transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
           transformOrigin: 'center',
           transition: isPanning ? 'none' : 'transform 0.1s ease-out',
           cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
