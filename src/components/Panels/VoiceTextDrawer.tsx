@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,8 @@ interface VoiceTextDrawerProps {
   voiceId: string;
   voiceName: string;
   onVoiceGenerated: (audioUrl: string, text: string, voiceId: string, voiceName: string) => void;
+  initialText?: string;
+  editMode?: boolean;
 }
 
 const emotionControls = [
@@ -38,9 +40,11 @@ export default function VoiceTextDrawer({
   voiceId: initialVoiceId,
   voiceName: initialVoiceName,
   onVoiceGenerated,
+  initialText = "",
+  editMode = false,
 }: VoiceTextDrawerProps) {
   const { toast } = useToast();
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initialText);
   const [isGenerating, setIsGenerating] = useState(false);
   const [voiceId, setVoiceId] = useState(initialVoiceId);
   const [voiceName, setVoiceName] = useState(initialVoiceName);
@@ -48,6 +52,11 @@ export default function VoiceTextDrawer({
   const [isPreviewing, setIsPreviewing] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Update text when initialText changes (for edit mode)
+  useEffect(() => {
+    setText(initialText);
+  }, [initialText]);
 
   const insertEmotionTag = (tag: string) => {
     const textarea = textareaRef.current;
@@ -183,7 +192,7 @@ export default function VoiceTextDrawer({
       <Sheet open={open} onOpenChange={onClose}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader>
-            <SheetTitle className="text-2xl">Generate Voice</SheetTitle>
+            <SheetTitle className="text-2xl">{editMode ? "Edit Voice" : "Generate Voice"}</SheetTitle>
           </SheetHeader>
 
           <div className="mt-6 space-y-6 flex flex-col h-[calc(100vh-8rem)]">
@@ -276,10 +285,13 @@ export default function VoiceTextDrawer({
                 {isGenerating ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Adding...
+                    {editMode ? "Updating..." : "Adding..."}
                   </>
                 ) : (
-                  "Add Voice"
+                  <>
+                    <Mic className="w-4 h-4 mr-2" />
+                    {editMode ? "Update Voice" : "Add Voice"}
+                  </>
                 )}
               </Button>
             </div>

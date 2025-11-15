@@ -140,10 +140,13 @@ export default function TimelinePanel({
   } | null>(null);
   const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
   const [voiceDrawerTimestamp, setVoiceDrawerTimestamp] = useState(0);
+  const [editingVoiceId, setEditingVoiceId] = useState<string | null>(null);
+  const [editingVoiceText, setEditingVoiceText] = useState("");
   const playingAudiosRef = useRef<Map<string, HTMLAudioElement>>(new Map());
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [playheadLeft, setPlayheadLeft] = useState(0);
   const [timelineZoom, setTimelineZoom] = useState(1);
+  const processedWaveformsRef = useRef<Set<string>>(new Set());
 
   const handleZoomIn = () => {
     setTimelineZoom((prev) => Math.min(4, prev * 1.25));
@@ -260,10 +263,12 @@ export default function TimelinePanel({
     onTimelineMarkersChange?.(markers);
   }, [markers, onTimelineMarkersChange]);
 
-  // Extract waveforms and fix duration for voice audios
+  // Extract waveforms and fix duration for voice audios (run once per voice)
   useEffect(() => {
     voiceAudios.forEach(async (voice) => {
-      if (!voice.waveformData && voice.url) {
+      if (!voice.waveformData && voice.url && !processedWaveformsRef.current.has(voice.id)) {
+        processedWaveformsRef.current.add(voice.id);
+        
         try {
           // Load audio to get actual duration
           const audio = new Audio();
@@ -281,10 +286,11 @@ export default function TimelinePanel({
           );
         } catch (error) {
           console.error('Failed to extract waveform for voice:', error);
+          processedWaveformsRef.current.delete(voice.id); // Allow retry on error
         }
       }
     });
-  }, [voiceAudios]);
+  }, [voiceAudios.length]); // Only depend on length, not the array itself
 
   // Handle marker operations
   const handleAddMarker = (time?: number) => {
@@ -539,16 +545,29 @@ export default function TimelinePanel({
   const handleVoiceGenerated = (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
     const audio = new Audio(audioUrl);
     audio.addEventListener('loadedmetadata', () => {
-      const newVoice = {
-        id: `voice-${Date.now()}`,
-        url: audioUrl,
-        text,
-        delay: voiceDrawerTimestamp,
-        duration: audio.duration,
-        voiceId,
-        voiceName,
-      };
-      setVoiceAudios(prev => [...prev, newVoice]);
+      if (editingVoiceId) {
+        // Update existing voice
+        setVoiceAudios(prev => prev.map(v => 
+          v.id === editingVoiceId 
+            ? { ...v, url: audioUrl, text, duration: audio.duration, voiceId, voiceName }
+            : v
+        ));
+        processedWaveformsRef.current.delete(editingVoiceId); // Re-extract waveform
+        setEditingVoiceId(null);
+        setEditingVoiceText("");
+      } else {
+        // Add new voice
+        const newVoice = {
+          id: `voice-${Date.now()}`,
+          url: audioUrl,
+          text,
+          delay: voiceDrawerTimestamp,
+          duration: audio.duration,
+          voiceId,
+          voiceName,
+        };
+        setVoiceAudios(prev => [...prev, newVoice]);
+      }
     });
     setSelectedVoice(null);
     setVoiceDrawerOpen(false);
@@ -556,6 +575,14 @@ export default function TimelinePanel({
 
   const handleRemoveVoice = (voiceId: string) => {
     setVoiceAudios(prev => prev.filter(v => v.id !== voiceId));
+    processedWaveformsRef.current.delete(voiceId);
+  };
+
+  const handleEditVoice = (voice: VoiceAudio) => {
+    setEditingVoiceId(voice.id);
+    setEditingVoiceText(voice.text);
+    setSelectedVoice({ id: voice.voiceId, name: voice.voiceName });
+    setVoiceDrawerOpen(true);
   };
 
   const handleVoiceTrackRightClick = (e: React.MouseEvent) => {
@@ -791,6 +818,10 @@ export default function TimelinePanel({
                                           left: `${startPercent}%`,
                                           width: `${widthPercent}%`,
                                         }}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditVoice(voice);
+                                        }}
                                         onMouseDown={(e) => {
                                           if (!timelineRef.current) return;
                                           e.stopPropagation();
@@ -857,6 +888,9 @@ export default function TimelinePanel({
                                       </div>
                                     </ContextMenuTrigger>
                                     <ContextMenuContent>
+                                      <ContextMenuItem onClick={() => handleEditVoice(voice)}>
+                                        Edit Text
+                                      </ContextMenuItem>
                                       <ContextMenuItem onClick={() => handleRemoveVoice(voice.id)}>
                                         Remove Voice
                                       </ContextMenuItem>
@@ -1105,10 +1139,16 @@ export default function TimelinePanel({
 
       <VoiceTextDrawer
         open={voiceDrawerOpen}
-        onClose={() => setVoiceDrawerOpen(false)}
+        onClose={() => {
+          setVoiceDrawerOpen(false);
+          setEditingVoiceId(null);
+          setEditingVoiceText("");
+        }}
         voiceId={selectedVoice?.id || "9BWtsMINqrJLrRacOk9x"}
         voiceName={selectedVoice?.name || "Aria"}
         onVoiceGenerated={handleVoiceGenerated}
+        initialText={editingVoiceText}
+        editMode={!!editingVoiceId}
       />
 
       {/* Marker creation dialog */}
