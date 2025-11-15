@@ -542,35 +542,54 @@ export default function TimelinePanel({
     return clickTime;
   };
 
-  const handleVoiceGenerated = (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
-    const audio = new Audio(audioUrl);
-    audio.addEventListener('loadedmetadata', () => {
+  const handleVoiceGenerated = async (audioUrl: string, text: string, voiceId: string, voiceName: string) => {
+    try {
+      // Create audio and wait for it to fully load
+      const audio = new Audio(audioUrl);
+      
+      await new Promise<void>((resolve, reject) => {
+        audio.onloadedmetadata = () => {
+          // Ensure audio is fully loaded by playing it for a tiny moment
+          audio.currentTime = 0;
+          resolve();
+        };
+        audio.onerror = reject;
+        audio.load();
+      });
+      
+      // Get accurate duration
+      const actualDuration = audio.duration;
+      
       if (editingVoiceId) {
         // Update existing voice
         setVoiceAudios(prev => prev.map(v => 
           v.id === editingVoiceId 
-            ? { ...v, url: audioUrl, text, duration: audio.duration, voiceId, voiceName }
+            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName }
             : v
         ));
         processedWaveformsRef.current.delete(editingVoiceId); // Re-extract waveform
         setEditingVoiceId(null);
         setEditingVoiceText("");
       } else {
-        // Add new voice
+        // Add new voice with accurate duration
         const newVoice = {
           id: `voice-${Date.now()}`,
           url: audioUrl,
           text,
           delay: voiceDrawerTimestamp,
-          duration: audio.duration,
+          duration: actualDuration,
           voiceId,
           voiceName,
         };
         setVoiceAudios(prev => [...prev, newVoice]);
       }
-    });
-    setSelectedVoice(null);
-    setVoiceDrawerOpen(false);
+      
+      setSelectedVoice(null);
+      setVoiceDrawerOpen(false);
+    } catch (error) {
+      console.error('Error loading audio:', error);
+      toast.error("Failed to load audio file");
+    }
   };
 
   const handleRemoveVoice = (voiceId: string) => {
@@ -793,7 +812,7 @@ export default function TimelinePanel({
                                 </div>
                               )}
                             </div>
-                            <div className="flex-1 relative h-8 bg-muted/30 rounded">
+                            <div className="flex-1 relative h-12 bg-muted/30 rounded pt-6">
                               {tracksVoices.map((voice) => {
                                 const startPercent = (voice.delay / maxDuration) * 100;
                                 const widthPercent = (voice.duration / maxDuration) * 100;
@@ -811,7 +830,7 @@ export default function TimelinePanel({
                                   <ContextMenu key={voice.id}>
                                     <ContextMenuTrigger asChild>
                                       <div
-                                        className={`absolute top-1 bottom-1 rounded bg-background/80 border border-primary/40 hover:border-primary cursor-move transition-all group overflow-hidden ${
+                                        className={`absolute top-1 bottom-1 rounded bg-background/80 border border-primary/40 hover:border-primary cursor-move transition-all group ${
                                           isPlaying ? 'ring-2 ring-primary/50 ring-offset-1 animate-pulse' : ''
                                         }`}
                                         style={{
@@ -853,14 +872,14 @@ export default function TimelinePanel({
                                         }}
                                       >
                                         {/* Top label with avatar + name */}
-                                        <div className="absolute -top-4 left-0 flex items-center gap-1 text-[10px] text-foreground/80">
+                                        <div className="absolute -top-8 left-0 flex items-center gap-1 text-[10px] text-foreground/90 z-20 bg-background/50 px-1 rounded backdrop-blur-sm">
                                           {voiceAvatar && (
-                                            <Avatar className="w-6 h-6 border-2 border-white/80">
+                                            <Avatar className="w-5 h-5 border border-primary/30">
                                               <AvatarImage src={voiceAvatar} alt={voice.voiceName} />
-                                              <AvatarFallback className="text-[10px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
+                                              <AvatarFallback className="text-[8px]">{voice.voiceName?.[0] || '?'}</AvatarFallback>
                                             </Avatar>
                                           )}
-                                          <span className="font-medium truncate max-w-[120px]">{voice.voiceName}</span>
+                                          <span className="font-medium truncate max-w-[100px]">{voice.voiceName}</span>
                                         </div>
 
                                         {/* Inside bar: waveform */}
