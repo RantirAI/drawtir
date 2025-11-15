@@ -821,18 +821,18 @@ export default function TimelinePanel({
             </div>
           </div>
 
-          {/* Playhead - spans full timeline height */}
-          <div
-            className="absolute top-0 bottom-0 w-0.5 bg-primary z-50 cursor-ew-resize pointer-events-auto"
-            style={{ left: playheadLeft }}
-            onMouseDown={handleMouseDown}
-          >
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mt-1 pointer-events-auto" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mb-1 pointer-events-auto" />
-          </div>
+            {/* Playhead - spans full timeline height */}
+            <div
+              className="absolute top-0 bottom-0 w-0.5 bg-primary z-50 cursor-ew-resize pointer-events-auto"
+              style={{ left: playheadLeft }}
+              onMouseDown={handleMouseDown}
+            >
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mt-1 pointer-events-auto" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rounded-full -mb-1 pointer-events-auto" />
+            </div>
 
-          {/* Element tracks */}
-          <div className="space-y-2 mt-4">
+            {/* Element tracks */}
+            <div className="space-y-2 mt-4">
             {/* Voice tracks - multiple rows */}
             {voiceAudios.length > 0 && (() => {
               // Calculate number of tracks needed
@@ -1216,7 +1216,7 @@ export default function TimelinePanel({
               </ContextMenuContent>
             </ContextMenu>
 
-          </div>
+            </div>
           </div>
         </div>
       </ScrollArea>
