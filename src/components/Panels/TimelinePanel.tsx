@@ -265,7 +265,7 @@ export default function TimelinePanel({
 
   // Extract waveforms and fix duration for voice audios (run once per voice)
   useEffect(() => {
-    voiceAudios.forEach(async (voice) => {
+    const processVoice = async (voice: VoiceAudio) => {
       if (!voice.waveformData && voice.url && !processedWaveformsRef.current.has(voice.id)) {
         processedWaveformsRef.current.add(voice.id);
         
@@ -281,15 +281,23 @@ export default function TimelinePanel({
           const actualDuration = audio.duration;
           const waveform = await extractWaveform(voice.url, 80);
           
-          setVoiceAudios(prev => 
-            prev.map(v => v.id === voice.id ? { ...v, waveformData: waveform, duration: actualDuration } : v)
-          );
+          // Use functional update to prevent race conditions
+          setVoiceAudios(prev => {
+            // Only update if the voice still exists and doesn't have waveformData
+            const voiceStillExists = prev.find(v => v.id === voice.id);
+            if (!voiceStillExists || voiceStillExists.waveformData) {
+              return prev;
+            }
+            return prev.map(v => v.id === voice.id ? { ...v, waveformData: waveform, duration: actualDuration } : v);
+          });
         } catch (error) {
           console.error('Failed to extract waveform for voice:', error);
           processedWaveformsRef.current.delete(voice.id); // Allow retry on error
         }
       }
-    });
+    };
+
+    voiceAudios.forEach(processVoice);
   }, [voiceAudios.length]); // Only depend on length, not the array itself
 
   // Handle marker operations
@@ -561,13 +569,13 @@ export default function TimelinePanel({
       const actualDuration = audio.duration;
       
       if (editingVoiceId) {
-        // Update existing voice
+        // Update existing voice - force waveform re-extraction by setting undefined
+        processedWaveformsRef.current.delete(editingVoiceId);
         setVoiceAudios(prev => prev.map(v => 
           v.id === editingVoiceId 
-            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName }
+            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName, waveformData: undefined }
             : v
         ));
-        processedWaveformsRef.current.delete(editingVoiceId); // Re-extract waveform
         setEditingVoiceId(null);
         setEditingVoiceText("");
       } else {
