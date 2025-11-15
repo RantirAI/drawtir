@@ -9,7 +9,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { text, voiceId = '9BWtsMINqrJLrRacOk9x' } = await req.json();
+    const { text, voiceId = '9BWtsMINqrJLrRacOk9x', modelId } = await req.json();
 
     if (!text) {
       throw new Error('Text is required');
@@ -58,12 +58,17 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Use eleven_multilingual_v2 which properly supports emotion tags like [crying], [laughs], etc.
-    let response = await tts('eleven_multilingual_v2');
+    // Prefer Eleven Turbo v3 (supports emotion tags). Allow override via request.
+    let response = await tts(modelId || 'eleven_turbo_v3');
     if (!response.ok) {
       const errTxt = await response.text();
-      console.warn('eleven_multilingual_v2 failed, trying eleven_turbo_v2_5:', response.status, errTxt);
-      response = await tts('eleven_turbo_v2_5');
+      console.warn('Primary model failed, trying eleven_multilingual_v2:', response.status, errTxt);
+      response = await tts('eleven_multilingual_v2');
+      if (!response.ok) {
+        const errTxt2 = await response.text();
+        console.warn('eleven_multilingual_v2 failed, trying eleven_turbo_v2_5:', response.status, errTxt2);
+        response = await tts('eleven_turbo_v2_5');
+      }
     }
 
     if (!response.ok) {
