@@ -368,25 +368,11 @@ export default function CanvasContainerNew({
       }
     };
 
-    const handleWheel = (e: WheelEvent) => {
-      // Prevent browser zoom for all modifier key combinations
-      if (e.ctrlKey || e.metaKey || e.shiftKey) {
-        e.preventDefault();
-      }
-      
-      if (e.ctrlKey || e.metaKey) {
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        setZoom(prev => Math.max(0.1, Math.min(5, prev + delta)));
-      }
-    };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('wheel', handleWheel, { passive: false });
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('wheel', handleWheel);
     };
   }, [historyIndex, history, selectedElementIds]);
 
@@ -2456,6 +2442,7 @@ export default function CanvasContainerNew({
           }
         }}
         onWheel={(e) => {
+          // Always prevent default to stop browser zoom
           e.preventDefault();
           e.stopPropagation();
           
