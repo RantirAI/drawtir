@@ -2554,7 +2554,7 @@ export default function CanvasContainerNew({
           className="absolute inset-0"
           style={{
             transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
-            transformOrigin: 'center',
+            transformOrigin: '0 0',
             transition: isPanning ? 'none' : 'transform 0.1s ease-out',
             cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default',
             minWidth: '100vw',
