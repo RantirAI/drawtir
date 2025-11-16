@@ -368,11 +368,31 @@ export default function CanvasContainerNew({
       }
     };
 
+    // Global prevention of browser zoom when Ctrl/Cmd is held
+    const handleGlobalWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+      }
+    };
+
+    // Safari pinch-zoom gestures
+    const preventGesture = (e: Event) => {
+      e.preventDefault();
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
+    window.addEventListener('gesturestart', preventGesture as any);
+    window.addEventListener('gesturechange', preventGesture as any);
+    window.addEventListener('gestureend', preventGesture as any);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('wheel', handleGlobalWheel as any);
+      window.removeEventListener('gesturestart', preventGesture as any);
+      window.removeEventListener('gesturechange', preventGesture as any);
+      window.removeEventListener('gestureend', preventGesture as any);
     };
   }, [historyIndex, history, selectedElementIds]);
 
