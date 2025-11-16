@@ -44,7 +44,7 @@ const InputWithUnit = React.forwardRef<HTMLInputElement, InputWithUnitProps>(
           value={localValue}
           onChange={handleChange}
           className={cn(
-            "h-7 text-xs pr-14",
+            "h-7 text-xs pr-14 min-w-[80px]",
             className
           )}
           ref={ref}
