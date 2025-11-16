@@ -1,4 +1,4 @@
-import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2 } from "iconsax-react";
+import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Maximize4 } from "iconsax-react";
 import { Save, Share2, Hand, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -58,6 +58,7 @@ interface EditorTopBarProps {
   activeUsers?: UserPresence[];
   currentUser?: { id: string; name: string; avatar: string | null } | null;
   enableCollaboration?: boolean;
+  onRecenter?: () => void;
 }
 
 export default function EditorTopBar({ 
@@ -91,6 +92,7 @@ export default function EditorTopBar({
   activeUsers = [],
   currentUser = null,
   enableCollaboration = false,
+  onRecenter,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -291,6 +293,18 @@ export default function EditorTopBar({
               </div>
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+        
+        {onRecenter && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+            onClick={onRecenter}
+            title="Center View (F)"
+          >
+            <Maximize4 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          </Button>
         )}
         
         <ThemeToggle />
