@@ -1249,6 +1249,44 @@ export default function CanvasContainerNew({
       // Apply canvas view if provided
       if (initialSnapshot.canvas?.zoom !== undefined) setZoom(initialSnapshot.canvas.zoom);
       if (initialSnapshot.canvas?.panOffset) setPanOffset(initialSnapshot.canvas.panOffset);
+    } else if (!initialSnapshot && frames.length === 0) {
+      // If no initial snapshot and no frames, ensure we have a default frame
+      setFrames([{
+        id: "frame-1",
+        name: "Frame 1",
+        x: 100,
+        y: 100,
+        width: 400,
+        height: 600,
+        initialWidth: 400,
+        initialHeight: 600,
+        enableDynamicScale: false,
+        backgroundColor: "#ffffff",
+        image: null,
+        topCaption: "",
+        bottomCaption: "",
+        textColor: "#ffffff",
+        textAlign: "center",
+        textSize: 3,
+        textOpacity: 100,
+        imageStyle: "cover",
+        brightness: 100,
+        contrast: 100,
+        saturation: 100,
+        blur: 0,
+        linkText: "",
+        linkPosition: "top-right",
+        gradientIntensity: 80,
+        flexDirection: undefined,
+        justifyContent: undefined,
+        alignItems: undefined,
+        gap: 0,
+        elements: [],
+        cornerRadius: 0,
+        opacity: 100,
+        blendMode: "normal",
+      }]);
+      setSelectedFrameId("frame-1");
     }
   }, [initialSnapshot]);
 
