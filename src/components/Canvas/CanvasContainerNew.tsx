@@ -2561,8 +2561,8 @@ export default function CanvasContainerNew({
             minHeight: '100vh',
             width: '400vw',
             height: '400vh',
-            left: '-150vw',
-            top: '-150vh'
+            left: '0',
+            top: '0'
           }}
         >
         {frames.map((frame) => (
