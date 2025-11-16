@@ -536,6 +536,10 @@ export default function CanvasContainerNew({
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
+    // Center newly added frame
+    requestAnimationFrame(() => {
+      try { fitFrameToView(newFrame.id); } catch {}
+    });
     toast.success("Frame added!");
   };
 
@@ -1287,12 +1291,19 @@ export default function CanvasContainerNew({
         blendMode: "normal",
       }]);
       setSelectedFrameId("frame-1");
-      // Center default frame on first load
-      requestAnimationFrame(() => {
-        try { fitFrameToView("frame-1"); } catch {}
-      });
     }
   }, [initialSnapshot]);
+  
+  // Center default frame once canvas is ready
+  useEffect(() => {
+    if (frames.length === 1 && frames[0].id === "frame-1" && !initialSnapshot && canvasAreaRef.current) {
+      // Wait a bit to ensure canvas is fully mounted
+      const timer = setTimeout(() => {
+        try { fitFrameToView("frame-1"); } catch {}
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [frames, initialSnapshot, canvasAreaRef.current]);
 
   // Load project from URL on mount
   useEffect(() => {
@@ -2479,6 +2490,7 @@ export default function CanvasContainerNew({
         activeUsers={activeUsers}
         currentUser={currentUser}
         enableCollaboration={enableCollaboration}
+        onRecenter={() => selectedFrameId && fitFrameToView(selectedFrameId)}
       />
 
       {/* Canvas Area */}
