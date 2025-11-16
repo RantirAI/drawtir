@@ -160,12 +160,12 @@ export default function CanvasContainerNew({
   };
   const fitDebounceRef = useRef<number | null>(null);
 
-  // Fit frame to view only when selection changes, not on every frame update
-  useEffect(() => {
-    if (!selectedFrameId) return;
-    const t = window.setTimeout(() => fitFrameToView(selectedFrameId), 0);
-    return () => window.clearTimeout(t);
-  }, [selectedFrameId]);
+  // Removed auto-fit frame to view on selection - user can manually fit with F key
+  // useEffect(() => {
+  //   if (!selectedFrameId) return;
+  //   const t = window.setTimeout(() => fitFrameToView(selectedFrameId), 0);
+  //   return () => window.clearTimeout(t);
+  // }, [selectedFrameId]);
 
   // Fit on window resize to keep poster fully visible
   useEffect(() => {
