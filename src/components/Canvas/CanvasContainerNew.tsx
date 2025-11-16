@@ -1287,6 +1287,10 @@ export default function CanvasContainerNew({
         blendMode: "normal",
       }]);
       setSelectedFrameId("frame-1");
+      // Center default frame on first load
+      requestAnimationFrame(() => {
+        try { fitFrameToView("frame-1"); } catch {}
+      });
     }
   }, [initialSnapshot]);
 
