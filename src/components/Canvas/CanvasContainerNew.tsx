@@ -382,14 +382,23 @@ export default function CanvasContainerNew({
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('wheel', handleGlobalWheel, { passive: false });
+
+    // Capture-phase, non-passive listeners to reliably prevent browser zoom
+    window.addEventListener('wheel', handleGlobalWheel, { passive: false, capture: true });
+    document.addEventListener('wheel', handleGlobalWheel, { passive: false, capture: true });
+    document.documentElement.addEventListener('wheel', handleGlobalWheel, { passive: false, capture: true });
+
     window.addEventListener('gesturestart', preventGesture as any);
     window.addEventListener('gesturechange', preventGesture as any);
     window.addEventListener('gestureend', preventGesture as any);
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('wheel', handleGlobalWheel as any);
+
+      window.removeEventListener('wheel', handleGlobalWheel as any, { capture: true } as any);
+      document.removeEventListener('wheel', handleGlobalWheel as any, { capture: true } as any);
+      document.documentElement.removeEventListener('wheel', handleGlobalWheel as any, { capture: true } as any);
+
       window.removeEventListener('gesturestart', preventGesture as any);
       window.removeEventListener('gesturechange', preventGesture as any);
       window.removeEventListener('gestureend', preventGesture as any);
@@ -2433,7 +2442,7 @@ export default function CanvasContainerNew({
       {/* Canvas Area */}
       <div 
         ref={canvasAreaRef}
-        className="flex-1 relative"
+        className="flex-1 relative touch-none overscroll-none select-none"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
