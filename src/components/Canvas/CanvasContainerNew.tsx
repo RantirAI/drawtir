@@ -2505,10 +2505,10 @@ export default function CanvasContainerNew({
             cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default',
             minWidth: '100vw',
             minHeight: '100vh',
-            width: '200vw',
-            height: '200vh',
-            left: '-50vw',
-            top: '-50vh'
+            width: '400vw',
+            height: '400vh',
+            left: '-150vw',
+            top: '-150vh'
           }}
         >
         {frames.map((frame) => (
