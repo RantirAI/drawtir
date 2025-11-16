@@ -2442,7 +2442,7 @@ export default function CanvasContainerNew({
       {/* Canvas Area */}
       <div 
         ref={canvasAreaRef}
-        className="flex-1 relative touch-none overscroll-none select-none"
+        className="flex-1 relative overflow-hidden touch-none overscroll-none select-none"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
@@ -2494,13 +2494,23 @@ export default function CanvasContainerNew({
             }));
           }
         }}
-        style={{
-          transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
-          transformOrigin: 'center',
-          transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-          cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default'
-        }}
       >
+        {/* Large canvas workspace to prevent vanishing when scrolled */}
+        <div 
+          className="absolute inset-0"
+          style={{
+            transform: `scale(${zoom}) translate(${panOffset.x / zoom}px, ${panOffset.y / zoom}px)`,
+            transformOrigin: 'center',
+            transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+            cursor: isPanning && activeTool !== 'pen' ? 'grab' : activeTool === 'pen' ? 'crosshair' : 'default',
+            minWidth: '100vw',
+            minHeight: '100vh',
+            width: '200vw',
+            height: '200vh',
+            left: '-50vw',
+            top: '-50vh'
+          }}
+        >
         {frames.map((frame) => (
           <div key={frame.id}>
             <FrameBadge
@@ -3127,6 +3137,7 @@ export default function CanvasContainerNew({
             }}
           />
         )}
+      </div>
       </div>
 
       {/* AI Generation Panel */}
