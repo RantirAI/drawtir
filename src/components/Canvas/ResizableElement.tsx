@@ -277,15 +277,20 @@ export default function ResizableElement({
 
   // Calculate actual pixel dimensions from percentage if needed
   const getActualDimension = (value: number, unit: string, referenceSize: number): number => {
-    if (unit === "%") {
+    if (unit === "%" && referenceSize > 0) {
       return (value / 100) * referenceSize;
     }
     // For now, only handle px and %, can extend for rem/em later
     return value;
   };
 
-  const actualWidth = getActualDimension(width, sizeUnit, frameWidth || width);
-  const actualHeight = getActualDimension(height, sizeUnit, frameHeight || height);
+  // Only use percentage conversion if we have valid frame dimensions
+  const actualWidth = (sizeUnit === "%" && frameWidth > 0) 
+    ? getActualDimension(width, sizeUnit, frameWidth) 
+    : width;
+  const actualHeight = (sizeUnit === "%" && frameHeight > 0) 
+    ? getActualDimension(height, sizeUnit, frameHeight) 
+    : height;
 
   // Calculate adjusted corner radius based on stroke position
   const getAdjustedCornerRadius = (baseRadius: number): { outer: number; inner: number } => {
@@ -957,7 +962,8 @@ export default function ResizableElement({
           <img 
             src={src} 
             alt="Element" 
-            className="w-full h-full"
+            draggable={false}
+            className="w-full h-full pointer-events-none"
             style={{ 
               objectFit: getObjectFitStyle(imageFit || "cover") as any,
               objectPosition: "center",

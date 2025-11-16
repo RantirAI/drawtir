@@ -369,10 +369,14 @@ export default function CanvasContainerNew({
     };
 
     const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
+      // Prevent browser zoom for all modifier key combinations
+      if (e.ctrlKey || e.metaKey || e.shiftKey) {
         e.preventDefault();
+      }
+      
+      if (e.ctrlKey || e.metaKey) {
         const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        setZoom(prev => Math.max(0.1, Math.min(3, prev + delta)));
+        setZoom(prev => Math.max(0.1, Math.min(5, prev + delta)));
       }
     };
 
@@ -2385,7 +2389,7 @@ export default function CanvasContainerNew({
 
   // Main canvas container component
   return (
-    <div className="w-full h-screen relative overflow-hidden flex flex-col">
+    <div className="w-full h-screen relative flex flex-col">
       <CanvasBackground />
 
       <EditorTopBar
@@ -2423,7 +2427,7 @@ export default function CanvasContainerNew({
       {/* Canvas Area */}
       <div 
         ref={canvasAreaRef}
-        className="flex-1 overflow-hidden relative"
+        className="flex-1 relative"
         onMouseDown={(e) => {
           if (isPanning && e.button === 0 && activeTool !== 'pen') {
             setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
