@@ -114,16 +114,16 @@ export default function FrameBadge({ name, x, y, onChange, onPositionChange, onS
       onDelete={onDelete}
     >
       <div
-        className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border-border/50 border text-[10px] font-medium hover:bg-card/90 transition-colors group"
+        className="absolute z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-card/80 backdrop-blur-sm border-border/50 border text-[10px] font-medium hover:bg-card/90 transition-colors group whitespace-nowrap"
         style={{ left: x, top: y - 28 }}
         onDoubleClick={handleDoubleClick}
       >
         <GripVertical 
           size={14}
-          className="text-muted-foreground cursor-grab active:cursor-grabbing" 
+          className="text-muted-foreground cursor-grab active:cursor-grabbing flex-shrink-0" 
           onMouseDown={handleDragStart}
         />
-        <span className="cursor-text">{name}</span>
+        <span className="cursor-text whitespace-nowrap">{name}</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
