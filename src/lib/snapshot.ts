@@ -9,7 +9,9 @@ export function createSnapshot(
   zoom: number = 1,
   panOffset: { x: number; y: number } = { x: 0, y: 0 },
   backgroundColor: string = "#ffffff",
-  voiceAudios: VoiceAudio[] = []
+  voiceAudios: VoiceAudio[] = [],
+  timelineMarkers: any[] = [],
+  backgroundMusic: any[] = []
 ): CanvasSnapshot {
   return {
     version: SNAPSHOT_VERSION,
@@ -25,6 +27,8 @@ export function createSnapshot(
     },
     frames: JSON.parse(JSON.stringify(frames)), // Deep clone
     voiceAudios: JSON.parse(JSON.stringify(voiceAudios)), // Deep clone
+    timelineMarkers: JSON.parse(JSON.stringify(timelineMarkers)), // Deep clone
+    backgroundMusic: JSON.parse(JSON.stringify(backgroundMusic)), // Deep clone
   };
 }
 
