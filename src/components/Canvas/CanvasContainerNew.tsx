@@ -820,7 +820,7 @@ export default function CanvasContainerNew({
       const canvasHeight = selectedFrame?.height || 1200;
 
       // Get current snapshot for iterative updates
-      const currentSnapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
+      const currentSnapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic);
 
       // Full AI poster generation with streaming
       const { data: { session } } = await supabase.auth.getSession();
@@ -1126,7 +1126,7 @@ export default function CanvasContainerNew({
         try {
           const { data: { user } } = await supabase.auth.getUser();
           if (user) {
-            const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
+            const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic);
             await supabase.from('ai_conversations').insert({
               project_id: projectId,
               user_id: user.id,
@@ -1159,7 +1159,7 @@ export default function CanvasContainerNew({
 
   const saveToCloud = async () => {
     if (isEmbedded && onSaveRequest) {
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic);
       await onSaveRequest(snapshot);
       return;
     }
@@ -1171,7 +1171,7 @@ export default function CanvasContainerNew({
         return;
       }
 
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic);
       const thumbnail = await generateThumbnail(frames);
 
       // Get selected workspace ID from localStorage
@@ -1225,10 +1225,10 @@ export default function CanvasContainerNew({
   // Notify parent of changes in embedded mode
   useEffect(() => {
     if (isEmbedded && onSnapshotChange) {
-      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios);
+      const snapshot = createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic);
       onSnapshotChange(snapshot);
     }
-  }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange, voiceAudios]);
+  }, [frames, projectTitle, zoom, panOffset, isEmbedded, onSnapshotChange, voiceAudios, timelineMarkers, backgroundMusic]);
 
   // Load initial snapshot
   // Load or update from provided snapshot (supports prop changes)
@@ -1240,6 +1240,16 @@ export default function CanvasContainerNew({
       // Restore voice audios if available
       if (initialSnapshot.voiceAudios) {
         setVoiceAudios(initialSnapshot.voiceAudios);
+      }
+      
+      // Restore timeline markers if available
+      if (initialSnapshot.timelineMarkers) {
+        setTimelineMarkers(initialSnapshot.timelineMarkers);
+      }
+      
+      // Restore background music if available
+      if (initialSnapshot.backgroundMusic) {
+        setBackgroundMusic(initialSnapshot.backgroundMusic);
       }
 
       const firstId = initialSnapshot.frames?.[0]?.id;
@@ -1343,6 +1353,11 @@ export default function CanvasContainerNew({
               // Load canvas settings if they exist
               if (snapshot.canvas?.zoom !== undefined) setZoom(snapshot.canvas.zoom);
               if (snapshot.canvas?.panOffset) setPanOffset(snapshot.canvas.panOffset);
+              
+              // Load voice audios, markers, and background music
+              if (snapshot.voiceAudios) setVoiceAudios(snapshot.voiceAudios);
+              if (snapshot.timelineMarkers) setTimelineMarkers(snapshot.timelineMarkers);
+              if (snapshot.backgroundMusic) setBackgroundMusic(snapshot.backgroundMusic);
               
               setProjectId(projectIdFromUrl);
               console.log("✅ Loaded project from URL:", projectIdFromUrl, "with", snapshot.frames.length, "frames");
@@ -3198,7 +3213,7 @@ export default function CanvasContainerNew({
       {showGeneratePanel && (
         <AIGeneratorPanel
           projectId={projectId}
-          currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios)}
+          currentSnapshot={createSnapshot(frames, projectTitle, zoom, panOffset, "#ffffff", voiceAudios, timelineMarkers, backgroundMusic)}
           frames={frames}
           selectedFrameId={selectedFrameId}
           onFrameSelect={setSelectedFrameId}
