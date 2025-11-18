@@ -114,7 +114,7 @@ export default function Gallery() {
 
   const openProject = (id: string) => {
     trackProjectView(id);
-    navigate(`/?project=${id}`);
+    navigate(`/editor?project=${id}`);
   };
 
   const deleteProject = async (id: string, e: React.MouseEvent) => {
@@ -180,7 +180,7 @@ export default function Gallery() {
   };
 
   const openTemplate = (templateId: string) => {
-    navigate(`/?template=${templateId}`);
+    navigate(`/editor?template=${templateId}`);
   };
 
   const filteredAndSortedProjects = useMemo(() => {
@@ -321,7 +321,7 @@ export default function Gallery() {
               </TabsList>
               {canCreate ? (
                 <Button 
-                  onClick={() => navigate("/?new=true")}
+                  onClick={() => navigate("/editor?new=true")}
                   size="default"
                   className="gap-2"
                 >
@@ -459,7 +459,7 @@ export default function Gallery() {
                   <p className="text-base text-muted-foreground mb-4">
                     {searchQuery || filterBy !== "all" ? "No projects match your filters" : "No projects yet"}
                   </p>
-                  <Button onClick={() => navigate("/?new=true")} variant="default">
+                  <Button onClick={() => navigate("/editor?new=true")} variant="default">
                     Create your first project
                   </Button>
                 </div>
