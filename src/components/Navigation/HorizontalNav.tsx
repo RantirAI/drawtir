@@ -14,9 +14,10 @@ export default function HorizontalNav() {
 
   const handleSignOut = async () => {
     try {
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       toast.success("Signed out successfully");
-      navigate("/");
+      navigate("/", { replace: true });
     } catch (error: any) {
       toast.error("Error signing out: " + error.message);
     }
