@@ -586,15 +586,22 @@ async function exportFrameAsImage(frame: Frame, config: ExportConfig): Promise<v
   const mimeType = config.format === "JPEG" ? "image/jpeg" : "image/png";
   const extension = config.format.toLowerCase();
 
-  canvas.toBlob((blob) => {
-    if (!blob) return;
+  // Wrap toBlob in a Promise to properly await it
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), mimeType);
+  });
+
+  if (blob) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.download = `${frame.name || "frame"}.${extension}`;
     link.href = url;
     link.click();
     URL.revokeObjectURL(url);
-  }, mimeType);
+    
+    // Add small delay to avoid browser blocking multiple downloads
+    await new Promise(resolve => setTimeout(resolve, 150));
+  }
 }
 
 async function exportAsPDF(frames: Frame[], config: ExportConfig): Promise<void> {
@@ -644,6 +651,9 @@ async function exportFrameAsSVG(frame: Frame): Promise<void> {
   link.href = url;
   link.click();
   URL.revokeObjectURL(url);
+  
+  // Add small delay to avoid browser blocking multiple downloads
+  await new Promise(resolve => setTimeout(resolve, 150));
 }
 
 async function captureFrameAtTime(
@@ -888,13 +898,16 @@ async function exportFrameAsGIF(frame: Frame, config: ExportConfig): Promise<voi
   }
 
   return new Promise((resolve, reject) => {
-    gif.on('finished', (blob: Blob) => {
+    gif.on('finished', async (blob: Blob) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = `${frame.name || "frame"}.gif`;
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
+      
+      // Add small delay to avoid browser blocking multiple downloads
+      await new Promise(r => setTimeout(r, 150));
       resolve();
     });
 
@@ -937,7 +950,7 @@ async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<voi
   };
 
   return new Promise((resolve, reject) => {
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       const blob = new Blob(chunks, { type: mimeType });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -945,6 +958,9 @@ async function exportFrameAsMP4(frame: Frame, config: ExportConfig): Promise<voi
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
+      
+      // Add small delay to avoid browser blocking multiple downloads
+      await new Promise(r => setTimeout(r, 150));
       resolve();
     };
 
