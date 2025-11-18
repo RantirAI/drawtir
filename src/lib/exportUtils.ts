@@ -134,13 +134,14 @@ function drawText(ctx: CanvasRenderingContext2D, element: Element, x: number, y:
   ctx.font = `${element.fontWeight || "normal"} ${element.fontSize || 16}px ${element.fontFamily || "Arial"}`;
   ctx.fillStyle = element.color || "#000000";
   ctx.textAlign = (element.textAlign as CanvasTextAlign) || "left";
-  ctx.globalAlpha = element.opacity ?? 1;
+  ctx.textBaseline = "top";
+  ctx.globalAlpha = (element.opacity ?? 100) / 100;
 
   const lines = (element.text || "").split("\n");
   const lineHeight = (element.fontSize || 16) * 1.2;
 
   lines.forEach((line, i) => {
-    ctx.fillText(line, x, y + i * lineHeight + (element.fontSize || 16));
+    ctx.fillText(line, x, y + i * lineHeight);
   });
 }
 
