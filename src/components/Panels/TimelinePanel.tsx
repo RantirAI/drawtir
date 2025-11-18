@@ -662,7 +662,7 @@ export default function TimelinePanel({
         setEditingVoiceText("");
         toast.success("Voice updated successfully");
       } else {
-        const newVoice = {
+        const newVoice: VoiceAudio = {
           id: `voice-${Date.now()}`,
           url: audioUrl,
           text,
@@ -670,6 +670,8 @@ export default function TimelinePanel({
           duration: actualDuration,
           voiceId,
           voiceName,
+          // Show an immediate placeholder waveform so UI never gets stuck on "Loading..."
+          waveformData: new Array(80).fill(0.35),
         };
         setVoiceAudios(prev => [...prev, newVoice]);
         toast.success("Voice added successfully");
