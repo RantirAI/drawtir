@@ -134,14 +134,29 @@ function drawText(ctx: CanvasRenderingContext2D, element: Element, x: number, y:
   ctx.font = `${element.fontWeight || "normal"} ${element.fontSize || 16}px ${element.fontFamily || "Arial"}`;
   ctx.fillStyle = element.color || "#000000";
   ctx.textAlign = (element.textAlign as CanvasTextAlign) || "left";
-  ctx.textBaseline = "top";
+  ctx.textBaseline = "middle";
   ctx.globalAlpha = (element.opacity ?? 100) / 100;
 
   const lines = (element.text || "").split("\n");
   const lineHeight = (element.fontSize || 16) * 1.2;
+  const padding = 8; // px-2 padding from editor
+
+  // Calculate total text height
+  const totalTextHeight = lines.length * lineHeight;
+  
+  // Vertical centering: start from middle of element height
+  const startY = y + element.height / 2 - (totalTextHeight / 2) + lineHeight / 2;
 
   lines.forEach((line, i) => {
-    ctx.fillText(line, x, y + i * lineHeight);
+    // Apply horizontal padding based on text alignment
+    let textX = x + padding;
+    if (element.textAlign === "center") {
+      textX = x + element.width / 2;
+    } else if (element.textAlign === "right") {
+      textX = x + element.width - padding;
+    }
+    
+    ctx.fillText(line, textX, startY + i * lineHeight);
   });
 }
 
