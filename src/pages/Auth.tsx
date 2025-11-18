@@ -82,7 +82,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="dark min-h-screen flex">
       {/* Left Side - Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 bg-background">
         <div className="max-w-md w-full mx-auto">

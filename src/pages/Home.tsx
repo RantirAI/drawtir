@@ -13,7 +13,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="dark min-h-screen bg-background relative overflow-hidden">
       <AnnounceBanner />
       <HomeNav />
       
