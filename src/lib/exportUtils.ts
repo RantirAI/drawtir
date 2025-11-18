@@ -14,14 +14,16 @@ interface RenderOptions {
 
 async function renderFrameToCanvas(frame: Frame, options: RenderOptions): Promise<HTMLCanvasElement> {
   const { scale } = options;
+  const padding = 40; // extra space around frame to avoid clipping
   const canvas = document.createElement("canvas");
-  canvas.width = frame.width * scale;
-  canvas.height = frame.height * scale;
+  canvas.width = (frame.width + padding * 2) * scale;
+  canvas.height = (frame.height + padding * 2) * scale;
   const ctx = canvas.getContext("2d");
   
   if (!ctx) throw new Error("Failed to get canvas context");
 
   ctx.scale(scale, scale);
+  ctx.translate(padding, padding);
 
   // Draw frame background
   await drawFrameBackground(ctx, frame);
