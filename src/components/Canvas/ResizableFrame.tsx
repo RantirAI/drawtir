@@ -342,6 +342,8 @@ export default function ResizableFrame({
         opacity: opacity / 100,
         mixBlendMode: (blendMode || 'normal') as any,
         ...backgroundStyle,
+        position: "absolute",
+        isolation: "isolate",
       }}
       onClick={handleFrameClick}
       onMouseDown={handleMouseDown}
