@@ -915,8 +915,8 @@ export default function ResizableElement({
         interactivity?.enabled && !readOnly ? 'ring-2 ring-blue-400 ring-offset-2' : ''
       }`}
       style={{ 
-        left: useFlexLayout ? undefined : x,
-        top: useFlexLayout ? undefined : y,
+        left: useFlexLayout ? undefined : Math.max(0, x),
+        top: useFlexLayout ? undefined : Math.max(0, y),
         width, 
         height,
         opacity: opacity / 100,
