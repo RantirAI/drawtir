@@ -4,6 +4,7 @@ import jsPDF from "jspdf";
 import GIF from "gif.js";
 import { createRoot } from "react-dom/client";
 import React from "react";
+import JSZip from "jszip";
 // Vite will bundle this worker and give us a URL
 // @ts-ignore
 import workerUrl from "gif.js/dist/gif.worker.js?url";
@@ -438,6 +439,31 @@ export async function exportFrames(frames: Frame[], config: ExportConfig): Promi
     return;
   }
 
+  // When exporting multiple PNG/JPEG frames, bundle them into a single ZIP
+  const isImageFormat = config.format === "PNG" || config.format === "JPEG";
+  if (isImageFormat && selectedFrames.length > 1) {
+    const zip = new JSZip();
+    const mimeType = config.format === "JPEG" ? "image/jpeg" : "image/png";
+    const extension = config.format.toLowerCase();
+
+    for (const frame of selectedFrames) {
+      const canvas = await renderFrameToCanvas(frame, { scale: config.scale });
+      const dataUrl = canvas.toDataURL(mimeType);
+      const base64Data = dataUrl.split(",")[1];
+      const fileName = `${frame.name || "frame"}.${extension}`;
+      zip.file(fileName, base64Data, { base64: true });
+    }
+
+    const zipBlob = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(zipBlob);
+    const link = document.createElement("a");
+    link.download = `frames-${Date.now()}.zip`;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
   if (config.format === "PDF") {
     await exportAsPDF(selectedFrames, config);
   } else if (config.format === "SVG") {
@@ -453,7 +479,7 @@ export async function exportFrames(frames: Frame[], config: ExportConfig): Promi
       await exportFrameAsMP4(frame, config);
     }
   } else {
-    // PNG or JPEG
+    // PNG or JPEG single-frame export
     for (const frame of selectedFrames) {
       await exportFrameAsImage(frame, config);
     }
