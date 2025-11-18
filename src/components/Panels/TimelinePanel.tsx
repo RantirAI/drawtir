@@ -285,7 +285,13 @@ export default function TimelinePanel({
   // Extract waveforms independently (doesn't trigger parent updates)
   useEffect(() => {
     const processVoice = async (voice: VoiceAudio) => {
-      if (!voice.waveformData && voice.url && !processedWaveformsRef.current.has(voice.id)) {
+      // Always process if waveformData is missing, even if we've seen this ID before
+      // (in case the voice was reloaded from a saved snapshot without waveform data)
+      if (!voice.waveformData && voice.url) {
+        // Check if we're already processing this voice
+        if (processedWaveformsRef.current.has(voice.id)) {
+          return;
+        }
         processedWaveformsRef.current.add(voice.id);
         
         try {
@@ -317,7 +323,20 @@ export default function TimelinePanel({
     };
 
     voiceAudios.forEach(processVoice);
-  }, [voiceAudios.length, waveformTrigger]);
+  }, [voiceAudios, waveformTrigger]);
+  
+  // Clear processed refs when voice audios are removed or changed
+  useEffect(() => {
+    const currentVoiceIds = new Set(voiceAudios.map(v => v.id));
+    const processedIds = Array.from(processedWaveformsRef.current);
+    
+    // Remove IDs from processedRef that are no longer in voiceAudios
+    processedIds.forEach(id => {
+      if (!currentVoiceIds.has(id)) {
+        processedWaveformsRef.current.delete(id);
+      }
+    });
+  }, [voiceAudios]);
 
   // Handle marker operations
   const handleAddMarker = (time?: number) => {
