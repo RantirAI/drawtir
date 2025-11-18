@@ -649,15 +649,23 @@ export default function TimelinePanel({
       
       const actualDuration = audio.duration;
       
+      // Extract waveform immediately since we now have a permanent URL
+      let waveform: number[] | undefined;
+      try {
+        waveform = await extractWaveform(audioUrl, 80);
+        console.log('Waveform extracted immediately for new voice');
+      } catch (error) {
+        console.warn('Failed to extract waveform immediately, using placeholder:', error);
+        waveform = new Array(80).fill(0.35);
+      }
+      
       if (editingVoiceId) {
         processedWaveformsRef.current.delete(editingVoiceId);
         setVoiceAudios(prev => prev.map(v => 
           v.id === editingVoiceId 
-            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName, waveformData: undefined }
+            ? { ...v, url: audioUrl, text, duration: actualDuration, voiceId, voiceName, waveformData: waveform }
             : v
         ));
-        // Trigger waveform extraction for edited voice
-        setWaveformTrigger(prev => prev + 1);
         setEditingVoiceId(null);
         setEditingVoiceText("");
         toast.success("Voice updated successfully");
@@ -670,8 +678,7 @@ export default function TimelinePanel({
           duration: actualDuration,
           voiceId,
           voiceName,
-          // Show an immediate placeholder waveform so UI never gets stuck on "Loading..."
-          waveformData: new Array(80).fill(0.35),
+          waveformData: waveform,
         };
         setVoiceAudios(prev => [...prev, newVoice]);
         toast.success("Voice added successfully");
