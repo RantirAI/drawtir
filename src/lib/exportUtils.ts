@@ -31,6 +31,9 @@ async function renderFrameToCanvas(frame: Frame, options: RenderOptions): Promis
     await drawElement(ctx, element, frame);
   }
 
+  // Draw frame name badge
+  drawFrameBadge(ctx, frame);
+
   return canvas;
 }
 
@@ -289,6 +292,34 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onerror = reject;
     img.src = src;
   });
+}
+
+function drawFrameBadge(ctx: CanvasRenderingContext2D, frame: Frame) {
+  const frameName = frame.name || "Untitled";
+  const badgePadding = 8;
+  const badgeHeight = 28;
+  const fontSize = 13;
+  
+  // Measure text
+  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  const textWidth = ctx.measureText(frameName).width;
+  const badgeWidth = textWidth + badgePadding * 2 + 8; // Extra space for hash icon
+  
+  // Draw badge background
+  ctx.fillStyle = "#1a1a1a";
+  ctx.beginPath();
+  ctx.roundRect(frame.x, frame.y - badgeHeight - 8, badgeWidth, badgeHeight, 6);
+  ctx.fill();
+  
+  // Draw hash icon
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `${fontSize}px monospace`;
+  ctx.fillText("#", frame.x + badgePadding, frame.y - badgeHeight / 2 - 2);
+  
+  // Draw frame name text
+  ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(frameName, frame.x + badgePadding + 16, frame.y - badgeHeight / 2 - 2);
 }
 
 async function drawShaderElement(
