@@ -418,71 +418,99 @@ async function drawShaderElement(
 }
 
 export async function exportFrames(frames: Frame[], config: ExportConfig): Promise<void> {
+  console.log('🎬 Export started with config:', config);
   const selectedFrames = frames.filter(f => config.frameIds.includes(f.id));
   
-  console.log('Export config:', config);
-  console.log('Available frames:', frames.map(f => ({ id: f.id, name: f.name })));
-  console.log('Selected frames:', selectedFrames.map(f => ({ id: f.id, name: f.name })));
+  console.log('📋 Available frames:', frames.map(f => ({ id: f.id, name: f.name })));
+  console.log('✅ Selected frames:', selectedFrames.map(f => ({ id: f.id, name: f.name })));
   
   if (selectedFrames.length === 0) {
-    console.error('No frames matched the selected IDs');
+    console.error('❌ No frames matched the selected IDs');
     throw new Error('No frames selected for export');
   }
 
-  // Handle social media multi-size export
-  if (config.socialMediaSizes && config.socialMediaSizes.length > 0) {
-    for (const frame of selectedFrames) {
-      for (const size of config.socialMediaSizes) {
-        await exportFrameForSocialMedia(frame, size, config);
+  try {
+    // Handle social media multi-size export
+    if (config.socialMediaSizes && config.socialMediaSizes.length > 0) {
+      console.log('📱 Starting social media export');
+      for (const frame of selectedFrames) {
+        for (const size of config.socialMediaSizes) {
+          await exportFrameForSocialMedia(frame, size, config);
+        }
       }
-    }
-    return;
-  }
-
-  // When exporting multiple PNG/JPEG frames, bundle them into a single ZIP
-  const isImageFormat = config.format === "PNG" || config.format === "JPEG";
-  if (isImageFormat && selectedFrames.length > 1) {
-    const zip = new JSZip();
-    const mimeType = config.format === "JPEG" ? "image/jpeg" : "image/png";
-    const extension = config.format.toLowerCase();
-
-    for (const frame of selectedFrames) {
-      const canvas = await renderFrameToCanvas(frame, { scale: config.scale });
-      const dataUrl = canvas.toDataURL(mimeType);
-      const base64Data = dataUrl.split(",")[1];
-      const fileName = `${frame.name || "frame"}.${extension}`;
-      zip.file(fileName, base64Data, { base64: true });
+      console.log('✅ Social media export complete');
+      return;
     }
 
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    const url = URL.createObjectURL(zipBlob);
-    const link = document.createElement("a");
-    link.download = `frames-${Date.now()}.zip`;
-    link.href = url;
-    link.click();
-    URL.revokeObjectURL(url);
-    return;
-  }
+    // When exporting multiple PNG/JPEG frames, bundle them into a single ZIP
+    const isImageFormat = config.format === "PNG" || config.format === "JPEG";
+    if (isImageFormat && selectedFrames.length > 1) {
+      console.log('📦 Starting ZIP bundle for', selectedFrames.length, 'frames');
+      const zip = new JSZip();
+      const mimeType = config.format === "JPEG" ? "image/jpeg" : "image/png";
+      const extension = config.format.toLowerCase();
 
-  if (config.format === "PDF") {
-    await exportAsPDF(selectedFrames, config);
-  } else if (config.format === "SVG") {
-    for (const frame of selectedFrames) {
-      await exportFrameAsSVG(frame);
+      for (let i = 0; i < selectedFrames.length; i++) {
+        const frame = selectedFrames[i];
+        console.log(`🖼️ Processing frame ${i + 1}/${selectedFrames.length}:`, frame.name);
+        
+        const canvas = await renderFrameToCanvas(frame, { scale: config.scale });
+        console.log('✅ Canvas rendered:', canvas.width, 'x', canvas.height);
+        
+        const dataUrl = canvas.toDataURL(mimeType);
+        const base64Data = dataUrl.split(",")[1];
+        const fileName = `${frame.name || "frame"}.${extension}`;
+        zip.file(fileName, base64Data, { base64: true });
+        console.log('✅ Added to ZIP:', fileName);
+      }
+
+      console.log('📦 Generating ZIP file...');
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      console.log('✅ ZIP generated, size:', zipBlob.size, 'bytes');
+      
+      const url = URL.createObjectURL(zipBlob);
+      const link = document.createElement("a");
+      link.download = `frames-${Date.now()}.zip`;
+      link.href = url;
+      link.click();
+      console.log('✅ Download triggered');
+      URL.revokeObjectURL(url);
+      return;
     }
-  } else if (config.format === "GIF") {
-    for (const frame of selectedFrames) {
-      await exportFrameAsGIF(frame, config);
+
+    // Single frame or other formats
+    if (config.format === "PDF") {
+      console.log('📄 Starting PDF export');
+      await exportAsPDF(selectedFrames, config);
+      console.log('✅ PDF export complete');
+    } else if (config.format === "SVG") {
+      console.log('🎨 Starting SVG export');
+      for (const frame of selectedFrames) {
+        await exportFrameAsSVG(frame);
+      }
+      console.log('✅ SVG export complete');
+    } else if (config.format === "GIF") {
+      console.log('🎞️ Starting GIF export');
+      for (const frame of selectedFrames) {
+        await exportFrameAsGIF(frame, config);
+      }
+      console.log('✅ GIF export complete');
+    } else if (config.format === "MP4") {
+      console.log('🎥 Starting MP4 export');
+      for (const frame of selectedFrames) {
+        await exportFrameAsMP4(frame, config);
+      }
+      console.log('✅ MP4 export complete');
+    } else {
+      console.log('🖼️ Starting single image export');
+      for (const frame of selectedFrames) {
+        await exportFrameAsImage(frame, config);
+      }
+      console.log('✅ Image export complete');
     }
-  } else if (config.format === "MP4") {
-    for (const frame of selectedFrames) {
-      await exportFrameAsMP4(frame, config);
-    }
-  } else {
-    // PNG or JPEG single-frame export
-    for (const frame of selectedFrames) {
-      await exportFrameAsImage(frame, config);
-    }
+  } catch (error) {
+    console.error('❌ Export failed:', error);
+    throw error;
   }
 }
 
