@@ -418,6 +418,15 @@ async function drawShaderElement(
 
 export async function exportFrames(frames: Frame[], config: ExportConfig): Promise<void> {
   const selectedFrames = frames.filter(f => config.frameIds.includes(f.id));
+  
+  console.log('Export config:', config);
+  console.log('Available frames:', frames.map(f => ({ id: f.id, name: f.name })));
+  console.log('Selected frames:', selectedFrames.map(f => ({ id: f.id, name: f.name })));
+  
+  if (selectedFrames.length === 0) {
+    console.error('No frames matched the selected IDs');
+    throw new Error('No frames selected for export');
+  }
 
   // Handle social media multi-size export
   if (config.socialMediaSizes && config.socialMediaSizes.length > 0) {
