@@ -230,7 +230,7 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   <SelectItem value="1">1x</SelectItem>
                   <SelectItem value="2">2x</SelectItem>
                   <SelectItem value="4">4x</SelectItem>
@@ -244,7 +244,7 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100]">
                   <SelectItem value="PNG">
                     <div className="flex items-center gap-2">
                       <FileImage className="h-4 w-4" />
@@ -295,7 +295,7 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100]">
                     <SelectItem value="2">2s</SelectItem>
                     <SelectItem value="3">3s</SelectItem>
                     <SelectItem value="5">5s</SelectItem>
@@ -310,7 +310,7 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100]">
                     <SelectItem value="15">15 FPS</SelectItem>
                     <SelectItem value="24">24 FPS</SelectItem>
                     <SelectItem value="30">30 FPS</SelectItem>
