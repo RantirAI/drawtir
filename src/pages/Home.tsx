@@ -69,6 +69,42 @@ const Home = () => {
             From posters to graphics, bring your ideas to life.
           </p>
 
+          {/* Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto pt-8">
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">Vibe design & storyboarding</h3>
+              <p className="text-sm text-muted-foreground">Tell Drawtir what you want to create and select the tags for the "best" framework and watch the AI work its magic.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">A Whiteboard with Superpowers</h3>
+              <p className="text-sm text-muted-foreground">Adjust colors, layouts and styles with manual edit and natural language or with the style editor.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">Brand Guide & Media Storage</h3>
+              <p className="text-sm text-muted-foreground">Create beautiful UIs, bring your own design systems and components.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">Animate & Export Commercials</h3>
+              <p className="text-sm text-muted-foreground">With Drawtir's story boarding and commercial editing animations the Rantir Studio team brings a timeline view to any creation.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">Generate Images & Video</h3>
+              <p className="text-sm text-muted-foreground">Our Studio made this SDK kit for quick video and imagery presentations and high quality video support - now its released to the public.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left">
+              <h3 className="text-xl font-bold text-foreground mb-2">For Slides, UI or Presentations</h3>
+              <p className="text-sm text-muted-foreground">Your frames are your canvas, and create presentation, website, poster or social media templates all in one place.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left md:col-span-2 lg:col-span-1">
+              <h3 className="text-xl font-bold text-foreground mb-2">Open source & free (unless using Rantir Studio Cloud)</h3>
+              <p className="text-sm text-muted-foreground">Work together, share projects, and build with your team seamlessly or fork and host it yourself with your own AI API keys.</p>
+            </div>
+            <div className="bg-background/10 backdrop-blur-sm border border-border/20 rounded-lg p-6 text-left md:col-span-2">
+              <h3 className="text-xl font-bold text-foreground mb-2">Export & Embed</h3>
+              <p className="text-sm text-muted-foreground">Get production-ready code design editor built around your own Figma, Canvas or Web Assets to finetune your own Drawtir SDK experience. Export to your favorite IDE and integrate directly into your workflow and even white-label it.</p>
+            </div>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
             {isLoggedIn ? (
               <>
@@ -101,7 +137,7 @@ const Home = () => {
                   size="lg" 
                   variant="outline"
                   onClick={() => navigate("/pricing")}
-                  className="text-lg px-8"
+                  className="text-lg px-8 text-white hover:text-white"
                 >
                   See Pricing
                 </Button>
