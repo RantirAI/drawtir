@@ -69,17 +69,23 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
   );
 
   const handleFrameToggle = (frameId: string) => {
-    setSelectedFrameIds(prev =>
-      prev.includes(frameId)
+    console.log('Frame toggle clicked:', frameId, 'Current selection:', selectedFrameIds);
+    setSelectedFrameIds(prev => {
+      const newSelection = prev.includes(frameId)
         ? prev.filter(id => id !== frameId)
-        : [...prev, frameId]
-    );
+        : [...prev, frameId];
+      console.log('New selection:', newSelection);
+      return newSelection;
+    });
   };
 
   const handleSelectAll = () => {
+    console.log('Select all clicked. Current:', selectedFrameIds.length, 'Total frames:', frames.length);
     if (selectedFrameIds.length === frames.length) {
+      console.log('Deselecting all');
       setSelectedFrameIds([]);
     } else {
+      console.log('Selecting all frames:', frames.map(f => f.id));
       setSelectedFrameIds(frames.map(f => f.id));
     }
   };
@@ -101,13 +107,24 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
   };
 
   const handleExport = async () => {
-    if (selectedFrameIds.length === 0) return;
+    console.log('Export clicked. Selected frames:', selectedFrameIds);
+    if (selectedFrameIds.length === 0) {
+      console.log('No frames selected, aborting');
+      return;
+    }
     
     setIsExporting(true);
     try {
       const socialMediaSizes = exportMode === "social-media" 
         ? SOCIAL_MEDIA_PRESETS.filter(s => selectedSocialSizes.includes(s.name))
         : undefined;
+
+      console.log('Calling onExport with config:', {
+        frameIds: selectedFrameIds,
+        format,
+        scale,
+        socialMediaSizes
+      });
 
       await onExport({
         frameIds: selectedFrameIds,
@@ -117,7 +134,11 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
         fps: isAnimatedFormat ? fps : undefined,
         socialMediaSizes,
       });
+      
+      console.log('Export completed successfully');
       onOpenChange(false);
+    } catch (error) {
+      console.error('Export failed:', error);
     } finally {
       setIsExporting(false);
     }
