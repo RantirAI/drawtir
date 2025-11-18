@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import HomeNav from "@/components/HomePage/HomeNav";
 import AnnounceBanner from "@/components/HomePage/AnnounceBanner";
 import DraggablePanel from "@/components/HomePage/DraggablePanel";
@@ -11,6 +13,19 @@ import panel3Home from "@/assets/panel-3-home.svg";
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="dark min-h-screen bg-background relative overflow-hidden">
@@ -55,21 +70,43 @@ const Home = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-            <Button 
-              size="lg" 
-              onClick={() => navigate("/auth")}
-              className="text-lg px-8"
-            >
-              Get Started Free
-            </Button>
-            <Button 
-              size="lg" 
-              variant="outline"
-              onClick={() => navigate("/pricing")}
-              className="text-lg px-8"
-            >
-              See Pricing
-            </Button>
+            {isLoggedIn ? (
+              <>
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate("/gallery")}
+                  className="text-lg px-8"
+                >
+                  Go to Gallery
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => navigate("/editor")}
+                  className="text-lg px-8"
+                >
+                  Create New Project
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  size="lg" 
+                  onClick={() => navigate("/auth")}
+                  className="text-lg px-8"
+                >
+                  Get Started Free
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  onClick={() => navigate("/pricing")}
+                  className="text-lg px-8"
+                >
+                  See Pricing
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
