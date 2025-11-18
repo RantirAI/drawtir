@@ -102,14 +102,21 @@ export default function VoiceTextDrawer({
     setIsPreviewing(true);
     
     try {
+      // Get current user for storage path
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('generate-voice', {
-        body: { text, voiceId }
+        body: { 
+          text, 
+          voiceId,
+          userId: user?.id 
+        }
       });
 
       if (error) throw error;
 
-      if (!data?.audioContent) {
-        throw new Error('No audio content received');
+      if (!data?.audioUrl) {
+        throw new Error('No audio URL received');
       }
 
       // Stop any currently playing audio
@@ -118,22 +125,12 @@ export default function VoiceTextDrawer({
         audioRef.current = null;
       }
 
-      // Convert base64 to blob
-      const binaryString = atob(data.audioContent);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(blob);
-
-      // Play the audio
-      const audio = new Audio(audioUrl);
+      // Play the audio directly from the stored URL
+      const audio = new Audio(data.audioUrl);
       audioRef.current = audio;
       
       audio.onended = () => {
         setIsPreviewing(false);
-        URL.revokeObjectURL(audioUrl);
       };
       
       await audio.play();
@@ -161,26 +158,26 @@ export default function VoiceTextDrawer({
     setIsGenerating(true);
 
     try {
+      // Get current user for storage path
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase.functions.invoke('generate-voice', {
-        body: { text, voiceId }
+        body: { 
+          text, 
+          voiceId,
+          userId: user?.id 
+        }
       });
 
       if (error) throw error;
 
-      if (!data?.audioContent) {
-        throw new Error('No audio content received');
+      if (!data?.audioUrl) {
+        throw new Error('No audio URL received');
       }
 
-      // Convert base64 to blob
-      const binaryString = atob(data.audioContent);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      const blob = new Blob([bytes], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(blob);
+      console.log('Voice generated with permanent URL:', data.audioUrl);
 
-      onVoiceGenerated(audioUrl, text, voiceId, voiceName);
+      onVoiceGenerated(data.audioUrl, text, voiceId, voiceName);
 
       toast({
         title: "Voice generated",

@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -9,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { text, voiceId = '9BWtsMINqrJLrRacOk9x', modelId } = await req.json();
+    const { text, voiceId = '9BWtsMINqrJLrRacOk9x', modelId, userId } = await req.json();
 
     if (!text) {
       throw new Error('Text is required');
@@ -83,22 +85,47 @@ Deno.serve(async (req) => {
 
     const audioBuffer = await response.arrayBuffer();
     
-    // Convert to base64 in chunks to avoid stack overflow
-    const uint8Array = new Uint8Array(audioBuffer);
-    const chunkSize = 8192;
-    let binaryString = '';
-    
-    for (let i = 0; i < uint8Array.length; i += chunkSize) {
-      const chunk = uint8Array.subarray(i, Math.min(i + chunkSize, uint8Array.length));
-      binaryString += String.fromCharCode.apply(null, Array.from(chunk));
-    }
-    
-    const base64Audio = btoa(binaryString);
+    console.log('Voice generated successfully, uploading to storage...');
 
-    console.log('Voice generated successfully');
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Create a unique filename
+    const timestamp = Date.now();
+    const sanitizedText = text.substring(0, 30).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+    const filename = `voice-${timestamp}-${sanitizedText}.mp3`;
+    const filePath = userId ? `${userId}/${filename}` : `public/${filename}`;
+
+    // Upload to the media bucket
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('media')
+      .upload(filePath, audioBuffer, {
+        contentType: 'audio/mpeg',
+        cacheControl: '3600',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      throw new Error(`Failed to upload audio: ${uploadError.message}`);
+    }
+
+    console.log('Audio uploaded successfully:', uploadData.path);
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('media')
+      .getPublicUrl(uploadData.path);
+
+    console.log('Public URL generated:', publicUrl);
 
     return new Response(
-      JSON.stringify({ audioContent: base64Audio }),
+      JSON.stringify({ 
+        audioUrl: publicUrl,
+        filePath: uploadData.path,
+      }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
