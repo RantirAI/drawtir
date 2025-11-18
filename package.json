@@ -54,6 +54,7 @@
     "iconsax-react": "^0.0.8",
     "input-otp": "^1.4.2",
     "jspdf": "^3.0.3",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "qrcode.react": "^4.2.0",
