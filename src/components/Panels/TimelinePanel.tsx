@@ -317,6 +317,14 @@ export default function TimelinePanel({
           });
         } catch (error) {
           console.error('Failed to extract waveform for voice:', error);
+          
+          // On error, still set a placeholder waveform so UI doesn't stay stuck on "Loading..."
+          const placeholderWaveform = new Array(80).fill(0.35);
+          isInternalUpdateRef.current = true;
+          setVoiceAudios(prev => prev.map(v =>
+            v.id === voice.id ? { ...v, waveformData: placeholderWaveform } : v
+          ));
+          
           processedWaveformsRef.current.delete(voice.id);
         }
       }
