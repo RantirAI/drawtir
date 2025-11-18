@@ -1,12 +1,19 @@
 import { Home2, Gallery, Setting2, Logout, Colorfilter, Ruler } from "iconsax-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ThemeToggle } from "./ThemeToggle";
 export default function Sidebar() {
+  const navigate = useNavigate();
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      toast.success("Signed out successfully");
+      navigate("/", { replace: true });
+    } catch (error: any) {
+      toast.error("Error signing out: " + error.message);
+    }
   };
   const navItems = [{
     to: "/",

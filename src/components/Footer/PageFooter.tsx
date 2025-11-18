@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function PageFooter() {
   const links = [
     { label: "Data Policy", url: "https://www.rantir.com/company-services-policy" },
@@ -6,6 +8,7 @@ export default function PageFooter() {
     { label: "Terms & Conditions", url: "https://www.rantir.com/terms-and-conditions" },
     { label: "Privacy Policy", url: "https://www.rantir.com/privacy-policy" },
     { label: "License", url: "https://www.rantir.com/licensing" },
+    { label: "Pricing", url: "/pricing", internal: true },
   ];
 
   return (
@@ -18,14 +21,23 @@ export default function PageFooter() {
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs">
             {links.map((link, index) => (
               <span key={link.url} className="flex items-center gap-x-3">
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {link.label}
-                </a>
+                {link.internal ? (
+                  <Link
+                    to={link.url}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                )}
                 {index < links.length - 1 && (
                   <span className="text-muted-foreground">•</span>
                 )}

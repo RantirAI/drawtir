@@ -1,12 +1,9 @@
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import rantirLogo from "@/assets/rantir-logo.png";
 
-interface HomeNavProps {
-  onOpenAuth: () => void;
-}
-
-export default function HomeNav({ onOpenAuth }: HomeNavProps) {
+export default function HomeNav() {
   return (
     <nav className="bg-transparent fixed top-[32px] left-0 right-0 z-40 border-b border-white/5">
       <div className="container mx-auto px-6 py-3">
@@ -60,12 +57,13 @@ export default function HomeNav({ onOpenAuth }: HomeNavProps) {
               alt="Rantir Studio" 
               className="h-5 w-auto opacity-90"
             />
-            <Button 
-              onClick={onOpenAuth}
-              className="bg-primary text-white hover:bg-primary/90 text-xs px-3 py-1 h-auto shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_2px_4px_rgba(59,130,246,0.3)] hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_3px_6px_rgba(59,130,246,0.4)] transition-all duration-200"
-            >
-              Login / Sign Up
-            </Button>
+            <Link to="/auth">
+              <Button 
+                className="bg-primary text-white hover:bg-primary/90 text-xs px-3 py-1 h-auto shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_2px_4px_rgba(59,130,246,0.3)] hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.3),0_3px_6px_rgba(59,130,246,0.4)] transition-all duration-200"
+              >
+                Login / Sign Up
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
