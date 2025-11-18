@@ -58,7 +58,7 @@ export default function ExportDialog({ open, onOpenChange, frames, onExport, def
     if (open) {
       setSelectedFrameIds(defaultSelectedFrameIds || []);
     }
-  }, [open, defaultSelectedFrameIds]);
+  }, [open]);
 
   const isAnimatedFormat = format === "GIF" || format === "MP4";
   const hasAnimations = frames.some(f => 
