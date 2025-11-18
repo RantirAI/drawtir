@@ -2,6 +2,8 @@ import type { Frame, Element } from "@/types/elements";
 import type { ExportConfig } from "@/components/Canvas/ExportDialog";
 import jsPDF from "jspdf";
 import GIF from "gif.js";
+import { createRoot } from "react-dom/client";
+import React from "react";
 // Vite will bundle this worker and give us a URL
 // @ts-ignore
 import workerUrl from "gif.js/dist/gif.worker.js?url";
@@ -84,46 +86,8 @@ async function drawElement(ctx: CanvasRenderingContext2D, element: Element, fram
   } else if (element.type === "drawing" && element.pathData) {
     drawPenPath(ctx, element);
   } else if (element.type === "shader" && element.shader) {
-    // Draw shader as gradient placeholder for static exports
-    ctx.globalAlpha = (element.opacity ?? 100) / 100;
-    const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
-    
-    switch (element.shader.type) {
-      case "plasma":
-        gradient.addColorStop(0, "#6366f1");
-        gradient.addColorStop(0.5, "#a855f7");
-        gradient.addColorStop(1, "#ec4899");
-        break;
-      case "nebula":
-        gradient.addColorStop(0, "#1e1b4b");
-        gradient.addColorStop(0.5, "#1e3a8a");
-        gradient.addColorStop(1, "#000000");
-        break;
-      case "aurora":
-        gradient.addColorStop(0, "#34d399");
-        gradient.addColorStop(0.5, "#60a5fa");
-        gradient.addColorStop(1, "#a78bfa");
-        break;
-      case "vortex":
-        gradient.addColorStop(0, "#2563eb");
-        gradient.addColorStop(0.5, "#9333ea");
-        gradient.addColorStop(1, "#db2777");
-        break;
-      default:
-        gradient.addColorStop(0, "#3b82f6");
-        gradient.addColorStop(0.5, "#8b5cf6");
-        gradient.addColorStop(1, "#ec4899");
-    }
-    
-    ctx.fillStyle = gradient;
-    const radius = element.cornerRadius || 0;
-    if (radius > 0) {
-      ctx.beginPath();
-      roundedRect(ctx, x, y, width, height, radius);
-      ctx.fill();
-    } else {
-      ctx.fillRect(x, y, width, height);
-    }
+    // Render actual shader to canvas
+    await drawShaderElement(ctx, element, x, y, width, height);
   }
 
   // Draw interactive indicator on exported images
@@ -324,6 +288,82 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
+  });
+}
+
+async function drawShaderElement(
+  ctx: CanvasRenderingContext2D,
+  element: Element,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): Promise<void> {
+  return new Promise(async (resolve) => {
+    try {
+      // Dynamically import ShadcnShaderElement
+      const { ShadcnShaderElement } = await import("@/components/Canvas/ShadcnShaderElement");
+      
+      // Create temporary container
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.width = `${width}px`;
+      container.style.height = `${height}px`;
+      container.style.overflow = "hidden";
+      document.body.appendChild(container);
+
+      // Render shader component
+      const root = createRoot(container);
+      root.render(React.createElement(ShadcnShaderElement, { element }));
+
+      // Wait for shader to render
+      await new Promise(r => setTimeout(r, 500));
+
+      // Find canvas in the container
+      const shaderCanvas = container.querySelector("canvas");
+      
+      if (shaderCanvas) {
+        ctx.globalAlpha = (element.opacity ?? 100) / 100;
+        
+        // Apply corner radius if present
+        if (element.cornerRadius && element.cornerRadius > 0) {
+          ctx.save();
+          ctx.beginPath();
+          roundedRect(ctx, x, y, width, height, element.cornerRadius);
+          ctx.clip();
+          ctx.drawImage(shaderCanvas, x, y, width, height);
+          ctx.restore();
+        } else {
+          ctx.drawImage(shaderCanvas, x, y, width, height);
+        }
+      } else {
+        // Fallback to gradient if shader canvas not found
+        console.warn("Shader canvas not found, using gradient fallback");
+        const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+        gradient.addColorStop(0, "#3b82f6");
+        gradient.addColorStop(1, "#8b5cf6");
+        ctx.globalAlpha = (element.opacity ?? 100) / 100;
+        ctx.fillStyle = gradient;
+        ctx.fillRect(x, y, width, height);
+      }
+
+      // Cleanup
+      root.unmount();
+      document.body.removeChild(container);
+      
+      resolve();
+    } catch (error) {
+      console.error("Error rendering shader:", error);
+      // Fallback to gradient on error
+      const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
+      gradient.addColorStop(0, "#3b82f6");
+      gradient.addColorStop(1, "#8b5cf6");
+      ctx.globalAlpha = (element.opacity ?? 100) / 100;
+      ctx.fillStyle = gradient;
+      ctx.fillRect(x, y, width, height);
+      resolve();
+    }
   });
 }
 
