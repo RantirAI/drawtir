@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut, Flag } from "lucide-react";
+import { Play, Pause, RotateCcw, Type, Image, Square, Circle, Video, Pen, Mic, ZoomIn, ZoomOut, Flag, ChevronDown, ChevronRight } from "lucide-react";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -27,7 +27,9 @@ import {
 import AnimationSettingsDialog from "./AnimationSettingsDialog";
 import VoiceSelector from "./VoiceSelector";
 import VoiceTextDrawer from "./VoiceTextDrawer";
+import FrameTimelineControls from "./FrameTimelineControls";
 import { extractWaveform, renderWaveformPath } from "@/lib/audioWaveform";
+import { globalToFrameTime, frameToGlobalTime } from "@/lib/timelineUtils";
 import { toast } from "sonner";
 
 // Voice avatars
@@ -76,7 +78,8 @@ const VOICE_AVATARS: Record<string, string> = {
 };
 
 interface TimelinePanelProps {
-  frame: Frame | null;
+  frames: Frame[];
+  onUpdateFrame?: (frameId: string, updates: Partial<Frame>) => void;
   elements: Element[];
   onUpdateElement: (elementId: string, updates: Partial<Element>) => void;
   currentTime: number;
@@ -96,7 +99,8 @@ interface TimelinePanelProps {
 }
 
 export default function TimelinePanel({
-  frame,
+  frames,
+  onUpdateFrame,
   elements,
   onUpdateElement,
   currentTime,
@@ -123,6 +127,7 @@ export default function TimelinePanel({
   const [showMarkerDialog, setShowMarkerDialog] = useState(false);
   const [newMarkerTime, setNewMarkerTime] = useState(0);
   const [newMarkerLabel, setNewMarkerLabel] = useState("");
+  const [collapsedFrames, setCollapsedFrames] = useState<Set<string>>(new Set());
   const [draggingAnimation, setDraggingAnimation] = useState<{
     elementId: string;
     animationId: string;
@@ -590,12 +595,19 @@ export default function TimelinePanel({
     const element = elements.find(el => el.id === elementId);
     if (!element) return;
 
-    const delay = clickTimeInSeconds !== undefined ? clickTimeInSeconds : 0;
+    // Find the frame that contains this element
+    const elementFrame = frames.find(f => f.elements?.some(el => el.id === elementId));
+    if (!elementFrame) return;
+
+    // Convert global time to frame-relative time
+    const globalTime = clickTimeInSeconds !== undefined ? clickTimeInSeconds : 0;
+    const frameRelativeTime = globalToFrameTime(elementFrame, globalTime);
+
     const newAnimation = {
       id: `anim-${Date.now()}`,
       type: animationType as any,
       duration: "0.5s",
-      delay: `${delay}s`,
+      delay: `${frameRelativeTime}s`,
       timingFunction: "ease-out",
       iterationCount: "1",
       category: (animationType.includes("out") ? "out" : "in") as "in" | "out" | "custom",
@@ -879,6 +891,174 @@ export default function TimelinePanel({
 
             {/* Element tracks */}
             <div className="space-y-2 mt-4">
+            
+            {/* Frame Sections */}
+            {frames.map((frame, frameIndex) => {
+              const frameElements = elements.filter(el => 
+                frame.elements?.some(frameEl => frameEl.id === el.id)
+              );
+              const isCollapsed = collapsedFrames.has(frame.id);
+              const frameDuration = frame.duration || 3;
+              const frameStart = frame.startTime || 0;
+              const frameStartPercent = (frameStart / maxDuration) * 100;
+              const frameWidthPercent = (frameDuration / maxDuration) * 100;
+
+              return (
+                <div key={frame.id} className="border border-border/40 rounded-lg overflow-hidden bg-muted/10">
+                  {/* Frame Header */}
+                  <div className="flex items-center gap-2 p-2 bg-muted/30 border-b border-border/40">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => {
+                        const newCollapsed = new Set(collapsedFrames);
+                        if (isCollapsed) {
+                          newCollapsed.delete(frame.id);
+                        } else {
+                          newCollapsed.add(frame.id);
+                        }
+                        setCollapsedFrames(newCollapsed);
+                      }}
+                    >
+                      {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                    
+                    <div className="flex-1 flex items-center gap-2">
+                      <span className="text-sm font-medium">{frame.name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {frameStart.toFixed(1)}s - {(frameStart + frameDuration).toFixed(1)}s
+                        ({frameElements.length} elements)
+                      </span>
+                    </div>
+
+                    {/* Frame Duration Bar */}
+                    <div className="flex-1 relative h-4 bg-background/50 rounded border border-border/20">
+                      <div
+                        className="absolute h-full bg-primary/20 border border-primary/40 rounded"
+                        style={{
+                          left: `${frameStartPercent}%`,
+                          width: `${frameWidthPercent}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Frame Timeline Controls */}
+                  {!isCollapsed && onUpdateFrame && (
+                    <div className="px-2 py-2 bg-muted/20 border-b border-border/20">
+                      <FrameTimelineControls
+                        frame={frame}
+                        onUpdateFrame={onUpdateFrame}
+                      />
+                    </div>
+                  )}
+
+                  {/* Frame Elements */}
+                  {!isCollapsed && (
+                    <div className="p-2 space-y-2">
+                      {frameElements.length === 0 ? (
+                        <div className="text-xs text-muted-foreground text-center py-4">
+                          No elements in this frame
+                        </div>
+                      ) : (
+                        frameElements.map((element) => {
+                          const isSelected = selectedElementIds.includes(element.id);
+                          const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
+                          const elementAnimations = element.animations || [];
+                          const ElementIcon = getElementIcon(element);
+
+                          return (
+                            <ContextMenu key={element.id}>
+                              <ContextMenuTrigger asChild>
+                                <div 
+                                  className={`flex items-center gap-2 p-1 rounded transition-colors cursor-pointer ${
+                                    isSelected ? "bg-blue-500/10 ring-1 ring-blue-500/50" : "hover:bg-muted/30"
+                                  }`}
+                                  onClick={() => onElementSelect?.(element.id)}
+                                >
+                                  <div className="w-32 flex-shrink-0">
+                                    <div className="flex items-center gap-1">
+                                      <ElementIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                                      <div className="text-xs truncate font-medium">
+                                        {elementName}
+                                      </div>
+                                    </div>
+                                    {elementAnimations.length > 0 && (
+                                      <div className="text-[10px] text-muted-foreground">
+                                        {elementAnimations.length} animation{elementAnimations.length > 1 ? "s" : ""}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="flex-1 relative h-8 bg-background/50 rounded">
+                                    {elementAnimations.map((anim) => {
+                                      const delay = parseFloat(anim.delay || "0s");
+                                      const duration = parseFloat(anim.duration || "0.5s");
+                                      // Convert frame-relative time to global time for display
+                                      const globalDelay = frameToGlobalTime(frame, delay);
+                                      const startPercent = (globalDelay / maxDuration) * 100;
+                                      const widthPercent = (duration / maxDuration) * 100;
+
+                                      return (
+                                        <div
+                                          key={anim.id}
+                                          className="absolute top-1 bottom-1 rounded bg-primary/20 border border-primary/40 hover:bg-primary/30 cursor-move transition-colors group"
+                                          style={{
+                                            left: `${startPercent}%`,
+                                            width: `${widthPercent}%`,
+                                          }}
+                                          title={`${anim.type} (${delay}s + ${duration}s)`}
+                                        >
+                                          <div className="text-[9px] px-1 py-0.5 truncate text-primary-foreground/90">
+                                            {anim.type}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </ContextMenuTrigger>
+                              <ContextMenuContent className="z-[100] bg-background border border-border">
+                                <ContextMenuSub>
+                                  <ContextMenuSubTrigger>Add Animation</ContextMenuSubTrigger>
+                                  <ContextMenuSubContent className="z-[100] bg-background border border-border">
+                                    {Object.entries(animationsByCategory).map(([category, anims]) => (
+                                      <ContextMenuSub key={category}>
+                                        <ContextMenuSubTrigger>{category}</ContextMenuSubTrigger>
+                                        <ContextMenuSubContent className="z-[100] bg-background border border-border">
+                                          {anims.map((anim) => (
+                                            <ContextMenuItem
+                                              key={anim.value}
+                                              onClick={() => handleAddAnimation(element.id, anim.value, currentTime)}
+                                            >
+                                              {anim.name}
+                                            </ContextMenuItem>
+                                          ))}
+                                        </ContextMenuSubContent>
+                                      </ContextMenuSub>
+                                    ))}
+                                  </ContextMenuSubContent>
+                                </ContextMenuSub>
+                                {elementAnimations.length > 0 && (
+                                  <>
+                                    <ContextMenuSeparator />
+                                    <ContextMenuItem onClick={() => onUpdateElement(element.id, { animations: [] })}>
+                                      Clear All Animations
+                                    </ContextMenuItem>
+                                  </>
+                                )}
+                              </ContextMenuContent>
+                            </ContextMenu>
+                          );
+                        })
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
             {/* Voice tracks - multiple rows */}
             {voiceAudios.length > 0 && (() => {
               // Calculate number of tracks needed
@@ -1044,169 +1224,6 @@ export default function TimelinePanel({
               );
             })()}
             
-            {elements.map((element) => {
-              const isSelected = selectedElementIds.includes(element.id);
-              const elementName = element.name || (element.type === "text" ? element.text || "Text" : element.type === "drawing" ? "Drawing" : element.shapeType || element.type);
-              const elementAnimations = element.animations || [];
-              const ElementIcon = getElementIcon(element);
-
-              return (
-                <ContextMenu key={element.id}>
-                  <ContextMenuTrigger asChild>
-                    <div 
-                      className={`flex items-center gap-2 p-1 rounded transition-colors cursor-pointer ${
-                        isSelected ? "bg-blue-500/10 ring-1 ring-blue-500/50" : ""
-                      }`}
-                      onClick={() => onElementSelect?.(element.id)}
-                    >
-                  <div className="w-32 flex-shrink-0">
-                    <div className="flex items-center gap-1">
-                      <ElementIcon className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <div className="text-xs truncate font-medium">
-                        {elementName}
-                      </div>
-                    </div>
-                    {elementAnimations.length > 0 && (
-                      <div className="text-[10px] text-muted-foreground">
-                        {elementAnimations.length} animation{elementAnimations.length !== 1 ? 's' : ''}
-                      </div>
-                    )}
-                  </div>
-
-                  <ContextMenu>
-                    <ContextMenuTrigger asChild>
-                      <div className="flex-1 relative h-8 bg-muted/30 rounded">
-                        {elementAnimations.map((anim) => {
-                          const delay = parseDelay(anim.delay);
-                          const duration = parseDuration(anim.duration);
-                          const startPercent = (delay / maxDuration) * 100;
-                          const widthPercent = (duration / maxDuration) * 100;
-
-                          return (
-                            <AnimationSettingsDialog
-                              key={anim.id}
-                              animation={anim}
-                              elementId={element.id}
-                              onUpdate={(animId, updates) => handleUpdateAnimation(element.id, animId, updates)}
-                              onRemove={(animId) => handleRemoveAnimation(element.id, animId)}
-                              trigger={
-                                <div
-                                  className={`absolute top-1 bottom-1 rounded cursor-move transition-colors group ${
-                                    isSelected ? "bg-blue-500 hover:bg-blue-600" : "bg-primary hover:bg-primary/80"
-                                  }`}
-                                  style={{
-                                    left: `${startPercent}%`,
-                                    width: `${widthPercent}%`,
-                                  }}
-                                  onMouseDown={(e) => {
-                                    if (!timelineRef.current) return;
-                                    e.stopPropagation();
-                                    onElementSelect?.(element.id);
-                                    
-                                    const rect = timelineRef.current.getBoundingClientRect();
-                                    const barRect = e.currentTarget.getBoundingClientRect();
-                                    const clickX = e.clientX - barRect.left;
-                                    const isResizeZone = clickX > barRect.width - 8;
-                                    
-                                    if (isResizeZone) {
-                                      setDraggingAnimation({
-                                        elementId: element.id,
-                                        animationId: anim.id,
-                                        startX: e.clientX - rect.left,
-                                        startDelay: parseDelay(anim.delay),
-                                        mode: 'resize',
-                                      });
-                                    } else {
-                                      setDraggingAnimation({
-                                        elementId: element.id,
-                                        animationId: anim.id,
-                                        startX: e.clientX - rect.left,
-                                        startDelay: parseDelay(anim.delay),
-                                        mode: 'move',
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <div className="h-full flex items-center justify-between px-1">
-                                    <div className="text-[10px] text-primary-foreground font-medium truncate">
-                                      {anim.type}
-                                    </div>
-                                    <div className="w-2 h-full cursor-ew-resize flex items-center justify-center">
-                                      <div className="w-0.5 h-3 bg-primary-foreground/50 rounded" />
-                                    </div>
-                                  </div>
-                                </div>
-                              }
-                            />
-                          );
-                        })}
-                      </div>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent className="w-56" onContextMenu={(e) => e.preventDefault()}>
-                      {Object.entries(animationsByCategory).map(([category, animations]) => (
-                        <ContextMenuSub key={category}>
-                          <ContextMenuSubTrigger className="text-xs">
-                            {category}
-                          </ContextMenuSubTrigger>
-                          <ContextMenuSubContent className="w-48">
-                            {animations.map((anim) => (
-                              <ContextMenuItem
-                                key={anim.value}
-                                onClick={(e) => {
-                                  const clickTime = handleTrackRightClick(element, e as any);
-                                  handleAddAnimation(element.id, anim.value, clickTime);
-                                }}
-                                className="text-xs"
-                              >
-                                {anim.name}
-                              </ContextMenuItem>
-                            ))}
-                          </ContextMenuSubContent>
-                        </ContextMenuSub>
-                      ))}
-                      <ContextMenuSeparator />
-                      <ContextMenuItem
-                        onClick={() => onUpdateElement(element.id, { animations: [] })}
-                        className="text-xs text-destructive"
-                        disabled={elementAnimations.length === 0}
-                      >
-                        Remove All Animations
-                      </ContextMenuItem>
-                    </ContextMenuContent>
-                  </ContextMenu>
-                </div>
-              </ContextMenuTrigger>
-              <ContextMenuContent className="w-56">
-                {Object.entries(animationsByCategory).map(([category, animations]) => (
-                  <ContextMenuSub key={category}>
-                    <ContextMenuSubTrigger className="text-xs">
-                      {category}
-                    </ContextMenuSubTrigger>
-                    <ContextMenuSubContent className="w-48">
-                      {animations.map((anim) => (
-                        <ContextMenuItem
-                          key={anim.value}
-                          onClick={() => handleAddAnimation(element.id, anim.value, 0)}
-                          className="text-xs"
-                        >
-                          {anim.name}
-                        </ContextMenuItem>
-                      ))}
-                    </ContextMenuSubContent>
-                  </ContextMenuSub>
-                ))}
-                <ContextMenuSeparator />
-                <ContextMenuItem
-                  onClick={() => onUpdateElement(element.id, { animations: [] })}
-                  className="text-xs text-destructive"
-                  disabled={elementAnimations.length === 0}
-                >
-                  Remove All Animations
-                </ContextMenuItem>
-              </ContextMenuContent>
-            </ContextMenu>
-              );
-            })}
             {/* Markers Section */}
             <ContextMenu>
               <ContextMenuTrigger asChild>
