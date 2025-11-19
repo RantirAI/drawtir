@@ -1019,8 +1019,17 @@ export default function CanvasContainerNew({
                   s.id === designStepId ? { ...s, status: 'complete' as const } : s
                 ));
                 designSpec = data.designSpec;
-                // Store the target frame ID from the response
+                // Store the target frame ID and final image URL from the response
                 targetFrameIdFromResponse = data.targetFrameId;
+                if (data.imageUrl) {
+                  const frameIdToUpdate = data.targetFrameId || selectedFrameId;
+                  if (frameIdToUpdate) {
+                    handleFrameUpdate(frameIdToUpdate, {
+                      image: data.imageUrl,
+                      imageStyle: "cover",
+                    });
+                  }
+                }
               }
             } catch (e) {
               // Skip invalid JSON

@@ -1564,7 +1564,8 @@ Here's the design: {"title":"Example"}
               type: 'complete', 
               designSpec,
               model,
-              targetFrameId // Include target frame ID in response
+              targetFrameId, // Include target frame ID in response
+              imageUrl: generatedImageBase64 || null // Include final image URL for client-side use
             })}\n\n`));
             
             controller.close();
