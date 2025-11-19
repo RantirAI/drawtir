@@ -46,6 +46,7 @@ import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snaps
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { segmentImageToLayers } from "@/lib/objectSegmentation";
 import { calculateFrameTimings, getTotalDuration } from "@/lib/timelineUtils";
+import GenerationProgressOverlay from "./GenerationProgressOverlay";
 
 interface CanvasContainerNewProps {
   isEmbedded?: boolean;
@@ -216,6 +217,7 @@ export default function CanvasContainerNew({
     id: string;
     label: string;
     status: 'pending' | 'active' | 'complete' | 'error';
+    fileName?: string;
   }>>([]);
   const [generationProgressPercent, setGenerationProgressPercent] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
@@ -749,15 +751,35 @@ export default function CanvasContainerNew({
     const shouldReplicate = generationTypes.includes("replicate");
     
     if (shouldSearchUnsplash) {
-      steps.push({ id: 'unsplash', label: 'Search Unsplash Photos', status: 'pending' as const });
+      steps.push({ 
+        id: 'unsplash', 
+        label: 'Search Unsplash Photos', 
+        status: 'pending' as const,
+        fileName: 'unsplash-search.json'
+      });
     }
     if (shouldGenerateImage) {
-      steps.push({ id: 'image', label: 'Generate Image with AI', status: 'pending' as const });
+      steps.push({ 
+        id: 'image', 
+        label: 'Generate Image with AI', 
+        status: 'pending' as const,
+        fileName: 'ai-generated-image.png'
+      });
     }
     if (shouldReplicate) {
-      steps.push({ id: 'replicate', label: 'Analyze & Replicate Design', status: 'pending' as const });
+      steps.push({ 
+        id: 'replicate', 
+        label: 'Analyze & Replicate Design', 
+        status: 'pending' as const,
+        fileName: 'design-analysis.json'
+      });
     }
-    steps.push({ id: 'design', label: 'Create Poster Design', status: 'pending' as const });
+    steps.push({ 
+      id: 'design', 
+      label: 'Create Poster Design', 
+      status: 'pending' as const,
+      fileName: 'poster-layout.json'
+    });
     setGenerationSteps(steps);
     
     try {
@@ -920,10 +942,16 @@ export default function CanvasContainerNew({
               const data = JSON.parse(line.slice(6));
               
               if (data.type === 'status') {
-                // Show friendly status message
+                // Show friendly status message and update active step with file info
                 setGenerationProgress(data.message);
                 // Increment progress gradually
                 setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
+                
+                // Update the active step with more details
+                setGenerationSteps(prev => prev.map(s => 
+                  s.status === 'active' ? { ...s, fileName: data.fileName || undefined } : s
+                ));
+                
                 console.log('Status:', data.message);
               } else if (data.type === 'image_ready') {
                 // Apply image to frame immediately when ready
@@ -940,11 +968,23 @@ export default function CanvasContainerNew({
                 if (selectedFrameId && data.color) {
                   handleFrameUpdate(selectedFrameId, { backgroundColor: data.color });
                   console.log('Applied background:', data.color);
+                  
+                  // Update progress with fileName
+                  setGenerationSteps(prev => prev.map(s => 
+                    s.status === 'active' ? { ...s, fileName: 'background.json' } : s
+                  ));
                 }
               } else if (data.type === 'element') {
                 // Render element progressively as it arrives
                 if (selectedFrameId && data.element) {
                   const el = data.element;
+                  
+                  // Update progress with element type as fileName
+                  const elementFileName = `${el.type}-element-${el.id?.substring(0, 8) || 'new'}.json`;
+                  setGenerationSteps(prev => prev.map(s => 
+                    s.status === 'active' ? { ...s, fileName: elementFileName } : s
+                  ));
+                  
                   
                   // Determine border radius
                   let borderRadius = 0;
@@ -4107,6 +4147,15 @@ export default function CanvasContainerNew({
         open={showShaderLibrary}
         onClose={() => setShowShaderLibrary(false)}
         onSelect={handleShaderSelect}
+      />
+
+      {/* Generation Progress Overlay */}
+      <GenerationProgressOverlay
+        isVisible={isGenerating}
+        currentStep={generationProgress}
+        progress={generationProgressPercent}
+        totalSteps={generationSteps.length}
+        steps={generationSteps}
       />
 
       <input
