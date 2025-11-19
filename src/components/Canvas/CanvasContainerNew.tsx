@@ -3988,8 +3988,11 @@ export default function CanvasContainerNew({
           </button>
           
           <TimelinePanel
-            frame={selectedFrame}
-            elements={selectedFrame.elements || []}
+            frames={frames}
+            onUpdateFrame={(frameId, updates) => {
+              setFrames(frames.map(f => f.id === frameId ? { ...f, ...updates } : f));
+            }}
+            elements={frames.flatMap(f => f.elements || [])}
             onUpdateElement={(elementId, updates) => {
               handleElementUpdate(elementId, updates);
             }}
