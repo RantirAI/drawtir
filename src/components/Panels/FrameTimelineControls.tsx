@@ -49,19 +49,10 @@ export default function FrameTimelineControls({
   };
 
   return (
-    <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border">
-      {/* Frame Info */}
-      <div className="flex items-center gap-2">
-        <Clock className="w-4 h-4 text-muted-foreground" />
-        <span className="text-sm font-medium">{frame.name}</span>
-        <span className="text-xs text-muted-foreground ml-auto">
-          Start: {formatTimeString(frame.startTime || 0)}
-        </span>
-      </div>
-
+    <div className="space-y-2 p-2 bg-muted/30 rounded border border-border">
       {/* Duration Mode Toggle */}
       <div className="flex items-center justify-between">
-        <Label htmlFor="timeline-mode" className="text-sm">
+        <Label htmlFor="timeline-mode" className="text-xs">
           Manual Duration
         </Label>
         <Switch
@@ -72,9 +63,9 @@ export default function FrameTimelineControls({
       </div>
 
       {/* Duration Control */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <Label className="text-sm">
+          <Label className="text-xs">
             Duration {!isManualMode && "(Auto)"}
           </Label>
           <Input
@@ -82,7 +73,7 @@ export default function FrameTimelineControls({
             value={duration.toFixed(2)}
             onChange={handleDurationInputChange}
             disabled={!isManualMode}
-            className="w-20 h-8 text-xs"
+            className="w-16 h-6 text-xs"
             step="0.1"
             min="0.1"
           />
@@ -97,18 +88,12 @@ export default function FrameTimelineControls({
           disabled={!isManualMode}
           className="w-full"
         />
-        
-        {!isManualMode && (
-          <p className="text-xs text-muted-foreground">
-            Duration is calculated from element animations
-          </p>
-        )}
       </div>
 
       {/* Transition Duration */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <Label className="text-sm">Transition to Next</Label>
+          <Label className="text-xs">Transition to Next</Label>
           <span className="text-xs text-muted-foreground">
             {formatTimeString(frame.transitionDuration || 0)}
           </span>
@@ -125,20 +110,14 @@ export default function FrameTimelineControls({
       </div>
 
       {/* Frame Stats */}
-      <div className="pt-2 border-t border-border">
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div>
-            <span className="text-muted-foreground">Elements:</span>
-            <span className="ml-1 font-medium">
-              {frame.elements?.length || 0}
-            </span>
-          </div>
-          <div>
-            <span className="text-muted-foreground">End Time:</span>
-            <span className="ml-1 font-medium">
-              {formatTimeString((frame.startTime || 0) + duration)}
-            </span>
-          </div>
+      <div className="pt-1 border-t border-border">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
+            Elements: <span className="font-medium text-foreground">{frame.elements?.length || 0}</span>
+          </span>
+          <span className="text-muted-foreground">
+            End Time: <span className="font-medium text-foreground">{formatTimeString((frame.startTime || 0) + duration)}</span>
+          </span>
         </div>
       </div>
     </div>
