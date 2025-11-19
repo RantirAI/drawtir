@@ -45,6 +45,7 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 import { createSnapshot, generateThumbnail, validateSnapshot } from "@/lib/snapshot";
 import { useAutoSave } from "@/hooks/useAutoSave";
 import { segmentImageToLayers } from "@/lib/objectSegmentation";
+import { calculateFrameTimings, getTotalDuration } from "@/lib/timelineUtils";
 
 interface CanvasContainerNewProps {
   isEmbedded?: boolean;
@@ -107,6 +108,11 @@ export default function CanvasContainerNew({
       cornerRadius: 0,
       opacity: 100,
       blendMode: "normal",
+      // Timeline properties
+      duration: 3,
+      startTime: 0,
+      timelineMode: "auto",
+      transitionDuration: 0,
     },
   ]);
   const [selectedFrameId, setSelectedFrameId] = useState<string>("frame-1");
@@ -195,7 +201,7 @@ export default function CanvasContainerNew({
   const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
-  const [maxDuration, setMaxDuration] = useState(5);
+  const [maxDuration, setMaxDuration] = useState(10);
   const [isPlayingAnimation, setIsPlayingAnimation] = useState(false);
   const [animationGlobalKey, setAnimationGlobalKey] = useState(0);
   const [voiceAudios, setVoiceAudios] = useState<Array<{ id: string; url: string; text: string; delay: number; duration: number; voiceId: string; voiceName: string; track?: number; waveformData?: number[] }>>([]);
@@ -293,6 +299,23 @@ export default function CanvasContainerNew({
     setHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
   }, [frames]);
+
+  // Recalculate frame timings when frames change (timeline properties)
+  useEffect(() => {
+    if (isUndoRedoing) return;
+    
+    const updatedFrames = calculateFrameTimings(frames);
+    const hasTimingChanges = updatedFrames.some((f, i) => 
+      f.startTime !== frames[i]?.startTime || 
+      f.duration !== frames[i]?.duration
+    );
+    
+    if (hasTimingChanges) {
+      setFrames(updatedFrames);
+    }
+  }, [frames.map(f => 
+    `${f.id}-${f.timelineMode}-${f.duration}-${f.transitionDuration}-${f.elements?.length || 0}`
+  ).join('|')]);
 
   // Keyboard shortcuts and zoom controls
   useEffect(() => {
@@ -408,6 +431,12 @@ export default function CanvasContainerNew({
   // Calculate max duration based on all content
   useEffect(() => {
     let calculatedMax = 5; // Default minimum duration
+
+    // Check total frame duration from timeline system
+    const framesTotalDuration = getTotalDuration(frames);
+    if (framesTotalDuration > calculatedMax) {
+      calculatedMax = framesTotalDuration;
+    }
 
     // Check voice clips
     voiceAudios.forEach(voice => {
@@ -533,6 +562,11 @@ export default function CanvasContainerNew({
       cornerRadius: 0,
       opacity: 100,
       blendMode: "normal",
+      // Timeline properties
+      duration: 3,
+      startTime: 0, // Will be calculated by calculateFrameTimings
+      timelineMode: "auto",
+      transitionDuration: 0,
     };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
@@ -1421,7 +1455,18 @@ export default function CanvasContainerNew({
 
   const handleDuplicate = () => {
     if (!selectedFrame) return;
-    const newFrame = { ...selectedFrame, id: `frame-${frames.length + 1}`, name: `${selectedFrame.name} Copy`, x: selectedFrame.x + 50, y: selectedFrame.y + 50 };
+    const newFrame = { 
+      ...selectedFrame, 
+      id: `frame-${Date.now()}`, 
+      name: `${selectedFrame.name} Copy`, 
+      x: selectedFrame.x + 50, 
+      y: selectedFrame.y + 50,
+      // Reset timeline to let it be recalculated
+      startTime: 0,
+      duration: selectedFrame.duration || 3,
+      timelineMode: selectedFrame.timelineMode || "auto",
+      transitionDuration: selectedFrame.transitionDuration || 0,
+    };
     setFrames([...frames, newFrame]);
     setSelectedFrameId(newFrame.id);
     toast.success("Frame duplicated!");
@@ -2343,6 +2388,11 @@ export default function CanvasContainerNew({
       cornerRadius: 0,
       opacity: 100,
       blendMode: "normal",
+      // Timeline properties
+      duration: 3,
+      startTime: 0,
+      timelineMode: "auto",
+      transitionDuration: 0,
     };
 
     // Remove selected elements from current frame and add nested frame as child

@@ -223,6 +223,12 @@ export interface Frame {
   initialHeight?: number;
   enableDynamicScale?: boolean;
   
+  // Timeline properties
+  duration?: number; // Frame duration in seconds (default: auto-calculate from elements)
+  startTime?: number; // When this frame starts in global timeline (auto-calculated)
+  timelineMode?: "auto" | "manual"; // Auto = calculate from elements, Manual = user sets duration
+  transitionDuration?: number; // Transition time to next frame (e.g., crossfade)
+  
   elements?: Element[];
   frames?: Frame[]; // Nested frames support
   opacity?: number;
