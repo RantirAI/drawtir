@@ -899,6 +899,7 @@ export default function CanvasContainerNew({
       let buffer = '';
       let designSpec = null;
       let targetFrameIdFromResponse = targetFrameId; // Store target frame ID for applying changes
+      let finalImageUrl: string | null = null; // Track final generated image URL for replacing placeholders
 
       if (!reader) {
         throw new Error("No response body");
@@ -994,9 +995,14 @@ export default function CanvasContainerNew({
                       borderRadius: borderRadius,
                     };
                   } else if (el.type === "image") {
+                    const resolvedImageUrl =
+                      (el.content && el.content !== "user-uploaded-image" ? el.content : "") ||
+                      finalImageUrl ||
+                      (imagesToUse.length > 0 ? imagesToUse[0] : "");
+
                     newElement = {
                       ...baseElement,
-                      imageUrl: el.content || el.imageUrl || el.src || "",
+                      imageUrl: resolvedImageUrl,
                       imageFit: "cover",
                       fillType: "solid",
                       fill: "#000000",
