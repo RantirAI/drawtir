@@ -69,7 +69,9 @@ export default function AIGeneratorPanel({
   const [selectedGenerationTypes, setSelectedGenerationTypes] = useState<string[]>(["freeform"]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
   const [selectedModel, setSelectedModel] = useState(() => {
-    return localStorage.getItem('ai-poster-model') || 'gemini-2.5-flash';
+    const supportedModels = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.5-flash-lite'];
+    const storedModel = localStorage.getItem('ai-poster-model');
+    return storedModel && supportedModels.includes(storedModel) ? storedModel : 'gemini-2.5-flash';
   });
   const [selectedPalette, setSelectedPalette] = useState<string>("auto");
   const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
