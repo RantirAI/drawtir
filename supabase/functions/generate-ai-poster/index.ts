@@ -768,6 +768,9 @@ DO NOT generate: posters, flyers, event graphics, or anything with text/words.`
                 
                 if (!insertError) {
                   console.log('✅ Uploaded and saved generated poster image to media library');
+                  // Replace base64 with public URL for the design
+                  generatedImageBase64 = publicUrl;
+                  console.log('✅ Using public URL for image in design:', publicUrl);
                 } else {
                   console.error('Error saving to media library:', insertError);
                 }
@@ -1381,7 +1384,7 @@ Here's the design: {"title":"Example"}
                 // Find or add image element for generated image
                 const imageElements = designSpec.elements.filter((el: any) => el.type === 'image');
                 if (imageElements.length > 0) {
-                  // Update first image element to use generated image with full base64 URL
+                  // Update first image element to use generated image URL
                   imageElements[0].content = generatedImageBase64;
                   imageElements[0].imageUrl = generatedImageBase64;
                   imageElements[0].src = generatedImageBase64;
@@ -1403,6 +1406,41 @@ Here's the design: {"title":"Example"}
                   };
                   designSpec.elements.unshift(newImageElement);
                   console.log('Added new image element with generated image');
+                }
+                
+                // Add dark overlay for better text contrast if background is an image
+                const hasImage = designSpec.elements.some((el: any) => el.type === 'image');
+                const hasWhiteText = designSpec.elements.some((el: any) => 
+                  el.type === 'text' && (el.color === '#FFFFFF' || el.color === '#FFF' || el.color === 'white' || el.color?.toLowerCase().includes('white'))
+                );
+                
+                if (hasImage && hasWhiteText) {
+                  // Add semi-transparent overlay for text readability
+                  const overlayExists = designSpec.elements.some((el: any) => 
+                    el.type === 'shape' && el.color && el.color.includes('rgba') && el.color.includes('0,0,0')
+                  );
+                  
+                  if (!overlayExists) {
+                    const overlay = {
+                      type: 'shape',
+                      shape: 'rectangle',
+                      x: 0,
+                      y: Math.floor(canvasHeight * 0.5), // Bottom half
+                      width: canvasWidth,
+                      height: Math.floor(canvasHeight * 0.5),
+                      color: 'rgba(0,0,0,0.6)',
+                      borderRadius: '0',
+                      opacity: 1
+                    };
+                    // Insert overlay before text elements
+                    const firstTextIndex = designSpec.elements.findIndex((el: any) => el.type === 'text');
+                    if (firstTextIndex > 0) {
+                      designSpec.elements.splice(firstTextIndex, 0, overlay);
+                    } else {
+                      designSpec.elements.push(overlay);
+                    }
+                    console.log('✅ Added contrast overlay for white text readability');
+                  }
                 }
               }
 
