@@ -9,7 +9,8 @@ interface GenerationProgressOverlayProps {
   steps: Array<{
     id: string;
     label: string;
-    status: 'pending' | 'active' | 'complete';
+    status: 'pending' | 'active' | 'complete' | 'error';
+    fileName?: string; // Optional file name being processed
   }>;
 }
 
@@ -67,6 +68,8 @@ export default function GenerationProgressOverlay({
                       ? 'bg-primary/10 border-2 border-primary/30' 
                       : step.status === 'complete'
                       ? 'bg-green-500/10 border border-green-500/20'
+                      : step.status === 'error'
+                      ? 'bg-red-500/10 border border-red-500/20'
                       : 'bg-muted/30 border border-transparent'
                   }`}
                 >
@@ -75,10 +78,14 @@ export default function GenerationProgressOverlay({
                       ? 'bg-primary text-primary-foreground animate-pulse'
                       : step.status === 'complete'
                       ? 'bg-green-500 text-white'
+                      : step.status === 'error'
+                      ? 'bg-red-500 text-white'
                       : 'bg-muted text-muted-foreground'
                   }`}>
                     {step.status === 'complete' ? (
                       <CheckCircle2 className="w-4 h-4" />
+                    ) : step.status === 'error' ? (
+                      <span className="text-xs font-bold">✕</span>
                     ) : (
                       <Icon className="w-4 h-4" />
                     )}
@@ -87,13 +94,31 @@ export default function GenerationProgressOverlay({
                     <p className={`text-sm font-medium ${
                       step.status === 'active' ? 'text-foreground' : 
                       step.status === 'complete' ? 'text-green-600 dark:text-green-400' :
+                      step.status === 'error' ? 'text-red-600 dark:text-red-400' :
                       'text-muted-foreground'
                     }`}>
                       {step.label}
                     </p>
                     {step.status === 'active' && (
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {currentStep}
+                      <div className="mt-0.5 space-y-0.5">
+                        <p className="text-xs text-muted-foreground">
+                          {currentStep}
+                        </p>
+                        {step.fileName && (
+                          <p className="text-xs text-primary/70 font-mono">
+                            {step.fileName}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {step.status === 'complete' && step.fileName && (
+                      <p className="text-xs text-green-600/70 dark:text-green-400/70 font-mono mt-0.5">
+                        ✓ {step.fileName}
+                      </p>
+                    )}
+                    {step.status === 'error' && (
+                      <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-0.5">
+                        Failed to generate
                       </p>
                     )}
                   </div>
