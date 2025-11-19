@@ -924,6 +924,16 @@ export default function CanvasContainerNew({
                 // Increment progress gradually
                 setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
                 console.log('Status:', data.message);
+              } else if (data.type === 'image_ready') {
+                // Apply image to frame immediately when ready
+                const frameIdToUpdate = data.targetFrameId || selectedFrameId;
+                if (frameIdToUpdate && data.imageUrl) {
+                  handleFrameUpdate(frameIdToUpdate, {
+                    image: data.imageUrl,
+                    imageStyle: "cover",
+                  });
+                  console.log('✅ Applied image to frame:', data.imageUrl.substring(0, 50));
+                }
               } else if (data.type === 'background') {
                 // Apply background color immediately
                 if (selectedFrameId && data.color) {

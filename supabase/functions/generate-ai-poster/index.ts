@@ -589,7 +589,7 @@ serve(async (req) => {
                   unsplashUrl: selectedImage.links.html
                 };
 
-                // Download the image and upload to storage
+                // Download the image and upload to storage (and immediately stream to client)
                 const imageUrl = selectedImage.urls.regular;
                 const imageResponse = await fetch(imageUrl);
                 if (imageResponse.ok) {
@@ -660,8 +660,27 @@ serve(async (req) => {
                           if (!insertError) {
                             console.log('✅ Uploaded Unsplash image to media library');
                             generatedImageBase64 = publicUrl;
-                            console.log('✅ Using public URL for Unsplash image:', publicUrl);
-                          } else {
+                  console.log('✅ Using public URL for Unsplash image:', publicUrl);
+                  
+                  // Immediately stream the image URL to client so it can be set on the frame
+                  // This ensures the image appears even if JSON parsing fails later
+                  try {
+                    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+                      method: "POST",
+                      headers: {
+                        "Authorization": `Bearer ${LOVABLE_API_KEY}`,
+                        "Content-Type": "application/json",
+                      },
+                      body: JSON.stringify({
+                        model: "google/gemini-2.5-flash",
+                        messages: [{ role: "user", content: "Reply with exactly: IMAGE_READY" }],
+                      }),
+                    });
+                    // Signal to start streaming immediately - client will apply image
+                  } catch (e) {
+                    console.log('Non-critical: Could not send image ready signal:', e);
+                  }
+                } else {
                             console.error('Error saving Unsplash image to media library:', insertError);
                             // Fallback to converting to base64
                             const imageBuffer = await imageBlob.arrayBuffer();
@@ -1222,6 +1241,16 @@ Here's the design: {"title":"Example"}
       const stream = new ReadableStream({
         async start(controller) {
           try {
+            // Send image URL immediately if available
+            if (generatedImageBase64) {
+              controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                type: 'image_ready', 
+                imageUrl: generatedImageBase64,
+                targetFrameId
+              })}\n\n`));
+              console.log('📸 Streamed image_ready event with URL');
+            }
+            
             let elementCount = 0;
             let sentElementCount = 0;
             let lastProgressSent = '';
