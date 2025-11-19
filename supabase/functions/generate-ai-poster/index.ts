@@ -589,20 +589,125 @@ serve(async (req) => {
                   unsplashUrl: selectedImage.links.html
                 };
 
-                // Download the image and convert to base64
+                // Download the image and upload to storage
                 const imageUrl = selectedImage.urls.regular;
                 const imageResponse = await fetch(imageUrl);
                 if (imageResponse.ok) {
-                  const imageBlob = await imageResponse.arrayBuffer();
-                  const base64Image = btoa(
-                    new Uint8Array(imageBlob).reduce(
-                      (data, byte) => data + String.fromCharCode(byte),
-                      ''
-                    )
-                  );
+                  const imageBlob = await imageResponse.blob();
                   
-                  generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
-                  console.log('✅ Successfully fetched and converted Unsplash image to base64 (length:', base64Image.length, ')');
+                  // Upload to media library if user is authenticated
+                  const authHeader = req.headers.get('Authorization');
+                  if (authHeader) {
+                    try {
+                      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2.7.1');
+                      const supabaseClient = createClient(
+                        Deno.env.get('SUPABASE_URL') ?? '',
+                        Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+                        { global: { headers: { Authorization: authHeader } } }
+                      );
+
+                      let userId: string | null = null;
+                      try {
+                        const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+                        if (!userError && user) {
+                          userId = user.id;
+                        }
+                      } catch (e) {
+                        console.error('auth.getUser() failed:', e);
+                      }
+
+                      if (!userId) {
+                        try {
+                          const token = authHeader.replace('Bearer ', '').trim();
+                          const payload = JSON.parse(atob(token.split('.')[1]));
+                          userId = payload?.sub || null;
+                        } catch (jwtErr) {
+                          console.error('Failed to decode JWT payload:', jwtErr);
+                        }
+                      }
+
+                      if (userId) {
+                        const fileName = `unsplash-${Date.now()}.jpg`;
+                        const path = `${userId}/${fileName}`;
+
+                        const { error: uploadError } = await supabaseClient.storage
+                          .from('media')
+                          .upload(path, imageBlob, { contentType: 'image/jpeg', upsert: true });
+
+                        if (uploadError) {
+                          console.error('Error uploading Unsplash image to storage:', uploadError);
+                        } else {
+                          const { data: pub } = supabaseClient.storage.from('media').getPublicUrl(path);
+                          const publicUrl = pub?.publicUrl ?? '';
+
+                          const { error: insertError } = await supabaseClient.from('media_library').insert({
+                            user_id: userId,
+                            file_name: fileName,
+                            file_url: publicUrl || path,
+                            file_type: 'image/jpeg',
+                            file_size: imageBlob.size ?? null,
+                            source: 'unsplash',
+                            metadata: { 
+                              prompt, 
+                              unsplash: {
+                                photographer: selectedImage.user.name,
+                                photographer_url: selectedImage.user.links.html,
+                                photo_url: selectedImage.links.html
+                              }
+                            }
+                          });
+
+                          if (!insertError) {
+                            console.log('✅ Uploaded Unsplash image to media library');
+                            generatedImageBase64 = publicUrl;
+                            console.log('✅ Using public URL for Unsplash image:', publicUrl);
+                          } else {
+                            console.error('Error saving Unsplash image to media library:', insertError);
+                            // Fallback to converting to base64
+                            const imageBuffer = await imageBlob.arrayBuffer();
+                            const base64Image = btoa(
+                              new Uint8Array(imageBuffer).reduce(
+                                (data, byte) => data + String.fromCharCode(byte),
+                                ''
+                              )
+                            );
+                            generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
+                          }
+                        }
+                      } else {
+                        // No user, fallback to base64
+                        const imageBuffer = await imageBlob.arrayBuffer();
+                        const base64Image = btoa(
+                          new Uint8Array(imageBuffer).reduce(
+                            (data, byte) => data + String.fromCharCode(byte),
+                            ''
+                          )
+                        );
+                        generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
+                      }
+                    } catch (error) {
+                      console.error('Exception uploading Unsplash image:', error);
+                      // Fallback to base64
+                      const imageBuffer = await imageBlob.arrayBuffer();
+                      const base64Image = btoa(
+                        new Uint8Array(imageBuffer).reduce(
+                          (data, byte) => data + String.fromCharCode(byte),
+                          ''
+                        )
+                      );
+                      generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
+                    }
+                  } else {
+                    // No auth header, use base64
+                    const imageBuffer = await imageBlob.arrayBuffer();
+                    const base64Image = btoa(
+                      new Uint8Array(imageBuffer).reduce(
+                        (data, byte) => data + String.fromCharCode(byte),
+                        ''
+                      )
+                    );
+                    generatedImageBase64 = `data:image/jpeg;base64,${base64Image}`;
+                  }
 
                   // Trigger download for attribution (as per Unsplash API guidelines)
                   if (selectedImage.links.download_location) {
