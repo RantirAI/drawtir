@@ -229,25 +229,59 @@ export const MediaLibraryPanel = ({ onSelectImage, onClose, open = false }: Medi
   };
 
   const handleUnsplashSelect = async (image: UnsplashImage) => {
-    onSelectImage?.(image.urls.regular);
-    
-    // Save to media library
+    setUploading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) throw new Error("Not authenticated");
 
-      await supabase
+      // Download image from Unsplash
+      const response = await fetch(image.urls.regular);
+      const blob = await response.blob();
+      
+      // Upload to Supabase Storage
+      const fileName = `${user.id}/${Date.now()}-${image.id}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('media')
+        .upload(fileName, blob);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('media')
+        .getPublicUrl(fileName);
+
+      // Save to media library
+      const { error: dbError } = await supabase
         .from('media_library')
         .insert({
           user_id: user.id,
           file_name: `unsplash-${image.id}`,
-          file_url: image.urls.regular,
+          file_url: publicUrl,
           file_type: 'image/jpeg',
           source: 'unsplash',
-          thumbnail_url: image.urls.thumb,
+          thumbnail_url: publicUrl,
         });
-    } catch (error) {
-      console.error('Failed to save Unsplash image:', error);
+
+      if (dbError) throw dbError;
+
+      // Use the Supabase Storage URL
+      onSelectImage?.(publicUrl);
+      
+      toast({
+        title: "Image added",
+        description: "Unsplash image saved to your library",
+      });
+
+      loadMedia();
+    } catch (error: any) {
+      toast({
+        title: "Failed to add image",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
