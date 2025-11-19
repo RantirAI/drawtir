@@ -750,6 +750,12 @@ serve(async (req) => {
           } else {
             const errorText = await keywordExtractionResponse.text();
             console.error('❌ Keyword extraction failed:', keywordExtractionResponse.status, errorText);
+            
+            // Handle payment required error specifically
+            if (keywordExtractionResponse.status === 402) {
+              throw new Error('Credits exhausted. Please add credits to your Lovable workspace in Settings → Usage.');
+            }
+            
             throw new Error('Failed to extract keywords for Unsplash search');
           }
       } catch (error) {
