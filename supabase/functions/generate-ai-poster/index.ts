@@ -78,15 +78,15 @@ const DESIGN_JSON_SCHEMA = {
 const MODEL_CONFIGS: Record<string, any> = {
   'gemini-2.5-flash': {
     model: 'google/gemini-2.5-flash',
-    maxTokens: 4096,
+    maxTokens: 16384,
   },
   'gemini-2.5-pro': {
     model: 'google/gemini-2.5-pro',
-    maxTokens: 4096,
+    maxTokens: 16384,
   },
   'gemini-2.5-flash-lite': {
     model: 'google/gemini-2.5-flash-lite',
-    maxTokens: 4096,
+    maxTokens: 8192,
   },
 };
 
