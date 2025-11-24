@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import authBackground from "@/assets/auth-background.jpg";
 import drawtirLogo from "@/assets/drawtir-login-logo.svg";
+import rantirStudioLogo from "@/assets/rantir-studio-logo.png";
 
 const authSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -89,10 +90,10 @@ export default function Auth() {
         <div className="max-w-md w-full mx-auto">
           {/* Rantir Studio Logo */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold">Rantir Studio</h1>
+            <img src={rantirStudioLogo} alt="Rantir Studio" className="w-20" />
           </div>
 
-          <h2 className="text-xl font-semibold mb-2">
+          <h2 className="text-xl font-semibold mb-2 text-foreground">
             {isLogin ? "Welcome back" : "Create your account"}
           </h2>
           <p className="text-muted-foreground text-sm mb-6">
