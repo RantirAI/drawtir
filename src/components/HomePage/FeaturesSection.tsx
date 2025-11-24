@@ -37,9 +37,9 @@ const features = [
 
 export default function FeaturesSection() {
   return (
-    <div className="relative z-10 py-20 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+    <div className="relative z-10 py-20 px-6">
+      <div className="max-w-[960px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((feature, index) => (
             <Card 
               key={index} 

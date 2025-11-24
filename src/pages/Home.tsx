@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import HomeNav from "@/components/HomePage/HomeNav";
 import AnnounceBanner from "@/components/HomePage/AnnounceBanner";
 import FeaturesSection from "@/components/HomePage/FeaturesSection";
+import DraggablePanel from "@/components/HomePage/DraggablePanel";
 import PageFooter from "@/components/Footer/PageFooter";
 import homeBackground from "@/assets/home-background.svg";
 import panel1Home from "@/assets/panel-1-home.svg";
@@ -42,18 +43,18 @@ const Home = () => {
         }}
       />
 
-      {/* Static Decorative Panels */}
-      <div className="fixed left-24 top-48 z-0 pointer-events-none">
+      {/* Draggable Decorative Panels */}
+      <DraggablePanel initialX={96} initialY={192} zIndex={5}>
         <img src={panel1Home} alt="Panel 1" className="w-48 opacity-60" />
-      </div>
+      </DraggablePanel>
       
-      <div className="fixed right-24 top-40 z-0 pointer-events-none">
+      <DraggablePanel initialX={window.innerWidth - 320} initialY={160} zIndex={5}>
         <img src={panel2Home} alt="Panel 2" className="w-56 opacity-60" />
-      </div>
+      </DraggablePanel>
       
-      <div className="fixed left-48 bottom-32 z-0 pointer-events-none">
+      <DraggablePanel initialX={192} initialY={window.innerHeight - 256} zIndex={5}>
         <img src={panel3Home} alt="Panel 3" className="w-40 opacity-60" />
-      </div>
+      </DraggablePanel>
 
       {/* Hero Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-16">
