@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import HomeNav from "@/components/HomePage/HomeNav";
 import AnnounceBanner from "@/components/HomePage/AnnounceBanner";
-import DraggablePanel from "@/components/HomePage/DraggablePanel";
+import FeaturesSection from "@/components/HomePage/FeaturesSection";
 import PageFooter from "@/components/Footer/PageFooter";
 import homeBackground from "@/assets/home-background.svg";
 import panel1Home from "@/assets/panel-1-home.svg";
@@ -42,18 +42,18 @@ const Home = () => {
         }}
       />
 
-      {/* Draggable Panels */}
-      <DraggablePanel initialX={100} initialY={200} zIndex={5}>
-        <img src={panel1Home} alt="Panel 1" className="w-64 opacity-80" />
-      </DraggablePanel>
+      {/* Static Decorative Panels */}
+      <div className="fixed left-24 top-48 z-0 pointer-events-none">
+        <img src={panel1Home} alt="Panel 1" className="w-48 opacity-60" />
+      </div>
       
-      <DraggablePanel initialX={window.innerWidth - 350} initialY={150} zIndex={5}>
-        <img src={panel2Home} alt="Panel 2" className="w-72 opacity-80" />
-      </DraggablePanel>
+      <div className="fixed right-24 top-40 z-0 pointer-events-none">
+        <img src={panel2Home} alt="Panel 2" className="w-56 opacity-60" />
+      </div>
       
-      <DraggablePanel initialX={200} initialY={window.innerHeight - 300} zIndex={5}>
-        <img src={panel3Home} alt="Panel 3" className="w-56 opacity-80" />
-      </DraggablePanel>
+      <div className="fixed left-48 bottom-32 z-0 pointer-events-none">
+        <img src={panel3Home} alt="Panel 3" className="w-40 opacity-60" />
+      </div>
 
       {/* Hero Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pt-16">
@@ -69,21 +69,21 @@ const Home = () => {
             From posters to graphics, bring your ideas to life.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
             {isLoggedIn ? (
               <>
                 <Button 
-                  size="lg" 
+                  size="default" 
                   onClick={() => navigate("/gallery")}
-                  className="text-lg px-8"
+                  className="px-6"
                 >
                   Go to Gallery
                 </Button>
                 <Button 
-                  size="lg" 
+                  size="default" 
                   variant="outline"
                   onClick={() => navigate("/editor")}
-                  className="text-lg px-8"
+                  className="px-6"
                 >
                   Create New Project
                 </Button>
@@ -91,17 +91,17 @@ const Home = () => {
             ) : (
               <>
                 <Button 
-                  size="lg" 
+                  size="default" 
                   onClick={() => navigate("/auth")}
-                  className="text-lg px-8"
+                  className="px-6"
                 >
                   Get Started Free
                 </Button>
                 <Button 
-                  size="lg" 
+                  size="default" 
                   variant="outline"
                   onClick={() => navigate("/pricing")}
-                  className="text-lg px-8"
+                  className="px-6"
                 >
                   See Pricing
                 </Button>
@@ -110,6 +110,9 @@ const Home = () => {
           </div>
         </div>
       </div>
+
+      {/* Features Section */}
+      <FeaturesSection />
 
       <PageFooter />
     </div>
