@@ -8,9 +8,10 @@ import FeaturesSection from "@/components/HomePage/FeaturesSection";
 import DraggablePanel from "@/components/HomePage/DraggablePanel";
 import PageFooter from "@/components/Footer/PageFooter";
 import homeBackground from "@/assets/home-background.svg";
-import panel1Home from "@/assets/panel-1-home.svg";
-import panel2Home from "@/assets/panel-2-home.svg";
-import panel3Home from "@/assets/panel-3-home.svg";
+import panel1 from "@/assets/panel-1.svg";
+import panel2 from "@/assets/panel-2.svg";
+import panel3 from "@/assets/panel-3.svg";
+import PricingSection from "@/components/HomePage/PricingSection";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const Home = () => {
       
       {/* Background */}
       <div 
-        className="fixed inset-0 z-0 opacity-20"
+        className="fixed inset-0 z-0 opacity-40"
         style={{
           backgroundImage: `url(${homeBackground})`,
           backgroundSize: "cover",
@@ -44,16 +45,16 @@ const Home = () => {
       />
 
       {/* Draggable Decorative Panels */}
-      <DraggablePanel initialX={96} initialY={192} zIndex={5}>
-        <img src={panel1Home} alt="Panel 1" className="w-48 opacity-60" />
+      <DraggablePanel initialX={80} initialY={180} zIndex={5}>
+        <img src={panel1} alt="AI Generator Panel" className="w-[170px] opacity-80" />
       </DraggablePanel>
       
-      <DraggablePanel initialX={window.innerWidth - 320} initialY={160} zIndex={5}>
-        <img src={panel2Home} alt="Panel 2" className="w-56 opacity-60" />
+      <DraggablePanel initialX={window.innerWidth - 280} initialY={120} zIndex={5}>
+        <img src={panel2} alt="Style Panel" className="w-[190px] opacity-80" />
       </DraggablePanel>
       
-      <DraggablePanel initialX={192} initialY={window.innerHeight - 256} zIndex={5}>
-        <img src={panel3Home} alt="Panel 3" className="w-40 opacity-60" />
+      <DraggablePanel initialX={150} initialY={window.innerHeight - 400} zIndex={5}>
+        <img src={panel3} alt="Layers Panel" className="w-[264px] opacity-80" />
       </DraggablePanel>
 
       {/* Hero Content */}
@@ -69,51 +70,14 @@ const Home = () => {
             Create stunning visuals with our powerful design studio. 
             From posters to graphics, bring your ideas to life.
           </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
-            {isLoggedIn ? (
-              <>
-                <Button 
-                  size="default" 
-                  onClick={() => navigate("/gallery")}
-                  className="px-6"
-                >
-                  Go to Gallery
-                </Button>
-                <Button 
-                  size="default" 
-                  variant="outline"
-                  onClick={() => navigate("/editor")}
-                  className="px-6"
-                >
-                  Create New Project
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button 
-                  size="default" 
-                  onClick={() => navigate("/auth")}
-                  className="px-6"
-                >
-                  Get Started Free
-                </Button>
-                <Button 
-                  size="default" 
-                  variant="outline"
-                  onClick={() => navigate("/pricing")}
-                  className="px-6"
-                >
-                  See Pricing
-                </Button>
-              </>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Features Section */}
       <FeaturesSection />
+
+      {/* Pricing Section */}
+      <PricingSection />
 
       <PageFooter />
     </div>

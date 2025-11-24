@@ -66,6 +66,14 @@ export default function HomeNav() {
                 fill="#ffffff"
               />
             </svg>
+            <nav className="flex items-center gap-6 ml-8">
+              <a 
+                href="#pricing" 
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Pricing
+              </a>
+            </nav>
           </div>
           <div className="flex items-center gap-4">
             <img 
