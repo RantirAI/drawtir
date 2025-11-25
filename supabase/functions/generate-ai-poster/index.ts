@@ -59,6 +59,7 @@ const DESIGN_JSON_SCHEMA = {
             color: { type: 'string' },
             fontSize: { type: 'number' },
             fontWeight: { type: 'string' },
+            fontFamily: { type: 'string' },
             borderRadius: { type: 'string' },
             shape: { type: 'string' },
             iconName: { type: 'string' },
@@ -333,11 +334,11 @@ EXAMPLE 1 - Music Festival with Photo Background:
   "elements": [
     {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 800, "height": 1200},
     {"type": "shape", "x": 0, "y": 700, "width": 800, "height": 500, "color": "rgba(0,0,0,0.75)", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "SUMMER VIBES", "x": 60, "y": 780, "width": 680, "height": 100, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
-    {"type": "text", "content": "MUSIC FESTIVAL", "x": 60, "y": 880, "width": 680, "height": 60, "fontSize": 48, "fontWeight": "700", "color": "#FFD700"},
-    {"type": "text", "content": "JUNE 24-26, 2025", "x": 60, "y": 960, "width": 680, "height": 40, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
-    {"type": "text", "content": "Central Park • Gates Open 3PM", "x": 60, "y": 1010, "width": 680, "height": 35, "fontSize": 26, "fontWeight": "500", "color": "#E0E0E0"},
-    {"type": "text", "content": "www.summervibes.com", "x": 60, "y": 1110, "width": 300, "height": 28, "fontSize": 22, "fontWeight": "400", "color": "#FFD700"}
+    {"type": "text", "content": "SUMMER VIBES", "fontFamily": "Inter", "x": 60, "y": 780, "width": 680, "height": 100, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
+    {"type": "text", "content": "MUSIC FESTIVAL", "fontFamily": "Inter", "x": 60, "y": 880, "width": 680, "height": 60, "fontSize": 48, "fontWeight": "700", "color": "#FFD700"},
+    {"type": "text", "content": "JUNE 24-26, 2025", "fontFamily": "Inter", "x": 60, "y": 960, "width": 680, "height": 40, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
+    {"type": "text", "content": "Central Park • Gates Open 3PM", "fontFamily": "Inter", "x": 60, "y": 1010, "width": 680, "height": 35, "fontSize": 26, "fontWeight": "500", "color": "#E0E0E0"},
+    {"type": "text", "content": "www.summervibes.com", "fontFamily": "Inter", "x": 60, "y": 1110, "width": 300, "height": 28, "fontSize": 22, "fontWeight": "400", "color": "#FFD700"}
   ]
 }
 WHY IT WORKS: Full-bleed photo with dark overlay for text readability, clear typography hierarchy (5 levels), complete event details, strong contrast, professional polish.
@@ -349,13 +350,13 @@ EXAMPLE 2 - Concert Poster with Bold Typography:
   "elements": [
     {"type": "image", "content": "user-uploaded-image", "x": 100, "y": 150, "width": 600, "height": 500},
     {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 1200, "color": "rgba(138, 43, 226, 0.2)", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "LIVE", "x": 60, "y": 700, "width": 680, "height": 90, "fontSize": 96, "fontWeight": "900", "color": "#FF00FF"},
-    {"type": "text", "content": "IN CONCERT", "x": 60, "y": 800, "width": 680, "height": 80, "fontSize": 72, "fontWeight": "800", "color": "#FFFFFF"},
+    {"type": "text", "content": "LIVE", "fontFamily": "Bebas Neue", "x": 60, "y": 700, "width": 680, "height": 90, "fontSize": 96, "fontWeight": "900", "color": "#FF00FF"},
+    {"type": "text", "content": "IN CONCERT", "fontFamily": "Bebas Neue", "x": 60, "y": 800, "width": 680, "height": 80, "fontSize": 72, "fontWeight": "800", "color": "#FFFFFF"},
     {"type": "shape", "x": 60, "y": 910, "width": 300, "height": 80, "color": "#FF00FF", "borderRadius": "16px", "shape": "rectangle"},
-    {"type": "text", "content": "DJ STELLAR", "x": 85, "y": 930, "width": 250, "height": 40, "fontSize": 36, "fontWeight": "800", "color": "#000000"},
-    {"type": "text", "content": "FRIDAY, MARCH 15 • 9:00 PM", "x": 60, "y": 1020, "width": 680, "height": 36, "fontSize": 28, "fontWeight": "600", "color": "#FFFFFF"},
-    {"type": "text", "content": "The Metro Club • 123 Music Ave", "x": 60, "y": 1065, "width": 680, "height": 32, "fontSize": 24, "fontWeight": "500", "color": "#E0E0E0"},
-    {"type": "text", "content": "TICKETS: www.metro-club.com", "x": 60, "y": 1120, "width": 680, "height": 28, "fontSize": 22, "fontWeight": "600", "color": "#FF00FF"}
+    {"type": "text", "content": "DJ STELLAR", "fontFamily": "Bebas Neue", "x": 85, "y": 930, "width": 250, "height": 40, "fontSize": 36, "fontWeight": "800", "color": "#000000"},
+    {"type": "text", "content": "FRIDAY, MARCH 15 • 9:00 PM", "fontFamily": "Inter", "x": 60, "y": 1020, "width": 680, "height": 36, "fontSize": 28, "fontWeight": "600", "color": "#FFFFFF"},
+    {"type": "text", "content": "The Metro Club • 123 Music Ave", "fontFamily": "Inter", "x": 60, "y": 1065, "width": 680, "height": 32, "fontSize": 24, "fontWeight": "500", "color": "#E0E0E0"},
+    {"type": "text", "content": "TICKETS: www.metro-club.com", "fontFamily": "Inter", "x": 60, "y": 1120, "width": 680, "height": 28, "fontSize": 22, "fontWeight": "600", "color": "#FF00FF"}
   ]
 }
 WHY IT WORKS: Dark background makes neon accents pop, photo with purple overlay, massive typography creates impact, badge element for artist name, complete venue/time info.
@@ -956,16 +957,27 @@ DO NOT generate: posters, flyers, event graphics, or anything with text/words.`
     if (brandKitData) {
       const { colors = [], fonts = [], logos = [] } = brandKitData;
       
+      if (colors.length > 0 || fonts.length > 0) {
+        brandKitGuidance += `\n\n🚨 CRITICAL BRAND KIT REQUIREMENTS - MUST FOLLOW EXACTLY:`;
+      }
+      
       if (colors.length > 0) {
-        brandKitGuidance += `\n\n🎨 BRAND COLORS REQUIREMENT: Use these brand colors: ${colors.join(', ')}. These colors MUST be incorporated throughout your design.`;
+        brandKitGuidance += `\n\n🎨 BRAND COLORS (USE ONLY THESE): ${colors.join(', ')}
+- You MUST use ONLY these colors for all text, shapes, icons, and backgrounds
+- DO NOT use any colors outside of this brand palette
+- These are the ONLY acceptable colors in the design`;
       }
       
       if (fonts.length > 0) {
-        brandKitGuidance += `\n\n✍️ BRAND FONTS: Apply these fonts in your typography: ${fonts.join(', ')}.`;
+        brandKitGuidance += `\n\n✍️ BRAND FONTS (USE ONLY THESE): ${fonts.join(', ')}
+- You MUST use ONLY these fonts for ALL text elements
+- DO NOT use any fonts outside of this brand kit
+- Every text element MUST include "fontFamily": "${fonts[0]}" (or one of the other brand fonts)
+- EXAMPLE: {"type": "text", "content": "Title", "fontFamily": "${fonts[0]}", "fontSize": 48, "fontWeight": "800", "color": "${colors[0] || '#000000'}"}`;
       }
       
       if (logos.length > 0) {
-        brandKitGuidance += `\n\n🖼️ BRAND LOGOS: ${logos.length} logo(s) available to incorporate in the design.`;
+        brandKitGuidance += `\n\n🖼️ BRAND LOGOS: ${logos.length} logo(s) available to incorporate strategically in the design.`;
       }
     }
 
