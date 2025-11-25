@@ -982,7 +982,7 @@ export default function CanvasContainerNew({
                       text: el.content || el.text || "Text",
                       fill: el.color || "#000000",
                       fontSize: el.fontSize || 24,
-                      fontFamily: "Arial",
+                      fontFamily: el.fontFamily || "Arial",
                       fontWeight: el.fontWeight || "normal",
                     };
                   } else if (el.type === "shape") {
