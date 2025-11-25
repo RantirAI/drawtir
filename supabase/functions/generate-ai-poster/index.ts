@@ -1294,6 +1294,7 @@ Here's the design: {"title":"Example"}
             let lastProgressSent = '';
             let backgroundColor = '';
             let hasContent = false;
+            const sentElementHashes = new Set<string>(); // Track sent elements to prevent duplicates
             
             let streamComplete = false;
             while (true) {
@@ -1336,25 +1337,40 @@ Here's the design: {"title":"Example"}
                     const elementRegex = /\{[^{}]*"type"\s*:\s*"(text|shape|icon|image)"[^{}]*\}/g;
                     const elementMatches = [...fullContent.matchAll(elementRegex)];
                     
-                    // Send any new complete elements
-                    if (elementMatches.length > sentElementCount) {
-                      for (let i = sentElementCount; i < elementMatches.length; i++) {
-                        try {
-                          const elementJson = elementMatches[i][0];
-                          const element = JSON.parse(elementJson);
-                          
-                          // Validate element has required fields
-                          if (element.type && element.x !== undefined && element.y !== undefined) {
-                            controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-                              type: 'element', 
-                              element: element,
-                              index: i 
-                            })}\n\n`));
-                            sentElementCount++;
-                          }
-                        } catch (e) {
-                          // Element not complete yet, will try again next iteration
+                    // Send any new complete elements (with deduplication)
+                    for (const match of elementMatches) {
+                      try {
+                        const elementJson = match[0];
+                        const elementHash = elementJson.trim(); // Use trimmed JSON as hash
+                        
+                        // Skip if we've already sent this exact element
+                        if (sentElementHashes.has(elementHash)) {
+                          continue;
                         }
+                        
+                        const element = JSON.parse(elementJson);
+                        
+                        // Validate element has required fields and reasonable values
+                        if (element.type && 
+                            element.x !== undefined && 
+                            element.y !== undefined &&
+                            element.width !== undefined &&
+                            element.height !== undefined &&
+                            element.width > 0 &&
+                            element.height > 0) {
+                          
+                          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                            type: 'element', 
+                            element: element,
+                            index: sentElementCount 
+                          })}\n\n`));
+                          
+                          sentElementHashes.add(elementHash);
+                          sentElementCount++;
+                          console.log(`✅ Sent unique element ${sentElementCount}: ${element.type}`);
+                        }
+                      } catch (e) {
+                        // Element not complete or invalid JSON, skip
                       }
                     }
                     
@@ -1372,9 +1388,8 @@ Here's the design: {"title":"Example"}
                       progressMessage = 'Applying color palette...';
                     }
                     
-                    const elementCountMatches = fullContent.match(/"type"\s*:\s*"(text|shape|icon|image)"/g);
-                    if (elementCountMatches && elementCountMatches.length > elementCount) {
-                      elementCount = elementCountMatches.length;
+                    if (sentElementCount > elementCount) {
+                      elementCount = sentElementCount;
                       progressMessage = `Adding element ${elementCount}...`;
                     }
                     
