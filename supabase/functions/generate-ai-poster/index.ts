@@ -487,7 +487,7 @@ serve(async (req) => {
       canvasWidth = 800, 
       canvasHeight = 1200,
       model = 'gemini-2.5-flash', // Default model
-      colorPalette, // Optional color palette preference
+      brandKitData, // Brand kit with colors, fonts, logos
       generationTypes = [], // Array of generation types (e.g., ["generate-image", "create", "search-unsplash"])
       conversationHistory = [], // Chat conversation history
       currentSnapshot = null, // Current canvas state
@@ -497,6 +497,7 @@ serve(async (req) => {
     console.log('AI Poster Generation - Model:', model, 'Type:', analysisType, 'Generation types:', generationTypes);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
     console.log('Target frame:', targetFrameId);
+    console.log('Brand kit data:', brandKitData ? 'provided' : 'none');
     
     // Validate model
     const modelConfig = MODEL_CONFIGS[model];
@@ -950,11 +951,22 @@ DO NOT generate: posters, flyers, event graphics, or anything with text/words.`
       playful: /playful|fun|colorful|whimsical|cheerful/i.test(prompt),
     };
 
-    // Apply palette preference if provided
-    let paletteGuidance = '';
-    if (colorPalette && COLOR_PALETTES[colorPalette]) {
-      const colors = COLOR_PALETTES[colorPalette];
-      paletteGuidance = `\n\nCOLOR PALETTE REQUIREMENT: Use ONLY these colors from the ${colorPalette} palette: ${colors.join(', ')}. These colors MUST be used in your design.`;
+    // Apply brand kit guidance if provided
+    let brandKitGuidance = '';
+    if (brandKitData) {
+      const { colors = [], fonts = [], logos = [] } = brandKitData;
+      
+      if (colors.length > 0) {
+        brandKitGuidance += `\n\n🎨 BRAND COLORS REQUIREMENT: Use these brand colors: ${colors.join(', ')}. These colors MUST be incorporated throughout your design.`;
+      }
+      
+      if (fonts.length > 0) {
+        brandKitGuidance += `\n\n✍️ BRAND FONTS: Apply these fonts in your typography: ${fonts.join(', ')}.`;
+      }
+      
+      if (logos.length > 0) {
+        brandKitGuidance += `\n\n🖼️ BRAND LOGOS: ${logos.length} logo(s) available to incorporate in the design.`;
+      }
     }
 
     // Apply conditional style guidance
@@ -1007,7 +1019,7 @@ TASK: Create a stunning poster featuring ${images.length > 1 ? `these ${images.l
 USER REQUEST: "${prompt || 'Create an eye-catching poster with great visual impact'}"
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
-${styleGuidance}${paletteGuidance}
+${styleGuidance}${brandKitGuidance}
 
 CRITICAL SIZING GUIDELINES:
 - Display Title: ${Math.floor(canvasHeight * 0.08)}-${Math.floor(canvasHeight * 0.10)}px, weight 800-900
@@ -1053,7 +1065,7 @@ TASK: Create a stunning, professional poster design that stands out.
 USER REQUEST: "${prompt}"
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
-${styleGuidance}${paletteGuidance}
+${styleGuidance}${brandKitGuidance}
 
 CRITICAL SIZING GUIDELINES (follow exactly):
 - Display Title: ${Math.floor(canvasHeight * 0.08)}-${Math.floor(canvasHeight * 0.10)}px, weight 800-900
