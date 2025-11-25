@@ -2764,7 +2764,6 @@ export default function CanvasContainerNew({
                      onFitToFrame={() => handleFitToFrame(element.id)}
                      onFitWidth={() => handleFitWidth(element.id)}
                      onFitHeight={() => handleFitHeight(element.id)}
-                     onRemoveBackground={element.type === "image" ? () => handleRemoveBackground(element.id) : undefined}
                      onEditFill={() => {
                        setSelectedElementIds([element.id]);
                        setShowShapeSettings(true);
