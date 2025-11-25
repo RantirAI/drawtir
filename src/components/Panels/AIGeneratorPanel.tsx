@@ -6,13 +6,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Frame } from "@/types/elements";
 import type { CanvasSnapshot } from "@/types/snapshot";
+import { useBrandKit } from "@/hooks/useBrandKit";
 
 interface AIGeneratorPanelProps {
   projectId: string | null;
@@ -27,7 +27,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationTypes: string[], model: string, colorPalette?: string, conversationHistory?: ChatMessage[], targetFrameId?: string) => Promise<void>;
+  onGenerate: (generationTypes: string[], model: string, brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: ChatMessage[], targetFrameId?: string) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -64,6 +64,7 @@ export default function AIGeneratorPanel({
   onRestoreConversation,
   onClose,
 }: AIGeneratorPanelProps) {
+  const { brandKits, activeBrandKit } = useBrandKit();
   const [activeTab, setActiveTab] = useState("generator");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedGenerationTypes, setSelectedGenerationTypes] = useState<string[]>(["freeform"]);
@@ -73,25 +74,8 @@ export default function AIGeneratorPanel({
     const storedModel = localStorage.getItem('ai-poster-model');
     return storedModel && supportedModels.includes(storedModel) ? storedModel : 'gemini-2.5-flash';
   });
-  const [selectedPalette, setSelectedPalette] = useState<string>("auto");
-  const [customColors, setCustomColors] = useState<string[]>(["", "", "", ""]);
-  const [accordionValue, setAccordionValue] = useState<string>("");
-  const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
-
-  const colorPalettes = [
-    { id: "auto", name: "Auto Select", colors: [] },
-    { id: "energetic", name: "Energetic", colors: ["#FF6B35", "#F7931E", "#FDC830", "#F37335"] },
-    { id: "calm", name: "Calm", colors: ["#89B0AE", "#BEE3DB", "#FFD6BA", "#FEEAFA"] },
-    { id: "professional", name: "Professional", colors: ["#2C3E50", "#34495E", "#7F8C8D", "#BDC3C7"] },
-    { id: "playful", name: "Playful", colors: ["#FF6B9D", "#C06C84", "#6C5B7B", "#355C7D"] },
-    { id: "elegant", name: "Elegant", colors: ["#1A1A2E", "#16213E", "#0F3460", "#533483"] },
-    { id: "vibrant", name: "Vibrant", colors: ["#FF00FF", "#00FFFF", "#FFFF00", "#FF0080"] },
-    { id: "sunset", name: "Sunset", colors: ["#FF6F61", "#FF9068", "#FFB088", "#FFC3A0"] },
-    { id: "ocean", name: "Ocean", colors: ["#006994", "#0582CA", "#00A6FB", "#7DCFB6"] },
-    { id: "neon", name: "Neon", colors: ["#39FF14", "#FF10F0", "#00F0FF", "#FFD700"] },
-  ];
 
   // Save model preference
   useEffect(() => {
@@ -152,18 +136,15 @@ export default function AIGeneratorPanel({
     };
     setChatMessages(prev => [...prev, userMessage]);
     
-    let paletteToUse = selectedPalette !== "auto" ? selectedPalette : undefined;
-    
-    // If custom palette is selected and has valid colors, use those
-    if (selectedPalette === "custom") {
-      const validColors = customColors.filter(c => c.trim() !== "");
-      if (validColors.length > 0) {
-        paletteToUse = validColors.join(",");
-      }
-    }
+    // Get brand kit data if available
+    const brandKitData = activeBrandKit ? {
+      colors: activeBrandKit.colors,
+      fonts: activeBrandKit.fonts,
+      logos: activeBrandKit.logo_urls
+    } : undefined;
     
     // Pass all selected generation types and conversation history, including target frame
-    await onGenerate(selectedGenerationTypes, selectedModel, paletteToUse, [...chatMessages, userMessage], selectedFrameId);
+    await onGenerate(selectedGenerationTypes, selectedModel, brandKitData, [...chatMessages, userMessage], selectedFrameId);
     
     // Add AI response to chat
     const aiMessage: ChatMessage = {
@@ -203,44 +184,6 @@ export default function AIGeneratorPanel({
         return [...prev, typeId];
       }
     });
-  };
-
-  const handleCustomColorChange = (index: number, value: string) => {
-    const newColors = [...customColors];
-    newColors[index] = value;
-    setCustomColors(newColors);
-  };
-
-  const addCustomColor = () => {
-    if (customColors.length < 8) {
-      setCustomColors([...customColors, ""]);
-    }
-  };
-
-  const removeCustomColor = (index: number) => {
-    if (customColors.length > 1) {
-      setCustomColors(customColors.filter((_, i) => i !== index));
-    }
-  };
-
-  const handlePaletteColorClick = (colorIndex: number) => {
-    // Convert preset palette to custom if needed
-    if (selectedPalette !== "custom" && selectedPalette !== "auto") {
-      const currentPalette = colorPalettes.find(p => p.id === selectedPalette);
-      if (currentPalette && currentPalette.colors.length > 0) {
-        setCustomColors(currentPalette.colors);
-        setSelectedPalette("custom");
-      }
-    }
-    setEditingColorIndex(colorIndex);
-  };
-
-  const getCurrentColors = () => {
-    if (selectedPalette === "custom") {
-      return customColors;
-    }
-    const palette = colorPalettes.find(p => p.id === selectedPalette);
-    return palette?.colors || [];
   };
 
   const handleRestore = (conversation: Conversation) => {
@@ -565,156 +508,71 @@ export default function AIGeneratorPanel({
               </div>
             )}
 
-            {/* Color Palette Selection - Accordion Style */}
-            <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
-              <Label className="text-xs text-muted-foreground">Color Palette</Label>
-              
-              {/* Selected Palette Display */}
-              {selectedPalette && (
-                <div className="p-2 rounded-lg border border-primary bg-primary/10">
-                  <div className="text-xs font-medium mb-1.5">
-                    {colorPalettes.find(p => p.id === selectedPalette)?.name || "Custom"}
-                    {selectedPalette !== "auto" && (
-                      <span className="text-[10px] text-muted-foreground ml-1">(click colors to edit)</span>
-                    )}
-                  </div>
-                  {selectedPalette === "auto" ? (
-                    <div className="h-4 rounded bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500 w-full" />
-                  ) : (
+            {/* Brand Kit Selection */}
+            {activeBrandKit && (
+              <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
+                <Label className="text-xs text-muted-foreground">Brand Kit</Label>
+                
+                <div className="p-3 rounded-lg border border-primary bg-primary/10">
+                  <div className="text-sm font-medium mb-3">{activeBrandKit.name}</div>
+                  
+                  {/* Colors */}
+                  {activeBrandKit.colors.length > 0 && (
                     <div className="space-y-2">
-                      <div className="flex gap-1">
-                        {getCurrentColors().map((color, idx) => (
-                          <button
+                      <div className="text-xs text-muted-foreground">Colors</div>
+                      <div className="flex gap-1 flex-wrap">
+                        {activeBrandKit.colors.map((color, idx) => (
+                          <div
                             key={idx}
-                            onClick={() => handlePaletteColorClick(idx)}
-                            className="flex-1 h-4 rounded border border-border hover:ring-2 hover:ring-primary transition-all cursor-pointer"
+                            className="w-8 h-8 rounded border border-border"
                             style={{ backgroundColor: color }}
-                            title={`Click to edit ${color}`}
+                            title={color}
                           />
                         ))}
                       </div>
-                      {editingColorIndex !== null && (
-                        <div className="flex gap-2 items-center">
-                          <Input
-                            value={customColors[editingColorIndex] || ""}
-                            onChange={(e) => handleCustomColorChange(editingColorIndex, e.target.value)}
-                            placeholder="#FFFFFF"
-                            className="h-7 text-xs"
-                            autoFocus
-                          />
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0"
-                            onClick={() => setEditingColorIndex(null)}
+                    </div>
+                  )}
+                  
+                  {/* Fonts */}
+                  {activeBrandKit.fonts.length > 0 && (
+                    <div className="space-y-2 mt-3">
+                      <div className="text-xs text-muted-foreground">Fonts</div>
+                      <div className="flex gap-2 flex-wrap">
+                        {activeBrandKit.fonts.map((font, idx) => (
+                          <div
+                            key={idx}
+                            className="px-2 py-1 rounded bg-background border border-border text-xs"
+                            style={{ fontFamily: font }}
                           >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      )}
+                            {font}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Logos */}
+                  {activeBrandKit.logo_urls.length > 0 && (
+                    <div className="space-y-2 mt-3">
+                      <div className="text-xs text-muted-foreground">Logos ({activeBrandKit.logo_urls.length})</div>
                     </div>
                   )}
                 </div>
-              )}
-
-              {/* Palette Accordion */}
-              <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue}>
-                <AccordionItem value="palettes" className="border-border">
-                  <AccordionTrigger className="text-xs py-1.5 hover:no-underline">
-                    Change Palette
-                  </AccordionTrigger>
-                  <AccordionContent className="pb-1.5 max-h-[300px] overflow-y-auto">
-                    <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                      {colorPalettes.map((palette) => (
-                        <button
-                          key={palette.id}
-                          onClick={() => {
-                            setSelectedPalette(palette.id);
-                            setAccordionValue("");
-                            setEditingColorIndex(null);
-                          }}
-                          className={`p-1.5 rounded-lg border transition-all ${
-                            selectedPalette === palette.id
-                              ? "border-primary bg-primary/10"
-                              : "border-border bg-background hover:bg-muted"
-                          }`}
-                        >
-                          <div className="text-[10px] font-medium mb-1">{palette.name}</div>
-                          {palette.colors.length > 0 ? (
-                            <div className="flex gap-0.5">
-                              {palette.colors.map((color, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex-1 h-3 rounded-sm"
-                                  style={{ backgroundColor: color }}
-                                />
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="h-3 rounded-sm bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-500" />
-                          )}
-                        </button>
-                      ))}
-                      
-                      {/* Custom Palette Option */}
-                      <button
-                        onClick={() => {
-                          setSelectedPalette("custom");
-                          setAccordionValue("");
-                          setEditingColorIndex(null);
-                        }}
-                        className={`p-2 rounded-lg border transition-all ${
-                          selectedPalette === "custom"
-                            ? "border-primary bg-primary/10"
-                            : "border-border bg-background hover:bg-muted"
-                        }`}
-                      >
-                        <div className="text-xs font-medium mb-1.5">Custom</div>
-                        <div className="h-4 rounded bg-gradient-to-r from-gray-300 to-gray-600" />
-                      </button>
-                    </div>
-                    
-                    {/* Custom Color Inputs */}
-                    {selectedPalette === "custom" && (
-                      <div className="mt-3 space-y-2">
-                        <Label className="text-xs text-muted-foreground">Custom Colors (hex codes)</Label>
-                        {customColors.map((color, idx) => (
-                          <div key={idx} className="flex gap-2">
-                            <Input
-                              value={color}
-                              onChange={(e) => handleCustomColorChange(idx, e.target.value)}
-                              placeholder="#FFFFFF"
-                              className="h-8 text-xs"
-                            />
-                            {customColors.length > 1 && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                                onClick={() => removeCustomColor(idx)}
-                              >
-                                <X className="h-3 w-3" />
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                        {customColors.length < 8 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-7 text-xs w-full"
-                            onClick={addCustomColor}
-                          >
-                            <Plus className="h-3 w-3 mr-1" />
-                            Add Color
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
+                
+                <p className="text-[10px] text-muted-foreground">
+                  AI will use your brand kit colors, fonts, and logos in the design
+                </p>
+              </div>
+            )}
+            
+            {!activeBrandKit && (
+              <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2">
+                <Label className="text-xs text-muted-foreground">No Brand Kit Selected</Label>
+                <p className="text-xs text-muted-foreground">
+                  Open Brand Kit panel to create or select a brand kit for consistent AI designs
+                </p>
+              </div>
+            )}
 
             {/* Generation Preferences */}
             <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">

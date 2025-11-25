@@ -711,7 +711,7 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", colorPalette?: string, conversationHistory?: any[], targetFrameId?: string) => {
+  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: any[], targetFrameId?: string) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
@@ -875,7 +875,7 @@ export default function CanvasContainerNew({
             canvasWidth,
             canvasHeight,
             model,
-            colorPalette,
+            brandKitData, // Pass brand kit data instead of colorPalette
             generationTypes, // Pass generation types to backend
             conversationHistory: conversationHistory || [], // Pass conversation history
             currentSnapshot, // Pass current canvas state
