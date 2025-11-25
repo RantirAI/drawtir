@@ -990,7 +990,7 @@ export default function CanvasContainerNew({
                       ...baseElement,
                       shapeType: el.shape || "rectangle",
                       fill: el.color || "#000000",
-                      stroke: "#000000",
+                      stroke: "transparent",
                       strokeWidth: 0,
                       borderRadius: borderRadius,
                     };

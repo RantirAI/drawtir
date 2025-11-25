@@ -79,15 +79,15 @@ const DESIGN_JSON_SCHEMA = {
 const MODEL_CONFIGS: Record<string, any> = {
   'gemini-2.5-flash': {
     model: 'google/gemini-2.5-flash',
-    maxTokens: 16384,
+    maxTokens: 8192,
   },
   'gemini-2.5-pro': {
     model: 'google/gemini-2.5-pro',
-    maxTokens: 16384,
+    maxTokens: 8192,
   },
   'gemini-2.5-flash-lite': {
     model: 'google/gemini-2.5-flash-lite',
-    maxTokens: 8192,
+    maxTokens: 4096,
   },
 };
 
@@ -958,21 +958,22 @@ DO NOT generate: posters, flyers, event graphics, or anything with text/words.`
       const { colors = [], fonts = [], logos = [] } = brandKitData;
       
       if (colors.length > 0 || fonts.length > 0) {
-        brandKitGuidance += `\n\n🚨 CRITICAL BRAND KIT REQUIREMENTS - MUST FOLLOW EXACTLY:`;
+        brandKitGuidance += `\n\n🎨 BRAND KIT GUIDELINES (for creative consistency):`;
       }
       
       if (colors.length > 0) {
-        brandKitGuidance += `\n\n🎨 BRAND COLORS (USE ONLY THESE): ${colors.join(', ')}
-- You MUST use ONLY these colors for all text, shapes, icons, and backgrounds
-- DO NOT use any colors outside of this brand palette
-- These are the ONLY acceptable colors in the design`;
+        brandKitGuidance += `\n\n🎨 BRAND COLORS: ${colors.join(', ')}
+- Primarily use these brand colors as your main palette
+- You can use variations, tints, shades, or transparency (rgba) of these colors
+- You can add complementary colors for accents if it enhances the design
+- Be creative while keeping the brand colors as the primary focus`;
       }
       
       if (fonts.length > 0) {
-        brandKitGuidance += `\n\n✍️ BRAND FONTS (USE ONLY THESE): ${fonts.join(', ')}
-- You MUST use ONLY these fonts for ALL text elements
-- DO NOT use any fonts outside of this brand kit
-- Every text element MUST include "fontFamily": "${fonts[0]}" (or one of the other brand fonts)
+        brandKitGuidance += `\n\n✍️ BRAND FONTS: ${fonts.join(', ')}
+- Use these fonts as your primary typefaces for text elements
+- You can mix and match these fonts for hierarchy (e.g., one for headings, another for body)
+- Feel free to use font weights creatively within these families
 - EXAMPLE: {"type": "text", "content": "Title", "fontFamily": "${fonts[0]}", "fontSize": 48, "fontWeight": "800", "color": "${colors[0] || '#000000'}"}`;
       }
       
@@ -1091,12 +1092,14 @@ CRITICAL SIZING GUIDELINES (follow exactly):
 MANDATORY DESIGN REQUIREMENTS:
 1. Choose ONE curated color palette that matches the mood (${Object.keys(COLOR_PALETTES).join(', ')})
 2. Create dramatic visual hierarchy (title must be 2-3x larger than body)
-3. Use 8pt grid spacing (all x, y, width, height must be multiples of 8 or 16)
+3. Use 8pt grid spacing (all x, y, width, height should align to 8 or 16 pixel increments when possible)
 4. Add 2-4 strategic shapes for visual interest (circles, rectangles with borderRadius)
 5. Include 1-3 relevant icons from lucide-react library
-6. Follow rule of thirds for element placement (33%, 66% positions)
+6. Follow rule of thirds for element placement when appropriate (33%, 66% positions)
 7. 🚨 CRITICAL COLOR CONTRAST: NEVER use white text (#FFFFFF, #FFF, rgb(255,255,255)) on white backgrounds OR black text (#000000, #000, rgb(0,0,0)) on black backgrounds. Text must be clearly visible!
 8. Use generous whitespace - don't crowd elements
+9. 🚨 ALWAYS INCLUDE TEXT ELEMENTS: Every design must have at least 2-3 text elements (title, subtitle, or body text)
+10. BE CREATIVE: Don't be afraid to experiment with layouts, overlapping elements, and bold compositions
 
 🚨 COLOR CONTRAST RULES (STRICTLY ENFORCE):
 - If background is light (white, cream, light gray), text MUST be dark (#000000, #1A1A1A, dark colors)
@@ -1184,6 +1187,11 @@ ${conversationHistory.slice(0, -1).map((msg: any) => `${msg.role}: ${msg.content
 8. NO trailing commas anywhere in the JSON
 9. Ensure all brackets [ ] and braces { } are perfectly balanced
 10. The response must be directly parseable by JSON.parse() with ZERO preprocessing
+11. 🚨 ALWAYS INCLUDE TEXT ELEMENTS: The "elements" array MUST contain at least 2-3 text elements with content
+12. Keep the JSON concise - aim for 2000-4000 characters total to avoid truncation
+
+Example of CORRECT format:
+{"title":"Example","backgroundColor":"#FFFFFF","elements":[{"type":"text","content":"Title","x":50,"y":50,"width":300,"height":80,"fontSize":48,"fontWeight":"bold","color":"#000000"},{"type":"shape","shape":"circle","x":100,"y":200,"width":100,"height":100,"color":"#FF0000","borderRadius":"50%"}],"style":"Modern","mood":"Professional"}
 
 Example of CORRECT format:
 {"title":"Example","backgroundColor":"#FFFFFF","elements":[{"type":"text","content":"Hello"}],"style":"Modern","mood":"Professional"}
