@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
@@ -508,71 +509,99 @@ export default function AIGeneratorPanel({
               </div>
             )}
 
-            {/* Brand Kit Selection */}
-            {activeBrandKit && (
-              <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-3">
-                <Label className="text-xs text-muted-foreground">Brand Kit</Label>
-                
-                <div className="p-3 rounded-lg border border-primary bg-primary/10">
-                  <div className="text-sm font-medium mb-3">{activeBrandKit.name}</div>
-                  
-                  {/* Colors */}
-                  {activeBrandKit.colors.length > 0 && (
-                    <div className="space-y-2">
-                      <div className="text-xs text-muted-foreground">Colors</div>
-                      <div className="flex gap-1 flex-wrap">
-                        {activeBrandKit.colors.map((color, idx) => (
-                          <div
-                            key={idx}
-                            className="w-8 h-8 rounded border border-border"
-                            style={{ backgroundColor: color }}
-                            title={color}
-                          />
-                        ))}
+            {/* Brand Kit Selection - Compact */}
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground">Brand Kit</Label>
+              
+              {activeBrandKit ? (
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="brandkit" className="border rounded-lg border-primary bg-primary/10">
+                    <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                      <div className="flex items-center gap-2 flex-1">
+                        <div className="text-sm font-medium">{activeBrandKit.name}</div>
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Fonts */}
-                  {activeBrandKit.fonts.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      <div className="text-xs text-muted-foreground">Fonts</div>
-                      <div className="flex gap-2 flex-wrap">
-                        {activeBrandKit.fonts.map((font, idx) => (
-                          <div
-                            key={idx}
-                            className="px-2 py-1 rounded bg-background border border-border text-xs"
-                            style={{ fontFamily: font }}
-                          >
-                            {font}
+                      <div className="flex items-center gap-3 mr-2 text-[10px] text-muted-foreground">
+                        {activeBrandKit.colors.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            <span>Colors</span>
+                            <div className="flex gap-0.5">
+                              {activeBrandKit.colors.slice(0, 3).map((color, idx) => (
+                                <div
+                                  key={idx}
+                                  className="w-3 h-3 rounded-sm border border-border/50"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                              {activeBrandKit.colors.length > 3 && (
+                                <span className="text-[10px]">+{activeBrandKit.colors.length - 3}</span>
+                              )}
+                            </div>
                           </div>
-                        ))}
+                        )}
+                        {activeBrandKit.fonts.length > 0 && (
+                          <span>Fonts</span>
+                        )}
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Logos */}
-                  {activeBrandKit.logo_urls.length > 0 && (
-                    <div className="space-y-2 mt-3">
-                      <div className="text-xs text-muted-foreground">Logos ({activeBrandKit.logo_urls.length})</div>
-                    </div>
-                  )}
+                    </AccordionTrigger>
+                    <AccordionContent className="px-3 pb-3 pt-1">
+                      {/* Colors */}
+                      {activeBrandKit.colors.length > 0 && (
+                        <div className="space-y-1.5 mb-2">
+                          <div className="text-xs text-muted-foreground">Colors</div>
+                          <div className="flex gap-1 flex-wrap">
+                            {activeBrandKit.colors.map((color, idx) => (
+                              <div
+                                key={idx}
+                                className="w-7 h-7 rounded border border-border"
+                                style={{ backgroundColor: color }}
+                                title={color}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Fonts */}
+                      {activeBrandKit.fonts.length > 0 && (
+                        <div className="space-y-1.5 mt-2">
+                          <div className="text-xs text-muted-foreground">Fonts</div>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {activeBrandKit.fonts.map((font, idx) => (
+                              <div
+                                key={idx}
+                                className="px-2 py-0.5 rounded bg-background border border-border text-[10px]"
+                                style={{ fontFamily: font }}
+                              >
+                                {font}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Logos */}
+                      {activeBrandKit.logo_urls.length > 0 && (
+                        <div className="mt-2">
+                          <div className="text-xs text-muted-foreground">
+                            {activeBrandKit.logo_urls.length} logo{activeBrandKit.logo_urls.length !== 1 ? 's' : ''} available
+                          </div>
+                        </div>
+                      )}
+                      
+                      <p className="text-[10px] text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                        AI will use your brand kit in the design
+                      </p>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              ) : (
+                <div className="bg-muted/30 border border-border rounded-lg p-3">
+                  <p className="text-xs text-muted-foreground">
+                    No brand kit selected. Open Brand Kit panel to create one.
+                  </p>
                 </div>
-                
-                <p className="text-[10px] text-muted-foreground">
-                  AI will use your brand kit colors, fonts, and logos in the design
-                </p>
-              </div>
-            )}
-            
-            {!activeBrandKit && (
-              <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2">
-                <Label className="text-xs text-muted-foreground">No Brand Kit Selected</Label>
-                <p className="text-xs text-muted-foreground">
-                  Open Brand Kit panel to create or select a brand kit for consistent AI designs
-                </p>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Generation Preferences */}
             <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
