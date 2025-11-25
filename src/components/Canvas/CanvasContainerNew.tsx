@@ -1015,14 +1015,40 @@ export default function CanvasContainerNew({
                   }
 
                   if (newElement) {
-                    // Add element to the current frame (building on top of existing design)
+                    // Add element to the current frame (with deduplication)
                     setFrames(prevFrames => prevFrames.map(f => {
                       if (f.id === selectedFrameId) {
-                        return { ...f, elements: [...(f.elements || []), newElement] };
+                        const existingElements = f.elements || [];
+                        
+                        // Check if this element already exists (deduplication)
+                        const isDuplicate = existingElements.some(existing => {
+                          if (existing.type !== newElement.type) return false;
+                          
+                          // For text elements, check content and position
+                          if (newElement.type === 'text') {
+                            return existing.text === newElement.text &&
+                                   existing.x === newElement.x &&
+                                   existing.y === newElement.y &&
+                                   existing.fontSize === newElement.fontSize;
+                          }
+                          
+                          // For other elements, check position and size
+                          return existing.x === newElement.x &&
+                                 existing.y === newElement.y &&
+                                 existing.width === newElement.width &&
+                                 existing.height === newElement.height;
+                        });
+                        
+                        if (isDuplicate) {
+                          console.log(`⚠️ Skipped duplicate element:`, el.type);
+                          return f;
+                        }
+                        
+                        return { ...f, elements: [...existingElements, newElement] };
                       }
                       return f;
                     }));
-                    console.log(`Added element ${data.index + 1} on top of existing design:`, el.type);
+                    console.log(`✅ Added element ${data.index + 1}:`, el.type);
                   }
                 }
               } else if (data.type === 'progress') {
