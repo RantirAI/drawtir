@@ -78,6 +78,7 @@ export default function AIGeneratorPanel({
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [targetFrameMode, setTargetFrameMode] = useState<string | null>(null); // null = general mode, frameId = specific frame mode
+  const [explicitFrameCount, setExplicitFrameCount] = useState<number>(1); // Explicit frame count override
 
   // Target frame mode starts in general mode by default.
   // It will only be set when the user explicitly clicks "Target Frame" in the UI.
@@ -160,36 +161,43 @@ export default function AIGeneratorPanel({
     
     // Only detect multi-frame intent if we're in general mode (not targeting a specific frame)
     if (!targetFrameMode) {
-      // Detect explicit numbers (e.g., "3 posters", "create 5 frames")
-      const numberMatch = lowerPrompt.match(/\b(\d+)\s+(posters?|frames?)\b/) || 
-                         lowerPrompt.match(/\b(create|generate|make)\s+(\d+)\b/);
-      
-      // Detect word numbers (e.g., "three posters", "five frames")
-      const wordNumbers: Record<string, number> = {
-        'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
-        'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
-      };
-      
-      if (numberMatch && numberMatch[1]) {
-        frameCount = parseInt(numberMatch[1]) || parseInt(numberMatch[2]) || 1;
-        wantsMultipleFrames = frameCount > 1;
+      // If user has explicitly set a frame count > 1, use that
+      if (explicitFrameCount > 1) {
+        frameCount = explicitFrameCount;
+        wantsMultipleFrames = true;
       } else {
-        // Check for word numbers
-        for (const [word, num] of Object.entries(wordNumbers)) {
-          if (lowerPrompt.includes(word + ' poster') || lowerPrompt.includes(word + ' frame')) {
-            frameCount = num;
-            wantsMultipleFrames = true;
-            break;
+        // Otherwise, detect from prompt
+        // Detect explicit numbers (e.g., "3 posters", "create 5 frames")
+        const numberMatch = lowerPrompt.match(/\b(\d+)\s+(posters?|frames?)\b/) || 
+                           lowerPrompt.match(/\b(create|generate|make)\s+(\d+)\b/);
+        
+        // Detect word numbers (e.g., "three posters", "five frames")
+        const wordNumbers: Record<string, number> = {
+          'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
+          'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+        };
+        
+        if (numberMatch && numberMatch[1]) {
+          frameCount = parseInt(numberMatch[1]) || parseInt(numberMatch[2]) || 1;
+          wantsMultipleFrames = frameCount > 1;
+        } else {
+          // Check for word numbers
+          for (const [word, num] of Object.entries(wordNumbers)) {
+            if (lowerPrompt.includes(word + ' poster') || lowerPrompt.includes(word + ' frame')) {
+              frameCount = num;
+              wantsMultipleFrames = true;
+              break;
+            }
           }
         }
-      }
-      
-      // Fallback: check for keywords without explicit count
-      if (!wantsMultipleFrames) {
-        const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'several', 'few', 'variety'];
-        wantsMultipleFrames = multiFrameKeywords.some(keyword => lowerPrompt.includes(keyword));
-        if (wantsMultipleFrames) {
-          frameCount = 3; // Default to 3 frames when no specific number is given
+        
+        // Fallback: check for keywords without explicit count
+        if (!wantsMultipleFrames) {
+          const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'several', 'few', 'variety'];
+          wantsMultipleFrames = multiFrameKeywords.some(keyword => lowerPrompt.includes(keyword));
+          if (wantsMultipleFrames) {
+            frameCount = 3; // Default to 3 frames when no specific number is given
+          }
         }
       }
     }
@@ -414,7 +422,7 @@ export default function AIGeneratorPanel({
                 </p>
               </div>
             ) : (
-              <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
+              <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-3">
                 <div className="flex items-center justify-between">
                   <Label className="text-xs text-muted-foreground">Mode: General</Label>
                   {frames.length > 1 && (
@@ -431,8 +439,45 @@ export default function AIGeneratorPanel({
                     </Button>
                   )}
                 </div>
+                
+                {/* Frame Count Control */}
+                <div className="flex items-center justify-between gap-3">
+                  <Label className="text-xs font-medium">Posters to generate:</Label>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExplicitFrameCount(Math.max(1, explicitFrameCount - 1))}
+                      disabled={explicitFrameCount <= 1}
+                      className="h-7 w-7 p-0"
+                    >
+                      -
+                    </Button>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={explicitFrameCount}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1;
+                        setExplicitFrameCount(Math.min(10, Math.max(1, val)));
+                      }}
+                      className="h-7 w-14 text-center text-sm"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setExplicitFrameCount(Math.min(10, explicitFrameCount + 1))}
+                      disabled={explicitFrameCount >= 10}
+                      className="h-7 w-7 p-0"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+                
                 <p className="text-xs text-muted-foreground">
-                  Create new frames or use keywords like "3 posters" to generate multiple frames at once.
+                  Set the number of posters (1-10) or use prompt keywords like "3 posters".
                 </p>
               </div>
             )}
