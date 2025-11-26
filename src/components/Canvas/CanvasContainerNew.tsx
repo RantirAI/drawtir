@@ -1198,14 +1198,15 @@ export default function CanvasContainerNew({
                   console.log('Applied background:', data.color);
                 }
               } else if (data.type === 'element') {
-                // In multi-frame mode we ignore per-element streaming so that
-                // each poster is built as its own frame from the final frames[] spec.
-                if (wantsMultipleFrames) {
-                  break;
-                }
+                // Render element progressively as it arrives.
+                // In multi-poster mode, stream into the first empty poster slot
+                // so users still see at least one complete design even if
+                // the final JSON spec is malformed.
+                const targetForElementId = wantsMultipleFrames && emptyFrameIds.length > 0
+                  ? emptyFrameIds[0]
+                  : selectedFrameId;
 
-                // Render element progressively as it arrives (single-frame mode only)
-                if (selectedFrameId && data.element) {
+                if (targetForElementId && data.element) {
                   const el = data.element;
                   
                   // Determine border radius
@@ -1277,9 +1278,9 @@ export default function CanvasContainerNew({
                   }
 
                   if (newElement) {
-                    // Add element to the current frame (with deduplication)
+                    // Add element to the target frame (with deduplication)
                     setFrames(prevFrames => prevFrames.map(f => {
-                      if (f.id === selectedFrameId) {
+                      if (f.id === targetForElementId) {
                         const existingElements = f.elements || [];
                         
                         // Check if this element already exists (deduplication)
