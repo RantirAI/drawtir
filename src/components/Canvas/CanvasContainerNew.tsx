@@ -1065,7 +1065,13 @@ export default function CanvasContainerNew({
                   console.log('Applied background:', data.color);
                 }
               } else if (data.type === 'element') {
-                // Render element progressively as it arrives
+                // In multi-frame mode we ignore per-element streaming so that
+                // each poster is built as its own frame from the final frames[] spec.
+                if (wantsMultipleFrames) {
+                  break;
+                }
+
+                // Render element progressively as it arrives (single-frame mode only)
                 if (selectedFrameId && data.element) {
                   const el = data.element;
                   

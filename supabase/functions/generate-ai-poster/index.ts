@@ -1620,11 +1620,15 @@ Here's the design: {"title":"Example"}
                 let sanitized = jsonStr
                   // Remove duplicate property definitions (e.g., "width": 100, "height": 200, "width": 300)
                   // This regex finds duplicate keys within the same object
-                  .replace(/"(\w+)"\s*:\s*[^,}]+,\s*(?=[^{}]*"(\1)"\s*:)/g, '')
+                  .replace(/"(\w+)"\s*:\s*[^,}]+,\s*(?=[^{}]*"(\1)"\s*:\s*)/g, '')
+                  // Remove obviously corrupted string-only entries like "elements, 209, 0.2)"
+                  .replace(/"elements[^"\n]*"\s*,?/g, '')
+                  // Remove invalid textAlign properties without a value like "textAlign":,
+                  .replace(/"textAlign"\s*:\s*,/g, '')
                   // remove trailing commas in objects/arrays
                   .replace(/,\s*(\}|\])/g, '$1')
                   // fix missing quotes around property names
-                  .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
+                  .replace(/([{|,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
                   // fix incomplete strings at the end
                   .replace(/,\s*$/g, '')
                   // remove incomplete property definitions at the end (e.g., "color": "rgba(45, 106, 79)
