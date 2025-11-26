@@ -79,13 +79,12 @@ export default function AIGeneratorPanel({
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [targetFrameMode, setTargetFrameMode] = useState<string | null>(null); // null = general mode, frameId = specific frame mode
 
-  // Set targetFrameMode when panel opens with a selected frame (optional - user can detach)
+  // Target frame mode starts in general mode by default.
+  // It will only be set when the user explicitly clicks "Target Frame" in the UI.
   useEffect(() => {
-    // Only auto-set on first open if there's a selected frame
-    if (selectedFrameId && !targetFrameMode && frames.length > 1) {
-      setTargetFrameMode(selectedFrameId);
-    }
-  }, []); // Only run on mount
+    // No auto-targeting on mount to keep multi-frame prompts working by default.
+  }, []);
+
 
   // Save model preference
   useEffect(() => {
