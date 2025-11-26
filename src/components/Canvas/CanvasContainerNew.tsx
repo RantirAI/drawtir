@@ -721,6 +721,53 @@ export default function CanvasContainerNew({
     // Determine if we're in multi-frame mode
     const wantsMultipleFrames = frameCount !== undefined && frameCount > 1;
 
+    // Step 1: If multi-frame mode, create empty frame slots immediately for visual feedback
+    const emptyFrameIds: string[] = [];
+    if (wantsMultipleFrames) {
+      const newEmptyFrames: Frame[] = [];
+      const frameId = targetFrameId || selectedFrameId;
+      const currentFrame = frames.find(f => f.id === frameId);
+      const frameWidth = currentFrame?.width || 800;
+      const frameHeight = currentFrame?.height || 1200;
+      
+      // Clear the starter frame if it's empty
+      const isStarterSingleFrame = frames.length === 1 && (frames[0].elements?.length || 0) === 0;
+      const workingFrames = isStarterSingleFrame ? [] : frames;
+      const existingCount = workingFrames.length;
+      
+      const marginX = 80;
+      const baseY = 100;
+      
+      for (let i = 0; i < frameCount; i++) {
+        const newFrameId = crypto.randomUUID();
+        emptyFrameIds.push(newFrameId);
+        
+        const offsetX = 100 + (existingCount + i) * (frameWidth + marginX);
+        const offsetY = baseY;
+        
+        newEmptyFrames.push({
+          id: newFrameId,
+          name: `Poster ${i + 1}`,
+          x: offsetX,
+          y: offsetY,
+          width: frameWidth,
+          height: frameHeight,
+          backgroundColor: "#ffffff",
+          elements: [],
+        } as Frame);
+      }
+      
+      setFrames(prev => {
+        const base = isStarterSingleFrame ? [] : prev;
+        return [...base, ...newEmptyFrames];
+      });
+      
+      toast.info(`Creating ${frameCount} poster slots...`, {
+        description: "Each poster will be populated one by one",
+        duration: 3000,
+      });
+    }
+
     setIsGenerating(true);
     
     // Check if image generation or Unsplash search is requested
@@ -934,119 +981,205 @@ export default function CanvasContainerNew({
                 setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
                 console.log('Status:', data.message);
               } else if (data.type === 'frame') {
-                // Entire frame received - create new frame with elements
+                // Entire frame received - populate the pre-created empty frame
                 if (data.frame) {
                   const frameSpec = data.frame;
-                  console.log(`✅ Received complete frame ${data.index + 1}:`, frameSpec.name);
+                  const frameIndex = data.index || 0;
+                  console.log(`✅ Received complete frame ${frameIndex + 1}:`, frameSpec.name);
                   streamedFrameCount++;
                   
-                  // Create new frame
-                  const newFrameId = crypto.randomUUID();
+                  // Find the pre-created empty frame by index
+                  const targetEmptyFrameId = emptyFrameIds[frameIndex];
                   
-                  setFrames(prevFrames => {
-                    // If we're in multi-frame mode and only have a single empty starter frame,
-                    // clear it so the AI-generated frames become the primary layout
-                    const isStarterSingleFrame =
-                      wantsMultipleFrames &&
-                      prevFrames.length === 1 &&
-                      (prevFrames[0].elements?.length || 0) === 0;
+                  if (targetEmptyFrameId) {
+                    // Populate the existing empty frame
+                    setFrames(prevFrames => prevFrames.map(f => {
+                      if (f.id === targetEmptyFrameId) {
+                        const newElements = (frameSpec.elements || []).map((el: any) => {
+                          let borderRadius = 0;
+                          if (el.borderRadius) {
+                            borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+                          } else if (el.shape === 'circle') {
+                            borderRadius = 9999;
+                          }
 
-                    const workingFrames = isStarterSingleFrame ? [] : prevFrames;
+                          const baseElement: any = {
+                            id: crypto.randomUUID(),
+                            type: el.type,
+                            x: el.x || 100,
+                            y: el.y || 100,
+                            width: el.width || 200,
+                            height: el.height || 100,
+                            rotation: 0,
+                            opacity: 100,
+                            blendMode: "normal" as const,
+                          };
 
-                    // Lay out frames horizontally in a row with consistent spacing
-                    const existingCount = workingFrames.length;
-                    const marginX = 80;
-                    const baseY = 100;
+                          if (el.type === "icon") {
+                            return {
+                              ...baseElement,
+                              iconName: el.iconName || "heart",
+                              iconFamily: el.iconFamily || "lucide",
+                              iconStrokeWidth: el.iconStrokeWidth || 2,
+                              fill: el.color || "#000000",
+                            };
+                          } else if (el.type === "text") {
+                            return {
+                              ...baseElement,
+                              text: el.content || el.text || "Text",
+                              fill: el.color || "#000000",
+                              fontSize: el.fontSize || 24,
+                              fontFamily: el.fontFamily || "Arial",
+                              fontWeight: el.fontWeight || "normal",
+                            };
+                          } else if (el.type === "shape") {
+                            return {
+                              ...baseElement,
+                              shapeType: el.shape || "rectangle",
+                              fill: el.color || "#000000",
+                              stroke: "transparent",
+                              strokeWidth: 0,
+                              borderRadius: borderRadius,
+                            };
+                          } else if (el.type === "image") {
+                            const resolvedImageUrl =
+                              (el.content && el.content !== "user-uploaded-image" ? el.content : "") ||
+                              finalImageUrl ||
+                              (imagesToUse.length > 0 ? imagesToUse[0] : "");
 
-                    const frameWidth = frameSpec.width || selectedFrame?.width || 800;
-                    const frameHeight = frameSpec.height || selectedFrame?.height || 1200;
+                            return {
+                              ...baseElement,
+                              imageUrl: resolvedImageUrl,
+                              imageFit: "cover",
+                              fillType: "solid",
+                              fill: "#000000",
+                              brightness: 100,
+                              contrast: 100,
+                              saturation: 100,
+                              blur: 0,
+                              cornerRadius: borderRadius,
+                            };
+                          }
+                          return baseElement;
+                        });
 
-                    const offsetX = 100 + existingCount * (frameWidth + marginX);
-                    const offsetY = baseY;
-
-                    const newElements = (frameSpec.elements || []).map((el: any) => {
-                      let borderRadius = 0;
-                      if (el.borderRadius) {
-                        borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
-                      } else if (el.shape === 'circle') {
-                        borderRadius = 9999;
+                        return {
+                          ...f,
+                          name: frameSpec.name || f.name,
+                          backgroundColor: frameSpec.backgroundColor || f.backgroundColor,
+                          elements: newElements,
+                        };
                       }
+                      return f;
+                    }));
+                    
+                    setGenerationProgress(`Completed ${frameSpec.name}`);
+                    toast.success(`${frameSpec.name} ready!`, { duration: 2000 });
+                  } else {
+                    // Fallback: create new frame (shouldn't happen if empty frames were created)
+                    const newFrameId = crypto.randomUUID();
+                    
+                    setFrames(prevFrames => {
+                      const isStarterSingleFrame =
+                        wantsMultipleFrames &&
+                        prevFrames.length === 1 &&
+                        (prevFrames[0].elements?.length || 0) === 0;
 
-                      const baseElement: any = {
-                        id: crypto.randomUUID(),
-                        type: el.type,
-                        x: el.x || 100,
-                        y: el.y || 100,
-                        width: el.width || 200,
-                        height: el.height || 100,
-                        rotation: 0,
-                        opacity: 100,
-                        blendMode: "normal" as const,
+                      const workingFrames = isStarterSingleFrame ? [] : prevFrames;
+                      const existingCount = workingFrames.length;
+                      const marginX = 80;
+                      const baseY = 100;
+
+                      const frameWidth = frameSpec.width || selectedFrame?.width || 800;
+                      const frameHeight = frameSpec.height || selectedFrame?.height || 1200;
+
+                      const offsetX = 100 + existingCount * (frameWidth + marginX);
+                      const offsetY = baseY;
+
+                      const newElements = (frameSpec.elements || []).map((el: any) => {
+                        let borderRadius = 0;
+                        if (el.borderRadius) {
+                          borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+                        } else if (el.shape === 'circle') {
+                          borderRadius = 9999;
+                        }
+
+                        const baseElement: any = {
+                          id: crypto.randomUUID(),
+                          type: el.type,
+                          x: el.x || 100,
+                          y: el.y || 100,
+                          width: el.width || 200,
+                          height: el.height || 100,
+                          rotation: 0,
+                          opacity: 100,
+                          blendMode: "normal" as const,
+                        };
+
+                        if (el.type === "icon") {
+                          return {
+                            ...baseElement,
+                            iconName: el.iconName || "heart",
+                            iconFamily: el.iconFamily || "lucide",
+                            iconStrokeWidth: el.iconStrokeWidth || 2,
+                            fill: el.color || "#000000",
+                          };
+                        } else if (el.type === "text") {
+                          return {
+                            ...baseElement,
+                            text: el.content || el.text || "Text",
+                            fill: el.color || "#000000",
+                            fontSize: el.fontSize || 24,
+                            fontFamily: el.fontFamily || "Arial",
+                            fontWeight: el.fontWeight || "normal",
+                          };
+                        } else if (el.type === "shape") {
+                          return {
+                            ...baseElement,
+                            shapeType: el.shape || "rectangle",
+                            fill: el.color || "#000000",
+                            stroke: "transparent",
+                            strokeWidth: 0,
+                            borderRadius: borderRadius,
+                          };
+                        } else if (el.type === "image") {
+                          const resolvedImageUrl =
+                            (el.content && el.content !== "user-uploaded-image" ? el.content : "") ||
+                            finalImageUrl ||
+                            (imagesToUse.length > 0 ? imagesToUse[0] : "");
+
+                          return {
+                            ...baseElement,
+                            imageUrl: resolvedImageUrl,
+                            imageFit: "cover",
+                            fillType: "solid",
+                            fill: "#000000",
+                            brightness: 100,
+                            contrast: 100,
+                            saturation: 100,
+                            blur: 0,
+                            cornerRadius: borderRadius,
+                          };
+                        }
+                        return baseElement;
+                      });
+
+                      const newFrame: Frame = {
+                        id: newFrameId,
+                        name: frameSpec.name || `Frame ${data.index + 1}`,
+                        x: offsetX,
+                        y: offsetY,
+                        width: frameWidth,
+                        height: frameHeight,
+                        backgroundColor: frameSpec.backgroundColor || "#FFFFFF",
+                        elements: newElements,
                       };
 
-                      if (el.type === "icon") {
-                        return {
-                          ...baseElement,
-                          iconName: el.iconName || "heart",
-                          iconFamily: el.iconFamily || "lucide",
-                          iconStrokeWidth: el.iconStrokeWidth || 2,
-                          fill: el.color || "#000000",
-                        };
-                      } else if (el.type === "text") {
-                        return {
-                          ...baseElement,
-                          text: el.content || el.text || "Text",
-                          fill: el.color || "#000000",
-                          fontSize: el.fontSize || 24,
-                          fontFamily: el.fontFamily || "Arial",
-                          fontWeight: el.fontWeight || "normal",
-                        };
-                      } else if (el.type === "shape") {
-                        return {
-                          ...baseElement,
-                          shapeType: el.shape || "rectangle",
-                          fill: el.color || "#000000",
-                          stroke: "transparent",
-                          strokeWidth: 0,
-                          borderRadius: borderRadius,
-                        };
-                      } else if (el.type === "image") {
-                        const resolvedImageUrl =
-                          (el.content && el.content !== "user-uploaded-image" ? el.content : "") ||
-                          finalImageUrl ||
-                          (imagesToUse.length > 0 ? imagesToUse[0] : "");
-
-                        return {
-                          ...baseElement,
-                          imageUrl: resolvedImageUrl,
-                          imageFit: "cover",
-                          fillType: "solid",
-                          fill: "#000000",
-                          brightness: 100,
-                          contrast: 100,
-                          saturation: 100,
-                          blur: 0,
-                          cornerRadius: borderRadius,
-                        };
-                      }
-                      return baseElement;
+                      return [...workingFrames, newFrame];
                     });
 
-                    const newFrame: Frame = {
-                      id: newFrameId,
-                      name: frameSpec.name || `Frame ${data.index + 1}`,
-                      x: offsetX,
-                      y: offsetY,
-                      width: frameWidth,
-                      height: frameHeight,
-                      backgroundColor: frameSpec.backgroundColor || "#FFFFFF",
-                      elements: newElements,
-                    };
-
-                    return [...workingFrames, newFrame];
-                  });
-
-                  setGenerationProgress(`Created ${frameSpec.name}`);
+                    setGenerationProgress(`Created ${frameSpec.name}`);
+                  }
                 }
               } else if (data.type === 'image_ready') {
                 // Apply image to frame immediately when ready
