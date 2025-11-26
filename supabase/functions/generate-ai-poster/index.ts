@@ -1617,13 +1617,19 @@ Here's the design: {"title":"Example"}
               designSpec = tryParse(jsonStr);
               if (!designSpec) {
                 // Aggressive sanitization
-                const sanitized = jsonStr
+                let sanitized = jsonStr
+                  // Remove duplicate property definitions (e.g., "width": 100, "height": 200, "width": 300)
+                  // This regex finds duplicate keys within the same object
+                  .replace(/"(\w+)"\s*:\s*[^,}]+,\s*(?=[^{}]*"(\1)"\s*:)/g, '')
                   // remove trailing commas in objects/arrays
                   .replace(/,\s*(\}|\])/g, '$1')
                   // fix missing quotes around property names
                   .replace(/([{,]\s*)([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":')
                   // fix incomplete strings at the end
                   .replace(/,\s*$/g, '')
+                  // remove incomplete property definitions at the end (e.g., "color": "rgba(45, 106, 79)
+                  .replace(/,?\s*"\w+"\s*:\s*"[^"]*$/g, '')
+                  .replace(/,?\s*"\w+"\s*:\s*\d+$/g, '')
                   // ensure closing brackets
                   .trim();
                 
