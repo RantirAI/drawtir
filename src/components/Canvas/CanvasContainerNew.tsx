@@ -718,6 +718,10 @@ export default function CanvasContainerNew({
       return;
     }
 
+    // Detect if the user explicitly requested multiple posters/frames
+    const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'create 2', 'create 3', 'create 4', 'create 5', 'several', 'few'];
+    const wantsMultipleFrames = multiFrameKeywords.some(keyword => description.toLowerCase().includes(keyword));
+
     setIsGenerating(true);
     
     // Check if image generation or Unsplash search is requested
@@ -869,7 +873,10 @@ export default function CanvasContainerNew({
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
-            prompt: description,
+            // If the user asked for multiple posters, strongly instruct the AI
+            prompt: wantsMultipleFrames
+              ? `${description}\n\nCreate 3 distinct poster frames for this request. Each poster MUST be a separate object in the \\"frames\\" array with its own name, backgroundColor, width, height and elements.`
+              : description,
             imageBase64: imagesToUse.length > 0 ? imagesToUse : null,
             analysisType,
             canvasWidth,
@@ -879,7 +886,7 @@ export default function CanvasContainerNew({
             generationTypes, // Pass generation types to backend
             conversationHistory: conversationHistory || [], // Pass conversation history
             currentSnapshot, // Pass current canvas state
-            targetFrameId: frameId, // Pass target frame ID
+            targetFrameId: wantsMultipleFrames ? undefined : frameId, // Only lock to a single frame when not in multi-frame mode
           }),
         }
       );
@@ -1180,35 +1187,127 @@ export default function CanvasContainerNew({
         throw new Error("No design specification received from AI. Please try again.");
       }
 
-      // Flatten any frames into a single editable elements array
-      const baseElements = Array.isArray(designSpec.elements) ? designSpec.elements : [];
-      let combinedElements: any[] = [...baseElements];
+      // If the user asked for multiple posters and the AI returned frames,
+      // create one canvas frame per AI frame instead of flattening them.
+      if (wantsMultipleFrames && Array.isArray(designSpec.frames) && designSpec.frames.length > 0) {
+        const newFrames: Frame[] = [];
 
-      if (Array.isArray(designSpec.frames)) {
-        for (const frameSpec of designSpec.frames) {
-          const offsetX = frameSpec.x || 0;
-          const offsetY = frameSpec.y || 0;
-          const children = Array.isArray(frameSpec.elements) ? frameSpec.elements : [];
-          for (const child of children) {
-            combinedElements.push({
-              ...child,
-              x: (child.x || 0) + offsetX,
-              y: (child.y || 0) + offsetY,
-            });
+        designSpec.frames.forEach((frameSpec: any, index: number) => {
+          const offsetX = 50 + index * 100;
+          const offsetY = 50 + index * 40;
+
+          const newElements = (frameSpec.elements || []).map((el: any) => {
+            // Determine border radius based on shape type
+            let borderRadius = 0;
+            if (el.borderRadius) {
+              borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+            } else if (el.shape === 'circle') {
+              borderRadius = 9999;
+            }
+
+            const baseElement: any = {
+              id: crypto.randomUUID(),
+              type: el.type,
+              x: el.x || 100,
+              y: el.y || 100,
+              width: el.width || 200,
+              height: el.height || 100,
+              rotation: 0,
+              opacity: 100,
+              blendMode: "normal" as const,
+            };
+
+            if (el.type === "icon") {
+              return {
+                ...baseElement,
+                iconName: el.iconName || "heart",
+                iconFamily: el.iconFamily || "lucide",
+                iconStrokeWidth: el.iconStrokeWidth || 2,
+                fill: el.color || "#000000",
+              };
+            } else if (el.type === "text") {
+              return {
+                ...baseElement,
+                text: el.content || el.text || "Text",
+                fill: el.color || "#000000",
+                fontSize: el.fontSize || 24,
+                fontFamily: el.fontFamily || "Arial",
+                fontWeight: el.fontWeight || "normal",
+              };
+            } else if (el.type === "shape") {
+              return {
+                ...baseElement,
+                shapeType: el.shape || "rectangle",
+                fill: el.color || el.backgroundColor || "#000000",
+                stroke: el.borderColor || "#000000",
+                strokeWidth: el.borderWidth || 0,
+                borderRadius,
+              };
+            } else if (el.type === "image") {
+              return {
+                ...baseElement,
+                imageUrl: el.content || (imagesToUse.length > 0 ? imagesToUse[0] : ""),
+                imageFit: "cover",
+                fillType: "solid",
+                fill: "#000000",
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                blur: 0,
+                cornerRadius: borderRadius,
+              };
+            }
+
+            return baseElement;
+          });
+
+          newFrames.push({
+            id: crypto.randomUUID(),
+            name: frameSpec.name || `Frame ${index + 1}`,
+            x: offsetX,
+            y: offsetY,
+            width: frameSpec.width || 800,
+            height: frameSpec.height || 1200,
+            backgroundColor: frameSpec.backgroundColor || "#FFFFFF",
+            elements: newElements,
+          } as Frame);
+        });
+
+        if (newFrames.length > 0) {
+          setFrames(prev => [...prev, ...newFrames]);
+          console.log(`Created ${newFrames.length} frames from AI design spec`);
+          toast.success(`Generated ${newFrames.length} poster frames!`);
+        }
+      } else {
+        // Legacy single-frame behaviour: flatten frames into the selected frame
+        const baseElements = Array.isArray(designSpec.elements) ? designSpec.elements : [];
+        let combinedElements: any[] = [...baseElements];
+
+        if (Array.isArray(designSpec.frames)) {
+          for (const frameSpec of designSpec.frames) {
+            const offsetX = frameSpec.x || 0;
+            const offsetY = frameSpec.y || 0;
+            const children = Array.isArray(frameSpec.elements) ? frameSpec.elements : [];
+            for (const child of children) {
+              combinedElements.push({
+                ...child,
+                x: (child.x || 0) + offsetX,
+                y: (child.y || 0) + offsetY,
+              });
+            }
           }
         }
-      }
 
-      if (combinedElements.length === 0) {
-        console.warn('Design spec has no elements; only background may be present');
-        toast.info("AI generated only a background. Try adding more details to your prompt.");
-      }
+        if (combinedElements.length === 0) {
+          console.warn('Design spec has no elements; only background may be present');
+          toast.info("AI generated only a background. Try adding more details to your prompt.");
+        }
 
-      // Update current frame background
-      const targetFrame = targetFrameIdFromResponse || selectedFrameId;
-      if (targetFrame && designSpec.backgroundColor) {
-        handleFrameUpdate(targetFrame, { backgroundColor: designSpec.backgroundColor });
-      }
+        // Update current frame background
+        const targetFrame = targetFrameIdFromResponse || selectedFrameId;
+        if (targetFrame && designSpec.backgroundColor) {
+          handleFrameUpdate(targetFrame, { backgroundColor: designSpec.backgroundColor });
+        }
 
         // Add elements to the current frame
         if (targetFrame && combinedElements.length > 0) {
@@ -1288,11 +1387,9 @@ export default function CanvasContainerNew({
           ));
         }
 
-        // Frames from AI are intentionally ignored; content was flattened above to keep everything editable.
-
-
-      console.log(`Added ${combinedElements.length} elements to canvas`);
-      toast.success(`Design generated successfully with ${combinedElements.length} elements!`);
+        console.log(`Added ${combinedElements.length} elements to canvas`);
+        toast.success(`Design generated successfully with ${combinedElements.length} elements!`);
+      }
       
       // Auto-fit the frame to view after generation
       if (selectedFrameId) {
