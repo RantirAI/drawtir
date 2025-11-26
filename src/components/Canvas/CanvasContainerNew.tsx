@@ -907,6 +907,7 @@ export default function CanvasContainerNew({
       let designSpec = null;
       let targetFrameIdFromResponse = targetFrameId; // Store target frame ID for applying changes
       let finalImageUrl: string | null = null; // Track final generated image URL for replacing placeholders
+      let streamedFrameCount = 0; // Track how many full frames we received from the stream
 
       if (!reader) {
         throw new Error("No response body");
@@ -937,6 +938,7 @@ export default function CanvasContainerNew({
                 if (data.frame) {
                   const frameSpec = data.frame;
                   console.log(`✅ Received complete frame ${data.index + 1}:`, frameSpec.name);
+                  streamedFrameCount++;
                   
                   // Create new frame
                   const newFrameId = crypto.randomUUID();
