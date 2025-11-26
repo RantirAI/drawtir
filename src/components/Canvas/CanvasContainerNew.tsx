@@ -925,6 +925,99 @@ export default function CanvasContainerNew({
                 // Increment progress gradually
                 setGenerationProgressPercent(prev => Math.min(prev + 5, 90));
                 console.log('Status:', data.message);
+              } else if (data.type === 'frame') {
+                // Entire frame received - create new frame with elements
+                if (data.frame) {
+                  const frameSpec = data.frame;
+                  console.log(`✅ Received complete frame ${data.index + 1}:`, frameSpec.name);
+                  
+                  // Create new frame
+                  const newFrameId = crypto.randomUUID();
+                  const offsetX = 50 + (data.index * 100);
+                  const offsetY = 50 + (data.index * 100);
+                  
+                  const newElements = (frameSpec.elements || []).map((el: any) => {
+                    let borderRadius = 0;
+                    if (el.borderRadius) {
+                      borderRadius = el.borderRadius === '50%' ? 9999 : parseInt(el.borderRadius) || 0;
+                    } else if (el.shape === 'circle') {
+                      borderRadius = 9999;
+                    }
+
+                    const baseElement: any = {
+                      id: crypto.randomUUID(),
+                      type: el.type,
+                      x: el.x || 100,
+                      y: el.y || 100,
+                      width: el.width || 200,
+                      height: el.height || 100,
+                      rotation: 0,
+                      opacity: 100,
+                      blendMode: "normal" as const,
+                    };
+
+                    if (el.type === "icon") {
+                      return {
+                        ...baseElement,
+                        iconName: el.iconName || "heart",
+                        iconFamily: el.iconFamily || "lucide",
+                        iconStrokeWidth: el.iconStrokeWidth || 2,
+                        fill: el.color || "#000000",
+                      };
+                    } else if (el.type === "text") {
+                      return {
+                        ...baseElement,
+                        text: el.content || el.text || "Text",
+                        fill: el.color || "#000000",
+                        fontSize: el.fontSize || 24,
+                        fontFamily: el.fontFamily || "Arial",
+                        fontWeight: el.fontWeight || "normal",
+                      };
+                    } else if (el.type === "shape") {
+                      return {
+                        ...baseElement,
+                        shapeType: el.shape || "rectangle",
+                        fill: el.color || "#000000",
+                        stroke: "transparent",
+                        strokeWidth: 0,
+                        borderRadius: borderRadius,
+                      };
+                    } else if (el.type === "image") {
+                      const resolvedImageUrl =
+                        (el.content && el.content !== "user-uploaded-image" ? el.content : "") ||
+                        finalImageUrl ||
+                        (imagesToUse.length > 0 ? imagesToUse[0] : "");
+
+                      return {
+                        ...baseElement,
+                        imageUrl: resolvedImageUrl,
+                        imageFit: "cover",
+                        fillType: "solid",
+                        fill: "#000000",
+                        brightness: 100,
+                        contrast: 100,
+                        saturation: 100,
+                        blur: 0,
+                        cornerRadius: borderRadius,
+                      };
+                    }
+                    return baseElement;
+                  });
+
+                  const newFrame: Frame = {
+                    id: newFrameId,
+                    name: frameSpec.name || `Frame ${data.index + 1}`,
+                    x: offsetX,
+                    y: offsetY,
+                    width: frameSpec.width || selectedFrame?.width || 800,
+                    height: frameSpec.height || selectedFrame?.height || 1200,
+                    backgroundColor: frameSpec.backgroundColor || "#FFFFFF",
+                    elements: newElements,
+                  };
+
+                  setFrames(prevFrames => [...prevFrames, newFrame]);
+                  setGenerationProgress(`Created ${frameSpec.name}`);
+                }
               } else if (data.type === 'image_ready') {
                 // Apply image to frame immediately when ready
                 const frameIdToUpdate = data.targetFrameId || selectedFrameId;

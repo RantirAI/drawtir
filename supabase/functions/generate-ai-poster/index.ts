@@ -41,35 +41,47 @@ const DESIGN_JSON_SCHEMA = {
   schema: {
     type: 'object',
     properties: {
-      title: { type: 'string' },
-      backgroundColor: { type: 'string' },
-      style: { type: 'string' },
-      mood: { type: 'string' },
-      elements: {
+      frames: {
         type: 'array',
         items: {
           type: 'object',
           properties: {
-            type: { type: 'string' },
-            content: { type: 'string' },
-            x: { type: 'number' },
-            y: { type: 'number' },
+            name: { type: 'string' },
+            backgroundColor: { type: 'string' },
             width: { type: 'number' },
             height: { type: 'number' },
-            color: { type: 'string' },
-            fontSize: { type: 'number' },
-            fontWeight: { type: 'string' },
-            fontFamily: { type: 'string' },
-            borderRadius: { type: 'string' },
-            shape: { type: 'string' },
-            iconName: { type: 'string' },
-            iconFamily: { type: 'string' },
+            elements: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  type: { type: 'string' },
+                  content: { type: 'string' },
+                  x: { type: 'number' },
+                  y: { type: 'number' },
+                  width: { type: 'number' },
+                  height: { type: 'number' },
+                  color: { type: 'string' },
+                  fontSize: { type: 'number' },
+                  fontWeight: { type: 'string' },
+                  fontFamily: { type: 'string' },
+                  borderRadius: { type: 'string' },
+                  shape: { type: 'string' },
+                  iconName: { type: 'string' },
+                  iconFamily: { type: 'string' },
+                },
+                additionalProperties: true,
+              },
+            },
           },
+          required: ['name', 'elements'],
           additionalProperties: true,
         },
       },
+      style: { type: 'string' },
+      mood: { type: 'string' },
     },
-    required: [ 'elements' ],
+    required: [ 'frames' ],
     additionalProperties: true,
   },
   strict: false,
@@ -1031,6 +1043,10 @@ ${DESIGN_EXAMPLES}
 TASK: Create a stunning poster featuring ${images.length > 1 ? `these ${images.length} images` : 'this image'}.
 USER REQUEST: "${prompt || 'Create an eye-catching poster with great visual impact'}"
 
+🎯 MULTI-FRAME GENERATION:
+- DEFAULT: Create 1 frame unless user asks for "multiple", "several", "a series", etc.
+- MULTIPLE: Only create multiple frames when explicitly requested (e.g., "create 3 posters", "make a series")
+
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${brandKitGuidance}
 
@@ -1056,16 +1072,20 @@ IMAGE POSITIONING STRATEGIES:
 - Hero: Image in top 60% (y: 0, height: ${Math.floor(canvasHeight * 0.6)})
 - Feature: Image positioned strategically with text overlay
 
-Return complete JSON:
+Return complete JSON (single frame - default):
 {
-  "title": "Poster title",
-  "backgroundColor": "#hex",
-  "elements": [
-    {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": ${canvasWidth}, "height": ${Math.floor(canvasHeight * 0.6)}},
-    {"type": "text", "content": "BOLD TITLE", "x": 64, "y": ${Math.floor(canvasHeight * 0.65)}, "width": ${canvasWidth - 128}, "height": 100, "color": "#FFFFFF", "fontSize": 96, "fontWeight": "900"},
-    {"type": "shape", ...},
-    {"type": "icon", ...}
-  ],
+  "frames": [{
+    "name": "Poster with Image",
+    "backgroundColor": "#hex",
+    "width": 800,
+    "height": 1200,
+    "elements": [
+      {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 800, "height": 720},
+      {"type": "text", "content": "BOLD TITLE", "x": 64, "y": 780, "width": 672, "height": 100, "color": "#FFFFFF", "fontSize": 96, "fontWeight": "900"},
+      {"type": "shape", ...},
+      {"type": "icon", ...}
+    ]
+  }],
   "style": "Modern with striking visuals",
   "mood": "Bold and engaging"
 }`;
@@ -1076,6 +1096,11 @@ ${DESIGN_EXAMPLES}
 
 TASK: Create a stunning, professional poster design that stands out.
 USER REQUEST: "${prompt}"
+
+🎯 MULTI-FRAME GENERATION:
+- DEFAULT: Create 1 frame unless user asks for "multiple", "several", "a series", etc.
+- MULTIPLE: Only create multiple frames when explicitly requested (e.g., "create 3 posters", "make a series")
+- Each frame should be cohesive but can vary in layout, color, or emphasis
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${brandKitGuidance}
@@ -1190,11 +1215,11 @@ ${conversationHistory.slice(0, -1).map((msg: any) => `${msg.role}: ${msg.content
 11. 🚨 ALWAYS INCLUDE TEXT ELEMENTS: The "elements" array MUST contain at least 2-3 text elements with content
 12. Keep the JSON concise - aim for 2000-4000 characters total to avoid truncation
 
-Example of CORRECT format:
-{"title":"Example","backgroundColor":"#FFFFFF","elements":[{"type":"text","content":"Title","x":50,"y":50,"width":300,"height":80,"fontSize":48,"fontWeight":"bold","color":"#000000"},{"type":"shape","shape":"circle","x":100,"y":200,"width":100,"height":100,"color":"#FF0000","borderRadius":"50%"}],"style":"Modern","mood":"Professional"}
+Example of CORRECT format (single frame):
+{"frames":[{"name":"Example Poster","backgroundColor":"#FFFFFF","width":800,"height":1200,"elements":[{"type":"text","content":"Title","x":50,"y":50,"width":300,"height":80,"fontSize":48,"fontWeight":"bold","color":"#000000"}]}],"style":"Modern","mood":"Professional"}
 
-Example of CORRECT format:
-{"title":"Example","backgroundColor":"#FFFFFF","elements":[{"type":"text","content":"Hello"}],"style":"Modern","mood":"Professional"}
+Example of CORRECT format (multiple frames):
+{"frames":[{"name":"Slide 1","backgroundColor":"#FFFFFF","width":800,"height":1200,"elements":[{"type":"text","content":"Hello","x":50,"y":50,"width":300,"height":80,"fontSize":48,"fontWeight":"bold","color":"#000000"}]},{"name":"Slide 2","backgroundColor":"#000000","width":800,"height":1200,"elements":[{"type":"text","content":"World","x":50,"y":50,"width":300,"height":80,"fontSize":48,"fontWeight":"bold","color":"#FFFFFF"}]}],"style":"Modern","mood":"Professional"}
 
 Example of WRONG format (DO NOT DO THIS):
 \`\`\`json
@@ -1289,11 +1314,13 @@ Here's the design: {"title":"Example"}
               console.log('📸 Streamed image_ready event with URL');
             }
             
+            let frameCount = 0;
             let elementCount = 0;
             let sentElementCount = 0;
             let lastProgressSent = '';
-            let backgroundColor = '';
+            let progressMessage = '';
             let hasContent = false;
+            const sentFrameHashes = new Set<string>(); // Track sent frames
             const sentElementHashes = new Set<string>(); // Track sent elements to prevent duplicates
             
             let streamComplete = false;
@@ -1321,19 +1348,46 @@ Here's the design: {"title":"Example"}
                     fullContent += text;
                     hasContent = true;
                     
-                    // Stream background color immediately
-                    if (!backgroundColor && fullContent.includes('"backgroundColor"')) {
-                      const bgMatch = fullContent.match(/"backgroundColor"\s*:\s*"(#[0-9A-Fa-f]{6})"/);
-                      if (bgMatch) {
-                        backgroundColor = bgMatch[1];
-                        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
-                          type: 'background', 
-                          color: backgroundColor 
-                        })}\n\n`));
+                    // Try to extract and stream complete frames progressively
+                    const frameRegex = /\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"backgroundColor"\s*:\s*"[^"]+"\s*,\s*"width"\s*:\s*\d+\s*,\s*"height"\s*:\s*\d+\s*,\s*"elements"\s*:\s*\[[^\]]*\]\s*\}/g;
+                    const frameMatches = [...fullContent.matchAll(frameRegex)];
+                    
+                    // Send any new complete frames (with deduplication)
+                    for (const match of frameMatches) {
+                      try {
+                        const frameJson = match[0];
+                        const frameHash = frameJson.trim();
+                        
+                        if (sentFrameHashes.has(frameHash)) {
+                          continue;
+                        }
+                        
+                        const frame = JSON.parse(frameJson);
+                        
+                        if (frame.name && frame.backgroundColor && frame.elements && Array.isArray(frame.elements)) {
+                          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                            type: 'frame', 
+                            frame: frame,
+                            index: frameCount 
+                          })}\n\n`));
+                          
+                          sentFrameHashes.add(frameHash);
+                          frameCount++;
+                          console.log(`✅ Sent unique frame ${frameCount}: ${frame.name}`);
+                          
+                          progressMessage = `Creating frame ${frameCount}: ${frame.name}`;
+                          lastProgressSent = progressMessage;
+                          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
+                            type: 'status', 
+                            message: progressMessage
+                          })}\n\n`));
+                        }
+                      } catch (e) {
+                        // Frame not complete, skip
                       }
                     }
                     
-                    // Try to extract and stream complete elements progressively
+                    // Try to extract and stream complete elements progressively (fallback for single-frame format)
                     const elementRegex = /\{[^{}]*"type"\s*:\s*"(text|shape|icon|image)"[^{}]*\}/g;
                     const elementMatches = [...fullContent.matchAll(elementRegex)];
                     
@@ -1341,16 +1395,14 @@ Here's the design: {"title":"Example"}
                     for (const match of elementMatches) {
                       try {
                         const elementJson = match[0];
-                        const elementHash = elementJson.trim(); // Use trimmed JSON as hash
+                        const elementHash = elementJson.trim();
                         
-                        // Skip if we've already sent this exact element
                         if (sentElementHashes.has(elementHash)) {
                           continue;
                         }
                         
                         const element = JSON.parse(elementJson);
                         
-                        // Validate element has required fields and reasonable values
                         if (element.type && 
                             element.x !== undefined && 
                             element.y !== undefined &&
@@ -1375,16 +1427,16 @@ Here's the design: {"title":"Example"}
                     }
                     
                     // Progress messages
-                    let progressMessage = '';
+                    progressMessage = '';
                     
-                    if (fullContent.includes('"title"') && !lastProgressSent.includes('title')) {
-                      const titleMatch = fullContent.match(/"title"\s*:\s*"([^"]+)"/);
-                      if (titleMatch) {
-                        progressMessage = `Setting up design: "${titleMatch[1]}"`;
+                    if (frameCount === 0 && fullContent.includes('"name"') && !lastProgressSent.includes('Setting up')) {
+                      const nameMatch = fullContent.match(/"name"\s*:\s*"([^"]+)"/);
+                      if (nameMatch) {
+                        progressMessage = `Setting up: "${nameMatch[1]}"`;
                       }
                     }
                     
-                    if (backgroundColor && !lastProgressSent.includes('background')) {
+                    if (frameCount === 0 && fullContent.includes('"backgroundColor"') && !lastProgressSent.includes('palette')) {
                       progressMessage = 'Applying color palette...';
                     }
                     
@@ -1397,7 +1449,7 @@ Here's the design: {"title":"Example"}
                       lastProgressSent = progressMessage;
                       controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
                         type: 'status', 
-                        message: progressMessage 
+                        message: progressMessage
                       })}\n\n`));
                     }
                   }
