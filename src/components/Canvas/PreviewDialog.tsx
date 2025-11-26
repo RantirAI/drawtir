@@ -156,90 +156,44 @@ export default function PreviewDialog({
           </video>
         )}
 
-        {/* Elements */}
+        {/* Elements rendered via ResizableElement to match canvas view */}
         <div className="relative w-full h-full">
           {(frame.elements || []).map((element) => {
-            const fillWithOpacity = element.fillType === "solid" && element.fill
-              ? hexToRgba(element.fill, element.fillOpacity || 100)
-              : element.fill;
+            // Skip drawing elements (complex strokes) in preview for now
+            if (element.type === "drawing") return null;
+
+            // Cast to ResizableElement type and exclude children
+            const { children, ...elementProps } = element as any;
+
+            // ResizableElement doesn't support icon directly; skip icons
+            if (elementProps.type === "icon") return null;
+
+            const elementType = elementProps.type as
+              | "image"
+              | "video"
+              | "shape"
+              | "text"
+              | "shader"
+              | "richtext"
+              | "qrcode";
 
             return (
-              <div
-                key={`${element.id}-${animationKey}`}
-                className={`absolute ${
-                  element.animations && element.animations.length > 0 && element.animations.some(a => {
-                    const delay = parseFloat(a.delay) || 0;
-                    const duration = parseFloat(a.duration) || 0;
-                    return animationKey >= delay && animationKey < (delay + duration);
-                  })
-                    ? element.animations.map(a => `animate-${a.type}`).join(' ')
-                    : ""
-                } ${isInteractive && element.interactivity?.enabled ? "cursor-pointer hover:opacity-80 transition-opacity" : ""}`}
-                style={{
-                  left: element.x,
-                  top: element.y,
-                  width: element.width,
-                  height: element.height,
-                  opacity: (element.opacity || 100) / 100,
-                  transform: `rotate(${element.rotation || 0}deg)`,
-                  transformOrigin: "center center",
-                  animationDuration: element.animations?.[0]?.duration,
-                }}
-                onClick={isInteractive ? () => handleElementInteraction(element) : undefined}
-              >
-                {/* Interactive indicator */}
-                {element.interactivity?.enabled && (
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-blue-500 rounded-full shadow-lg flex items-center justify-center pointer-events-none z-10">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.042 21.672L13.684 16.6m0 0l-2.51 2.225.569-9.47 5.227 7.917-3.286-.672zM12 2.25V4.5m5.834.166l-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243l-1.59-1.59" />
-                    </svg>
-                  </div>
-                )}
-                {element.type === "text" ? (
-                  <div
-                    className="w-full h-full flex items-center px-2"
-                    style={{
-                      fontSize: `${element.fontSize}px`,
-                      fontFamily: element.fontFamily,
-                      fontWeight: element.fontWeight,
-                      textAlign: element.textAlign,
-                      color: element.color || element.fill,
-                      justifyContent:
-                        element.textAlign === "left"
-                          ? "flex-start"
-                          : element.textAlign === "right"
-                          ? "flex-end"
-                          : "center",
-                    }}
-                  >
-                    {element.text}
-                  </div>
-                ) : element.type === "image" && element.imageUrl ? (
-                  <img
-                    src={element.imageUrl}
-                    alt=""
-                    className="w-full h-full"
-                    style={{
-                      objectFit: (element.imageFit === "crop" ? "cover" : element.imageFit || "cover") as any,
-                      borderRadius: element.cornerRadius
-                        ? `${element.cornerRadius}px`
-                        : "0",
-                    }}
-                  />
-                ) : element.type === "shader" && element.shader ? (
-                  <div className="w-full h-full">
-                    {isGridView ? (
-                      <div className="w-full h-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500" />
-                    ) : (
-                      <ShadcnShaderElement element={element} />
-                    )}
-                  </div>
-                ) : null}
-              </div>
+              <ResizableElement
+                key={`${elementProps.id}-${animationKey}`}
+                {...elementProps}
+                type={elementType}
+                isSelected={false}
+                onSelect={() => {}}
+                onUpdate={() => {}}
+                onDelete={() => {}}
+                onDuplicate={() => {}}
+                zoom={1}
+                readOnly={true}
+              />
             );
           })}
         </div>
-
+ 
         {/* Frame captions */}
         {frame.topCaption && (
           <div
