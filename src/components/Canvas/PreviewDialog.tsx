@@ -4,11 +4,12 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { X, Grid3x3, Square, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, Grid3x3, Square, ChevronLeft, ChevronRight, Play } from "lucide-react";
 import type { Frame, Element } from "@/types/elements";
 import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 import { InfoModal } from "./InfoModal";
 import { ShadcnShaderElement } from "./ShadcnShaderElement";
+import { PresentationMode } from "@/components/Presentation/PresentationMode";
 
 interface PreviewDialogProps {
   open: boolean;
@@ -31,8 +32,22 @@ export default function PreviewDialog({
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [infoModalTitle, setInfoModalTitle] = useState("");
   const [infoModalContent, setInfoModalContent] = useState("");
+  const [showPresentationMode, setShowPresentationMode] = useState(false);
 
   if (!frames || frames.length === 0) return null;
+
+  // If presentation mode is active, show it instead
+  if (showPresentationMode) {
+    return (
+      <PresentationMode
+        frames={frames}
+        onClose={() => {
+          setShowPresentationMode(false);
+          onOpenChange(false);
+        }}
+      />
+    );
+  }
 
   const currentFrame = frames[currentFrameIndex] || frames[0];
 
@@ -262,14 +277,25 @@ export default function PreviewDialog({
           {/* Top controls */}
           <div className="absolute top-4 right-4 z-50 flex gap-2">
             {frames.length > 1 && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="bg-background/80 hover:bg-background"
-                onClick={() => setViewMode(viewMode === "single" ? "grid" : "single")}
-              >
-                {viewMode === "single" ? <Grid3x3 className="h-4 w-4" /> : <Square className="h-4 w-4" />}
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background"
+                  onClick={() => setShowPresentationMode(true)}
+                  title="Start Presentation (Autoplay)"
+                >
+                  <Play className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="bg-background/80 hover:bg-background"
+                  onClick={() => setViewMode(viewMode === "single" ? "grid" : "single")}
+                >
+                  {viewMode === "single" ? <Grid3x3 className="h-4 w-4" /> : <Square className="h-4 w-4" />}
+                </Button>
+              </>
             )}
             <Button
               variant="ghost"
