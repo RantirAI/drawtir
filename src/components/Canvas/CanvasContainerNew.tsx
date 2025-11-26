@@ -34,6 +34,7 @@ import CanvasContextMenu from "./ContextMenu";
 import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
 import { InteractivityPanel } from "@/components/Panels/InteractivityPanel";
+import { PresentationMode } from "@/components/Presentation/PresentationMode";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -198,6 +199,7 @@ export default function CanvasContainerNew({
   const [showBrandKitPanel, setShowBrandKitPanel] = useState(false);
   const [showInteractivityPanel, setShowInteractivityPanel] = useState(false);
   const [showShaderLibrary, setShowShaderLibrary] = useState(false);
+  const [showPresentationMode, setShowPresentationMode] = useState(false);
   const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -2975,6 +2977,8 @@ export default function CanvasContainerNew({
         currentUser={currentUser}
         enableCollaboration={enableCollaboration}
         onRecenter={() => selectedFrameId && fitFrameToView(selectedFrameId)}
+        frames={frames}
+        onPresentationMode={() => setShowPresentationMode(true)}
       />
 
       {/* Canvas Area */}
@@ -4509,6 +4513,14 @@ export default function CanvasContainerNew({
         className="hidden"
         onChange={handleImageChange}
       />
+
+      {/* Presentation Mode */}
+      {showPresentationMode && (
+        <PresentationMode
+          frames={frames}
+          onClose={() => setShowPresentationMode(false)}
+        />
+      )}
     </div>
   );
 }
