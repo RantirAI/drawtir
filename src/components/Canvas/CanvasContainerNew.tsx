@@ -3761,12 +3761,12 @@ export default function CanvasContainerNew({
               ? `${selectedElementIds.length} Elements`
               : selectedElement 
               ? selectedElement.type === "shape" && selectedElement.shapeType
-                ? `Shape - ${selectedElement.shapeType.charAt(0).toUpperCase() + selectedElement.shapeType.slice(1)}`
+                ? `Shape - ${selectedElement.shapeType ? selectedElement.shapeType.charAt(0).toUpperCase() + selectedElement.shapeType.slice(1) : "Shape"}`
                 : selectedElement.type === "icon"
                   ? "Icon"
                   : selectedElement.text 
                     ? selectedElement.text.substring(0, 20)
-                    : selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1)
+                    : selectedElement.type ? selectedElement.type.charAt(0).toUpperCase() + selectedElement.type.slice(1) : "Element"
               : selectedFrame?.name
           }
           shapeType={selectedElement?.shapeType}
