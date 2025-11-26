@@ -9,6 +9,7 @@ import type { Frame, Element } from "@/types/elements";
 import { generateGradientCSS, getFitStyle } from "@/lib/utils";
 import { InfoModal } from "./InfoModal";
 import { ShadcnShaderElement } from "./ShadcnShaderElement";
+import ResizableElement from "./ResizableElement";
 import { PresentationMode } from "@/components/Presentation/PresentationMode";
 
 interface PreviewDialogProps {
