@@ -43,19 +43,36 @@ const DESIGN_JSON_SCHEMA = {
     properties: {
       frames: {
         type: 'array',
+        description: 'Array of frame objects, each with name, dimensions, background, and elements',
         items: {
           type: 'object',
           properties: {
-            name: { type: 'string' },
-            backgroundColor: { type: 'string' },
-            width: { type: 'number' },
-            height: { type: 'number' },
+            name: { 
+              type: 'string',
+              description: 'Descriptive name for the frame (e.g., "Summer Camp Adventure", "Music Festival Poster")'
+            },
+            backgroundColor: { 
+              type: 'string',
+              description: 'CSS color value (e.g., "#1A1A2E", "rgb(26,26,46)")'
+            },
+            width: { 
+              type: 'number',
+              description: 'Frame width in pixels'
+            },
+            height: { 
+              type: 'number',
+              description: 'Frame height in pixels'
+            },
             elements: {
               type: 'array',
+              description: 'Array of design elements (text, shapes, images, icons)',
               items: {
                 type: 'object',
                 properties: {
-                  type: { type: 'string' },
+                  type: { 
+                    type: 'string',
+                    description: 'Element type: "text", "shape", "image", or "icon"'
+                  },
                   content: { type: 'string' },
                   x: { type: 'number' },
                   y: { type: 'number' },
@@ -70,11 +87,12 @@ const DESIGN_JSON_SCHEMA = {
                   iconName: { type: 'string' },
                   iconFamily: { type: 'string' },
                 },
+                required: ['type', 'x', 'y', 'width', 'height'],
                 additionalProperties: true,
               },
             },
           },
-          required: ['name', 'elements'],
+          required: ['name', 'backgroundColor', 'width', 'height', 'elements'],
           additionalProperties: true,
         },
       },
@@ -121,6 +139,33 @@ const COLOR_PALETTES: Record<string, string[]> = {
 
 // Enhanced design system prompt with professional design principles and intelligent image transformation
 const DESIGN_SYSTEM_PROMPT = `You are an award-winning poster designer specialized in MODERN, PROFESSIONAL, EVENT-QUALITY designs. Your designs must match the quality of professional concert posters, festival flyers, and high-end event marketing materials.
+
+🚨 MANDATORY JSON FORMAT:
+You MUST return valid JSON in this EXACT structure:
+{
+  "frames": [
+    {
+      "name": "Frame Title Here",
+      "backgroundColor": "#HEX_COLOR",
+      "width": 800,
+      "height": 1200,
+      "elements": [
+        {"type": "text", "content": "...", "x": 0, "y": 0, "width": 100, "height": 50, "fontSize": 48, "fontWeight": "700", "color": "#000000"},
+        {"type": "shape", "x": 0, "y": 0, "width": 100, "height": 50, "color": "#000000", "shape": "rectangle", "borderRadius": "8px"}
+      ]
+    }
+  ],
+  "style": "Design style description",
+  "mood": "Design mood description"
+}
+
+CRITICAL JSON RULES:
+- ALWAYS wrap design in "frames" array (even for single frame)
+- Each frame MUST have: "name" (string), "backgroundColor" (string), "width" (number), "height" (number), "elements" (array)
+- Each element MUST have: "type", "x", "y", "width", "height" (all required)
+- NEVER duplicate property names (e.g., don't have "height" twice in same object)
+- Use proper JSON syntax: no trailing commas, proper quotes, valid structure
+- For multiple frames/posters, add multiple objects to the "frames" array
 
 🎯 INTELLIGENT IMAGE TRANSFORMATION MODE:
 When the user provides BOTH an uploaded image AND a descriptive prompt (e.g., "pillow on a blue chair with Christmas text"):
@@ -339,15 +384,25 @@ Use rgba() colors with 0.4-0.7 opacity
 
 // Professional event poster examples based on high-quality designs
 const DESIGN_EXAMPLES = `
-EXAMPLE 1 - Music Festival with Photo Background:
+🚨 CRITICAL JSON FORMAT REQUIREMENTS:
+- ALWAYS wrap design in a "frames" array, even for single posters
+- Each frame MUST have: "name", "backgroundColor", "width", "height", "elements"
+- Each element MUST have: "type", "x", "y", "width", "height"
+- NEVER use duplicate property names in a single object
+- ALWAYS use valid JSON syntax (no trailing commas, proper quotes)
+
+EXAMPLE 1 - Single Frame Music Festival:
 {
-  "title": "Summer Vibes Festival 2025",
-  "backgroundColor": "#1A1A2E",
-  "elements": [
-    {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 800, "height": 1200},
-    {"type": "shape", "x": 0, "y": 700, "width": 800, "height": 500, "color": "rgba(0,0,0,0.75)", "borderRadius": "0", "shape": "rectangle"},
-    {"type": "text", "content": "SUMMER VIBES", "fontFamily": "Inter", "x": 60, "y": 780, "width": 680, "height": 100, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
-    {"type": "text", "content": "MUSIC FESTIVAL", "fontFamily": "Inter", "x": 60, "y": 880, "width": 680, "height": 60, "fontSize": 48, "fontWeight": "700", "color": "#FFD700"},
+  "frames": [{
+    "name": "Summer Vibes Festival 2025",
+    "backgroundColor": "#1A1A2E",
+    "width": 800,
+    "height": 1200,
+    "elements": [
+      {"type": "image", "content": "user-uploaded-image", "x": 0, "y": 0, "width": 800, "height": 1200},
+      {"type": "shape", "x": 0, "y": 700, "width": 800, "height": 500, "color": "rgba(0,0,0,0.75)", "borderRadius": "0", "shape": "rectangle"},
+      {"type": "text", "content": "SUMMER VIBES", "fontFamily": "Inter", "x": 60, "y": 780, "width": 680, "height": 100, "fontSize": 88, "fontWeight": "900", "color": "#FFFFFF"},
+      {"type": "text", "content": "MUSIC FESTIVAL", "fontFamily": "Inter", "x": 60, "y": 880, "width": 680, "height": 60, "fontSize": 48, "fontWeight": "700", "color": "#FFD700"},
     {"type": "text", "content": "JUNE 24-26, 2025", "fontFamily": "Inter", "x": 60, "y": 960, "width": 680, "height": 40, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
     {"type": "text", "content": "Central Park • Gates Open 3PM", "fontFamily": "Inter", "x": 60, "y": 1010, "width": 680, "height": 35, "fontSize": 26, "fontWeight": "500", "color": "#E0E0E0"},
     {"type": "text", "content": "www.summervibes.com", "fontFamily": "Inter", "x": 60, "y": 1110, "width": 300, "height": 28, "fontSize": 22, "fontWeight": "400", "color": "#FFD700"}
@@ -1591,9 +1646,41 @@ Here's the design: {"title":"Example"}
                 }
               }
 
-              // Validate required fields
-              if (!designSpec.elements || !Array.isArray(designSpec.elements)) {
-                throw new Error('Invalid design spec: missing elements array');
+              // Validate required fields - support both single frame and multi-frame formats
+              if (designSpec.frames && Array.isArray(designSpec.frames)) {
+                // New multi-frame format
+                designSpec.frames.forEach((frame: any, idx: number) => {
+                  if (!frame.name || typeof frame.name !== 'string') {
+                    throw new Error(`Frame ${idx} missing required 'name' property`);
+                  }
+                  if (!frame.elements || !Array.isArray(frame.elements)) {
+                    throw new Error(`Frame ${idx} missing required 'elements' array`);
+                  }
+                  if (!frame.width || !frame.height) {
+                    throw new Error(`Frame ${idx} missing required width/height`);
+                  }
+                  // Validate each element has required fields
+                  frame.elements.forEach((el: any, elIdx: number) => {
+                    if (!el.type || typeof el.x !== 'number' || typeof el.y !== 'number' || !el.width || !el.height) {
+                      throw new Error(`Frame ${idx}, element ${elIdx} missing required fields (type, x, y, width, height)`);
+                    }
+                  });
+                });
+              } else if (designSpec.elements && Array.isArray(designSpec.elements)) {
+                // Legacy single-frame format - convert to frames array
+                designSpec = {
+                  frames: [{
+                    name: designSpec.title || designSpec.name || 'Untitled Design',
+                    backgroundColor: designSpec.backgroundColor || '#FFFFFF',
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    elements: designSpec.elements
+                  }],
+                  style: designSpec.style,
+                  mood: designSpec.mood
+                };
+              } else {
+                throw new Error('Invalid design spec: missing frames or elements array');
               }
 
               // Fix color contrast issues

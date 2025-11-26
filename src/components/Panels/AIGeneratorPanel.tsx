@@ -144,8 +144,19 @@ export default function AIGeneratorPanel({
       logos: activeBrandKit.logo_urls
     } : undefined;
     
-    // Pass all selected generation types and conversation history, including target frame
-    await onGenerate(selectedGenerationTypes, selectedModel, brandKitData, [...chatMessages, userMessage], selectedFrameId);
+    // Detect if user wants multiple frames from keywords
+    const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'create 2', 'create 3', 'create 4', 'create 5', 'several', 'few'];
+    const wantsMultipleFrames = multiFrameKeywords.some(keyword => description.toLowerCase().includes(keyword));
+    
+    // Pass all selected generation types and conversation history
+    // Only pass targetFrameId if NOT creating multiple frames
+    await onGenerate(
+      selectedGenerationTypes, 
+      selectedModel, 
+      brandKitData, 
+      [...chatMessages, userMessage], 
+      wantsMultipleFrames ? undefined : selectedFrameId
+    );
     
     // Add AI response to chat
     const aiMessage: ChatMessage = {
@@ -330,7 +341,7 @@ export default function AIGeneratorPanel({
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                AI will generate content in the selected frame only
+                For single frame edits. Use keywords like "posters" or "multiple frames" to create multiple frames
               </p>
             </div>
 
