@@ -198,27 +198,33 @@ export function PresentationMode({ frames, onClose }: PresentationModeProps) {
           }}
         >
           {/* Render frame elements */}
-          {currentFrame.elements
-            ?.filter((el) => el.type !== "drawing" && el.type !== "icon")
-            .map((element) => {
-              // Cast to ResizableElement type and exclude children
-              const { children, ...elementProps } = element;
-              const elementType = elementProps.type as "image" | "video" | "shape" | "text" | "shader" | "richtext" | "qrcode";
-              return (
-                <ResizableElement
-                  key={elementProps.id}
-                  {...elementProps}
-                  type={elementType}
-                  isSelected={false}
-                  onSelect={() => {}}
-                  onUpdate={() => {}}
-                  onDelete={() => {}}
-                  onDuplicate={() => {}}
-                  zoom={1}
-                  readOnly={true}
-                />
-              );
-            })}
+          {currentFrame.elements?.map((element) => {
+            // Skip drawing elements (complex to render in presentation mode)
+            if (element.type === "drawing") return null;
+            
+            // Cast to ResizableElement type and exclude children
+            const { children, ...elementProps } = element;
+            
+            // Skip icon type as ResizableElement doesn't support it
+            if (elementProps.type === "icon") return null;
+            
+            const elementType = elementProps.type as "image" | "video" | "shape" | "text" | "shader" | "richtext" | "qrcode";
+            
+            return (
+              <ResizableElement
+                key={elementProps.id}
+                {...elementProps}
+                type={elementType}
+                isSelected={false}
+                onSelect={() => {}}
+                onUpdate={() => {}}
+                onDelete={() => {}}
+                onDuplicate={() => {}}
+                zoom={1}
+                readOnly={true}
+              />
+            );
+          })}
         </div>
       </div>
 
