@@ -77,6 +77,15 @@ export default function AIGeneratorPanel({
   });
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [targetFrameMode, setTargetFrameMode] = useState<string | null>(null); // null = general mode, frameId = specific frame mode
+
+  // Set targetFrameMode when panel opens with a selected frame (optional - user can detach)
+  useEffect(() => {
+    // Only auto-set on first open if there's a selected frame
+    if (selectedFrameId && !targetFrameMode && frames.length > 1) {
+      setTargetFrameMode(selectedFrameId);
+    }
+  }, []); // Only run on mount
 
   // Save model preference
   useEffect(() => {
@@ -144,42 +153,45 @@ export default function AIGeneratorPanel({
       logos: activeBrandKit.logo_urls
     } : undefined;
     
-    // Smart frame count detection
+    // Smart frame count detection (only when NOT in target frame mode)
     const lowerPrompt = description.toLowerCase();
-    
-    // Detect explicit numbers (e.g., "3 posters", "create 5 frames")
-    const numberMatch = lowerPrompt.match(/\b(\d+)\s+(posters?|frames?)\b/) || 
-                       lowerPrompt.match(/\b(create|generate|make)\s+(\d+)\b/);
-    
-    // Detect word numbers (e.g., "three posters", "five frames")
-    const wordNumbers: Record<string, number> = {
-      'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
-      'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
-    };
     
     let frameCount = 1;
     let wantsMultipleFrames = false;
     
-    if (numberMatch && numberMatch[1]) {
-      frameCount = parseInt(numberMatch[1]) || parseInt(numberMatch[2]) || 1;
-      wantsMultipleFrames = frameCount > 1;
-    } else {
-      // Check for word numbers
-      for (const [word, num] of Object.entries(wordNumbers)) {
-        if (lowerPrompt.includes(word + ' poster') || lowerPrompt.includes(word + ' frame')) {
-          frameCount = num;
-          wantsMultipleFrames = true;
-          break;
+    // Only detect multi-frame intent if we're in general mode (not targeting a specific frame)
+    if (!targetFrameMode) {
+      // Detect explicit numbers (e.g., "3 posters", "create 5 frames")
+      const numberMatch = lowerPrompt.match(/\b(\d+)\s+(posters?|frames?)\b/) || 
+                         lowerPrompt.match(/\b(create|generate|make)\s+(\d+)\b/);
+      
+      // Detect word numbers (e.g., "three posters", "five frames")
+      const wordNumbers: Record<string, number> = {
+        'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
+        'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+      };
+      
+      if (numberMatch && numberMatch[1]) {
+        frameCount = parseInt(numberMatch[1]) || parseInt(numberMatch[2]) || 1;
+        wantsMultipleFrames = frameCount > 1;
+      } else {
+        // Check for word numbers
+        for (const [word, num] of Object.entries(wordNumbers)) {
+          if (lowerPrompt.includes(word + ' poster') || lowerPrompt.includes(word + ' frame')) {
+            frameCount = num;
+            wantsMultipleFrames = true;
+            break;
+          }
         }
       }
-    }
-    
-    // Fallback: check for keywords without explicit count
-    if (!wantsMultipleFrames) {
-      const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'several', 'few', 'variety'];
-      wantsMultipleFrames = multiFrameKeywords.some(keyword => lowerPrompt.includes(keyword));
-      if (wantsMultipleFrames) {
-        frameCount = 3; // Default to 3 frames when no specific number is given
+      
+      // Fallback: check for keywords without explicit count
+      if (!wantsMultipleFrames) {
+        const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'several', 'few', 'variety'];
+        wantsMultipleFrames = multiFrameKeywords.some(keyword => lowerPrompt.includes(keyword));
+        if (wantsMultipleFrames) {
+          frameCount = 3; // Default to 3 frames when no specific number is given
+        }
       }
     }
     
@@ -189,16 +201,22 @@ export default function AIGeneratorPanel({
         description: "The AI will generate multiple distinct posters for you",
         duration: 4000,
       });
+    } else if (targetFrameMode) {
+      const targetFrame = frames.find(f => f.id === targetFrameMode);
+      toast.info(`Updating ${targetFrame?.name || 'selected frame'}...`, {
+        description: "AI will modify only this specific frame",
+        duration: 3000,
+      });
     }
     
     // Pass all selected generation types, conversation history, and frame count
-    // Only pass targetFrameId if NOT creating multiple frames
+    // Use targetFrameMode if set, otherwise use multi-frame logic
     await onGenerate(
       selectedGenerationTypes, 
       selectedModel, 
       brandKitData, 
       [...chatMessages, userMessage], 
-      wantsMultipleFrames ? undefined : selectedFrameId,
+      targetFrameMode || (wantsMultipleFrames ? undefined : selectedFrameId),
       wantsMultipleFrames ? frameCount : undefined
     );
     
@@ -369,25 +387,56 @@ export default function AIGeneratorPanel({
           </div>
 
           <TabsContent value="generator" className="p-3 space-y-3 mt-0">
-            {/* Target Frame Selector */}
-            <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
-              <Label className="text-xs text-muted-foreground">Target Frame</Label>
-              <Select value={selectedFrameId} onValueChange={onFrameSelect}>
-                <SelectTrigger className="w-full h-9 text-sm bg-background border-border">
-                  <SelectValue placeholder="Select frame to generate in" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border z-50">
-                  {frames.map((frame) => (
-                    <SelectItem key={frame.id} value={frame.id}>
-                      {frame.name || frame.id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                For single frame edits. Use keywords like "posters" or "multiple frames" to create multiple frames
-              </p>
-            </div>
+            {/* Target Frame Mode Indicator & Controls */}
+            {targetFrameMode ? (
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <Label className="text-xs font-medium text-primary">
+                      Editing: {frames.find(f => f.id === targetFrameMode)?.name || 'Frame'}
+                    </Label>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setTargetFrameMode(null);
+                      toast.success("Switched to general mode");
+                    }}
+                    className="h-7 px-2 text-xs hover:bg-primary/20"
+                  >
+                    <X className="h-3 w-3 mr-1" />
+                    Detach
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  AI will modify only this specific frame. Click "Detach" to create new frames or make general prompts.
+                </p>
+              </div>
+            ) : (
+              <div className="bg-muted/30 border border-border rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">Mode: General</Label>
+                  {frames.length > 1 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setTargetFrameMode(selectedFrameId);
+                        toast.info(`Now targeting: ${frames.find(f => f.id === selectedFrameId)?.name}`);
+                      }}
+                      className="h-7 px-2 text-xs"
+                    >
+                      Target Frame
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Create new frames or use keywords like "3 posters" to generate multiple frames at once.
+                </p>
+              </div>
+            )}
 
             {/* Chat Messages */}
             {chatMessages.length > 0 && (
