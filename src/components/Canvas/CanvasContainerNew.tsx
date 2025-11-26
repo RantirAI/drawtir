@@ -955,6 +955,8 @@ export default function CanvasContainerNew({
       let targetFrameIdFromResponse = targetFrameId; // Store target frame ID for applying changes
       let finalImageUrl: string | null = null; // Track final generated image URL for replacing placeholders
       let streamedFrameCount = 0; // Track how many full frames we received from the stream
+      let currentElementFrameIndex = 0; // Track which frame we're currently adding elements to
+      let elementsPerFrame = 0; // Count elements added to current frame
 
       if (!reader) {
         throw new Error("No response body");
@@ -1199,12 +1201,25 @@ export default function CanvasContainerNew({
                 }
               } else if (data.type === 'element') {
                 // Render element progressively as it arrives.
-                // In multi-poster mode, stream into the first empty poster slot
-                // so users still see at least one complete design even if
-                // the final JSON spec is malformed.
-                const targetForElementId = wantsMultipleFrames && emptyFrameIds.length > 0
-                  ? emptyFrameIds[0]
-                  : selectedFrameId;
+                // In multi-poster mode, distribute elements across all frames in round-robin fashion
+                // so if the backend fails to send complete frames, we at least fill all posters
+                let targetForElementId: string | null = null;
+                
+                if (wantsMultipleFrames && emptyFrameIds.length > 0) {
+                  // Distribute elements across frames (roughly 5-7 elements per frame)
+                  const maxElementsPerFrame = 7;
+                  
+                  if (elementsPerFrame >= maxElementsPerFrame) {
+                    // Move to next frame
+                    currentElementFrameIndex = (currentElementFrameIndex + 1) % emptyFrameIds.length;
+                    elementsPerFrame = 0;
+                  }
+                  
+                  targetForElementId = emptyFrameIds[currentElementFrameIndex];
+                  elementsPerFrame++;
+                } else {
+                  targetForElementId = selectedFrameId;
+                }
 
                 if (targetForElementId && data.element) {
                   const el = data.element;
