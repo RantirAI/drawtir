@@ -238,6 +238,40 @@ export default {
             transform: "translateX(100%)",
           },
         },
+        "scale-in": {
+          from: {
+            opacity: "0",
+            transform: "scale(0.95)",
+          },
+          to: {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+        },
+        "slide-in-left": {
+          from: {
+            transform: "translateX(-100%)",
+          },
+          to: {
+            transform: "translateX(0)",
+          },
+        },
+        "slide-in-down": {
+          from: {
+            transform: "translateY(-100%)",
+          },
+          to: {
+            transform: "translateY(0)",
+          },
+        },
+        "slide-in-up": {
+          from: {
+            transform: "translateY(100%)",
+          },
+          to: {
+            transform: "translateY(0)",
+          },
+        },
         "meteor-effect": {
           "0%": {
             transform: "rotate(215deg) translateX(0) translateY(0)",
@@ -267,6 +301,10 @@ export default {
         "slide-out-to-bottom": "slide-out-to-bottom 0.5s ease-out",
         "slide-out-to-left": "slide-out-to-left 0.5s ease-out",
         "slide-out-to-right": "slide-out-to-right 0.5s ease-out",
+        "scale-in": "scale-in 0.3s ease-out",
+        "slide-in-left": "slide-in-left 0.3s ease-out",
+        "slide-in-down": "slide-in-down 0.3s ease-out",
+        "slide-in-up": "slide-in-up 0.3s ease-out",
         "meteor-effect": "meteor-effect linear infinite",
       },
     },

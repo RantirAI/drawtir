@@ -1,7 +1,8 @@
 import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Maximize4 } from "iconsax-react";
-import { Save, Share2, Hand, Users } from "lucide-react";
+import { Save, Share2, Hand, Users, Presentation } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import type { Frame } from "@/types/elements";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,6 +60,8 @@ interface EditorTopBarProps {
   currentUser?: { id: string; name: string; avatar: string | null } | null;
   enableCollaboration?: boolean;
   onRecenter?: () => void;
+  frames?: Frame[];
+  onPresentationMode?: () => void;
 }
 
 export default function EditorTopBar({ 
@@ -93,6 +96,8 @@ export default function EditorTopBar({
   currentUser = null,
   enableCollaboration = false,
   onRecenter,
+  frames = [],
+  onPresentationMode,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -304,6 +309,18 @@ export default function EditorTopBar({
             title="Center View (F)"
           >
             <Maximize4 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          </Button>
+        )}
+
+        {onPresentationMode && frames.length > 0 && (
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+            onClick={onPresentationMode}
+            title="Presentation Mode"
+          >
+            <Presentation size={12} className="transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
         
