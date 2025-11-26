@@ -559,12 +559,14 @@ serve(async (req) => {
       generationTypes = [], // Array of generation types (e.g., ["generate-image", "create", "search-unsplash"])
       conversationHistory = [], // Chat conversation history
       currentSnapshot = null, // Current canvas state
-      targetFrameId = null // Specific frame to generate in
+      targetFrameId = null, // Specific frame to generate in
+      frameCount = 1 // Number of frames to generate (default: 1)
     } = await req.json();
     
     console.log('AI Poster Generation - Model:', model, 'Type:', analysisType, 'Generation types:', generationTypes);
     console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
     console.log('Target frame:', targetFrameId);
+    console.log('Frame count:', frameCount);
     console.log('Brand kit data:', brandKitData ? 'provided' : 'none');
     
     // Validate model
@@ -1099,8 +1101,9 @@ TASK: Create a stunning poster featuring ${images.length > 1 ? `these ${images.l
 USER REQUEST: "${prompt || 'Create an eye-catching poster with great visual impact'}"
 
 🎯 MULTI-FRAME GENERATION:
-- DEFAULT: Create 1 frame unless user asks for "multiple", "several", "a series", etc.
-- MULTIPLE: Only create multiple frames when explicitly requested (e.g., "create 3 posters", "make a series")
+${frameCount > 1 ? `- CREATE EXACTLY ${frameCount} DISTINCT FRAMES in the "frames" array` : '- Create 1 frame (single poster)'}
+${frameCount > 1 ? `- Each frame MUST have unique content and layout variations` : ''}
+${frameCount > 1 ? `- All ${frameCount} frames should follow a cohesive theme but with visual variety` : ''}
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${brandKitGuidance}
@@ -1153,9 +1156,9 @@ TASK: Create a stunning, professional poster design that stands out.
 USER REQUEST: "${prompt}"
 
 🎯 MULTI-FRAME GENERATION:
-- DEFAULT: Create 1 frame unless user asks for "multiple", "several", "a series", etc.
-- MULTIPLE: Only create multiple frames when explicitly requested (e.g., "create 3 posters", "make a series")
-- Each frame should be cohesive but can vary in layout, color, or emphasis
+${frameCount > 1 ? `- CREATE EXACTLY ${frameCount} DISTINCT FRAMES in the "frames" array` : '- Create 1 frame (single poster)'}
+${frameCount > 1 ? `- Each frame MUST have unique content and layout variations` : ''}
+${frameCount > 1 ? `- All ${frameCount} frames should follow a cohesive theme but with visual variety` : ''}
 
 CANVAS: ${canvasWidth}px × ${canvasHeight}px (${(canvasWidth/canvasHeight).toFixed(2)}:1 aspect ratio)
 ${styleGuidance}${brandKitGuidance}

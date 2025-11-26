@@ -711,16 +711,15 @@ export default function CanvasContainerNew({
     }
   };
 
-  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: any[], targetFrameId?: string) => {
+  const generateWithAI = async (generationTypes: string[] = ["freeform"], model: string = "gemini-2.5-flash", brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: any[], targetFrameId?: string, frameCount?: number) => {
     const imgs = Array.isArray(captionImage) ? captionImage : [];
     if (!description.trim() && imgs.length === 0) {
       toast.error("Please provide a description or upload an image");
       return;
     }
 
-    // Detect if the user explicitly requested multiple posters/frames
-    const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'create 2', 'create 3', 'create 4', 'create 5', 'several', 'few'];
-    const wantsMultipleFrames = multiFrameKeywords.some(keyword => description.toLowerCase().includes(keyword));
+    // Determine if we're in multi-frame mode
+    const wantsMultipleFrames = frameCount !== undefined && frameCount > 1;
 
     setIsGenerating(true);
     
@@ -873,9 +872,9 @@ export default function CanvasContainerNew({
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
           },
           body: JSON.stringify({
-            // If the user asked for multiple posters, strongly instruct the AI
+            // If the user asked for multiple posters, strongly instruct the AI with the exact count
             prompt: wantsMultipleFrames
-              ? `${description}\n\nCreate 3 distinct poster frames for this request. Each poster MUST be a separate object in the \\"frames\\" array with its own name, backgroundColor, width, height and elements.`
+              ? `${description}\n\nCreate exactly ${frameCount} distinct poster frames for this request. Each poster MUST be a separate object in the "frames" array with its own name, backgroundColor, width, height and elements.`
               : description,
             imageBase64: imagesToUse.length > 0 ? imagesToUse : null,
             analysisType,
@@ -887,6 +886,7 @@ export default function CanvasContainerNew({
             conversationHistory: conversationHistory || [], // Pass conversation history
             currentSnapshot, // Pass current canvas state
             targetFrameId: wantsMultipleFrames ? undefined : frameId, // Only lock to a single frame when not in multi-frame mode
+            frameCount: wantsMultipleFrames ? frameCount : undefined, // Pass explicit frame count
           }),
         }
       );
