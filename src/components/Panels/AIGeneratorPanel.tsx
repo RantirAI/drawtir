@@ -28,7 +28,7 @@ interface AIGeneratorPanelProps {
   isGenerating: boolean;
   generationProgress: string;
   captionImageInputRef: React.RefObject<HTMLInputElement>;
-  onGenerate: (generationTypes: string[], model: string, brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: ChatMessage[], targetFrameId?: string) => Promise<void>;
+  onGenerate: (generationTypes: string[], model: string, brandKitData?: { colors: string[], fonts: string[], logos: string[] }, conversationHistory?: ChatMessage[], targetFrameId?: string, frameCount?: number) => Promise<void>;
   onRestoreConversation: (snapshot: CanvasSnapshot) => void;
   onClose: () => void;
 }
@@ -144,18 +144,62 @@ export default function AIGeneratorPanel({
       logos: activeBrandKit.logo_urls
     } : undefined;
     
-    // Detect if user wants multiple frames from keywords
-    const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'create 2', 'create 3', 'create 4', 'create 5', 'several', 'few'];
-    const wantsMultipleFrames = multiFrameKeywords.some(keyword => description.toLowerCase().includes(keyword));
+    // Smart frame count detection
+    const lowerPrompt = description.toLowerCase();
     
-    // Pass all selected generation types and conversation history
+    // Detect explicit numbers (e.g., "3 posters", "create 5 frames")
+    const numberMatch = lowerPrompt.match(/\b(\d+)\s+(posters?|frames?)\b/) || 
+                       lowerPrompt.match(/\b(create|generate|make)\s+(\d+)\b/);
+    
+    // Detect word numbers (e.g., "three posters", "five frames")
+    const wordNumbers: Record<string, number> = {
+      'two': 2, 'three': 3, 'four': 4, 'five': 5, 'six': 6,
+      'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10
+    };
+    
+    let frameCount = 1;
+    let wantsMultipleFrames = false;
+    
+    if (numberMatch && numberMatch[1]) {
+      frameCount = parseInt(numberMatch[1]) || parseInt(numberMatch[2]) || 1;
+      wantsMultipleFrames = frameCount > 1;
+    } else {
+      // Check for word numbers
+      for (const [word, num] of Object.entries(wordNumbers)) {
+        if (lowerPrompt.includes(word + ' poster') || lowerPrompt.includes(word + ' frame')) {
+          frameCount = num;
+          wantsMultipleFrames = true;
+          break;
+        }
+      }
+    }
+    
+    // Fallback: check for keywords without explicit count
+    if (!wantsMultipleFrames) {
+      const multiFrameKeywords = ['posters', 'multiple', 'frames', 'series', 'several', 'few', 'variety'];
+      wantsMultipleFrames = multiFrameKeywords.some(keyword => lowerPrompt.includes(keyword));
+      if (wantsMultipleFrames) {
+        frameCount = 3; // Default to 3 frames when no specific number is given
+      }
+    }
+    
+    // Show toast with frame count before generation
+    if (wantsMultipleFrames) {
+      toast.info(`Creating ${frameCount} poster frames...`, {
+        description: "The AI will generate multiple distinct posters for you",
+        duration: 4000,
+      });
+    }
+    
+    // Pass all selected generation types, conversation history, and frame count
     // Only pass targetFrameId if NOT creating multiple frames
     await onGenerate(
       selectedGenerationTypes, 
       selectedModel, 
       brandKitData, 
       [...chatMessages, userMessage], 
-      wantsMultipleFrames ? undefined : selectedFrameId
+      wantsMultipleFrames ? undefined : selectedFrameId,
+      wantsMultipleFrames ? frameCount : undefined
     );
     
     // Add AI response to chat
