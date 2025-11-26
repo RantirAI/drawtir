@@ -1686,94 +1686,164 @@ Here's the design: {"title":"Example"}
                 throw new Error('Invalid design spec: missing frames or elements array');
               }
 
-              // Fix color contrast issues
-              const bgColor = designSpec.backgroundColor || '#FFFFFF';
-              const isLightBackground = isLightColor(bgColor);
-              
-              console.log('Background color:', bgColor, 'Is light:', isLightBackground);
-              
-              // Fix text elements with poor contrast
-              designSpec.elements.forEach((el: any, idx: number) => {
-                if (el.type === 'text' && el.color) {
-                  const textIsLight = isLightColor(el.color);
-                  
-                  // Check for poor contrast: light text on light bg OR dark text on dark bg
-                  if ((isLightBackground && textIsLight) || (!isLightBackground && !textIsLight)) {
-                    const oldColor = el.color;
-                    // Fix: Use contrasting color
-                    el.color = isLightBackground ? '#000000' : '#FFFFFF';
-                    console.log(`Fixed text element ${idx}: ${oldColor} -> ${el.color} (background is ${isLightBackground ? 'light' : 'dark'})`);
-                  }
-                }
-              });
-
-              // Update image elements to use generated image if available
-              if (generatedImageBase64) {
-                console.log('Adding generated image to design spec');
-                // Find or add image element for generated image
-                const imageElements = designSpec.elements.filter((el: any) => el.type === 'image');
-                if (imageElements.length > 0) {
-                  // Update first image element to use generated image URL
-                  imageElements[0].content = generatedImageBase64;
-                  imageElements[0].imageUrl = generatedImageBase64;
-                  imageElements[0].src = generatedImageBase64;
-                  imageElements[0].isGenerated = true;
-                  console.log('Updated existing image element with generated image');
-                } else {
-                  // Add image element if none exists
-                  const newImageElement = {
-                    type: 'image',
-                    content: generatedImageBase64,
-                    imageUrl: generatedImageBase64,
-                    src: generatedImageBase64,
-                    x: 0,
-                    y: 0,
-                    width: canvasWidth,
-                    height: Math.floor(canvasHeight * 0.6),
-                    opacity: 1,
-                    isGenerated: true
-                  };
-                  designSpec.elements.unshift(newImageElement);
-                  console.log('Added new image element with generated image');
-                }
-                
-                // Add dark overlay for better text contrast if background is an image
-                const hasImage = designSpec.elements.some((el: any) => el.type === 'image');
-                const hasWhiteText = designSpec.elements.some((el: any) => 
-                  el.type === 'text' && (el.color === '#FFFFFF' || el.color === '#FFF' || el.color === 'white' || el.color?.toLowerCase().includes('white'))
-                );
-                
-                if (hasImage && hasWhiteText) {
-                  // Add semi-transparent overlay for text readability
-                  const overlayExists = designSpec.elements.some((el: any) => 
-                    el.type === 'shape' && el.color && el.color.includes('rgba') && el.color.includes('0,0,0')
-                  );
-                  
-                  if (!overlayExists) {
-                    const overlay = {
-                      type: 'shape',
-                      shape: 'rectangle',
-                      x: 0,
-                      y: Math.floor(canvasHeight * 0.5), // Bottom half
+              // Fix color contrast and image usage PER FRAME for multi-frame designs
+              const framesArray = Array.isArray(designSpec.frames)
+                ? designSpec.frames
+                : [
+                    {
+                      name: designSpec.title || designSpec.name || 'Untitled Design',
+                      backgroundColor: designSpec.backgroundColor || '#FFFFFF',
                       width: canvasWidth,
-                      height: Math.floor(canvasHeight * 0.5),
-                      color: 'rgba(0,0,0,0.6)',
-                      borderRadius: '0',
-                      opacity: 1
-                    };
-                    // Insert overlay before text elements
-                    const firstTextIndex = designSpec.elements.findIndex((el: any) => el.type === 'text');
-                    if (firstTextIndex > 0) {
-                      designSpec.elements.splice(firstTextIndex, 0, overlay);
-                    } else {
-                      designSpec.elements.push(overlay);
-                    }
-                    console.log('✅ Added contrast overlay for white text readability');
-                  }
+                      height: canvasHeight,
+                      elements: designSpec.elements || [],
+                    },
+                  ];
+
+              // If a specific number of frames was requested, ensure we have at least that many
+              if (frameCount && frameCount > 1 && framesArray.length < frameCount) {
+                const baseFrame = framesArray[0];
+                for (let i = framesArray.length; i < frameCount; i++) {
+                  const cloned = JSON.parse(JSON.stringify(baseFrame));
+                  cloned.name = `${baseFrame.name || 'Frame'} ${i + 1}`;
+                  framesArray.push(cloned);
                 }
+                console.log(
+                  `Expanded frames to match requested count:`,
+                  `requested=${frameCount}, actual=${framesArray.length}`,
+                );
               }
 
-              console.log('Successfully parsed design with', designSpec.elements.length, 'elements');
+              framesArray.forEach((frame: any, frameIdx: number) => {
+                const frameBgColor = frame.backgroundColor || '#FFFFFF';
+                const isLightBackground = isLightColor(frameBgColor);
+
+                console.log(
+                  `Frame ${frameIdx} background color:`,
+                  frameBgColor,
+                  'Is light:',
+                  isLightBackground,
+                );
+
+                const elements: any[] = Array.isArray(frame.elements) ? frame.elements : [];
+
+                // Fix text elements with poor contrast
+                elements.forEach((el: any, idx: number) => {
+                  if (el.type === 'text' && el.color) {
+                    const textIsLight = isLightColor(el.color);
+
+                    // Check for poor contrast: light text on light bg OR dark text on dark bg
+                    if ((isLightBackground && textIsLight) || (!isLightBackground && !textIsLight)) {
+                      const oldColor = el.color;
+                      // Fix: Use contrasting color
+                      el.color = isLightBackground ? '#000000' : '#FFFFFF';
+                      console.log(
+                        `Fixed text element ${idx} in frame ${frameIdx}:`,
+                        oldColor,
+                        '->',
+                        el.color,
+                        `(background is ${isLightBackground ? 'light' : 'dark'})`,
+                      );
+                    }
+                  }
+                });
+
+                // Update image elements to use generated image if available
+                if (generatedImageBase64) {
+                  console.log('Adding generated image to design spec for frame', frameIdx);
+
+                  const imageElements = elements.filter((el: any) => el.type === 'image');
+                  if (imageElements.length > 0) {
+                    // Update first image element to use generated image URL
+                    imageElements[0].content = generatedImageBase64;
+                    imageElements[0].imageUrl = generatedImageBase64;
+                    imageElements[0].src = generatedImageBase64;
+                    imageElements[0].isGenerated = true;
+                    console.log('Updated existing image element with generated image');
+                  } else {
+                    // Add image element if none exists
+                    const frameWidth = frame.width || canvasWidth;
+                    const frameHeight = frame.height || canvasHeight;
+
+                    const newImageElement = {
+                      type: 'image',
+                      content: generatedImageBase64,
+                      imageUrl: generatedImageBase64,
+                      src: generatedImageBase64,
+                      x: 0,
+                      y: 0,
+                      width: frameWidth,
+                      height: Math.floor(frameHeight * 0.6),
+                      opacity: 1,
+                      isGenerated: true,
+                    };
+                    elements.unshift(newImageElement);
+                    console.log('Added new image element with generated image');
+                  }
+
+                  // Add dark overlay for better text contrast if background is an image
+                  const hasImage = elements.some((el: any) => el.type === 'image');
+                  const hasWhiteText = elements.some(
+                    (el: any) =>
+                      el.type === 'text' &&
+                      (el.color === '#FFFFFF' ||
+                        el.color === '#FFF' ||
+                        el.color === 'white' ||
+                        el.color?.toLowerCase().includes('white')),
+                  );
+
+                  if (hasImage && hasWhiteText) {
+                    // Add semi-transparent overlay for text readability
+                    const overlayExists = elements.some(
+                      (el: any) =>
+                        el.type === 'shape' &&
+                        el.color &&
+                        el.color.includes('rgba') &&
+                        el.color.includes('0,0,0'),
+                    );
+
+                    if (!overlayExists) {
+                      const frameHeight = frame.height || canvasHeight;
+                      const frameWidth = frame.width || canvasWidth;
+
+                      const overlay = {
+                        type: 'shape',
+                        shape: 'rectangle',
+                        x: 0,
+                        y: Math.floor(frameHeight * 0.5), // Bottom half
+                        width: frameWidth,
+                        height: Math.floor(frameHeight * 0.5),
+                        color: 'rgba(0,0,0,0.6)',
+                        borderRadius: '0',
+                        opacity: 1,
+                      };
+                      // Insert overlay before text elements
+                      const firstTextIndex = elements.findIndex((el: any) => el.type === 'text');
+                      if (firstTextIndex > 0) {
+                        elements.splice(firstTextIndex, 0, overlay);
+                      } else {
+                        elements.push(overlay);
+                      }
+                      console.log('✅ Added contrast overlay for white text readability');
+                    }
+                  }
+                }
+
+                // Write elements back to the frame
+                frame.elements = elements;
+              });
+
+              // If we constructed framesArray from legacy format, sync it back to designSpec
+              if (!Array.isArray(designSpec.frames)) {
+                designSpec.frames = framesArray;
+              }
+
+              console.log(
+                'Successfully parsed design with',
+                framesArray.reduce((acc: number, f: any) => acc + (f.elements?.length || 0), 0),
+                'elements across',
+                framesArray.length,
+                'frame(s)',
+              );
 
             } catch (e) {
               console.error('Failed to parse AI response:', e);
