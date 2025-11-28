@@ -1067,8 +1067,9 @@ export default function CanvasContainerNew({
                           if (el.type === "icon") {
                             return {
                               ...baseElement,
-                              iconName: el.iconName || "heart",
-                              iconFamily: el.iconFamily || "lucide",
+                              shapeType: "icon" as const,
+                              iconName: el.iconName || "Heart",
+                              iconFamily: el.iconFamily || "iconsax",
                               iconStrokeWidth: el.iconStrokeWidth || 2,
                               fill: el.color || "#000000",
                             };
@@ -1168,8 +1169,9 @@ export default function CanvasContainerNew({
                         if (el.type === "icon") {
                           return {
                             ...baseElement,
-                            iconName: el.iconName || "heart",
-                            iconFamily: el.iconFamily || "lucide",
+                            shapeType: "icon" as const,
+                            iconName: el.iconName || "Heart",
+                            iconFamily: el.iconFamily || "iconsax",
                             iconStrokeWidth: el.iconStrokeWidth || 2,
                             fill: el.color || "#000000",
                           };
@@ -1296,8 +1298,9 @@ export default function CanvasContainerNew({
                   if (el.type === "icon") {
                     newElement = {
                       ...baseElement,
-                      iconName: el.iconName || "heart",
-                      iconFamily: el.iconFamily || "lucide",
+                      shapeType: "icon" as const,
+                      iconName: el.iconName || "Heart",
+                      iconFamily: el.iconFamily || "iconsax",
                       iconStrokeWidth: el.iconStrokeWidth || 2,
                       fill: el.color || "#000000",
                     };
@@ -1445,8 +1448,9 @@ export default function CanvasContainerNew({
             if (el.type === "icon") {
               return {
                 ...baseElement,
-                iconName: el.iconName || "heart",
-                iconFamily: el.iconFamily || "lucide",
+                shapeType: "icon" as const,
+                iconName: el.iconName || "Heart",
+                iconFamily: el.iconFamily || "iconsax",
                 iconStrokeWidth: el.iconStrokeWidth || 2,
                 fill: el.color || "#000000",
               };
@@ -1564,8 +1568,9 @@ export default function CanvasContainerNew({
             if (el.type === "icon") {
               return {
                 ...baseElement,
-                iconName: el.iconName || "heart",
-                iconFamily: el.iconFamily || "lucide",
+                shapeType: "icon" as const,
+                iconName: el.iconName || "Heart",
+                iconFamily: el.iconFamily || "iconsax",
                 iconStrokeWidth: el.iconStrokeWidth || 2,
                 fill: el.color || "#000000",
               };
