@@ -168,6 +168,15 @@ export default function PreviewDialog({
             // ResizableElement doesn't support icon directly; skip icons
             if (elementProps.type === "icon") return null;
 
+            // For image elements, map imageUrl to src (ResizableElement expects src)
+            if (elementProps.type === "image") {
+              const imgSrc = elementProps.src || elementProps.imageUrl;
+              if (!imgSrc || imgSrc === "user-uploaded-image" || imgSrc === "" || !imgSrc.startsWith("http")) {
+                return null;
+              }
+              elementProps.src = imgSrc;
+            }
+
             const elementType = elementProps.type as
               | "image"
               | "video"

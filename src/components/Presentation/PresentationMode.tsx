@@ -197,16 +197,25 @@ export function PresentationMode({ frames, onClose }: PresentationModeProps) {
             backgroundColor: currentFrame.backgroundColor || "#ffffff",
           }}
         >
-          {/* Render frame elements */}
+        {/* Render frame elements */}
           {currentFrame.elements?.map((element) => {
             // Skip drawing elements (complex to render in presentation mode)
             if (element.type === "drawing") return null;
             
             // Cast to ResizableElement type and exclude children
-            const { children, ...elementProps } = element;
+            const { children, ...elementProps } = element as any;
             
             // Skip icon type as ResizableElement doesn't support it
             if (elementProps.type === "icon") return null;
+
+            // For image elements, map imageUrl to src (ResizableElement expects src)
+            if (elementProps.type === "image") {
+              const imgSrc = elementProps.src || elementProps.imageUrl;
+              if (!imgSrc || imgSrc === "user-uploaded-image" || imgSrc === "" || !imgSrc.startsWith("http")) {
+                return null;
+              }
+              elementProps.src = imgSrc;
+            }
             
             const elementType = elementProps.type as "image" | "video" | "shape" | "text" | "shader" | "richtext" | "qrcode";
             
