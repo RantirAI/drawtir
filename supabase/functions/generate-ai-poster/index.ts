@@ -345,29 +345,32 @@ Use rgba() colors with 0.4-0.7 opacity
 
 **ALWAYS use containers/shapes creatively for professional depth:**
 
-**Full-Width Containers:**
-- Create full-width bars/strips: {"type": "shape", "x": 0, "y": 900, "width": 800, "height": 300, "color": "rgba(0,0,0,0.7)", "shape": "rectangle"}
-- Use for text sections, footers, headers, or accent bands
-- Span entire canvas width (x: 0, width: canvasWidth)
+**🚨 CRITICAL: SOLID-COLORED CONTAINERS MUST HAVE TEXT ON THEM!**
+When you create a solid-colored shape (like a yellow pill, colored button, accent bar):
+- You MUST add a text element POSITIONED ON TOP of that container
+- Text should be CENTERED on the container
+- Use CONTRASTING text color (dark text on light containers, white text on dark containers)
+- NEVER create empty solid-colored shapes - they look broken!
 
-**Full-Height Containers:**
-- Vertical sidebars or panels: {"type": "shape", "x": 0, "y": 0, "width": 300, "height": 1200, "color": "rgba(255,255,255,0.15)", "shape": "rectangle"}
-- Great for split layouts or accent strips
+**Container + Text Pairing (MANDATORY for solid colors):**
+1. CTA Button Example:
+   Shape: {"type": "shape", "x": 100, "y": 540, "width": 200, "height": 50, "color": "#FFBE0B", "shape": "rectangle", "borderRadius": "25px"}
+   Text: {"type": "text", "content": "GET TICKETS", "x": 105, "y": 548, "width": 190, "height": 35, "fontSize": 20, "fontWeight": "700", "color": "#1A1A2E", "textAlign": "center"}
 
-**Opacity Layering (MANDATORY for sophisticated designs):**
-- Background shapes: 0.05-0.2 opacity (subtle texture)
-- Mid-layer containers: 0.3-0.5 opacity (visible but not overpowering)
-- Text backing panels: 0.6-0.85 opacity (readable text support)
-- Accent overlays: 0.1-0.3 opacity (color tinting)
+2. Date Badge Example:
+   Shape: {"type": "shape", "x": 50, "y": 100, "width": 120, "height": 40, "color": "#FF006E", "shape": "rectangle", "borderRadius": "20px"}
+   Text: {"type": "text", "content": "JUNE 24", "x": 55, "y": 106, "width": 110, "height": 30, "fontSize": 18, "fontWeight": "600", "color": "#FFFFFF"}
 
-**Creative Container Examples:**
-1. **Bottom Text Panel:** {"type": "shape", "x": 0, "y": 800, "width": 800, "height": 400, "color": "rgba(0,0,0,0.75)", "shape": "rectangle", "borderRadius": "0px"}
-2. **Top Gradient Bar:** {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 200, "color": "rgba(255,100,150,0.4)", "shape": "rectangle"}
-3. **Corner Accent:** {"type": "shape", "x": 600, "y": 0, "width": 200, "height": 300, "color": "rgba(100,200,255,0.25)", "shape": "rectangle", "borderRadius": "0 0 0 48px"}
-4. **Floating Card:** {"type": "shape", "x": 50, "y": 600, "width": 700, "height": 500, "color": "rgba(255,255,255,0.95)", "shape": "rectangle", "borderRadius": "24px"}
-5. **Subtle Overlay:** {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 1200, "color": "rgba(0,0,50,0.15)", "shape": "rectangle"}
+**Full-Width Containers (with text):**
+- Create full-width bars: {"type": "shape", "x": 0, "y": 520, "width": 400, "height": 80, "color": "#FFBE0B", "shape": "rectangle"}
+- ALWAYS add text on top: {"type": "text", "content": "REGISTER NOW", "x": 10, "y": 540, "width": 380, "height": 40, "fontSize": 24, "fontWeight": "700", "color": "#1A1A2E", "textAlign": "center"}
 
-**ALWAYS include at least 2-3 container shapes with varied opacity for visual depth!**
+**Semi-Transparent Overlays (these can be without text):**
+- Opacity < 0.5 overlays for visual depth don't need text: {"type": "shape", "x": 0, "y": 0, "width": 400, "height": 600, "color": "rgba(0,0,50,0.15)", "shape": "rectangle"}
+
+**Rule: If opacity >= 0.7 and solid color → MUST have text on it!**
+
+**ALWAYS include at least 2-3 container shapes for visual depth!**
 
 🎯 DESIGN CONSTRAINTS & VALIDATION:
 
@@ -1860,6 +1863,58 @@ Here's the design: {"title":"Example"}
                   elements.unshift(bottomPanel);
                   console.log('✅ Added 2 creative container shapes for visual depth');
                 }
+
+                // Check for solid-colored containers without text on them
+                const solidContainers = elements.filter(
+                  (el: any) =>
+                    el.type === 'shape' &&
+                    (el.shape === 'rectangle' || el.shape === 'circle') &&
+                    el.color &&
+                    !el.color.includes('rgba') &&
+                    el.width >= 80 &&
+                    el.height >= 30
+                );
+                
+                const ctaLabels = ['GET TICKETS', 'BOOK NOW', 'RSVP', 'LEARN MORE', 'JOIN US', 'REGISTER'];
+                let ctaIndex = 0;
+                
+                solidContainers.forEach((container: any) => {
+                  // Check if there's already text overlapping this container
+                  const hasTextOnTop = elements.some((el: any) => {
+                    if (el.type !== 'text') return false;
+                    const textCenterX = el.x + (el.width || 100) / 2;
+                    const textCenterY = el.y + (el.height || 30) / 2;
+                    const containerLeft = container.x;
+                    const containerRight = container.x + container.width;
+                    const containerTop = container.y;
+                    const containerBottom = container.y + container.height;
+                    return textCenterX >= containerLeft && textCenterX <= containerRight &&
+                           textCenterY >= containerTop && textCenterY <= containerBottom;
+                  });
+                  
+                  if (!hasTextOnTop) {
+                    // Add CTA text on this container
+                    const containerIsLight = isLightColor(container.color);
+                    const textColor = containerIsLight ? '#1A1A2E' : '#FFFFFF';
+                    const ctaText = ctaLabels[ctaIndex % ctaLabels.length];
+                    ctaIndex++;
+                    
+                    const newText = {
+                      type: 'text',
+                      content: ctaText,
+                      x: container.x + 10,
+                      y: container.y + (container.height / 2) - 12,
+                      width: container.width - 20,
+                      height: 30,
+                      fontSize: Math.min(24, Math.floor(container.height * 0.5)),
+                      fontWeight: '700',
+                      color: textColor,
+                      textAlign: 'center',
+                    };
+                    elements.push(newText);
+                    console.log(`✅ Added text "${ctaText}" on solid container at y:${container.y}`);
+                  }
+                });
 
                 // Update image elements to use generated image if available
                 if (generatedImageBase64) {
