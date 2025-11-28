@@ -441,7 +441,7 @@ EXAMPLE 3 - Party/Club Event with Dramatic Photo:
     {"type": "text", "content": "10 PM - 4 AM", "x": 60, "y": 965, "width": 680, "height": 45, "fontSize": 36, "fontWeight": "700", "color": "#000000"},
     {"type": "text", "content": "DOWNTOWN NIGHTCLUB", "x": 60, "y": 1025, "width": 680, "height": 38, "fontSize": 30, "fontWeight": "600", "color": "#FFFFFF"},
     {"type": "text", "content": "VIP TABLES: 555-0123", "x": 60, "y": 1090, "width": 680, "height": 32, "fontSize": 24, "fontWeight": "500", "color": "#FFFF00"},
-    {"type": "icon", "iconName": "sparkles", "iconFamily": "lucide", "x": 650, "y": 880, "width": 80, "height": 80, "color": "#FFFF00"}
+    {"type": "icon", "iconName": "Star1", "iconFamily": "iconsax", "x": 650, "y": 880, "width": 80, "height": 80, "color": "#FFFF00"}
   ]
 }
 WHY IT WORKS: Dramatic color blocking (hot pink), photo as main focal point, clear time/date/venue hierarchy, high energy neon accent color, professional event details.
@@ -460,7 +460,7 @@ EXAMPLE 4 - Summer Event with Gradient & Patterns:
     {"type": "text", "content": "JULY 15, 2025", "x": 150, "y": 680, "width": 500, "height": 36, "fontSize": 28, "fontWeight": "600", "color": "#333333"},
     {"type": "text", "content": "Riverside Park • 12 PM - 8 PM", "x": 150, "y": 725, "width": 500, "height": 30, "fontSize": 24, "fontWeight": "500", "color": "#666666"},
     {"type": "text", "content": "@summerbright", "x": 150, "y": 780, "width": 200, "height": 26, "fontSize": 20, "fontWeight": "500", "color": "#FF6B9D"},
-    {"type": "icon", "iconName": "sun", "iconFamily": "lucide", "x": 580, "y": 760, "width": 60, "height": 60, "color": "#FEC859"}
+    {"type": "icon", "iconName": "Sun1", "iconFamily": "iconsax", "x": 580, "y": 760, "width": 60, "height": 60, "color": "#FEC859"}
   ]
 }
 WHY IT WORKS: Vibrant gradient (overlapping circles), framed content area with white background for readability, colorful typography, complete event info, social handle included.
@@ -496,7 +496,7 @@ EXAMPLE 6 - Community/Volunteer Event:
     {"type": "text", "content": "9:00 AM - 3:00 PM", "x": 90, "y": 905, "width": 650, "height": 32, "fontSize": 24, "fontWeight": "500", "color": "#E0E0E0"},
     {"type": "text", "content": "Community Center • 456 Oak Street", "x": 90, "y": 945, "width": 650, "height": 28, "fontSize": 22, "fontWeight": "500", "color": "#CCCCCC"},
     {"type": "text", "content": "REGISTER: www.communityhelps.org", "x": 60, "y": 1050, "width": 680, "height": 32, "fontSize": 24, "fontWeight": "700", "color": "#FFD700"},
-    {"type": "icon", "iconName": "heart", "iconFamily": "lucide", "x": 650, "y": 1100, "width": 70, "height": 70, "color": "#FFD700"}
+    {"type": "icon", "iconName": "Heart", "iconFamily": "iconsax", "x": 650, "y": 1100, "width": 70, "height": 70, "color": "#FFD700"}
   ]
 }
 WHY IT WORKS: Split layout (photo top, solid color bottom), clean typography hierarchy, accent line for visual organization, complete registration info, appropriate icon.
@@ -517,7 +517,7 @@ EXAMPLE 7 - Professional Conference:
     {"type": "text", "content": "8:30 AM - 6:00 PM Daily", "x": 90, "y": 630, "width": 620, "height": 32, "fontSize": 24, "fontWeight": "500", "color": "#E0E0E0"},
     {"type": "text", "content": "REGISTER NOW", "x": 60, "y": 800, "width": 300, "height": 60, "fontSize": 32, "fontWeight": "800", "color": "#FFD700"},
     {"type": "text", "content": "www.techsummit2025.com", "x": 60, "y": 880, "width": 680, "height": 32, "fontSize": 24, "fontWeight": "600", "color": "#FFFFFF"},
-    {"type": "icon", "iconName": "rocket", "iconFamily": "lucide", "x": 60, "y": 1050, "width": 90, "height": 90, "color": "#F7931E"}
+    {"type": "icon", "iconName": "Rocket", "iconFamily": "iconsax", "x": 60, "y": 1050, "width": 90, "height": 90, "color": "#F7931E"}
   ]
 }
 WHY IT WORKS: Professional gradient (overlapping circles), framed info section, clear conference details, strong call-to-action, appropriate tech icon.
@@ -537,7 +537,7 @@ EXAMPLE 8 - Product Launch with Bold Design:
     {"type": "text", "content": "May 1, 2025 • 10:00 AM", "x": 80, "y": 840, "width": 640, "height": 40, "fontSize": 32, "fontWeight": "600", "color": "#FFFFFF"},
     {"type": "text", "content": "Innovation Hub • Downtown", "x": 80, "y": 895, "width": 640, "height": 34, "fontSize": 26, "fontWeight": "500", "color": "#E0E0E0"},
     {"type": "text", "content": "RSVP: launch@company.com", "x": 80, "y": 980, "width": 640, "height": 30, "fontSize": 24, "fontWeight": "600", "color": "#00F5FF"},
-    {"type": "icon", "iconName": "trending-up", "iconFamily": "lucide", "x": 650, "y": 1080, "width": 80, "height": 80, "color": "#FFD700"}
+    {"type": "icon", "iconName": "TrendUp", "iconFamily": "iconsax", "x": 650, "y": 1080, "width": 80, "height": 80, "color": "#FFD700"}
   ]
 }
 WHY IT WORKS: Rich gradient background (overlapping circles), large cyan focal shape with contrasting year, bold typography hierarchy, complete launch event details.`;
@@ -1082,7 +1082,7 @@ REPLICATION STEPS:
 4. Extract EXACT colors (hex values)
 5. Copy EXACT text content
 6. Match shapes (rectangle: borderRadius="0", circle: borderRadius="50%" + equal width/height)
-7. Match icons to lucide-react names
+7. Match icons using iconsax icon names (PascalCase like Heart, Star, Sun, Music)
 
 Return JSON:
 {
@@ -1177,7 +1177,7 @@ MANDATORY DESIGN REQUIREMENTS:
 2. Create dramatic visual hierarchy (title must be 2-3x larger than body)
 3. Use 8pt grid spacing (all x, y, width, height should align to 8 or 16 pixel increments when possible)
 4. Add 2-4 strategic shapes for visual interest (circles, rectangles with borderRadius)
-5. Include 1-3 relevant icons from lucide-react library
+5. Include 1-3 relevant icons from iconsax library (ALWAYS use iconFamily: "iconsax")
 6. Follow rule of thirds for element placement when appropriate (33%, 66% positions)
 7. 🚨 CRITICAL COLOR CONTRAST: NEVER use white text (#FFFFFF, #FFF, rgb(255,255,255)) on white backgrounds OR black text (#000000, #000, rgb(0,0,0)) on black backgrounds. Text must be clearly visible!
 8. Use generous whitespace - don't crowd elements
@@ -1190,7 +1190,7 @@ MANDATORY DESIGN REQUIREMENTS:
 - For colored backgrounds, choose contrasting text colors from the palette
 - When in doubt: Dark text on light backgrounds, Light text on dark backgrounds
 
-POPULAR ICONS (use these): sparkles, star, heart, trophy, award, crown, zap, flame, music, gift, calendar, camera, sun, moon, circle-dot, square-check, triangle
+POPULAR ICONSAX ICONS (use these with iconFamily: "iconsax"): Star1, Heart, Sun1, Moon, Music, Gift, Calendar, Camera, Award, Crown, Flash, Magicpen, Lamp, Location, Call, Message, Send2, Video, Microphone2, Play, Timer1, Clock, Ticket, Map, Bookmark, Category, Diagram, Graph, Cup, Medal, Like1, Lovely, TickCircle, ArrowRight2, ArrowUp2, Add, Minus, CloseCircle, SearchNormal1, Setting2, User, Profile2User, ShoppingCart, Bag2, Receipt21, Wallet2, MoneyRecive, CardPos, Chart, DocumentText, Gallery, VideoCircle, Brush2, ColorSwatch
 
 COMPOSITION TIPS:
 - Main title: Top third (y around ${Math.floor(canvasHeight * 0.2)})
@@ -1204,7 +1204,7 @@ Return JSON (COMPLETE structure, NO nested frames):
   "title": "Poster title",
   "backgroundColor": "#hex",
   "elements": [
-    {"type": "text|shape|icon", "content": "text or desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "fontSize": 0, "fontWeight": "normal|bold", "borderRadius": "0|16px|50%", "shape": "rectangle|circle", "iconName": "icon", "iconFamily": "lucide"}
+    {"type": "text|shape|icon", "content": "text or desc", "x": 0, "y": 0, "width": 0, "height": 0, "color": "#hex", "fontSize": 0, "fontWeight": "normal|bold", "borderRadius": "0|16px|50%", "shape": "rectangle|circle", "iconName": "Heart", "iconFamily": "iconsax"}
   ],
   "style": "Modern minimal with energetic palette",
   "mood": "Exciting and professional"
