@@ -109,15 +109,15 @@ const DESIGN_JSON_SCHEMA = {
 const MODEL_CONFIGS: Record<string, any> = {
   'gemini-2.5-flash': {
     model: 'google/gemini-2.5-flash',
-    maxTokens: 8192,
+    maxTokens: 16384,
   },
   'gemini-2.5-pro': {
     model: 'google/gemini-2.5-pro',
-    maxTokens: 8192,
+    maxTokens: 16384,
   },
   'gemini-2.5-flash-lite': {
     model: 'google/gemini-2.5-flash-lite',
-    maxTokens: 4096,
+    maxTokens: 8192,
   },
 };
 
@@ -1416,6 +1416,8 @@ Here's the design: {"title":"Example"}
             let hasContent = false;
             const sentFrameHashes = new Set<string>(); // Track sent frames
             const sentElementHashes = new Set<string>(); // Track sent elements to prevent duplicates
+            const collectedElements: any[] = []; // Store successfully parsed elements for fallback
+            let collectedFrameName = '';
             
             let streamComplete = false;
             while (true) {
@@ -1505,6 +1507,9 @@ Here's the design: {"title":"Example"}
                             element.width > 0 &&
                             element.height > 0) {
                           
+                          // Store for fallback recovery
+                          collectedElements.push(element);
+                          
                           controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify({ 
                             type: 'element', 
                             element: element,
@@ -1526,6 +1531,7 @@ Here's the design: {"title":"Example"}
                     if (frameCount === 0 && fullContent.includes('"name"') && !lastProgressSent.includes('Setting up')) {
                       const nameMatch = fullContent.match(/"name"\s*:\s*"([^"]+)"/);
                       if (nameMatch) {
+                        collectedFrameName = nameMatch[1]; // Store for fallback
                         progressMessage = `Setting up: "${nameMatch[1]}"`;
                       }
                     }
@@ -2005,7 +2011,56 @@ Here's the design: {"title":"Example"}
               console.error('Failed to parse AI response:', e);
               console.error('Full response length:', fullContent.length);
               console.error('Response preview:', fullContent.substring(0, 1000));
-              throw new Error(`AI generated invalid design specification: ${e instanceof Error ? e.message : 'Unknown error'}`);
+              
+              // FALLBACK: Use collected streamed elements if we have any
+              if (collectedElements.length > 0) {
+                console.log(`🔄 Using fallback with ${collectedElements.length} streamed elements`);
+                
+                // Try to extract background color from partial response
+                let bgColor = '#1A1A2E'; // Default dark background
+                const bgMatch = fullContent.match(/"backgroundColor"\s*:\s*"([^"]+)"/);
+                if (bgMatch) bgColor = bgMatch[1];
+                
+                // Build a valid designSpec from collected elements
+                designSpec = {
+                  frames: [{
+                    name: collectedFrameName || 'Generated Design',
+                    backgroundColor: bgColor,
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    elements: collectedElements.map(el => {
+                      // Update image elements to use generated image
+                      if (el.type === 'image' && generatedImageBase64) {
+                        return {
+                          ...el,
+                          content: generatedImageBase64,
+                          imageUrl: generatedImageBase64,
+                          src: generatedImageBase64,
+                          isGenerated: true,
+                        };
+                      }
+                      return el;
+                    })
+                  }],
+                  style: 'Generated',
+                  mood: 'Modern'
+                };
+                
+                // Apply contrast fixes to fallback elements
+                const isLightBg = isLightColor(bgColor);
+                designSpec.frames[0].elements.forEach((el: any) => {
+                  if (el.type === 'text' && el.color) {
+                    const textIsLight = isLightColor(el.color);
+                    if ((isLightBg && textIsLight) || (!isLightBg && !textIsLight)) {
+                      el.color = isLightBg ? '#000000' : '#FFFFFF';
+                    }
+                  }
+                });
+                
+                console.log(`✅ Fallback designSpec created with ${collectedElements.length} elements`);
+              } else {
+                throw new Error(`AI generated invalid design specification: ${e instanceof Error ? e.message : 'Unknown error'}`);
+              }
             }
 
             console.log('Successfully generated poster with model:', model);
