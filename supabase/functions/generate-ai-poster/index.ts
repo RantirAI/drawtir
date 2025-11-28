@@ -1651,13 +1651,20 @@ Here's the design: {"title":"Example"}
               if (!designSpec) {
                 // Aggressive sanitization
                 let sanitized = jsonStr
+                  // FIX: Handle corrupted number patterns like "400,0," -> "400,"
+                  .replace(/(\d+)\s*,\s*\d+\s*,/g, '$1,')
+                  // FIX: Handle patterns like "height": 400,0, -> "height": 400,
+                  .replace(/"(\w+)"\s*:\s*(\d+)\s*,\s*\d+\s*,/g, '"$1": $2,')
+                  // FIX: Handle truncated object values like "type": " followed by another property
+                  .replace(/"type"\s*:\s*"\s*\d+/g, '"type": "shape"')
                   // Remove duplicate property definitions (e.g., "width": 100, "height": 200, "width": 300)
-                  // This regex finds duplicate keys within the same object
                   .replace(/"(\w+)"\s*:\s*[^,}]+,\s*(?=[^{}]*"(\1)"\s*:\s*)/g, '')
                   // Remove obviously corrupted string-only entries like "elements, 209, 0.2)"
                   .replace(/"elements[^"\n]*"\s*,?/g, '')
                   // Remove invalid textAlign properties without a value like "textAlign":,
                   .replace(/"textAlign"\s*:\s*,/g, '')
+                  // FIX: Remove corrupted "elements" key without proper array
+                  .replace(/"elements"\s*:\s*(?!\[)/g, '"_elements": ')
                   // remove trailing commas in objects/arrays
                   .replace(/,\s*(\}|\])/g, '$1')
                   // fix missing quotes around property names
@@ -1757,8 +1764,31 @@ Here's the design: {"title":"Example"}
               }
 
               framesArray.forEach((frame: any, frameIdx: number) => {
-                const frameBgColor = frame.backgroundColor || '#FFFFFF';
-                const isLightBackground = isLightColor(frameBgColor);
+                let frameBgColor = frame.backgroundColor || '#FFFFFF';
+                let isLightBackground = isLightColor(frameBgColor);
+                const frameWidth = frame.width || canvasWidth;
+                const frameHeight = frame.height || canvasHeight;
+
+                const elements: any[] = Array.isArray(frame.elements) ? frame.elements : [];
+                
+                // Check if we have images and white text
+                const hasImage = elements.some((el: any) => el.type === 'image');
+                const hasWhiteText = elements.some(
+                  (el: any) =>
+                    el.type === 'text' &&
+                    (el.color === '#FFFFFF' ||
+                      el.color === '#FFF' ||
+                      el.color === 'white' ||
+                      el.color?.toLowerCase().includes('white')),
+                );
+                
+                // If light background + white text + no image, force dark background
+                if (isLightBackground && hasWhiteText && !hasImage) {
+                  console.log(`Frame ${frameIdx}: Light bg + white text + no image -> forcing dark background`);
+                  frame.backgroundColor = '#1A1A2E';
+                  frameBgColor = '#1A1A2E';
+                  isLightBackground = false;
+                }
 
                 console.log(
                   `Frame ${frameIdx} background color:`,
@@ -1766,8 +1796,6 @@ Here's the design: {"title":"Example"}
                   'Is light:',
                   isLightBackground,
                 );
-
-                const elements: any[] = Array.isArray(frame.elements) ? frame.elements : [];
 
                 // Fix text elements with poor contrast
                 elements.forEach((el: any, idx: number) => {
@@ -1790,6 +1818,49 @@ Here's the design: {"title":"Example"}
                   }
                 });
 
+                // Check if we have creative container shapes with opacity
+                const containerShapes = elements.filter(
+                  (el: any) =>
+                    el.type === 'shape' &&
+                    el.shape === 'rectangle' &&
+                    (el.color?.includes('rgba') || (el.opacity && el.opacity < 1))
+                );
+                
+                // Auto-add container shapes if AI didn't include any (for depth)
+                if (containerShapes.length < 2) {
+                  console.log(`Frame ${frameIdx}: Adding missing creative containers for depth`);
+                  
+                  // Add a subtle full-width bottom panel
+                  const bottomPanel = {
+                    type: 'shape',
+                    shape: 'rectangle',
+                    x: 0,
+                    y: Math.floor(frameHeight * 0.65),
+                    width: frameWidth,
+                    height: Math.floor(frameHeight * 0.35),
+                    color: isLightBackground ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
+                    borderRadius: '0',
+                    opacity: 1,
+                  };
+                  
+                  // Add a decorative accent shape
+                  const accentShape = {
+                    type: 'shape',
+                    shape: 'circle',
+                    x: Math.floor(frameWidth * 0.7),
+                    y: Math.floor(frameHeight * 0.1),
+                    width: Math.floor(frameWidth * 0.4),
+                    height: Math.floor(frameWidth * 0.4),
+                    color: isLightBackground ? 'rgba(99,102,241,0.15)' : 'rgba(253,200,48,0.2)',
+                    opacity: 1,
+                  };
+                  
+                  // Insert at the beginning (behind other elements)
+                  elements.unshift(accentShape);
+                  elements.unshift(bottomPanel);
+                  console.log('✅ Added 2 creative container shapes for visual depth');
+                }
+
                 // Update image elements to use generated image if available
                 if (generatedImageBase64) {
                   console.log('Adding generated image to design spec for frame', frameIdx);
@@ -1804,9 +1875,6 @@ Here's the design: {"title":"Example"}
                     console.log('Updated existing image element with generated image');
                   } else {
                     // Add image element if none exists
-                    const frameWidth = frame.width || canvasWidth;
-                    const frameHeight = frame.height || canvasHeight;
-
                     const newImageElement = {
                       type: 'image',
                       content: generatedImageBase64,
@@ -1824,30 +1892,20 @@ Here's the design: {"title":"Example"}
                   }
 
                   // Add dark overlay for better text contrast if background is an image
-                  const hasImage = elements.some((el: any) => el.type === 'image');
-                  const hasWhiteText = elements.some(
-                    (el: any) =>
-                      el.type === 'text' &&
-                      (el.color === '#FFFFFF' ||
-                        el.color === '#FFF' ||
-                        el.color === 'white' ||
-                        el.color?.toLowerCase().includes('white')),
-                  );
+                  const hasImageNow = elements.some((el: any) => el.type === 'image');
 
-                  if (hasImage && hasWhiteText) {
+                  if (hasImageNow && hasWhiteText) {
                     // Add semi-transparent overlay for text readability
                     const overlayExists = elements.some(
                       (el: any) =>
                         el.type === 'shape' &&
                         el.color &&
                         el.color.includes('rgba') &&
-                        el.color.includes('0,0,0'),
+                        el.color.includes('0,0,0') &&
+                        parseFloat(el.color.split(',')[3]) >= 0.4
                     );
 
                     if (!overlayExists) {
-                      const frameHeight = frame.height || canvasHeight;
-                      const frameWidth = frame.width || canvasWidth;
-
                       const overlay = {
                         type: 'shape',
                         shape: 'rectangle',
