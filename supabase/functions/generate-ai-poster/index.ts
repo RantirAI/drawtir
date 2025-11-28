@@ -341,6 +341,34 @@ Use rgba() colors with 0.4-0.7 opacity
 - Bright photos → dark text or overlay shapes with semi-transparency
 - Create contrast: warm photos use cool accents, cool photos use warm accents
 
+🎯 CREATIVE CONTAINER & OPACITY TECHNIQUES:
+
+**ALWAYS use containers/shapes creatively for professional depth:**
+
+**Full-Width Containers:**
+- Create full-width bars/strips: {"type": "shape", "x": 0, "y": 900, "width": 800, "height": 300, "color": "rgba(0,0,0,0.7)", "shape": "rectangle"}
+- Use for text sections, footers, headers, or accent bands
+- Span entire canvas width (x: 0, width: canvasWidth)
+
+**Full-Height Containers:**
+- Vertical sidebars or panels: {"type": "shape", "x": 0, "y": 0, "width": 300, "height": 1200, "color": "rgba(255,255,255,0.15)", "shape": "rectangle"}
+- Great for split layouts or accent strips
+
+**Opacity Layering (MANDATORY for sophisticated designs):**
+- Background shapes: 0.05-0.2 opacity (subtle texture)
+- Mid-layer containers: 0.3-0.5 opacity (visible but not overpowering)
+- Text backing panels: 0.6-0.85 opacity (readable text support)
+- Accent overlays: 0.1-0.3 opacity (color tinting)
+
+**Creative Container Examples:**
+1. **Bottom Text Panel:** {"type": "shape", "x": 0, "y": 800, "width": 800, "height": 400, "color": "rgba(0,0,0,0.75)", "shape": "rectangle", "borderRadius": "0px"}
+2. **Top Gradient Bar:** {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 200, "color": "rgba(255,100,150,0.4)", "shape": "rectangle"}
+3. **Corner Accent:** {"type": "shape", "x": 600, "y": 0, "width": 200, "height": 300, "color": "rgba(100,200,255,0.25)", "shape": "rectangle", "borderRadius": "0 0 0 48px"}
+4. **Floating Card:** {"type": "shape", "x": 50, "y": 600, "width": 700, "height": 500, "color": "rgba(255,255,255,0.95)", "shape": "rectangle", "borderRadius": "24px"}
+5. **Subtle Overlay:** {"type": "shape", "x": 0, "y": 0, "width": 800, "height": 1200, "color": "rgba(0,0,50,0.15)", "shape": "rectangle"}
+
+**ALWAYS include at least 2-3 container shapes with varied opacity for visual depth!**
+
 🎯 DESIGN CONSTRAINTS & VALIDATION:
 
 **Mandatory Requirements:**
@@ -353,6 +381,7 @@ Use rgba() colors with 0.4-0.7 opacity
 7. Headlines must be >60px font size
 8. Body text must be >24px for readability
 9. Use realistic, complete event information
+10. **Include at least 2 container shapes with opacity for layered depth**
 
 **Visual Hierarchy:**
 - Main title: 2-3x larger than body text
@@ -371,6 +400,8 @@ Use rgba() colors with 0.4-0.7 opacity
 ✓ Contact information visible
 ✓ Call-to-action prominent
 ✓ Professional polish and attention to detail
+✓ **Multiple container shapes with varied opacity for depth**
+✓ **Full-width or full-height elements for structure**
 
 ❌ NEVER DO:
 - Generic "Lorem Ipsum" or placeholder text
@@ -380,7 +411,9 @@ Use rgba() colors with 0.4-0.7 opacity
 - Cramped layouts with no breathing room
 - Text directly on busy photos without overlay/background
 - Missing critical info (date, time, location)
-- Unprofessional or amateurish appearance`;
+- Unprofessional or amateurish appearance
+- **Flat designs without layered containers/shapes**
+- **Ignoring opacity - always use semi-transparent elements for depth**`;
 
 // Professional event poster examples based on high-quality designs
 const DESIGN_EXAMPLES = `
