@@ -815,8 +815,53 @@ export default function CanvasContainerNew({
     try {
       // Handle image generation first if selected
       let imagesToUse = [...imgs];
+      const shouldSearchUnsplashImages = generationTypes.includes("search-unsplash");
       const shouldGenerateImage = generationTypes.includes("generate-image");
       const shouldReplicate = generationTypes.includes("replicate");
+      
+      // Search Unsplash for images if requested
+      if (shouldSearchUnsplashImages && description.trim()) {
+        setGenerationSteps(prev => prev.map(s => 
+          s.id === 'unsplash' ? { ...s, status: 'active' as const } : s
+        ));
+        setGenerationProgress("🔍 Searching Unsplash for images...");
+        setGenerationProgressPercent(5);
+        
+        try {
+          const { data: unsplashData, error: unsplashError } = await supabase.functions.invoke('search-unsplash', {
+            body: { query: description, perPage: 5 }
+          });
+          
+          if (unsplashError) {
+            console.error("Unsplash search error:", unsplashError);
+            toast.error("Failed to search Unsplash, continuing with AI design...");
+          } else if (unsplashData?.results?.length > 0) {
+            // Get the first few high-quality images
+            const unsplashUrls = unsplashData.results.slice(0, 3).map((img: any) => 
+              img.urls?.regular || img.urls?.full || img.urls?.small
+            ).filter(Boolean);
+            
+            if (unsplashUrls.length > 0) {
+              imagesToUse = [...unsplashUrls, ...imagesToUse];
+              toast.success(`Found ${unsplashUrls.length} image(s) from Unsplash!`);
+              console.log("Unsplash images added:", unsplashUrls);
+            }
+          } else {
+            toast.info("No images found on Unsplash, continuing with AI design...");
+          }
+          
+          setGenerationSteps(prev => prev.map(s => 
+            s.id === 'unsplash' ? { ...s, status: 'complete' as const } : s
+          ));
+          setGenerationProgressPercent(15);
+        } catch (unsplashErr: any) {
+          console.error("Unsplash error:", unsplashErr);
+          toast.error("Unsplash search failed, continuing...");
+          setGenerationSteps(prev => prev.map(s => 
+            s.id === 'unsplash' ? { ...s, status: 'error' as const } : s
+          ));
+        }
+      }
       
       if (shouldGenerateImage) {
         if (!description.trim()) {
