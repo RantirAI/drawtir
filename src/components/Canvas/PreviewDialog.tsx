@@ -121,6 +121,14 @@ export default function PreviewDialog({
   };
 
   const renderFrame = (frame: Frame, isInteractive: boolean = true, isGridView: boolean = false) => {
+    // Calculate scale factor for single view to handle maxWidth/maxHeight constraints
+    const viewportWidth = typeof window !== 'undefined' ? window.innerWidth * 0.9 : frame.width;
+    const viewportHeight = typeof window !== 'undefined' ? window.innerHeight * 0.9 : frame.height;
+    
+    const scaleX = viewportWidth / frame.width;
+    const scaleY = viewportHeight / frame.height;
+    const scale = isGridView ? 1 : Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+
     const frameStyle = isGridView
       ? {
           width: "100%",
@@ -130,8 +138,8 @@ export default function PreviewDialog({
       : {
           width: `${frame.width}px`,
           height: `${frame.height}px`,
-          maxWidth: "90vw",
-          maxHeight: "90vh",
+          transform: scale < 1 ? `scale(${scale})` : undefined,
+          transformOrigin: 'center center',
         };
 
     return (
@@ -171,7 +179,12 @@ export default function PreviewDialog({
             // For image elements, map imageUrl to src (ResizableElement expects src)
             if (elementProps.type === "image") {
               const imgSrc = elementProps.src || elementProps.imageUrl;
-              if (!imgSrc || imgSrc === "user-uploaded-image" || imgSrc === "" || !imgSrc.startsWith("http")) {
+              // Allow http/https URLs and data URLs, skip placeholders
+              const isValidSrc = imgSrc && 
+                imgSrc !== "user-uploaded-image" && 
+                imgSrc !== "" &&
+                (imgSrc.startsWith("http") || imgSrc.startsWith("data:") || imgSrc.startsWith("blob:"));
+              if (!isValidSrc) {
                 return null;
               }
               elementProps.src = imgSrc;

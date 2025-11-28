@@ -211,7 +211,12 @@ export function PresentationMode({ frames, onClose }: PresentationModeProps) {
             // For image elements, map imageUrl to src (ResizableElement expects src)
             if (elementProps.type === "image") {
               const imgSrc = elementProps.src || elementProps.imageUrl;
-              if (!imgSrc || imgSrc === "user-uploaded-image" || imgSrc === "" || !imgSrc.startsWith("http")) {
+              // Allow http/https URLs and data URLs, skip placeholders
+              const isValidSrc = imgSrc && 
+                imgSrc !== "user-uploaded-image" && 
+                imgSrc !== "" &&
+                (imgSrc.startsWith("http") || imgSrc.startsWith("data:") || imgSrc.startsWith("blob:"));
+              if (!isValidSrc) {
                 return null;
               }
               elementProps.src = imgSrc;
