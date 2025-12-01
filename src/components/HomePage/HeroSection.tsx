@@ -51,8 +51,7 @@ export default function HeroSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.3 }}
       >
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br from-card to-card/60 backdrop-blur-sm border border-border/30 shadow-2xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-purple-500/10" />
+        <div className="relative aspect-video rounded-xl overflow-hidden bg-card border border-border/30 shadow-2xl">
           <video
             className="w-full h-full object-cover"
             autoPlay
@@ -62,18 +61,6 @@ export default function HeroSection() {
           >
             <source src="https://fpmlrhpmtmaurrnhsmca.supabase.co/storage/v1/object/public/media/drawtir-demo.mp4" type="video/mp4" />
           </video>
-          {/* Fallback placeholder */}
-          <div className="absolute inset-0 flex items-center justify-center bg-card/80">
-            <div className="text-center text-muted-foreground">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
-                <svg className="w-8 h-8 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </div>
-              <p className="text-sm font-medium">Drawtir Demo</p>
-              <p className="text-xs mt-1">Video preview coming soon</p>
-            </div>
-          </div>
         </div>
       </motion.div>
     </section>
