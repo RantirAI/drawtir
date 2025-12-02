@@ -74,7 +74,7 @@ export default function FeatureCards() {
                 }}
               >
                 {/* Feature Image */}
-                <div className="relative h-64 overflow-hidden">
+                <div className="relative h-80 overflow-hidden">
                   <img 
                     src={feature.image} 
                     alt={feature.title}
