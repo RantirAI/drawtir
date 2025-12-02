@@ -6,8 +6,9 @@ import { Check } from "lucide-react";
 const plans = [
   {
     name: "Starter",
-    billing: "$12/mo",
-    price: "$49 Lifetime",
+    billing: "$19/mo",
+    price: "$89 Lifetime",
+    popular: true,
     features: [
       "Unlimited collaboration files",
       "Animation & Video Export",
@@ -16,27 +17,17 @@ const plans = [
     ],
   },
   {
-    name: "Business",
-    billing: "$29/mo",
-    price: "$89 Lifetime",
-    popular: true,
+    name: "SDK Whitelabel",
+    billing: "$999/yr",
+    price: "Enterprise",
     features: [
       "Everything in Starter",
-      "300 AI Credits",
-      "Priority Support",
-      "Team Features",
-    ],
-  },
-  {
-    name: "SDK Whitelabel",
-    billing: "$199/yr",
-    price: "$299 Lifetime",
-    features: [
-      "Everything in Business",
       "500 AI Credits",
       "White-label SDK",
+      "MIT Extended License",
       "4hr Dev Support",
     ],
+    isEnterprise: true,
   },
 ];
 
@@ -59,7 +50,7 @@ export default function PricingSectionNew() {
         </motion.div>
         
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[520px] mx-auto"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -92,14 +83,30 @@ export default function PricingSectionNew() {
                   <p className="text-lg font-bold text-foreground mt-1">{plan.price}</p>
                 </CardHeader>
                 <CardContent className="space-y-3 pb-5">
-                  <Button 
-                    size="sm"
-                    className="w-full text-xs h-8" 
-                    variant={plan.popular ? "default" : "outline"}
-                    onClick={() => window.location.href = '/auth'}
-                  >
-                    Get Started
-                  </Button>
+                  {plan.isEnterprise ? (
+                    <div className="space-y-2">
+                      <Button 
+                        size="sm"
+                        className="w-full text-xs h-8" 
+                        variant="outline"
+                        onClick={() => window.open('https://calendly.com/rantir/30min', '_blank')}
+                      >
+                        Request Extended License
+                      </Button>
+                      <p className="text-[10px] text-muted-foreground text-center">
+                        Email support: hello@rantir.com
+                      </p>
+                    </div>
+                  ) : (
+                    <Button 
+                      size="sm"
+                      className="w-full text-xs h-8" 
+                      variant={plan.popular ? "default" : "outline"}
+                      onClick={() => window.location.href = '/auth'}
+                    >
+                      Get Started
+                    </Button>
+                  )}
                   <ul className="space-y-1.5">
                     {plan.features.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-xs text-muted-foreground">
