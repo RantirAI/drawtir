@@ -1,43 +1,38 @@
 import { motion } from "framer-motion";
 
-interface Dot {
-  id: number;
-  x: number;
-  y: number;
-  size: number;
-  opacity: number;
-  duration: number;
-  delay: number;
-}
-
 interface FloatingDotsProps {
-  count?: number;
   className?: string;
 }
 
-export default function FloatingDots({ count = 80, className = "" }: FloatingDotsProps) {
-  const dots: Dot[] = Array.from({ length: count }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1.5,
-    opacity: Math.random() * 0.5 + 0.2,
-    duration: Math.random() * 20 + 15,
-    delay: Math.random() * 5,
-  }));
+export default function FloatingDots({ className = "" }: FloatingDotsProps) {
+  // Create a grid of dots
+  const cols = 30;
+  const rows = 20;
+  
+  const dots = [];
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      dots.push({
+        id: `${row}-${col}`,
+        x: (col / (cols - 1)) * 100,
+        y: (row / (rows - 1)) * 100,
+        delay: (row + col) * 0.02,
+      });
+    }
+  }
 
   return (
     <div className={`absolute inset-0 overflow-hidden pointer-events-none ${className}`}>
-      {/* Edge fade overlay - creates soft opacity on edges */}
+      {/* Edge fade overlay */}
       <div 
         className="absolute inset-0 pointer-events-none z-10"
         style={{
           background: `
-            radial-gradient(ellipse at center, transparent 30%, hsl(var(--background)) 70%),
-            linear-gradient(to top, hsl(var(--background)) 0%, transparent 15%),
-            linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 15%),
-            linear-gradient(to left, hsl(var(--background)) 0%, transparent 10%),
-            linear-gradient(to right, hsl(var(--background)) 0%, transparent 10%)
+            radial-gradient(ellipse at center, transparent 20%, hsl(var(--background)) 70%),
+            linear-gradient(to top, hsl(var(--background)) 0%, transparent 20%),
+            linear-gradient(to bottom, hsl(var(--background)) 0%, transparent 20%),
+            linear-gradient(to left, hsl(var(--background)) 0%, transparent 15%),
+            linear-gradient(to right, hsl(var(--background)) 0%, transparent 15%)
           `
         }}
       />
@@ -45,20 +40,18 @@ export default function FloatingDots({ count = 80, className = "" }: FloatingDot
       {dots.map((dot) => (
         <motion.div
           key={dot.id}
-          className="absolute rounded-full bg-white"
+          className="absolute rounded-full bg-white/30"
           style={{
             left: `${dot.x}%`,
             top: `${dot.y}%`,
-            width: dot.size,
-            height: dot.size,
-            opacity: dot.opacity,
+            width: 2,
+            height: 2,
           }}
           animate={{
-            x: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
-            y: [0, Math.random() * 40 - 20, Math.random() * 40 - 20, 0],
+            opacity: [0.2, 0.4, 0.2],
           }}
           transition={{
-            duration: dot.duration,
+            duration: 4,
             delay: dot.delay,
             repeat: Infinity,
             ease: "easeInOut",
