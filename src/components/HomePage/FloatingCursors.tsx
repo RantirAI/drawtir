@@ -14,7 +14,7 @@ const cursors = [
 
 export default function FloatingCursors() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-20">
       {cursors.map((cursor, index) => (
         <motion.img
           key={index}
