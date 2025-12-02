@@ -19,7 +19,7 @@ const plans = [
   {
     name: "SDK Whitelabel",
     billing: "$999/yr",
-    price: "Enterprise",
+    price: "$299 Lifetime",
     features: [
       "Everything in Starter",
       "500 AI Credits",
