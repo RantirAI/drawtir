@@ -17,12 +17,12 @@ export default function HeroSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[hsl(40,20%,92%)] leading-tight mb-6">
-          Own your Adaptive UI, Slides and Animation design tool
+        <h1 className="text-3xl md:text-4xl font-bold text-[hsl(40,20%,92%)] leading-tight mb-6">
+          Your Open Creative Engine for UI, Motion & Slides
         </h1>
         
         <p className="text-lg md:text-xl text-muted-foreground max-w-[600px] mx-auto mb-10 leading-relaxed">
-          Drawtir gives you a visual reasoning canvas for your app — where UI UX design meet, animation, video or a presentation canvas with AI-driven design agent.
+          Build UIs, videos, slides, and interactive visuals — backed by an open, self-hostable editor that grows with your product.
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

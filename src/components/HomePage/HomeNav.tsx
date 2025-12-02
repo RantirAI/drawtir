@@ -24,7 +24,7 @@ export default function HomeNav() {
 
   return (
     <>
-      <nav className="bg-transparent fixed top-[32px] left-0 right-0 z-40 border-b border-white/5">
+      <nav className="fixed top-[32px] left-0 right-0 z-40 border-b border-white/5 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto px-6 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
