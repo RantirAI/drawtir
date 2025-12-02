@@ -20,7 +20,7 @@ export default function FloatingCursors() {
           key={index}
           src={cursor.src}
           alt=""
-          className="absolute opacity-60"
+          className="absolute"
           style={{
             left: `${cursor.x}%`,
             top: `${cursor.y}%`,

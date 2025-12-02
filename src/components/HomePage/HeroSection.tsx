@@ -7,7 +7,7 @@ export default function HeroSection() {
   return (
     <section className="relative flex flex-col items-center justify-center px-4 pt-32 pb-20 overflow-hidden">
       {/* Floating Background Elements */}
-      <FloatingDots count={80} />
+      <FloatingDots />
       <FloatingCursors />
       
       {/* Hero Content */}
@@ -59,7 +59,7 @@ export default function HeroSection() {
             muted
             playsInline
           >
-            <source src="https://fpmlrhpmtmaurrnhsmca.supabase.co/storage/v1/object/public/media/drawtir-demo.mp4" type="video/mp4" />
+            <source src="/drawtir-demo.mp4" type="video/mp4" />
           </video>
         </div>
       </motion.div>
