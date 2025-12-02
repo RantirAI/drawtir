@@ -8,6 +8,7 @@ import Gallery from "./pages/Gallery";
 import Editor from "./pages/Editor";
 import EditorPage from "./pages/EditorPage";
 import Documentation from "./pages/Documentation";
+import Embed from "./pages/Embed";
 import Settings from "./pages/Settings";
 import PublicPoster from "./pages/PublicPoster";
 import SDKDemo from "./pages/SDKDemo";
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/editor" element={<EditorPage />} />
           <Route path="/editor/:id" element={<Editor />} />
           <Route path="/documentation" element={<Documentation />} />
+          <Route path="/embed" element={<Embed />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/workspaces" element={<Workspaces />} />
           <Route path="/workspaces/:id/settings" element={<WorkspaceSettings />} />
