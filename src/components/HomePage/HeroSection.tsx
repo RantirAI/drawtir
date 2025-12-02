@@ -25,21 +25,21 @@ export default function HeroSection() {
           Drawtir gives you a visual reasoning canvas for your app — where UI UX design meet, animation, video or a presentation canvas with AI-driven design agent.
         </p>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button 
-            size="lg" 
-            className="px-8 h-12 text-base font-medium"
-            onClick={() => window.open('mailto:hello@drawtir.com?subject=MIT%20License%20Request', '_blank')}
+            size="sm" 
+            className="px-4 h-8 text-sm font-medium"
+            onClick={() => window.location.href = '/auth'}
           >
-            Request MIT License
+            Get Started
           </Button>
           <Button 
             variant="outline" 
-            size="lg" 
-            className="px-8 h-12 text-base font-medium border-foreground/20 text-foreground hover:bg-foreground/10"
-            onClick={() => window.location.href = '/gallery'}
+            size="sm" 
+            className="px-4 h-8 text-sm font-medium border-foreground/20 text-foreground hover:bg-foreground/10"
+            onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
           >
-            View Examples
+            View Pricing
           </Button>
         </div>
       </motion.div>
