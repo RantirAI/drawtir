@@ -1,51 +1,9 @@
-import { Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import PageFooter from "@/components/Footer/PageFooter";
+import PricingSectionNew from "@/components/HomePage/PricingSectionNew";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 export default function Pricing() {
-  const plans = [
-    {
-      name: "Starter",
-      billing: "12/Monthly",
-      price: "$49 USD Lifetime Starter",
-      features: [
-        "Unlimited Collaboration files for UI, Whiteboarding, Slides & Video Creation",
-        "Animation, Timeline & Video Export",
-        "100 Credits for Frames, Video & Image generation",
-        "Slack and Discord Connection",
-      ],
-    },
-    {
-      name: "Business",
-      billing: "29/monthly",
-      price: "$89 USD Lifetime Starter",
-      features: [
-        "Unlimited Collaboration files for UI, Whiteboarding, Slides & Video Creation",
-        "Animation, Timeline & Video Export",
-        "300 Credits for Frames, Video & Image generation",
-        "Slack and Discord Connection",
-        "Priority Feedback and Support",
-      ],
-      popular: true,
-    },
-    {
-      name: "SDK Whitelable",
-      billing: "1999/Yearly",
-      price: "$299 USD Lifetime Starter",
-      features: [
-        "Unlimited Collaboration files for UI, Whiteboarding, Slides & Video Creation",
-        "Animation, Timeline & Video Export",
-        "500 Credits for Frames, Video & Image generation",
-        "Slack and Discord Connection",
-        "Priority Feedback and Support",
-        "White-label and embed Drawtir SDK",
-        "Custom Development support (up to 4 hours)",
-      ],
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <nav className="border-b border-border/10 py-4">
@@ -75,40 +33,8 @@ export default function Pricing() {
         </div>
       </nav>
 
-      <main className="flex-1 container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-3">Choose Your Plan</h1>
-          <p className="text-muted-foreground text-sm">Select the perfect plan for your creative needs</p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {plans.map((plan) => (
-            <Card 
-              key={plan.name} 
-              className={`p-5 ${plan.popular ? 'border-primary shadow-lg' : ''}`}
-            >
-              {plan.popular && (
-                <div className="text-xs font-semibold text-primary mb-2">MOST POPULAR</div>
-              )}
-              <h3 className="text-lg font-bold mb-1">{plan.name}</h3>
-              <p className="text-xs text-muted-foreground mb-2">{plan.billing}</p>
-              <p className="text-xl font-bold mb-4">{plan.price}</p>
-              
-              <Button className="w-full mb-4" size="sm" variant={plan.popular ? "default" : "outline"}>
-                Get Started
-              </Button>
-
-              <ul className="space-y-2">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-xs">
-                    <Check className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-        </div>
+      <main className="flex-1 flex items-center justify-center py-8">
+        <PricingSectionNew />
       </main>
 
       <PageFooter />
