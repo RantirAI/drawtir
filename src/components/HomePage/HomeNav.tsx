@@ -82,6 +82,14 @@ export default function HomeNav() {
                 >
                   Embed & License
                 </button>
+                <a 
+                  href="https://github.com/RantirAI/drawtir" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  GitHub
+                </a>
               </nav>
             </div>
             <div className="flex items-center gap-4">

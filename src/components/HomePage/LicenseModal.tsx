@@ -5,6 +5,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 interface LicenseModalProps {
   open: boolean;
@@ -23,7 +25,25 @@ export default function LicenseModal({ open, onOpenChange }: LicenseModalProps) 
             Version 1.0 — Effective 2025 • Copyright © 2025–present Rantir, Inc. (DBA HexigonAI, Inc.)
           </p>
         </DialogHeader>
-        <ScrollArea className="h-[60vh] px-4 py-3">
+        
+        {/* Open Source CTA */}
+        <div className="mx-4 mt-3 p-3 rounded-md bg-primary/10 border border-primary/20">
+          <p className="text-xs text-foreground mb-2">
+            <strong>Use the open-source version for free!</strong> You can fork, modify, and self-host Drawtir for personal and internal use. However, white-labeling or embedding Drawtir in another product or platform requires an MIT-Extended License.
+          </p>
+          <a 
+            href="https://github.com/RantirAI/drawtir" 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            <Button size="sm" variant="outline" className="text-xs h-7 gap-1.5">
+              <ExternalLink className="w-3 h-3" />
+              View on GitHub
+            </Button>
+          </a>
+        </div>
+        
+        <ScrollArea className="h-[50vh] px-4 py-3">
           <div className="space-y-4 text-xs text-muted-foreground leading-relaxed">
             <section>
               <h3 className="text-sm font-medium text-foreground mb-1">0. OVERVIEW</h3>
