@@ -16,6 +16,7 @@ import Workspaces from "./pages/Workspaces";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
 import Auth from "./pages/Auth";
 import Pricing from "./pages/Pricing";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/subscription-success" element={<SubscriptionSuccess />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/editor" element={<EditorPage />} />
           <Route path="/editor/:id" element={<Editor />} />
