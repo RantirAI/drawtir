@@ -11,7 +11,7 @@ import Documentation from "./pages/Documentation";
 import Embed from "./pages/Embed";
 import Settings from "./pages/Settings";
 import PublicPoster from "./pages/PublicPoster";
-import SDKDemo from "./pages/SDKDemo";
+
 import Workspaces from "./pages/Workspaces";
 import WorkspaceSettings from "./pages/WorkspaceSettings";
 import Auth from "./pages/Auth";
@@ -47,7 +47,7 @@ const App = () => (
           <Route path="/workspaces" element={<Workspaces />} />
           <Route path="/workspaces/:id/settings" element={<WorkspaceSettings />} />
           <Route path="/public/:id" element={<PublicPoster />} />
-          <Route path="/sdk-demo" element={<SDKDemo />} />
+          
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
