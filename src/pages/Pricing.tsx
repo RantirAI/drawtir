@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 
 export default function Pricing() {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <nav className="border-b border-border/10 py-4">
+    <div className="dark min-h-screen bg-background flex flex-col relative overflow-hidden">
+      <nav className="border-b border-border/10 py-4 relative z-10">
         <div className="container mx-auto px-4 flex items-center justify-between">
           <Link to="/" className="flex items-center">
             <svg 
@@ -28,12 +28,12 @@ export default function Pricing() {
             </svg>
           </Link>
           <Link to="/auth">
-            <Button variant="outline" size="sm">Sign In</Button>
+            <Button variant="outline" size="sm" className="border-border/20 hover:bg-secondary/50">Sign In</Button>
           </Link>
         </div>
       </nav>
 
-      <main className="flex-1 flex items-center justify-center py-8">
+      <main className="flex-1 flex items-center justify-center py-8 relative z-10">
         <PricingSectionNew />
       </main>
 
