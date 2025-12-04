@@ -69,9 +69,24 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      priceId = subscription.items.data[0].price.id;
-      productId = subscription.items.data[0].price.product;
+      
+      // Safely parse subscription end date
+      try {
+        if (subscription.current_period_end) {
+          subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
+        }
+      } catch (dateError) {
+        logStep("Warning: Could not parse subscription end date", { 
+          current_period_end: subscription.current_period_end 
+        });
+      }
+      
+      // Safely get price and product info
+      if (subscription.items?.data?.[0]?.price) {
+        priceId = subscription.items.data[0].price.id;
+        productId = subscription.items.data[0].price.product;
+      }
+      
       logStep("Active subscription found", { 
         subscriptionId: subscription.id, 
         endDate: subscriptionEnd,
