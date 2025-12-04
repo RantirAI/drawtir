@@ -1,73 +1,144 @@
-# Welcome to your Lovable project
+# 🎨 Drawtir
 
-## Project info
+*Create, animate, generate — all in one visual canvas.*
 
-**URL**: https://lovable.dev/projects/2f7c0f6a-8b69-4b20-a446-991b98abb8ea
+Drawtir is a next-generation, AI-powered visual editor for designers, developers, and storytellers.  
+Frames like Figma, timelines like After Effects, ease-of-use like Canva — with AI storyboarding, motion generation, multiplayer collaboration, and shader-powered visuals built directly into the workflow.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📘 Documentation • 🚀 Demo • 💬 Discord • 📦 NPM (coming soon)
 
-**Use Lovable**
+### 🎥 Demo Video
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2f7c0f6a-8b69-4b20-a446-991b98abb8ea) and start prompting.
+<video src="https://cdn.prod.website-files.com/690abf24d4f1913c4f3938da%2F69263aff075f68b0a66d1832_drawtir-mode_mp4.mp4" controls width="100%"></video>
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+## Table of Contents
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- [What is Drawtir?](#what-is-drawtir)
+- [Core Features](#core-features)
+- [Demo Video](#demo-video-1)
+- [Try It](#-try-it)
+- [Embedding & Licensing](#-embedding--licensing)
+- [Status](#-status)
+- [Feedback & Contact](#-feedback--contact)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## What is Drawtir?
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Drawtir is a multimodal, AI-native creation environment where you can:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Design UIs, graphics, and layouts  
+- Animate with a professional-grade timeline  
+- Generate storyboards, scenes, and variations with AI  
+- Render movies and motion graphics  
+- Create social posts, brand packs, and full visual campaigns  
+- Collaborate in real time with multiplayer editing  
 
-# Step 3: Install the necessary dependencies.
-npm i
+It’s the closest thing to:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+> **Figma × After Effects × Canva × AI**  
+> combined into one expressive tool.
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Core Features
 
-**Use GitHub Codespaces**
+### 🎨 Canvas & Frames
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Infinite-style canvas for unrestricted creation  
+- Nested frames with percentage-based layout  
+- Brand-kit–aware styling and tokens  
+- Auto-layout, alignment, spacing, and grouping tools  
 
-## What technologies are used for this project?
+### ✏️ Shapes, Text, & Styling
 
-This project is built with:
+- Clean styling interface with sliders + numeric fields  
+- Corner radius, stroke, fills, blends, shadows  
+- Brand kit uploads for fonts, logos, and palettes  
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### 🎬 Animation & Timeline
 
-## How can I deploy this project?
+- Keyframes for motion, opacity, rotation, and scale  
+- Layer-based timeline similar to After Effects  
+- Audio and voice tracks aligned to the timeline  
+- Timeline zoom and scrubbing controls  
+- Export high-quality movie renders  
 
-Simply open [Lovable](https://lovable.dev/projects/2f7c0f6a-8b69-4b20-a446-991b98abb8ea) and click on Share -> Publish.
+### 🌈 Shaders & Visual Effects
 
-## Can I connect a custom domain to my Lovable project?
+- GPU shader effects for scenes and elements  
+- Blurs, glows, overlays, gradients, and custom looks  
+- Keyframe-able shader parameters for motion design  
 
-Yes, you can!
+### 💡 AI Storyboarding & Content Generation
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Generate storyboards from prompts or scripts  
+- Auto-create scenes, pacing, and transitions  
+- AI-assisted layouts and visual variations  
+- Social media content generation from frames or text  
+- One-click aspect-ratio adaptation for multiple platforms  
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### 🤝 Multiplayer Collaboration
+
+- Real-time multiplayer editing  
+- Live cursors and presence indicators  
+- Comments, notes, and async review flows  
+
+
+---
+
+# 🌐 Try It
+
+👉 **https://drawtir.com**
+
+Sign up for early access and help shape the future of AI-native design and animation workflows.
+
+---
+
+# 📦 Embedding & Licensing
+
+Drawtir can be embedded into other tools or workflows — but **embedding rights are not included by default**.
+
+To embed Drawtir inside your own product, dashboard, or internal tools, you’ll need an **MIT Extended License for Drawtir**, which grants:
+
+- Rights to embed the Drawtir editor inside your application  
+- Rights to use Drawtir as part of a paid product or internal platform  
+- Access to the integration docs and embedding options  
+
+If you’re interested in embedding Drawtir, please reach out for MIT Extended licensing details.
+
+> ⚠️ The SDK and integration code are **not** included in this repository.  
+> This README is for discovery, documentation, and read-only reference.
+
+---
+
+# 📋 Status
+
+Drawtir is currently in **soft launch / early access**.
+
+- 🧪 Expect rapid iteration and frequent improvements  
+- 🐛 We’re actively improving canvas, frames, timeline, multiplayer, and AI flows  
+- 💬 Feedback is welcome — especially from developers building with AI, design tools, or motion graphics  
+
+---
+
+# 🤝 Feedback & Contact
+
+If you’re a developer, designer, or motion nerd who wants to jam on:
+
+- canvas engines  
+- animation timelines  
+- shader pipelines  
+- AI-assisted design tooling  
+
+…we’d love to hear from you.
+
+(Replace this section with your preferred contact info, Issues link, or Discussions board.)
+
+---
+
+Made with 🔮, ☕, and a deep love for developer tools.
