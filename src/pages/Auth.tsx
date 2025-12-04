@@ -24,12 +24,24 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Check if user is already logged in and has subscription
+    const checkAuthAndSubscription = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (session) {
-        navigate("/");
+        // Check subscription status
+        try {
+          const { data } = await supabase.functions.invoke('check-subscription');
+          if (data?.subscribed) {
+            navigate("/gallery");
+          } else {
+            navigate("/pricing");
+          }
+        } catch {
+          navigate("/pricing");
+        }
       }
-    });
+    };
+    checkAuthAndSubscription();
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,9 +67,16 @@ export default function Auth() {
         
         if (error) throw error;
         toast.success("Logged in successfully!");
-        navigate("/");
+        
+        // Check subscription after login
+        const { data } = await supabase.functions.invoke('check-subscription');
+        if (data?.subscribed) {
+          navigate("/gallery");
+        } else {
+          navigate("/pricing");
+        }
       } else {
-        const redirectUrl = `${window.location.origin}/`;
+        const redirectUrl = `${window.location.origin}/pricing`;
         const { error, data } = await supabase.auth.signUp({
           email,
           password,
@@ -73,8 +92,8 @@ export default function Auth() {
           localStorage.setItem("showOnboarding", "true");
         }
         
-        toast.success("Account created! Welcome aboard!");
-        navigate("/");
+        toast.success("Account created! Please choose a plan to continue.");
+        navigate("/pricing");
       }
     } catch (error: any) {
       toast.error(error.message);
