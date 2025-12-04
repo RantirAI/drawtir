@@ -1,0 +1,147 @@
+Drawtir Fair-Use License - By Rantir (Umbrella FUL for Rantir Cloud, Studio, Webtir, Drawtir, and any other open source TIR Products)
+
+Version 1.0 — Effective 2025
+Copyright © 2025–present
+Rantir, Inc. (DBA HexigonAI, Inc.)
+
+0. OVERVIEW
+
+This document governs all licensing, usage rights, and data-handling terms for Rantir Cloud, Rantir Studio, Webtir, Drawtir SDK, TIR Templates, community templates, and all associated components (collectively, the “Software”). The Software includes any repositories under the names Rantir, RantirAI, HexigonAI, or any related GitHub organizations maintained by Rantir.
+
+This unified document contains three major sections:
+
+Rantir Fair-Use License (RFUL) — governing all non-enterprise source code, templates, and open Developer tools.
+
+Rantir Enterprise License (REL) — governing all enterprise-designated components, directories, or files.
+
+Rantir Data Policy — governing data processing, storage, encryption, ownership, and API key usage.
+
+Where any conflict exists,
+(a) the Enterprise License (REL) governs enterprise components, and
+(b) the Data Policy governs all matters related to data privacy, retention, or key usage.
+
+1. LICENSED CONTENT & EXCLUSIONS
+
+Any file or directory containing .enterprise. in its filename, or /enterprise/ in its path, is not licensed under the Rantir Fair-Use License. These components require a valid Rantir Enterprise License to use in production environments.
+
+All other files, except for third-party dependencies retained under their original licenses, fall under the RFUL. Code in branches other than the default branch is not licensed unless explicitly stated. This applies to all Rantir Cloud, Rantir Studio, Webtir, Drawtir, SDK, and TIR libraries.
+
+2. RANTIR FAIR-USE LICENSE (RFUL)
+
+Umbrella governing all non-enterprise Rantir source code, including forks and direct GitHub clones.
+
+2.1 Acceptance
+
+By accessing or using the Software, you agree to comply with the terms of this license.
+
+2.2 Copyright License
+
+Rantir, Inc. grants you a non-exclusive, worldwide, non-transferable, royalty-free license to use, copy, modify, self-host, and prepare derivative works of the Software for personal use, internal business use, research, development, client services, private commercial workflows, template creation, plugin creation, and internal-only product extensions.
+
+These rights do not include any right to resell, rebrand, embed, externally redistribute, or commercially host Rantir’s features or UI. Any such use requires a valid Enterprise License.
+
+2.3 Open-Source Use
+
+The Software is free to download, inspect, self-host, and modify for personal and internal business use. While the Software is openly accessible, the RFUL itself is not an open-source license such as MIT or Apache; it is a Fair-Use license with restricted commercial rights.
+
+You may modify the Software for your own purposes indefinitely. However, if you use Rantir components for commercial gain, paid access, SaaS activation, marketplace activities, or resale, you must obtain an Enterprise License or an additional MIT-based license as offered by Rantir.
+
+2.4 Limitations
+
+You may not resell or rebrand the Software, embed the Software in any paid or public SaaS offering, or use Rantir Cloud, Studio, Webtir, or Drawtir to create a competing platform, builder, CMS, studio, visual editor, template marketplace, low-code tool, or SDK.
+
+You may not distribute either original or modified versions for a fee, nor republish templates outside the Rantir ecosystem. You may not remove copyright notices or alter licensing terms. You may not use any Rantir component—especially Webtir DOM structures, Drawtir rendering logic, or TIR logic frameworks—as training data for commercial AI models.
+
+Any prohibited use requires an Enterprise License.
+
+2.5 Community Templates
+
+Community templates submitted to Rantir or created within Webtir or Studio must remain under the RFUL. They may be used, modified, remixed, and shared inside the Rantir ecosystem. Creators retain ownership of their contributions but grant Rantir perpetual rights to distribute, store, and make the templates available to the ecosystem.
+
+3. RANTIR ENTERPRISE LICENSE (REL)
+3.1 Enterprise Components
+
+Files marked with .enterprise. or located in /enterprise/ directories are governed exclusively by the Enterprise License.
+
+3.2 Production Use
+
+You may only use enterprise components in production when you hold a valid Enterprise License corresponding to your intended usage. Development and testing are allowed without charge, but any form of deployment, availability, or external exposure requires licensing.
+
+All modifications or patches remain the intellectual property of Rantir.
+
+3.3 Commercial Rights
+
+With an Enterprise License, you receive permission to:
+
+rebrand or white-label Rantir components
+
+integrate Rantir Cloud, Webtir, Studio, or Drawtir into paid SaaS products
+
+resell derivative products
+
+build commercial template marketplaces
+
+distribute modified versions externally
+
+operate modified versions in production environments
+
+Without an Enterprise License, these rights are not granted under the RFUL.
+
+3.4 Development & Testing
+
+You may freely clone, modify, experiment with, and extend enterprise components for development and testing purposes. However, you may not deploy them publicly without proper licensing.
+
+3.5 No Other Rights
+
+No rights are granted beyond those explicitly defined in this license.
+
+4. DATA POLICY (APPLICABLE TO RFUL & ENTERPRISE)
+4.1 General Data Handling
+
+Rantir does not store, analyze, sell, reuse, or repurpose any project data, user data, template data, or TIR content for model training, analytics-driven optimization, dataset creation, internal research, or commercial resale. Customer data is not used to improve any Rantir AI model.
+
+4.2 Ownership of Data
+
+All data processed, generated, uploaded, or stored by users—including Webtir documents, Studio projects, Drawtir canvases, TIR workflows, and connected CMS content—remains the exclusive property of the user.
+
+4.3 Environment Keys
+
+Rantir Cloud stores user API keys for external AI providers using industry-standard encryption. Keys are never logged in plaintext, never repurposed, and only used to execute user-requested operations. Rantir never uses customer keys for background tasks, analytics, training, or internal services.
+
+4.4 Bring Your Own Key (BYOK)
+
+When using external AI models (OpenAI, Gemini, Anthropic, AWS Bedrock, etc.), your data is governed solely by those providers’ terms. Rantir does not copy, retain, or repurpose AI model requests or responses. No Rantir system uses this data for ML training or dataset generation.
+
+4.5 Model Training Prohibition
+
+Rantir does not train or fine-tune models using user data. No model, dataset, embedding system, or analytics profile is derived from user content, Webtir structures, Drawtir canvases, or Studio assets.
+
+4.6 Data Retention
+
+Rantir retains no persistent datasets beyond what is required for basic system functionality. No training corpora or derivative models are generated.
+
+5. PATENTS
+
+Rantir provides a limited patent license necessary to use the Software under the terms described. Any patent claim filed against Rantir immediately terminates all rights granted under this license.
+
+6. NOTICES
+
+Anyone receiving any portion of the Software from you must also receive this full license. Any modified copies must include prominent notices describing the modifications.
+
+7. TERMINATION
+
+Any violation of these licenses terminates your rights automatically. If cured within thirty days, rights may be reinstated once. A second violation results in irreversible termination.
+
+8. NO WARRANTY
+
+The Software is provided “as-is,” without any warranty. Rantir is not liable for any damages arising from its use.
+
+9. DEFINITIONS
+
+“Licensor” means Rantir, Inc. (DBA HexigonAI, Inc.).
+“Software” includes Rantir Cloud, Rantir Studio, Webtir, Drawtir, TIR Templates, plugins, SDKs, and all related components.
+“Enterprise Components” refers to files containing .enterprise. or found inside /enterprise/.
+“Fair-Use License” refers to the RFUL described here.
+“Enterprise License” refers to the REL described here.
+“Commercial Use” includes SaaS integration, resale, redistribution, paid access, white-labeling, or rebranding.
+“User Data” includes files, templates, workflows, content, metadata, API usage, and any information processed through the Software.
