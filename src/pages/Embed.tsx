@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Code, Layers, FileText } from "lucide-react";
 import PageFooter from "@/components/Footer/PageFooter";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +16,8 @@ export default function Embed() {
   const [activeModal, setActiveModal] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <SubscriptionGuard>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-4">
         <div className="flex gap-4">
@@ -380,6 +382,7 @@ const editor = new DrawtirSDK({
           </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }

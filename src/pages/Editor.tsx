@@ -15,6 +15,7 @@ import Sidebar from "@/components/Sidebar";
 import { removeBackground } from "@/lib/backgroundRemoval";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import PageFooter from "@/components/Footer/PageFooter";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 
 interface Poster {
   id: string;
@@ -466,7 +467,8 @@ export default function Editor() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <SubscriptionGuard>
+      <div className="flex h-screen bg-background">
       <Sidebar />
 
       <main className="flex-1 overflow-auto">
@@ -1148,6 +1150,7 @@ export default function Editor() {
         </div>
         <PageFooter />
       </main>
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }

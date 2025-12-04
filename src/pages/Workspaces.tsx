@@ -15,6 +15,7 @@ import HorizontalNav from '@/components/Navigation/HorizontalNav';
 import { ActivityLogPanel } from '@/components/Workspace/ActivityLogPanel';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { SubscriptionGuard } from '@/components/SubscriptionGuard';
 
 interface Workspace {
   id: string;
@@ -359,7 +360,8 @@ export default function Workspaces() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <SubscriptionGuard>
+      <div className="min-h-screen bg-background">
       <HorizontalNav />
       
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -706,6 +708,7 @@ export default function Workspaces() {
           )}
         </div>
       </div>
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }

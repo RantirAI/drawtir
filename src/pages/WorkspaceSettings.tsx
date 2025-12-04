@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Building2, Palette, Save } from 'lucide-react';
 import HorizontalNav from '@/components/Navigation/HorizontalNav';
 import { usePermissions } from '@/hooks/usePermissions';
+import { SubscriptionGuard } from '@/components/SubscriptionGuard';
 
 export default function WorkspaceSettings() {
   const navigate = useNavigate();
@@ -100,7 +101,8 @@ export default function WorkspaceSettings() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <SubscriptionGuard>
+      <div className="min-h-screen bg-background">
       <HorizontalNav />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -220,6 +222,7 @@ export default function WorkspaceSettings() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }
