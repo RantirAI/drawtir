@@ -17,6 +17,7 @@ import { useRecentlyViewed } from "@/hooks/useRecentlyViewed";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useActivityLog } from "@/hooks/useActivityLog";
 import { MoveProjectDialog } from "@/components/Gallery/MoveProjectDialog";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { formatDistanceToNow } from 'date-fns';
 
@@ -305,9 +306,10 @@ export default function Gallery() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
-      <HorizontalNav />
-      <main className="container mx-auto px-4 py-6">
+    <SubscriptionGuard>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+        <HorizontalNav />
+        <main className="container mx-auto px-4 py-6">
         <div className="max-w-7xl mx-auto rounded-xl p-6 shadow-sm" style={{ backgroundColor: 'hsl(var(--page-container))' }}>
           <Tabs defaultValue="projects" className="w-full">
             <div className="flex items-center justify-between mb-6">
@@ -505,6 +507,7 @@ export default function Gallery() {
           }}
         />
       )}
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }

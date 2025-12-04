@@ -7,6 +7,7 @@ import type { CanvasSnapshot } from "@/types/snapshot";
 import { validateSnapshot } from "@/lib/snapshot";
 import CanvasContainerNew from "@/components/Canvas/CanvasContainerNew";
 import OnboardingFlow from "@/components/Onboarding/OnboardingFlow";
+import { useSubscription } from "@/hooks/useSubscription";
 
 const EditorPage = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const EditorPage = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [snapshot, setSnapshot] = useState<CanvasSnapshot | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { subscribed, isLoading: subscriptionLoading } = useSubscription();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -44,6 +46,13 @@ const EditorPage = () => {
     return () => subscription.unsubscribe();
   }, [navigate, searchParams]);
 
+  // Redirect to pricing if not subscribed
+  useEffect(() => {
+    if (!isLoading && session && !subscriptionLoading && !subscribed) {
+      navigate("/pricing");
+    }
+  }, [isLoading, session, subscriptionLoading, subscribed, navigate]);
+
   const loadProject = async () => {
     const projectId = searchParams.get("project");
     if (!projectId) {
@@ -70,8 +79,8 @@ const EditorPage = () => {
     }
   };
 
-  // Show loading state while checking auth
-  if (isLoading) {
+  // Show loading state while checking auth or subscription
+  if (isLoading || subscriptionLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#0A0A0B]">
         <Loader2 className="w-8 h-8 animate-spin text-white/60" />
@@ -79,12 +88,12 @@ const EditorPage = () => {
     );
   }
 
-  // If not authenticated, redirect happens in useEffect
-  if (!session) {
+  // If not authenticated or not subscribed, redirect happens in useEffect
+  if (!session || !subscribed) {
     return null;
   }
 
-  // If authenticated, show canvas with onboarding
+  // If authenticated and subscribed, show canvas with onboarding
   return (
     <>
       <OnboardingFlow />

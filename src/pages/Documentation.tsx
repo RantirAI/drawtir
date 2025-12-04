@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Square, Type, Image, Pen, Box, Code, Layers } from "lucide-react";
 import PageFooter from "@/components/Footer/PageFooter";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 
 export default function Documentation() {
   const [activeSection, setActiveSection] = useState("getting-started");
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <SubscriptionGuard>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-4">
         <div className="flex gap-4">
@@ -271,6 +273,7 @@ function App() {
         </div>
       </main>
       <PageFooter />
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }

@@ -11,6 +11,7 @@ import { AvatarUpload } from "@/components/Settings/AvatarUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { SubscriptionGuard } from "@/components/SubscriptionGuard";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -165,7 +166,8 @@ export default function Settings() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
+    <SubscriptionGuard>
+      <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'hsl(var(--page-bg))' }}>
       <HorizontalNav />
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -272,6 +274,7 @@ export default function Settings() {
         </div>
       </main>
       <PageFooter />
-    </div>
+      </div>
+    </SubscriptionGuard>
   );
 }
