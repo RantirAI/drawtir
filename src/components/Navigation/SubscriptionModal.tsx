@@ -128,7 +128,7 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
           {subscribed && (
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground">
-                Manage your payment method, view invoices, or cancel subscription:
+                Update your payment method or view invoices:
               </p>
               <Button 
                 variant="outline" 
