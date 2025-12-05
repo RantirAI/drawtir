@@ -6,11 +6,47 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 import { WorkspaceNotifications } from "./WorkspaceNotifications";
+import { useSubscription, SUBSCRIPTION_TIERS } from "@/hooks/useSubscription";
+import { useEffect, useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, CreditCard, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function HorizontalNav() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const { subscribed, getCurrentTier, openCustomerPortal } = useSubscription();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || null);
+        // Try to get avatar from profile
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('avatar_url, display_name')
+          .eq('id', user.id)
+          .single();
+        if (profile?.avatar_url) {
+          setAvatarUrl(profile.avatar_url);
+        }
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const currentTier = getCurrentTier();
 
   const handleSignOut = async () => {
     try {
@@ -21,6 +57,19 @@ export default function HorizontalNav() {
     } catch (error: any) {
       toast.error("Error signing out: " + error.message);
     }
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      await openCustomerPortal();
+    } catch (error: any) {
+      toast.error("Error opening portal: " + error.message);
+    }
+  };
+
+  const getInitials = (email: string | null) => {
+    if (!email) return "U";
+    return email.charAt(0).toUpperCase();
   };
 
   return (
@@ -94,9 +143,55 @@ export default function HorizontalNav() {
             <div className="h-6 w-px bg-border/10 dark:bg-transparent" />
             <WorkspaceNotifications />
             <ThemeToggle />
-            <Button variant="ghost" size="sm" className="h-7 text-xs px-2" onClick={handleSignOut}>
-              Sign Out
-            </Button>
+            
+            {/* Profile Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full p-0">
+                  <Avatar className="h-7 w-7">
+                    <AvatarImage src={avatarUrl || undefined} />
+                    <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                      {getInitials(userEmail)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Account</p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">
+                      {userEmail || "Loading..."}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-xs text-muted-foreground">Subscription</p>
+                    <p className="text-sm font-medium leading-none">
+                      {subscribed ? (currentTier?.name || "Active") : "No active plan"}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                {subscribed && (
+                  <DropdownMenuItem onClick={handleManageSubscription} className="cursor-pointer">
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    <span>Manage Subscription</span>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
