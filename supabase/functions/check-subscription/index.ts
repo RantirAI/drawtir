@@ -70,15 +70,15 @@ serve(async (req) => {
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
       
-      // Safely parse subscription end date
-      try {
-        if (subscription.current_period_end) {
-          subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-        }
-      } catch (dateError) {
-        logStep("Warning: Could not parse subscription end date", { 
-          current_period_end: subscription.current_period_end 
-        });
+      // Log raw subscription data to debug
+      logStep("Raw subscription data", { 
+        current_period_end: subscription.current_period_end,
+        billing_cycle_anchor: subscription.billing_cycle_anchor
+      });
+      
+      // Parse subscription end date - current_period_end is a Unix timestamp
+      if (subscription.current_period_end) {
+        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
       }
       
       // Safely get price and product info
