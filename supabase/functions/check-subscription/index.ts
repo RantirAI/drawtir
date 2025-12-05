@@ -68,23 +68,41 @@ serve(async (req) => {
     let subscriptionEnd = null;
 
     if (hasActiveSub) {
-      const subscription = subscriptions.data[0];
+      const subscription = subscriptions.data[0] as any;
       
-      // Log raw subscription data to debug
-      logStep("Raw subscription data", { 
-        current_period_end: subscription.current_period_end,
-        billing_cycle_anchor: subscription.billing_cycle_anchor
-      });
-      
-      // Parse subscription end date - current_period_end is a Unix timestamp
-      if (subscription.current_period_end) {
-        subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      }
-      
-      // Safely get price and product info
+      // Get price info first to determine interval
       if (subscription.items?.data?.[0]?.price) {
         priceId = subscription.items.data[0].price.id;
         productId = subscription.items.data[0].price.product;
+        
+        // Get interval from price
+        const interval = subscription.items.data[0].price.recurring?.interval;
+        const billingAnchor = subscription.billing_cycle_anchor;
+        
+        logStep("Subscription details", { 
+          billingAnchor, 
+          interval,
+          priceId 
+        });
+        
+        // Calculate next billing date from billing_cycle_anchor
+        if (billingAnchor) {
+          const anchorDate = new Date(billingAnchor * 1000);
+          const now = new Date();
+          
+          // Find the next billing date after now
+          while (anchorDate <= now) {
+            if (interval === 'year') {
+              anchorDate.setFullYear(anchorDate.getFullYear() + 1);
+            } else if (interval === 'month') {
+              anchorDate.setMonth(anchorDate.getMonth() + 1);
+            } else {
+              // Default to monthly
+              anchorDate.setMonth(anchorDate.getMonth() + 1);
+            }
+          }
+          subscriptionEnd = anchorDate.toISOString();
+        }
       }
       
       logStep("Active subscription found", { 
