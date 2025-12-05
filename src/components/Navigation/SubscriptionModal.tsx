@@ -61,21 +61,24 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
                 {subscribed ? (currentTier?.name || "Active") : "No Plan"}
               </Badge>
             </div>
-            
-            {subscribed && subscriptionEnd && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Next billing</span>
-                <span className="text-sm font-medium">
-                  {format(new Date(subscriptionEnd), "MMM d, yyyy")}
-                </span>
-              </div>
-            )}
 
             {subscribed && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Billing cycle</span>
                 <span className="text-sm font-medium">
                   {currentTier?.interval === "month" ? "Monthly" : "Yearly"}
+                </span>
+              </div>
+            )}
+            
+            {subscribed && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Next billing date</span>
+                <span className="text-sm font-medium">
+                  {subscriptionEnd 
+                    ? format(new Date(subscriptionEnd), "MMMM d, yyyy")
+                    : "—"
+                  }
                 </span>
               </div>
             )}
