@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 import { WorkspaceNotifications } from "./WorkspaceNotifications";
-import { useSubscription, SUBSCRIPTION_TIERS } from "@/hooks/useSubscription";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useEffect, useState } from "react";
 import {
   DropdownMenu,
@@ -18,14 +18,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User, CreditCard, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { SubscriptionModal } from "./SubscriptionModal";
 
 export default function HorizontalNav() {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const isDark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const { subscribed, getCurrentTier, openCustomerPortal } = useSubscription();
+  const { subscribed, getCurrentTier } = useSubscription();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -56,14 +58,6 @@ export default function HorizontalNav() {
       navigate("/", { replace: true });
     } catch (error: any) {
       toast.error("Error signing out: " + error.message);
-    }
-  };
-
-  const handleManageSubscription = async () => {
-    try {
-      await openCustomerPortal();
-    } catch (error: any) {
-      toast.error("Error opening portal: " + error.message);
     }
   };
 
@@ -179,12 +173,10 @@ export default function HorizontalNav() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                {subscribed && (
-                  <DropdownMenuItem onClick={handleManageSubscription} className="cursor-pointer">
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    <span>Manage Subscription</span>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem onClick={() => setSubscriptionModalOpen(true)} className="cursor-pointer">
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Subscription</span>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive focus:text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
@@ -195,6 +187,11 @@ export default function HorizontalNav() {
           </div>
         </div>
       </div>
+
+      <SubscriptionModal 
+        open={subscriptionModalOpen} 
+        onOpenChange={setSubscriptionModalOpen} 
+      />
     </nav>
   );
 }
