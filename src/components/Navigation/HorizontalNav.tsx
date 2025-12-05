@@ -173,7 +173,13 @@ export default function HorizontalNav() {
                   <User className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSubscriptionModalOpen(true)} className="cursor-pointer">
+                <DropdownMenuItem 
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    setSubscriptionModalOpen(true);
+                  }} 
+                  className="cursor-pointer"
+                >
                   <CreditCard className="mr-2 h-4 w-4" />
                   <span>Subscription</span>
                 </DropdownMenuItem>
