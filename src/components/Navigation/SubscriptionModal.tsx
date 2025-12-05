@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useSubscription, SUBSCRIPTION_TIERS } from "@/hooks/useSubscription";
-import { CreditCard, Crown, Sparkles, ExternalLink } from "lucide-react";
+import { CreditCard, Crown, Sparkles, RefreshCw, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -19,7 +19,6 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
     getCurrentTier, 
     createCheckout, 
     openCustomerPortal,
-    isLoading 
   } = useSubscription();
 
   const currentTier = getCurrentTier();
@@ -31,15 +30,6 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
       await createCheckout(SUBSCRIPTION_TIERS.sdk_whitelabel.price_id);
     } catch (error: any) {
       toast.error("Error creating checkout: " + error.message);
-    }
-  };
-
-  const handleExtend = async () => {
-    try {
-      // For extending, we redirect to Stripe portal where they can manage billing
-      await openCustomerPortal();
-    } catch (error: any) {
-      toast.error("Error opening portal: " + error.message);
     }
   };
 
@@ -74,7 +64,7 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
             
             {subscribed && subscriptionEnd && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Renews on</span>
+                <span className="text-sm text-muted-foreground">Next billing</span>
                 <span className="text-sm font-medium">
                   {format(new Date(subscriptionEnd), "MMM d, yyyy")}
                 </span>
@@ -83,9 +73,18 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
 
             {subscribed && (
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Billing</span>
+                <span className="text-sm text-muted-foreground">Billing cycle</span>
                 <span className="text-sm font-medium">
                   {currentTier?.interval === "month" ? "Monthly" : "Yearly"}
+                </span>
+              </div>
+            )}
+
+            {subscribed && (
+              <div className="flex items-center gap-2 pt-2 border-t">
+                <RefreshCw className="h-3 w-3 text-green-500" />
+                <span className="text-xs text-muted-foreground">
+                  Auto-renews on billing date
                 </span>
               </div>
             )}
@@ -125,44 +124,36 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="space-y-2">
-            {subscribed && (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={handleExtend} 
-                  className="w-full gap-2"
-                  size="sm"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Extend / Renew Subscription
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleManageBilling} 
-                  className="w-full gap-2 text-muted-foreground"
-                  size="sm"
-                >
-                  <CreditCard className="h-4 w-4" />
-                  Manage Billing & Payment
-                </Button>
-              </>
-            )}
-
-            {!subscribed && (
+          {/* Manage Billing Section */}
+          {subscribed && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Manage your payment method, view invoices, or cancel subscription:
+              </p>
               <Button 
-                onClick={() => {
-                  onOpenChange(false);
-                  window.location.href = "/pricing";
-                }} 
+                variant="outline" 
+                onClick={handleManageBilling} 
                 className="w-full gap-2"
+                size="sm"
               >
-                <Sparkles className="h-4 w-4" />
-                View Plans
+                <CreditCard className="h-4 w-4" />
+                Manage Billing
               </Button>
-            )}
-          </div>
+            </div>
+          )}
+
+          {!subscribed && (
+            <Button 
+              onClick={() => {
+                onOpenChange(false);
+                window.location.href = "/pricing";
+              }} 
+              className="w-full gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              View Plans
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
