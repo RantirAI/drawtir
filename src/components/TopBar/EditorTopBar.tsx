@@ -121,7 +121,7 @@ export default function EditorTopBar({
   const hasActiveUsers = allUsers.length > 1;
 
   return (
-    <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50">
+    <div className="fixed top-2 left-1/2 -translate-x-1/2 z-50 max-w-[calc(100vw-16px)] sm:max-w-none">
       {/* Floating generation message */}
       {isGenerating && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex items-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -132,7 +132,7 @@ export default function EditorTopBar({
         </div>
       )}
       
-      <div className="relative flex items-center gap-1 px-2 py-1 rounded-full bg-card/95 backdrop-blur-xl border border-border/60 dark:border-border/40 shadow-lg overflow-hidden">
+      <div className="relative flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-1 rounded-full bg-card/95 backdrop-blur-xl border border-border/60 dark:border-border/40 shadow-lg overflow-hidden">
         {/* Progress bar overlay */}
         {isGenerating && (
           <div 
@@ -155,7 +155,7 @@ export default function EditorTopBar({
         )}
         
         {/* Content - original (dark) */}
-        <div className="relative z-10 flex items-center gap-1">
+        <div className="relative z-10 flex items-center gap-0.5 sm:gap-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group">
@@ -197,47 +197,47 @@ export default function EditorTopBar({
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
+          className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
           onClick={onUndo} 
           disabled={!canUndo}
           title="Undo (Ctrl+Z)"
         >
-          <ArrowRotateLeft size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          <ArrowRotateLeft size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
         </Button>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
+          className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group"
           onClick={onRedo} 
           disabled={!canRedo}
           title="Redo (Ctrl+Y)"
         >
-          <ArrowRotateRight size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          <ArrowRotateRight size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onSave && !hideCloudFeatures && (
-          <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onSave} disabled={isSaving}>
-            <Save size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+          <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onSave} disabled={isSaving}>
+            <Save size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
-        <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onDownload}>
-          <DocumentDownload size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+        <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" onClick={onDownload}>
+          <DocumentDownload size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
-        <Button variant="ghost" size="icon" className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" onClick={onShare}>
-          <Share2 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+        <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" onClick={onShare}>
+          <Share2 size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
         </Button>
 
         {onTogglePanMode && (
           <Button 
             variant={isPanMode ? "default" : "ghost"} 
             size="icon" 
-            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+            className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" 
             onClick={onTogglePanMode}
             title="Hand Tool (Space)"
           >
-            <Hand size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Hand size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -247,10 +247,10 @@ export default function EditorTopBar({
               <Button 
                 variant={showGrid ? "default" : "ghost"} 
                 size="icon" 
-                className="h-6 w-6 relative transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+                className="h-5 w-5 sm:h-6 sm:w-6 relative transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" 
                 title="Grid Settings"
               >
-                <Grid1 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+                <Grid1 size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-card/95 backdrop-blur-xl border-border/50">
@@ -304,11 +304,11 @@ export default function EditorTopBar({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+            className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
             onClick={onRecenter}
             title="Center View (F)"
           >
-            <Maximize4 size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Maximize4 size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
 
@@ -316,37 +316,37 @@ export default function EditorTopBar({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-6 w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group" 
+            className="h-5 w-5 sm:h-6 sm:w-6 transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" 
             onClick={onPresentationMode}
             title="Presentation Mode"
           >
-            <Presentation size={12} className="transition-transform duration-300 group-hover:rotate-6" />
+            <Presentation size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
           </Button>
         )}
         
         <ThemeToggle />
 
-        {/* Collaborative Users - Right side of toolbar */}
+        {/* Collaborative Users - Right side of toolbar - Hidden on mobile */}
         {enableCollaboration && hasActiveUsers && (
           <>
-            <Separator orientation="vertical" className="h-6 mx-1" />
-            <div className="relative flex items-center gap-2">
+            <Separator orientation="vertical" className="h-4 sm:h-6 mx-0.5 sm:mx-1 hidden sm:block" />
+            <div className="relative items-center gap-1 sm:gap-2 hidden sm:flex">
               {/* Glow effects behind each avatar */}
               <div className="absolute inset-0 -z-10 flex items-center justify-end">
                 {allUsers.slice(0, 5).map((user, index) => (
                   <div
                     key={user.userId}
-                    className="absolute blur-xl scale-125 opacity-30 w-10 h-10 rounded-full transition-all duration-300"
+                    className="absolute blur-xl scale-125 opacity-30 w-8 sm:w-10 h-8 sm:h-10 rounded-full transition-all duration-300"
                     style={{
                       backgroundColor: user.color,
-                      right: `${index * 28}px`,
+                      right: `${index * 24}px`,
                     }}
                   />
                 ))}
               </div>
               
-              <Users className="h-3 w-3 text-muted-foreground" />
-              <span className="text-[10px] font-medium text-muted-foreground">
+              <Users className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-muted-foreground" />
+              <span className="text-[9px] sm:text-[10px] font-medium text-muted-foreground">
                 {allUsers.length}
               </span>
               
@@ -360,7 +360,7 @@ export default function EditorTopBar({
                           style={{ zIndex: allUsers.length - index }}
                         >
                           <Avatar 
-                            className="h-8 w-8 border-2 ring-2 ring-background/50 cursor-pointer"
+                            className="h-6 w-6 sm:h-8 sm:w-8 border-2 ring-2 ring-background/50 cursor-pointer"
                             style={{
                               borderColor: user.color,
                               boxShadow: `0 0 16px ${user.color}40`,
@@ -368,7 +368,7 @@ export default function EditorTopBar({
                           >
                             <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName} />
                             <AvatarFallback 
-                              className="text-[10px] font-semibold"
+                              className="text-[8px] sm:text-[10px] font-semibold"
                               style={{
                                 backgroundColor: user.color,
                                 color: 'white',
@@ -378,7 +378,7 @@ export default function EditorTopBar({
                             </AvatarFallback>
                           </Avatar>
                           {user.userId === currentUser?.id && (
-                            <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-primary border border-background animate-pulse" />
+                            <div className="absolute -bottom-0.5 -right-0.5 h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full bg-primary border border-background animate-pulse" />
                           )}
                         </div>
                       </TooltipTrigger>
@@ -391,7 +391,7 @@ export default function EditorTopBar({
                   {allUsers.length > 5 && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-border bg-muted text-[10px] font-semibold text-muted-foreground ring-2 ring-background/50 transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50 cursor-pointer">
+                        <div className="relative flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full border-2 border-border bg-muted text-[8px] sm:text-[10px] font-semibold text-muted-foreground ring-2 ring-background/50 transition-all duration-300 hover:scale-110 hover:-translate-y-1 hover:z-50 cursor-pointer">
                           +{allUsers.length - 5}
                         </div>
                       </TooltipTrigger>

@@ -4138,36 +4138,36 @@ export default function CanvasContainerNew({
         />
       )}
 
-      {/* Quick Action Buttons */}
-      <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-40">
+      {/* Quick Action Buttons - Hidden on mobile, shown on larger screens */}
+      <div className="fixed left-2 sm:left-6 top-1/2 -translate-y-1/2 flex-col gap-1 sm:gap-2 z-40 hidden sm:flex">
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showGeneratePanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowGeneratePanel(!showGeneratePanel)}
         >
-          <Magicpen size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showGeneratePanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Magicpen size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showGeneratePanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showTemplatesPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowTemplatesPanel(!showTemplatesPanel)}
         >
-          <Element2 size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showTemplatesPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Element2 size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showTemplatesPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showLayersPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
@@ -4176,12 +4176,12 @@ export default function CanvasContainerNew({
             setShowLayersPanel(!showLayersPanel);
           }}
         >
-          <Layer size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showLayersPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Layer size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showLayersPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showMediaLibrary 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
@@ -4189,24 +4189,24 @@ export default function CanvasContainerNew({
           onClick={() => setShowMediaLibrary(!showMediaLibrary)}
           title="Media Library"
         >
-          <Gallery size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showMediaLibrary ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Gallery size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showMediaLibrary ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showShapeSettings || selectedElementIds.length > 0 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
           }`}
           onClick={() => setShowShapeSettings(!showShapeSettings)}
         >
-          <Setting4 size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Setting4 size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showShapeSettings || selectedElementIds.length > 0 ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showAnimationsPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
@@ -4220,12 +4220,12 @@ export default function CanvasContainerNew({
           }}
           title="Animations"
         >
-          <Video size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showAnimationsPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Video size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showAnimationsPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showBrandKitPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
@@ -4233,12 +4233,12 @@ export default function CanvasContainerNew({
           onClick={() => setShowBrandKitPanel(!showBrandKitPanel)}
           title="Brand Kit"
         >
-          <Colorfilter size={16} className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showBrandKitPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
+          <Colorfilter size={14} className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showBrandKitPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`} />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className={`h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
+          className={`h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground shadow-sm group ${
             showInteractivityPanel 
               ? 'bg-primary/20 text-primary shadow-primary/20' 
               : 'bg-card hover:shadow-md'
@@ -4246,7 +4246,7 @@ export default function CanvasContainerNew({
           onClick={() => setShowInteractivityPanel(!showInteractivityPanel)}
           title="Interactivity"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showInteractivityPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`}>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6 group-hover:text-white ${showInteractivityPanel ? 'text-primary' : 'hover:text-primary/70 transition-colors'}`}>
             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
           </svg>
@@ -4254,36 +4254,36 @@ export default function CanvasContainerNew({
         <Button
           variant="ghost"
           size="icon"
-          className="h-10 w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group"
+          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full transition-all duration-300 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground bg-primary/20 shadow-sm shadow-primary/20 group"
           onClick={() => setShowPreviewDialog(true)}
           title="Preview with animations"
         >
-          <PlayCircle size={16} className="text-primary transition-transform duration-300 group-hover:rotate-6" />
+          <PlayCircle size={14} className="sm:w-4 sm:h-4 text-primary transition-transform duration-300 group-hover:rotate-6" />
         </Button>
       </div>
       
-      {/* Zoom Controls */}
-      <div className="fixed left-4 bottom-12 flex flex-row items-center gap-1 z-40 bg-card/80 backdrop-blur-xl rounded-full px-2 py-1 border border-border/40 dark:border-border/25 shadow-sm">
+      {/* Zoom Controls - Repositioned for mobile */}
+      <div className="fixed left-2 sm:left-4 bottom-16 sm:bottom-12 flex flex-row items-center gap-0.5 sm:gap-1 z-40 bg-card/80 backdrop-blur-xl rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 border border-border/40 dark:border-border/25 shadow-sm">
         <button
           onClick={() => setZoom(prev => Math.min(3, prev + 0.1))}
-          className="text-xs font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
+          className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
         >
           +
         </button>
-        <div className="text-[10px] font-medium px-2 min-w-[40px] text-center">{Math.round(zoom * 100)}%</div>
+        <div className="text-[9px] sm:text-[10px] font-medium px-1 sm:px-2 min-w-[32px] sm:min-w-[40px] text-center">{Math.round(zoom * 100)}%</div>
         <button
           onClick={() => setZoom(prev => Math.max(0.1, prev - 0.1))}
-          className="text-xs font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
+          className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
         >
           -
         </button>
-        <div className="w-px h-3 bg-border/40 dark:bg-border/25 mx-1" />
+        <div className="w-px h-3 bg-border/40 dark:bg-border/25 mx-0.5 sm:mx-1 hidden sm:block" />
         <button
           onClick={() => {
             setZoom(1);
             setPanOffset({ x: 0, y: 0 });
           }}
-          className="text-[10px] font-medium px-2 py-0.5 hover:bg-secondary rounded-full transition-colors"
+          className="text-[9px] sm:text-[10px] font-medium px-1 sm:px-2 py-0.5 hover:bg-secondary rounded-full transition-colors hidden sm:block"
         >
           Reset
         </button>
