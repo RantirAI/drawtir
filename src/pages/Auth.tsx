@@ -103,19 +103,36 @@ export default function Auth() {
   };
 
   return (
-    <div className="dark min-h-screen flex">
+    <div className="dark min-h-screen flex flex-col lg:flex-row">
+      {/* Mobile Header with Logo */}
+      <div className="lg:hidden relative h-32 sm:h-40 w-full overflow-hidden">
+        <img 
+          src={authBackground} 
+          alt="Background" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img 
+            src={drawtirLogo} 
+            alt="Drawtir" 
+            className="w-40 sm:w-48 opacity-90"
+          />
+        </div>
+      </div>
+
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 bg-background">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-8 lg:px-16 py-8 lg:py-0 bg-background flex-1">
         <div className="max-w-md w-full mx-auto">
           {/* Rantir Studio Logo */}
-          <div className="mb-8">
-            <img src={rantirStudioLogo} alt="Rantir Studio" className="w-20" />
+          <div className="mb-6 lg:mb-8">
+            <img src={rantirStudioLogo} alt="Rantir Studio" className="w-16 sm:w-20" />
           </div>
 
-          <h2 className="text-xl font-semibold mb-2 text-foreground">
+          <h2 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">
             {isLogin ? "Welcome back" : "Create your account"}
           </h2>
-          <p className="text-muted-foreground text-sm mb-6">
+          <p className="text-muted-foreground text-xs sm:text-sm mb-5 lg:mb-6">
             {isLogin
               ? "Sign in to continue to your projects"
               : "Get started with your creative journey"}
@@ -131,7 +148,7 @@ export default function Auth() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-9 text-sm"
+                className="h-10 sm:h-9 text-sm"
                 style={{ color: 'white' }}
               />
             </div>
@@ -144,14 +161,14 @@ export default function Auth() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="h-9 text-sm"
+                className="h-10 sm:h-9 text-sm"
                 style={{ color: 'white' }}
               />
             </div>
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-9 text-sm"
+              className="w-full h-10 sm:h-9 text-sm mt-2"
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -172,7 +189,7 @@ export default function Auth() {
             </button>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="mt-5 lg:mt-6 text-center">
             <Link to="/pricing" className="text-xs text-primary hover:underline">
               See our pricing
             </Link>
@@ -180,7 +197,7 @@ export default function Auth() {
         </div>
       </div>
 
-      {/* Right Side - Image with Logo */}
+      {/* Right Side - Image with Logo (Desktop only) */}
       <div className="hidden lg:block lg:w-1/2 relative">
         <img 
           src={authBackground} 
