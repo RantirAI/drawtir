@@ -364,23 +364,23 @@ export default function Workspaces() {
       <div className="min-h-screen bg-background">
       <HorizontalNav />
       
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Workspaces</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold">Workspaces</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
               Collaborate with your team on design projects
             </p>
           </div>
           
           <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
             <DialogTrigger asChild>
-              <Button>
+              <Button size="sm" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Workspace
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>Create New Workspace</DialogTitle>
                 <DialogDescription>
@@ -405,13 +405,13 @@ export default function Workspaces() {
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <Card className="border-border/10">
-            <CardHeader>
-              <CardTitle className="text-lg">Your Workspaces</CardTitle>
-              <CardDescription>Select a workspace to manage</CardDescription>
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-base sm:text-lg">Your Workspaces</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">Select a workspace to manage</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2 p-4 sm:p-6 pt-0 sm:pt-0">
               {workspaces.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">
                   No workspaces yet. Create one to get started!
@@ -421,7 +421,7 @@ export default function Workspaces() {
                   <button
                     key={workspace.id}
                     onClick={() => setSelectedWorkspace(workspace)}
-                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                    className={`w-full text-left p-2.5 sm:p-3 rounded-lg border transition-colors ${
                       selectedWorkspace?.id === workspace.id
                         ? 'bg-primary/10 border-primary/30'
                         : 'hover:bg-muted border-border/10'
@@ -429,7 +429,7 @@ export default function Workspaces() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{workspace.name}</p>
+                        <p className="font-medium text-sm sm:text-base">{workspace.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {workspace.your_role}
                         </p>
@@ -445,12 +445,12 @@ export default function Workspaces() {
           {/* Members List */}
           {selectedWorkspace && (
             <Card className="lg:col-span-2 border-border/10">
-              <CardHeader>
-                <div className="flex items-center justify-between">
+              <CardHeader className="p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <CardTitle>{selectedWorkspace.name}</CardTitle>
-                    <CardDescription>
-                      {members.length} member{members.length !== 1 ? 's' : ''} · {pendingCount} pending invitation{pendingCount !== 1 ? 's' : ''}
+                    <CardTitle className="text-lg sm:text-xl">{selectedWorkspace.name}</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      {members.length} member{members.length !== 1 ? 's' : ''} · {pendingCount} pending
                     </CardDescription>
                   </div>
                   
@@ -461,18 +461,19 @@ export default function Workspaces() {
                           size="sm"
                           variant="outline"
                           onClick={() => navigate(`/workspaces/${selectedWorkspace.id}/settings`)}
+                          className="flex-1 sm:flex-none"
                         >
-                          <Settings className="h-4 w-4 mr-2" />
-                          Settings
+                          <Settings className="h-4 w-4 sm:mr-2" />
+                          <span className="hidden sm:inline">Settings</span>
                         </Button>
                         <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
                         <DialogTrigger asChild>
-                          <Button size="sm">
-                            <Mail className="h-4 w-4 mr-2" />
-                            Invite
+                          <Button size="sm" className="flex-1 sm:flex-none">
+                            <Mail className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Invite</span>
                           </Button>
                         </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-lg">
                         <DialogHeader>
                           <DialogTitle>Invite to Workspace</DialogTitle>
                           <DialogDescription>
@@ -515,50 +516,50 @@ export default function Workspaces() {
               </CardHeader>
               
               <Tabs defaultValue="members" className="w-full">
-                <TabsList className="mx-6">
-                  <TabsTrigger value="members">Members</TabsTrigger>
-                  <TabsTrigger value="activity">Activity</TabsTrigger>
+                <TabsList className="mx-4 sm:mx-6">
+                  <TabsTrigger value="members" className="text-xs sm:text-sm">Members</TabsTrigger>
+                  <TabsTrigger value="activity" className="text-xs sm:text-sm">Activity</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="members">
-              <CardContent>
+              <CardContent className="p-4 sm:p-6">
                 <div className="space-y-4">
                   {/* Active Members */}
                   <div>
-                    <h3 className="text-sm font-medium text-muted-foreground mb-3">Active Members</h3>
+                    <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-3">Active Members</h3>
                     <div className="space-y-2">
                       {members.map((member) => (
                         <div
                           key={member.id}
-                          className="flex items-center justify-between p-3 rounded-lg border border-border/10"
+                          className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border border-border/10 gap-2"
                         >
-                          <div className="flex items-center gap-3">
-                            <Avatar>
+                          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                            <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                               <AvatarImage src={member.profiles?.avatar_url || undefined} />
-                              <AvatarFallback>
+                              <AvatarFallback className="text-xs sm:text-sm">
                                 {(member.profiles?.display_name || member.profiles?.email || 'U').charAt(0).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            <div>
-                              <p className="font-medium">
+                            <div className="min-w-0">
+                              <p className="font-medium text-sm sm:text-base truncate">
                                 {member.profiles?.display_name || member.profiles?.email || 'Unknown User'}
                               </p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-muted-foreground truncate hidden sm:block">
                                 {member.profiles?.email || 'No email'}
                               </p>
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-2">
-                            <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
-                              {member.role === 'owner' && <Crown className="h-3 w-3 inline mr-1" />}
+                          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                            <div className={`px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${getRoleBadgeColor(member.role)}`}>
+                              {member.role === 'owner' && <Crown className="h-2.5 w-2.5 sm:h-3 sm:w-3 inline mr-0.5 sm:mr-1" />}
                               {member.role}
                             </div>
                             
                             {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'editor') && member.role !== 'owner' && (
                               <Popover>
                                 <PopoverTrigger asChild>
-                                  <Button size="sm" variant="ghost">
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8 p-0">
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </PopoverTrigger>
@@ -608,41 +609,41 @@ export default function Workspaces() {
                   {/* Invitations */}
                   {dedupedInvitations.length > 0 && (
                     <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-3">Invitations</h3>
+                      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-3">Invitations</h3>
                       <div className="space-y-2">
                         {dedupedInvitations.map((invitation) => {
                           const status = getInvitationStatus(invitation);
                           return (
                             <div
                               key={invitation.id}
-                              className="flex items-center justify-between p-3 rounded-lg border border-border/10 bg-muted/30"
+                              className="flex items-center justify-between p-2.5 sm:p-3 rounded-lg border border-border/10 bg-muted/30 gap-2"
                             >
-                              <div className="flex items-center gap-3">
-                                <Avatar>
+                              <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                                <Avatar className="h-8 w-8 sm:h-10 sm:w-10 flex-shrink-0">
                                   <AvatarFallback>
-                                    <Mail className="h-4 w-4" />
+                                    <Mail className="h-3 w-3 sm:h-4 sm:w-4" />
                                   </AvatarFallback>
                                 </Avatar>
-                                <div>
-                                  <p className="font-medium">{invitation.email}</p>
-                                  <p className="text-xs text-muted-foreground">
+                                <div className="min-w-0">
+                                  <p className="font-medium text-sm sm:text-base truncate">{invitation.email}</p>
+                                  <p className="text-xs text-muted-foreground truncate hidden sm:block">
                                     Invited by {invitation.inviter?.display_name || invitation.inviter?.email || 'Unknown'}
                                   </p>
                                 </div>
                               </div>
                               
-                              <div className="flex items-center gap-2">
-                                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                                <div className={`px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium ${status.color}`}>
                                   {status.label}
                                 </div>
-                                <div className={`px-2.5 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(invitation.role)}`}>
+                                <div className={`px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium hidden sm:block ${getRoleBadgeColor(invitation.role)}`}>
                                   {invitation.role}
                                 </div>
 
                                 {(selectedWorkspace.your_role === 'owner' || selectedWorkspace.your_role === 'editor') && (
                                   <Popover>
                                     <PopoverTrigger asChild>
-                                      <Button size="sm" variant="ghost">
+                                      <Button size="sm" variant="ghost" className="h-7 w-7 sm:h-8 sm:w-8 p-0">
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
                                     </PopoverTrigger>
@@ -699,7 +700,7 @@ export default function Workspaces() {
                 </TabsContent>
                 
                 <TabsContent value="activity">
-                  <div className="p-6">
+                  <div className="p-4 sm:p-6">
                     <ActivityLogPanel workspaceId={selectedWorkspace.id} />
                   </div>
                 </TabsContent>
