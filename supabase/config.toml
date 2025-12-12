@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.preview-voice]
 verify_jwt = false
+
+[functions.import-figma-design]
+verify_jwt = false

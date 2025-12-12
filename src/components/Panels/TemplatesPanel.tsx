@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Layout, Eye } from "lucide-react";
+import { Layout, Eye, FileUp } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import DraggablePanel from "./DraggablePanel";
 import { toast } from "sonner";
 import type { CanvasSnapshot } from "@/types/snapshot";
 import { useTemplates } from "@/hooks/useTemplates";
 import { starterTemplates } from "@/data/starterTemplates";
 import PreviewDialog from "@/components/Canvas/PreviewDialog";
+import FigmaImportModal from "./FigmaImportModal";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TemplatesPanelProps {
@@ -21,6 +23,11 @@ export default function TemplatesPanel({
   const { templates, isLoading: isLoadingTemplates, loadTemplates } = useTemplates();
   const [previewFrame, setPreviewFrame] = useState<any>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [figmaModalOpen, setFigmaModalOpen] = useState(false);
+
+  const handleFigmaImport = (snapshot: CanvasSnapshot) => {
+    onRestoreTemplate(snapshot);
+  };
 
   useEffect(() => {
     loadTemplates();
@@ -93,6 +100,18 @@ export default function TemplatesPanel({
       <div className="w-[380px] bg-card rounded-lg">
         <ScrollArea className="h-[500px]">
           <div className="p-4 space-y-6">
+            {/* Import from Figma */}
+            <div>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-2"
+                onClick={() => setFigmaModalOpen(true)}
+              >
+                <FileUp className="w-4 h-4" />
+                Import from Figma
+              </Button>
+            </div>
+
             {/* Starter Templates */}
             <div>
               <h3 className="text-sm font-semibold mb-3 text-foreground">Starter Templates</h3>
@@ -219,6 +238,11 @@ export default function TemplatesPanel({
         open={previewOpen}
         onOpenChange={setPreviewOpen}
         frames={previewFrame ? [previewFrame] : []}
+      />
+      <FigmaImportModal
+        open={figmaModalOpen}
+        onOpenChange={setFigmaModalOpen}
+        onImport={handleFigmaImport}
       />
     </DraggablePanel>
   );
