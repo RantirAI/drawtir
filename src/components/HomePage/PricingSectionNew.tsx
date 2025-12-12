@@ -65,24 +65,24 @@ export default function PricingSectionNew() {
   };
 
   return (
-    <section id="pricing" className="relative z-10 py-16 px-4">
+    <section id="pricing" className="relative z-10 py-10 sm:py-16 px-4">
       <div className="max-w-[720px] mx-auto">
         <motion.div
-          className="text-center mb-10"
+          className="text-center mb-8 sm:mb-10"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-2xl md:text-3xl font-bold text-[hsl(40,20%,92%)] mb-3">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[hsl(40,20%,92%)] mb-2 sm:mb-3">
             Simple Pricing
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Choose the plan that fits your needs
           </p>
         </motion.div>
         
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-[520px] mx-auto"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[520px] mx-auto px-2 sm:px-0"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

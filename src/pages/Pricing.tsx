@@ -7,7 +7,7 @@ export default function Pricing() {
     <div className="dark min-h-screen bg-background flex flex-col relative overflow-hidden">
       <HomeNav />
 
-      <main className="flex-1 flex items-center justify-center py-8 relative z-10">
+      <main className="flex-1 flex items-center justify-center py-4 sm:py-8 relative z-10">
         <PricingSectionNew />
       </main>
 
