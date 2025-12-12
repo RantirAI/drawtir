@@ -168,10 +168,18 @@ function extractFramesFromFigma(document: any): any[] {
   const frames: any[] = [];
 
   function processNode(node: FigmaNode, depth = 0) {
-    // Only process top-level frames/components as our frames
-    if ((node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') && depth <= 1) {
+    console.log(`Processing node: type=${node.type}, name="${node.name}", depth=${depth}`);
+    
+    // Process frames/components at depth 1-3 (to handle sections/groups containing frames)
+    const isFrameType = node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'COMPONENT_SET';
+    const isValidDepth = depth >= 1 && depth <= 3;
+    const hasValidSize = node.absoluteBoundingBox && node.absoluteBoundingBox.width >= 50 && node.absoluteBoundingBox.height >= 50;
+    
+    if (isFrameType && isValidDepth && hasValidSize) {
       const bbox = node.absoluteBoundingBox;
       if (!bbox) return;
+
+      console.log(`Found frame: "${node.name}" at depth ${depth}, size ${bbox.width}x${bbox.height}`);
 
       let backgroundColor = '#ffffff';
       if (node.backgroundColor) {
@@ -200,6 +208,9 @@ function extractFramesFromFigma(document: any): any[] {
                 if (element) elements.push(element);
               }
             }
+            // Also add the frame/group itself as an element
+            const element = convertFigmaNodeToElement(child, bbox.x, bbox.y);
+            if (element) elements.push(element);
           } else {
             const element = convertFigmaNodeToElement(child, bbox.x, bbox.y);
             if (element) elements.push(element);
@@ -219,10 +230,19 @@ function extractFramesFromFigma(document: any): any[] {
         cornerRadius: node.cornerRadius ?? 0,
         elements,
       });
+      
+      // Don't recurse into this frame's children for more frames
+      return;
     }
 
-    // Continue searching for frames in pages
-    if (node.children && (node.type === 'CANVAS' || node.type === 'DOCUMENT' || depth === 0)) {
+    // Continue searching for frames in pages, canvases, sections, groups
+    const shouldTraverse = node.type === 'CANVAS' || 
+                          node.type === 'DOCUMENT' || 
+                          node.type === 'SECTION' || 
+                          node.type === 'GROUP' ||
+                          depth === 0;
+    
+    if (node.children && (shouldTraverse || depth < 3)) {
       for (const child of node.children) {
         processNode(child, depth + 1);
       }
@@ -230,6 +250,7 @@ function extractFramesFromFigma(document: any): any[] {
   }
 
   processNode(document);
+  console.log(`Total frames extracted: ${frames.length}`);
   return frames;
 }
 
