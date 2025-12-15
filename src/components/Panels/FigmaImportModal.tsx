@@ -71,10 +71,29 @@ export default function FigmaImportModal({ open, onOpenChange, onImport }: Figma
       });
 
       if (fnError) {
-        throw new Error(fnError.message);
+        const ctx = (fnError as any)?.context;
+        const status = ctx?.status;
+        const body = ctx?.body;
+
+        let message = (typeof body?.error === 'string' && body.error) ? body.error : fnError.message;
+
+        // If backend returned extra Figma rate-limit details, show them.
+        const rateLimit = body?.figma?.rateLimit;
+        if (status === 429 && rateLimit) {
+          const parts = [
+            message,
+            `limit=${rateLimit.limit ?? 'unknown'}`,
+            `remaining=${rateLimit.remaining ?? 'unknown'}`,
+            `resetAt=${rateLimit.resetAt ?? 'unknown'}`,
+            `retryAfter=${rateLimit.retryAfter ?? 'unknown'}`,
+          ];
+          message = parts.join(' | ');
+        }
+
+        throw new Error(message);
       }
 
-      if (data.error) {
+      if (data?.error) {
         throw new Error(data.error);
       }
 
