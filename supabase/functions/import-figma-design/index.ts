@@ -284,9 +284,39 @@ serve(async (req) => {
 
     if (!fileResponse.ok) {
       const errorText = await fileResponse.text();
-      console.error('Figma API error:', errorText);
+
+      const rateLimit = {
+        limit: fileResponse.headers.get('x-ratelimit-limit'),
+        remaining: fileResponse.headers.get('x-ratelimit-remaining'),
+        reset: fileResponse.headers.get('x-ratelimit-reset'),
+        retryAfter: fileResponse.headers.get('retry-after'),
+      };
+
+      const requestId = fileResponse.headers.get('x-request-id') ||
+        fileResponse.headers.get('cf-ray') ||
+        null;
+
+      const resetAt = rateLimit.reset
+        ? new Date(Number(rateLimit.reset) * 1000).toISOString()
+        : null;
+
+      console.error('[FIGMA] API error', JSON.stringify({
+        status: fileResponse.status,
+        requestId,
+        rateLimit: { ...rateLimit, resetAt },
+        bodyPreview: errorText?.slice?.(0, 500),
+      }));
+
       return new Response(
-        JSON.stringify({ error: `Figma API error: ${fileResponse.status}` }),
+        JSON.stringify({
+          error: `Figma API error: ${fileResponse.status}`,
+          figma: {
+            status: fileResponse.status,
+            requestId,
+            rateLimit: { ...rateLimit, resetAt },
+            body: errorText,
+          },
+        }),
         { status: fileResponse.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
