@@ -1,5 +1,5 @@
 import { HambergerMenu, DocumentDownload, ExportSquare, ArrowRotateLeft, ArrowRotateRight, Setting2, Magicpen, Grid1, ArrowDown2, Maximize4 } from "iconsax-react";
-import { Save, Share2, Hand, Users, Presentation } from "lucide-react";
+import { Save, Share2, Hand, Users, Presentation, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import type { Frame } from "@/types/elements";
@@ -62,6 +62,9 @@ interface EditorTopBarProps {
   onRecenter?: () => void;
   frames?: Frame[];
   onPresentationMode?: () => void;
+  onToggleComments?: () => void;
+  showCommentsPanel?: boolean;
+  unresolvedCommentsCount?: number;
 }
 
 export default function EditorTopBar({ 
@@ -98,6 +101,9 @@ export default function EditorTopBar({
   onRecenter,
   frames = [],
   onPresentationMode,
+  onToggleComments,
+  showCommentsPanel = false,
+  unresolvedCommentsCount = 0,
 }: EditorTopBarProps) {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
@@ -321,6 +327,24 @@ export default function EditorTopBar({
             title="Presentation Mode"
           >
             <Presentation size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
+          </Button>
+        )}
+
+        {/* Comments button */}
+        {onToggleComments && (
+          <Button 
+            variant={showCommentsPanel ? "default" : "ghost"} 
+            size="icon" 
+            className="h-5 w-5 sm:h-6 sm:w-6 relative transition-all duration-300 hover:scale-125 hover:-translate-y-1 hover:shadow-[0_8px_16px_rgba(59,130,246,0.4)] hover:bg-primary hover:text-primary-foreground group hidden sm:flex" 
+            onClick={onToggleComments}
+            title="Comments"
+          >
+            <MessageCircle size={10} className="sm:w-3 sm:h-3 transition-transform duration-300 group-hover:rotate-6" />
+            {unresolvedCommentsCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-destructive text-[8px] font-bold text-destructive-foreground flex items-center justify-center">
+                {unresolvedCommentsCount > 9 ? '9+' : unresolvedCommentsCount}
+              </span>
+            )}
           </Button>
         )}
         
