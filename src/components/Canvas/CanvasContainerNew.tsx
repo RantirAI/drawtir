@@ -35,6 +35,8 @@ import AnimationsPanel from "@/components/Panels/AnimationsPanel";
 import type { AnimationType } from "@/components/Panels/AnimationsPanel";
 import { InteractivityPanel } from "@/components/Panels/InteractivityPanel";
 import { PresentationMode } from "@/components/Presentation/PresentationMode";
+import { CommentsPanel } from "@/components/Comments/CommentsPanel";
+import { useComments } from "@/hooks/useComments";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -200,6 +202,7 @@ export default function CanvasContainerNew({
   const [showInteractivityPanel, setShowInteractivityPanel] = useState(false);
   const [showShaderLibrary, setShowShaderLibrary] = useState(false);
   const [showPresentationMode, setShowPresentationMode] = useState(false);
+  const [showCommentsPanel, setShowCommentsPanel] = useState(false);
   const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -242,6 +245,15 @@ export default function CanvasContainerNew({
     enableCollaboration
   );
 
+  // Comments hook for real-time comment updates
+  const { getUnresolvedCount } = useComments(projectId);
+  const unresolvedCommentsCount = getUnresolvedCount();
+
+  // Get workspace ID for comments
+  const getWorkspaceId = () => {
+    const selectedWorkspaceId = localStorage.getItem('selectedWorkspaceId');
+    return selectedWorkspaceId && selectedWorkspaceId !== 'personal' ? selectedWorkspaceId : null;
+  };
   // Helper function to find a frame (top-level or nested)
   const findFrame = (frameId: string): { frame: Frame | null, parentId: string | null } => {
     // Check top-level frames
@@ -3029,6 +3041,9 @@ export default function CanvasContainerNew({
         onRecenter={() => selectedFrameId && fitFrameToView(selectedFrameId)}
         frames={frames}
         onPresentationMode={() => setShowPresentationMode(true)}
+        onToggleComments={() => setShowCommentsPanel(!showCommentsPanel)}
+        showCommentsPanel={showCommentsPanel}
+        unresolvedCommentsCount={unresolvedCommentsCount}
       />
 
       {/* Canvas Area */}
@@ -4570,6 +4585,19 @@ export default function CanvasContainerNew({
           frames={frames}
           onClose={() => setShowPresentationMode(false)}
         />
+      )}
+
+      {/* Comments Panel */}
+      {showCommentsPanel && projectId && (
+        <div className="fixed right-0 top-0 h-full z-40">
+          <CommentsPanel
+            posterId={projectId}
+            workspaceId={getWorkspaceId()}
+            currentUserId={currentUser?.id || null}
+            canEdit={true}
+            onClose={() => setShowCommentsPanel(false)}
+          />
+        </div>
       )}
     </div>
   );

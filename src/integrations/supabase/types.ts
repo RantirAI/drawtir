@@ -137,6 +137,42 @@ export type Database = {
         }
         Relationships: []
       }
+      comment_mentions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          mentioned_user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          mentioned_user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          mentioned_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comment_mentions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "poster_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comment_mentions_mentioned_user_id_fkey"
+            columns: ["mentioned_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_library: {
         Row: {
           created_at: string
@@ -178,6 +214,144 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      poster_approvals: {
+        Row: {
+          created_at: string
+          id: string
+          poster_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["approval_status"]
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          poster_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          poster_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["approval_status"]
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poster_approvals_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: true
+            referencedRelation: "posters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poster_approvals_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poster_approvals_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poster_comments: {
+        Row: {
+          content: string
+          created_at: string
+          frame_id: string | null
+          id: string
+          parent_id: string | null
+          position_x: number | null
+          position_y: number | null
+          poster_id: string
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          frame_id?: string | null
+          id?: string
+          parent_id?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          poster_id: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          frame_id?: string | null
+          id?: string
+          parent_id?: string | null
+          position_x?: number | null
+          position_y?: number | null
+          poster_id?: string
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poster_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "poster_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poster_comments_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "posters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poster_comments_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poster_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posters: {
         Row: {
@@ -453,6 +627,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_poster: {
+        Args: { _poster_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_edit_poster: {
+        Args: { _poster_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_edit_workspace: {
         Args: { _user_id: string; _workspace_id: string }
         Returns: boolean
@@ -491,6 +673,12 @@ export type Database = {
       }
     }
     Enums: {
+      approval_status:
+        | "draft"
+        | "pending_review"
+        | "changes_requested"
+        | "approved"
+        | "published"
       workspace_role: "owner" | "editor" | "viewer"
     }
     CompositeTypes: {
@@ -619,6 +807,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      approval_status: [
+        "draft",
+        "pending_review",
+        "changes_requested",
+        "approved",
+        "published",
+      ],
       workspace_role: ["owner", "editor", "viewer"],
     },
   },
