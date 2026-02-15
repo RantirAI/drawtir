@@ -36,6 +36,7 @@ import type { AnimationType } from "@/components/Panels/AnimationsPanel";
 import { InteractivityPanel } from "@/components/Panels/InteractivityPanel";
 import { PresentationMode } from "@/components/Presentation/PresentationMode";
 import { CommentsPanel } from "@/components/Comments/CommentsPanel";
+import { AIWallModal } from "./AIWallModal";
 import { useComments } from "@/hooks/useComments";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
@@ -203,6 +204,7 @@ export default function CanvasContainerNew({
   const [showShaderLibrary, setShowShaderLibrary] = useState(false);
   const [showPresentationMode, setShowPresentationMode] = useState(false);
   const [showCommentsPanel, setShowCommentsPanel] = useState(false);
+  const [showAIWallModal, setShowAIWallModal] = useState(false);
   const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -4325,6 +4327,7 @@ export default function CanvasContainerNew({
         onAddNestedFrame={handleAddNestedFrame}
         onAddRichText={handleAddRichText}
         onDisablePanMode={() => setIsPanning(false)}
+        onAIWall={() => setShowAIWallModal(true)}
       />
       
 
@@ -4599,6 +4602,85 @@ export default function CanvasContainerNew({
           />
         </div>
       )}
+
+      {/* AI Wall Modal */}
+      <AIWallModal
+        open={showAIWallModal}
+        onOpenChange={setShowAIWallModal}
+        onSelectDesign={(html, title) => {
+          // Create a new frame with the HTML as an iframe element
+          const spacing = 24;
+          const rightmost = frames.reduce(
+            (acc, f) => {
+              const right = f.x + f.width;
+              if (right > acc.right) return { right, y: f.y };
+              return acc;
+            },
+            { right: -Infinity, y: 100 }
+          );
+          const newX = isFinite(rightmost.right) ? rightmost.right + spacing : 100;
+          const newY = frames.length ? frames[0].y : 100;
+
+          const newFrame: Frame = {
+            id: `frame-${Date.now()}`,
+            name: title || `AI Wall Design`,
+            x: newX,
+            y: newY,
+            width: 1200,
+            height: 800,
+            initialWidth: 1200,
+            initialHeight: 800,
+            enableDynamicScale: false,
+            backgroundColor: "#0a0a0b",
+            image: null,
+            topCaption: "",
+            bottomCaption: "",
+            textColor: "#ffffff",
+            textAlign: "center",
+            textSize: 3,
+            textOpacity: 100,
+            imageStyle: "cover",
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            blur: 0,
+            linkText: "",
+            linkPosition: "top-right",
+            gradientIntensity: 80,
+            flexDirection: undefined,
+            justifyContent: undefined,
+            alignItems: undefined,
+            gap: 0,
+            elements: [{
+              id: `element-${Date.now()}`,
+              type: "richtext" as const,
+              x: 0,
+              y: 0,
+              width: 1200,
+              height: 800,
+              rotation: 0,
+              richTextHtml: `<div style="width:100%;height:100%;"><iframe srcdoc="${html.replace(/"/g, '&quot;')}" style="width:100%;height:100%;border:none;" sandbox="allow-scripts"></iframe></div>`,
+              fontSize: 16,
+              fontFamily: "Inter",
+              color: "#ffffff",
+              opacity: 100,
+            }],
+            cornerRadius: 8,
+            opacity: 100,
+            blendMode: "normal",
+            duration: 3,
+            startTime: 0,
+            timelineMode: "auto",
+            transitionDuration: 0,
+          };
+          setFrames(prev => [...prev, newFrame]);
+          setSelectedFrameId(newFrame.id);
+          requestAnimationFrame(() => {
+            try { fitFrameToView(newFrame.id); } catch {}
+          });
+          toast.success(`"${title}" added to canvas!`);
+        }}
+      />
     </div>
   );
 }

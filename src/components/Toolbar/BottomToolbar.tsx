@@ -1,6 +1,6 @@
 import { 
   Brush2, TextBlock, Gallery as GalleryIcon, Add,
-  EmojiHappy, BrushBig, Text, ScanBarcode, Edit2, Video
+  EmojiHappy, BrushBig, Text, ScanBarcode, Edit2, Video, Magicpen
 } from "iconsax-react";
 import { MousePointer2, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ interface BottomToolbarProps {
   timelinePanelHeight?: number;
   onAddRichText?: () => void;
   onDisablePanMode?: () => void;
+  onAIWall?: () => void;
 }
 
 export default function BottomToolbar({ 
@@ -42,7 +43,8 @@ export default function BottomToolbar({
   timelinePanelOpen = false,
   timelinePanelHeight = 300,
   onAddRichText,
-  onDisablePanMode
+  onDisablePanMode,
+  onAIWall
 }: BottomToolbarProps) {
   return (
     <TooltipProvider>
@@ -225,6 +227,20 @@ export default function BottomToolbar({
               <TooltipContent side="top">Add QR Code</TooltipContent>
             </Tooltip>
           </div>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-full transition-all duration-300 hover:scale-125 hover:-translate-y-2 hover:shadow-[0_8px_16px_rgba(168,85,247,0.4)] hover:bg-purple-500 hover:text-white group flex-shrink-0"
+                onClick={onAIWall}
+              >
+                <Magicpen size={14} className="sm:w-4 sm:h-4 transition-transform duration-300 group-hover:rotate-6" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">AI Wall</TooltipContent>
+          </Tooltip>
 
           <Separator orientation="vertical" className="h-5 sm:h-6 mx-0.5 sm:mx-1" />
 
