@@ -9,7 +9,7 @@ const corsHeaders = {
 
 // Add emails here to bypass subscription check
 const FREE_ACCESS_EMAILS: string[] = [
-  // "user@example.com",
+  "wahomemutahi8@gmail.com",
 ];
 
 const logStep = (step: string, details?: any) => {
