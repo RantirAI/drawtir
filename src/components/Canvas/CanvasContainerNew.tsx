@@ -3205,6 +3205,7 @@ export default function CanvasContainerNew({
                 snapToGrid={snapToGrid}
                 zoom={zoom}
                 panOffset={panOffset}
+                iframeHtml={frame.iframeHtml}
                 onUpdate={handleFrameUpdate}
                 onSelect={() => {
                   setSelectedFrameId(frame.id);
@@ -4651,20 +4652,8 @@ export default function CanvasContainerNew({
             justifyContent: undefined,
             alignItems: undefined,
             gap: 0,
-            elements: [{
-              id: `element-${Date.now()}`,
-              type: "richtext" as const,
-              x: 0,
-              y: 0,
-              width: 1200,
-              height: 800,
-              rotation: 0,
-              richTextHtml: `<div style="width:100%;height:100%;"><iframe srcdoc="${html.replace(/"/g, '&quot;')}" style="width:100%;height:100%;border:none;" sandbox="allow-scripts"></iframe></div>`,
-              fontSize: 16,
-              fontFamily: "Inter",
-              color: "#ffffff",
-              opacity: 100,
-            }],
+            elements: [],
+            iframeHtml: html,
             cornerRadius: 8,
             opacity: 100,
             blendMode: "normal",

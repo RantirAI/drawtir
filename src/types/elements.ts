@@ -231,6 +231,7 @@ export interface Frame {
   
   elements?: Element[];
   frames?: Frame[]; // Nested frames support
+  iframeHtml?: string; // AI Wall: self-contained HTML rendered as iframe overlay
   opacity?: number;
   fillOpacity?: number;
   cornerRadius?: number;

@@ -50,6 +50,7 @@ interface ResizableFrameProps {
   isLocked?: boolean; // Prevent dragging/resizing
   zoom?: number; // Canvas zoom level
   panOffset?: { x: number; y: number }; // Canvas pan offset
+  iframeHtml?: string; // AI Wall: self-contained HTML rendered as iframe
   onUpdate: (id: string, updates: Partial<{ x: number; y: number; width: number; height: number; backgroundColor: string; cornerRadius: number; flexDirection: "row" | "column"; justifyContent: string; alignItems: string; gap: number; backgroundPositionX: number; backgroundPositionY: number }>) => void;
   isSelected: boolean;
   onSelect: () => void;
@@ -102,6 +103,7 @@ export default function ResizableFrame({
   isLocked = false,
   zoom = 1,
   panOffset = { x: 0, y: 0 },
+  iframeHtml,
   onUpdate,
   isSelected,
   onSelect,
@@ -488,6 +490,18 @@ export default function ResizableFrame({
           {children}
         </div>
       </div>
+
+      {/* AI Wall iframe overlay */}
+      {iframeHtml && (
+        <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: `${cornerRadius}px` }}>
+          <iframe
+            srcDoc={iframeHtml}
+            className="w-full h-full border-none"
+            sandbox="allow-scripts"
+            title="AI Wall Design"
+          />
+        </div>
+      )}
       
       {isSelected && !isLocked && (
         <>
