@@ -9,6 +9,35 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import html2canvas from "html2canvas";
 
+function renderMarkdown(text: string): string {
+  if (!text) return "";
+  let html = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/^######\s+(.+)$/gm, '<h6 class="text-sm font-bold mt-4 mb-1">$1</h6>')
+    .replace(/^#####\s+(.+)$/gm, '<h5 class="text-sm font-bold mt-4 mb-1">$1</h5>')
+    .replace(/^####\s+(.+)$/gm, '<h4 class="text-base font-bold mt-5 mb-2">$1</h4>')
+    .replace(/^###\s+(.+)$/gm, '<h3 class="text-lg font-bold mt-6 mb-2 border-b pb-1">$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3 text-primary">$1</h2>')
+    .replace(/^#\s+(.+)$/gm, '<h1 class="text-2xl font-bold mt-6 mb-4 text-primary">$1</h1>')
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^---$/gm, '<hr class="my-4" />')
+    .replace(/^\*\s+(.+)$/gm, '<li class="ml-4 list-disc mb-1">$1</li>')
+    .replace(/^-\s+(.+)$/gm, '<li class="ml-4 list-disc mb-1">$1</li>')
+    .replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal mb-1">$1</li>')
+    .replace(/^\|(.+)\|$/gm, (match, inner) => {
+      const cells = inner.split("|").map((c: string) => c.trim());
+      if (cells.every((c: string) => /^[-:]+$/.test(c))) return '';
+      const cellHtml = cells.map((c: string) => `<td class="border px-3 py-1.5 text-sm">${c}</td>`).join("");
+      return `<tr>${cellHtml}</tr>`;
+    })
+    .replace(/\n\n/g, '</p><p class="mb-3">')
+    .replace(/\n/g, '<br />');
+  html = html.replace(/(<tr>.*?<\/tr>(?:\s*<tr>.*?<\/tr>)*)/gs, '<table class="w-full border-collapse border my-4">$1</table>');
+  return `<p class="mb-3">${html}</p>`;
+}
+
 export default function MarketingOutputEditor() {
   const { id: projectId, outputId } = useParams();
   const navigate = useNavigate();
@@ -192,10 +221,10 @@ export default function MarketingOutputEditor() {
                 <p className="text-sm text-muted-foreground italic mt-3">Visual: {content.visual_description}</p>
               )}
             </div>
+          ) : content?.html ? (
+            <iframe srcDoc={content.html} className="w-full h-full border-none" sandbox="allow-scripts" />
           ) : (
-            <div className="p-8 max-w-3xl mx-auto text-sm whitespace-pre-wrap">
-              {content?.content || JSON.stringify(content, null, 2)}
-            </div>
+            <div className="p-8 max-w-3xl mx-auto prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: renderMarkdown(content?.content || JSON.stringify(content, null, 2)) }} />
           )}
         </div>
 
