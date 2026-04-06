@@ -173,6 +173,37 @@ export default function ContentGenerator({ projectId }: Props) {
           </div>
         </div>
       )}
+
+      {/* Full-screen preview dialog */}
+      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+        <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b">
+              <span className="font-semibold truncate">{previewItem?.title}</span>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => previewItem && handleDownload(previewItem)}>
+                  <Download className="h-3 w-3 mr-1" /> Download
+                </Button>
+                <Button size="sm" onClick={() => { if (previewItem) { handleSave(previewItem, 0); setPreviewItem(null); } }} disabled={save.isPending}>
+                  <Save className="h-3 w-3 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+            {previewItem?.html && (
+              <iframe srcDoc={previewItem.html} className="flex-1 w-full border-none" sandbox="allow-scripts" />
+            )}
+            {previewItem && !previewItem.html && previewItem.caption && (
+              <div className="p-6 overflow-auto flex-1">
+                <p className="whitespace-pre-wrap">{previewItem.caption}</p>
+                {previewItem.hashtags && <p className="text-primary mt-3">{previewItem.hashtags.map((h: string) => `#${h}`).join(" ")}</p>}
+              </div>
+            )}
+            {previewItem && !previewItem.html && previewItem.content && (
+              <div className="p-6 overflow-auto flex-1" dangerouslySetInnerHTML={{ __html: renderMarkdown(previewItem.content) }} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
