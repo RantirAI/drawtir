@@ -192,10 +192,10 @@ export default function MarketingOutputEditor() {
                 <p className="text-sm text-muted-foreground italic mt-3">Visual: {content.visual_description}</p>
               )}
             </div>
+          ) : content?.html ? (
+            <iframe srcDoc={content.html} className="w-full h-full border-none" sandbox="allow-scripts" />
           ) : (
-            <div className="p-8 max-w-3xl mx-auto text-sm whitespace-pre-wrap">
-              {content?.content || JSON.stringify(content, null, 2)}
-            </div>
+            <div className="p-8 max-w-3xl mx-auto prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: renderMarkdown(content?.content || JSON.stringify(content, null, 2)) }} />
           )}
         </div>
 
