@@ -44,6 +44,7 @@ export default function ContentGenerator({ projectId }: Props) {
   const [platform, setPlatform] = useState("general");
   const [prompt, setPrompt] = useState("");
   const [results, setResults] = useState<any[]>([]);
+  const [previewItem, setPreviewItem] = useState<any | null>(null);
   const generate = useGenerateContent();
   const save = useSaveMarketingOutput();
 
@@ -62,6 +63,18 @@ export default function ContentGenerator({ projectId }: Props) {
       content: item,
       platform,
     });
+  };
+
+  const handleDownload = (item: any) => {
+    if (item.html) {
+      const blob = new Blob([item.html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${item.title || "poster"}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
