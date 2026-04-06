@@ -1,0 +1,1 @@
+CREATE POLICY "Users can update their own marketing outputs" ON public.marketing_outputs FOR UPDATE TO public USING (auth.uid() = user_id);
