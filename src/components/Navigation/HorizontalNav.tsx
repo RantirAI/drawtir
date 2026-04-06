@@ -129,6 +129,9 @@ export default function HorizontalNav() {
               <Link to="/settings" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Settings
               </Link>
+              <Link to="/marketing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Marketing
+              </Link>
             </div>
           </div>
           
