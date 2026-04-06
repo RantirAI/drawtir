@@ -7,6 +7,7 @@ import { Trash2, Download, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import html2canvas from "html2canvas";
 
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -79,19 +80,57 @@ export default function OutputGallery({ projectId }: Props) {
     const content = selectedOutput.content as any;
     if (!content.html) return;
 
+    toast.info("Rendering image...");
     try {
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "1080px";
+      container.style.height = "1350px";
+      document.body.appendChild(container);
+
+      const iframe = document.createElement("iframe");
+      iframe.style.width = "1080px";
+      iframe.style.height = "1350px";
+      iframe.style.border = "none";
+      container.appendChild(iframe);
+
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        iframe.srcdoc = content.html;
+      });
+      await new Promise((r) => setTimeout(r, 1500));
+
+      const iframeDoc = iframe.contentDocument;
+      if (!iframeDoc?.body) throw new Error("Could not access iframe");
+
+      const canvas = await html2canvas(iframeDoc.body, {
+        width: 1080,
+        height: 1350,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      document.body.removeChild(container);
+
+      const link = document.createElement("a");
+      link.download = `${selectedOutput.title || "poster"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Downloaded as PNG!");
+    } catch (err) {
+      console.error("Image download failed:", err);
+      // Fallback to HTML
       const blob = new Blob([content.html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `${selectedOutput.title || "poster"}.html`;
-      document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success("Downloaded!");
-    } catch {
-      toast.error("Download failed");
+      toast.info("Downloaded as HTML (image rendering failed)");
     }
   };
 
