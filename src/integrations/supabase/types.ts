@@ -173,6 +173,86 @@ export type Database = {
           },
         ]
       }
+      marketing_outputs: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          output_type: string
+          platform: string
+          project_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          output_type: string
+          platform?: string
+          project_id: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          output_type?: string
+          platform?: string
+          project_id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_outputs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          images: string[] | null
+          knowledge_base: string | null
+          logos: string[] | null
+          name: string
+          primary_color: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          knowledge_base?: string | null
+          logos?: string[] | null
+          name: string
+          primary_color?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          knowledge_base?: string | null
+          logos?: string[] | null
+          name?: string
+          primary_color?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       media_library: {
         Row: {
           created_at: string
