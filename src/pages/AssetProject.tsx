@@ -208,6 +208,104 @@ export default function AssetProject() {
     }
   };
 
+  const toggleAssetForGame = (assetId: string) => {
+    setSelectedAssetIds(prev => prev.includes(assetId) ? prev.filter(x => x !== assetId) : [...prev, assetId]);
+  };
+
+  const selectAllAssetsForGame = () => {
+    if (!allAssets) return;
+    if (selectedAssetIds.length === allAssets.length) {
+      setSelectedAssetIds([]);
+    } else {
+      setSelectedAssetIds(allAssets.map(a => a.id));
+    }
+  };
+
+  const handleGenerateGame = async () => {
+    if (!id) return;
+    setGeneratingGame(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-game", {
+        body: {
+          project_id: id,
+          asset_ids: selectedAssetIds,
+          game_type: gameType,
+          instructions: gameInstructions,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const gameCode = data.game_code;
+      setActiveGameCode(gameCode);
+
+      const build = await createGameBuild.mutateAsync({
+        project_id: id,
+        game_type: gameType,
+        instructions: gameInstructions,
+        game_code: gameCode,
+        asset_ids: selectedAssetIds,
+      });
+      setActiveGameBuildId(build.id);
+      toast.success("Game generated!");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to generate game");
+    }
+    setGeneratingGame(false);
+  };
+
+  const handleRefineGame = async () => {
+    if (!id || !refinePrompt.trim() || !activeGameCode) return;
+    setGeneratingGame(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-game", {
+        body: {
+          project_id: id,
+          asset_ids: selectedAssetIds,
+          game_type: gameType,
+          instructions: refinePrompt,
+          previous_code: activeGameCode,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const gameCode = data.game_code;
+      setActiveGameCode(gameCode);
+      setRefinePrompt("");
+
+      if (activeGameBuildId) {
+        await updateGameBuild.mutateAsync({ id: activeGameBuildId, game_code: gameCode, instructions: refinePrompt });
+      }
+      toast.success("Game updated!");
+    } catch (e: any) {
+      toast.error(e.message || "Failed to refine game");
+    }
+    setGeneratingGame(false);
+  };
+
+  const handleDownloadGame = () => {
+    if (!activeGameCode) return;
+    const blob = new Blob([activeGameCode], { type: "text/html" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${project?.name || "game"}.html`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  const handleFullscreen = () => {
+    if (iframeRef.current) {
+      iframeRef.current.requestFullscreen?.();
+    }
+  };
+
+  const loadGameBuild = (build: any) => {
+    setActiveGameCode(build.game_code);
+    setActiveGameBuildId(build.id);
+    setGameType(build.game_type);
+  };
+
   if (projLoading) {
     return (
       <div className="min-h-screen bg-background">
