@@ -21,6 +21,8 @@ import NotFound from "./pages/NotFound";
 import Marketing from "./pages/Marketing";
 import MarketingProject from "./pages/MarketingProject";
 import MarketingOutputEditor from "./pages/MarketingOutputEditor";
+import Assets from "./pages/Assets";
+import AssetProject from "./pages/AssetProject";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,6 +55,8 @@ const App = () => (
           <Route path="/marketing" element={<Marketing />} />
           <Route path="/marketing/:id" element={<MarketingProject />} />
           <Route path="/marketing/:id/output/:outputId" element={<MarketingOutputEditor />} />
+          <Route path="/assets" element={<Assets />} />
+          <Route path="/assets/:id" element={<AssetProject />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

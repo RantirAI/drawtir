@@ -132,6 +132,9 @@ export default function HorizontalNav() {
               <Link to="/marketing" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
                 Marketing
               </Link>
+              <Link to="/assets" className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                Assets
+              </Link>
             </div>
           </div>
           
