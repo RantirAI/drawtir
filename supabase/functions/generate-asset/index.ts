@@ -47,7 +47,8 @@ serve(async (req) => {
 
     const styleDesc = styleMap[project.art_style] || styleMap["pixel_art"];
     const contextParts = [
-      `Create a 2D game asset in ${styleDesc}.`,
+      `Create a SINGLE 2D game asset in ${styleDesc}.`,
+      "IMPORTANT: Generate exactly ONE asset/character/item centered in the image. Do NOT place multiple characters, sprites, or variations in the same image. Only one isolated element.",
       project.knowledge_base ? `Game context: ${project.knowledge_base}` : "",
       `Asset request: ${prompt}`,
       "The asset should have a transparent or clean solid-color background suitable for use in a game engine.",
