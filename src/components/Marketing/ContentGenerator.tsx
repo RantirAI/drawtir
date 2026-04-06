@@ -4,9 +4,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useGenerateContent, useSaveMarketingOutput } from "@/hooks/useMarketingProject";
-import { Loader2, Sparkles, Save, Maximize2, Download } from "lucide-react";
+import { Loader2, Sparkles, Save, Maximize2, Download, RefreshCw } from "lucide-react";
 import html2canvas from "html2canvas";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -47,8 +48,39 @@ export default function ContentGenerator({ projectId }: Props) {
   const [prompt, setPrompt] = useState("");
   const [results, setResults] = useState<any[]>([]);
   const [previewItem, setPreviewItem] = useState<any | null>(null);
+  const [refineFeedback, setRefineFeedback] = useState("");
+  const [isRefining, setIsRefining] = useState(false);
   const generate = useGenerateContent();
   const save = useSaveMarketingOutput();
+
+  const handleRefine = async () => {
+    if (!previewItem?.html || !refineFeedback.trim()) return;
+    setIsRefining(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-marketing-content", {
+        body: {
+          project_id: projectId,
+          output_type: outputType,
+          platform,
+          refine_html: previewItem.html,
+          refine_feedback: refineFeedback,
+        },
+      });
+      if (error) throw error;
+      const refined = data?.results?.[0];
+      if (refined?.html) {
+        setPreviewItem(refined);
+        setRefineFeedback("");
+        toast.success("Design refined!");
+      } else {
+        toast.error("No refined result returned");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Refine failed");
+    } finally {
+      setIsRefining(false);
+    }
+  };
 
   const handleGenerate = () => {
     generate.mutate(
@@ -247,6 +279,22 @@ export default function ContentGenerator({ projectId }: Props) {
             )}
             {previewItem && !previewItem.html && previewItem.content && (
               <div className="p-6 overflow-auto flex-1" dangerouslySetInnerHTML={{ __html: renderMarkdown(previewItem.content) }} />
+            )}
+            {/* Refine bar */}
+            {previewItem?.html && (
+              <div className="border-t p-3 flex gap-2 items-end">
+                <Textarea
+                  value={refineFeedback}
+                  onChange={(e) => setRefineFeedback(e.target.value)}
+                  placeholder="Describe changes... e.g. 'Make the title bigger', 'Change background to dark blue', 'Add more whitespace'"
+                  className="min-h-[44px] max-h-[100px] flex-1 resize-none"
+                  rows={1}
+                />
+                <Button onClick={handleRefine} disabled={isRefining || !refineFeedback.trim()} size="sm">
+                  {isRefining ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
+                  Refine
+                </Button>
+              </div>
             )}
           </div>
         </DialogContent>
