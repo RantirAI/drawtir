@@ -60,6 +60,8 @@ export default function AssetProject() {
   const { data: project, isLoading: projLoading } = useAssetProject(id);
   const updateProject = useUpdateAssetProject();
   const deleteAsset = useDeleteAsset();
+  const createGameBuild = useCreateGameBuild();
+  const updateGameBuild = useUpdateGameBuild();
 
   const [prompt, setPrompt] = useState("");
   const [category, setCategory] = useState("character");
@@ -73,8 +75,21 @@ export default function AssetProject() {
   const [previewAsset, setPreviewAsset] = useState<any | null>(null);
   const [selectedBulk, setSelectedBulk] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("generate");
+  const [mainTab, setMainTab] = useState("assets");
+
+  // Game builder state
+  const [gameType, setGameType] = useState("platformer");
+  const [gameInstructions, setGameInstructions] = useState("");
+  const [selectedAssetIds, setSelectedAssetIds] = useState<string[]>([]);
+  const [generatingGame, setGeneratingGame] = useState(false);
+  const [activeGameCode, setActiveGameCode] = useState<string>("");
+  const [activeGameBuildId, setActiveGameBuildId] = useState<string | null>(null);
+  const [refinePrompt, setRefinePrompt] = useState("");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const { data: assets, refetch: refetchAssets } = useGeneratedAssets(id, filterCategory);
+  const { data: allAssets } = useGeneratedAssets(id);
+  const { data: gameBuilds } = useGameBuilds(id);
 
   useEffect(() => {
     if (project) {
