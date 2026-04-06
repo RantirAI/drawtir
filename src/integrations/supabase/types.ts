@@ -101,6 +101,39 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_projects: {
+        Row: {
+          art_style: string | null
+          created_at: string
+          description: string | null
+          id: string
+          knowledge_base: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          art_style?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          knowledge_base?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          art_style?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          knowledge_base?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       brand_kits: {
         Row: {
           colors: string[] | null
@@ -169,6 +202,47 @@ export type Database = {
             columns: ["mentioned_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      generated_assets: {
+        Row: {
+          category: string
+          created_at: string
+          file_name: string
+          id: string
+          image_url: string
+          project_id: string
+          prompt: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          image_url: string
+          project_id: string
+          prompt: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          image_url?: string
+          project_id?: string
+          prompt?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_assets_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "asset_projects"
             referencedColumns: ["id"]
           },
         ]

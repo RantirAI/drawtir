@@ -35,3 +35,6 @@ verify_jwt = false
 
 [functions.generate-marketing-content]
 verify_jwt = false
+
+[functions.generate-asset]
+verify_jwt = false
