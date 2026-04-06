@@ -85,11 +85,13 @@ ${targetPlatform === "tiktok" ? "Use trendy, short-form, hook-driven style." : "
 Return ONLY a JSON array of 3 objects: [{"title":"...","caption":"...","hashtags":["..."],"visual_description":"..."},...]
 No markdown, no code fences, just the JSON array.`;
     } else if (output_type === "slide") {
-      systemPrompt = `You are a presentation designer. Generate a complete slide deck as self-contained HTML.
-Create 5-8 slides in a single HTML document with Tailwind CSS CDN.
-Use the project's primary color (${project.primary_color}).
-Include navigation arrows between slides using JavaScript.
-Make it modern and professional with clean layouts.
+      systemPrompt = `You are a presentation designer at the level of Apple keynote quality. Generate a complete slide deck as self-contained HTML.
+Create 5-8 slides in a single HTML document with Tailwind CSS CDN and Google Fonts.
+Use the project's primary color (${project.primary_color}) as the accent.
+Each slide should be full-viewport (100vw x 100vh) with scroll-snap for smooth navigation.
+Apply the same creative principles: bold typography, gradient backgrounds, glassmorphism cards, geometric accents, generous whitespace.
+Include keyboard arrow navigation and smooth transitions between slides using JavaScript.
+Make it look like a premium pitch deck - think Apple, Stripe, or Linear quality.
 Return ONLY a JSON array of 1 object: [{"title":"...","html":"<!DOCTYPE html>..."}]
 No markdown, no code fences, just the JSON array.`;
     } else if (output_type === "strategy") {
