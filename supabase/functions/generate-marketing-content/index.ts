@@ -51,11 +51,29 @@ IMAGES: ${(project.images || []).length > 0 ? project.images.join(", ") : "No im
     const targetPlatform = platform || "general";
 
     if (output_type === "poster") {
-      systemPrompt = `You are an expert marketing designer. Generate exactly 3 self-contained HTML poster designs.
-Each poster must be a complete HTML document with inline Tailwind CSS via CDN.
-Use the project's primary color (${project.primary_color}) as the main accent.
-If logos are provided, include them as <img> tags.
-Make the designs modern, professional, and visually striking with gradients, shadows, and clean typography.
+      systemPrompt = `You are a world-class creative director and visual designer. Generate exactly 3 self-contained HTML poster designs that look like they belong in a design magazine or Behance featured project.
+
+Each poster MUST be a complete HTML document with:
+- Tailwind CSS via CDN: <script src="https://cdn.tailwindcss.com"></script>
+- Google Fonts imported via <link> for premium typography (use combinations like Inter + Playfair Display, Space Grotesk + DM Serif, Outfit + Fraunces)
+- The viewport set to a poster ratio (e.g. 1080x1350 or 1080x1080)
+
+DESIGN PRINCIPLES - Follow these religiously:
+1. LAYERED DEPTH: Use overlapping elements, glassmorphism (backdrop-blur, bg-white/10, border border-white/20), and z-index layering
+2. BOLD TYPOGRAPHY: Mix font weights dramatically (100 vs 900), use massive hero text (text-6xl to text-9xl), creative letter-spacing (tracking-tighter or tracking-widest)
+3. GRADIENT MASTERY: Use multi-stop gradients, mesh-gradient-style backgrounds with multiple radial gradients overlapping, gradient text (bg-clip-text text-transparent)
+4. COLOR SOPHISTICATION: Primary color is ${project.primary_color}. Build a rich palette around it with complementary tones, use opacity variations (from /5 to /90) for depth
+5. GEOMETRIC ACCENTS: Add decorative circles, lines, dots, grid patterns using CSS (border-radius, borders, pseudo-elements via inline styles)
+6. NEGATIVE SPACE: Use generous whitespace strategically - let elements breathe
+7. MODERN EFFECTS: Subtle shadows (shadow-2xl), rounded corners, blur effects, border accents
+8. VISUAL HIERARCHY: One dominant element, clear reading order, intentional contrast
+
+Each design should have a COMPLETELY DIFFERENT layout approach:
+- Design 1: Bold editorial style with massive typography and geometric shapes
+- Design 2: Minimalist luxury with lots of whitespace, thin fonts, and subtle gradients  
+- Design 3: Dynamic and energetic with overlapping elements, bold colors, and creative composition
+
+If logos are provided, incorporate them elegantly. Use the body with min-h-screen and overflow-hidden.
 Return ONLY a JSON array of 3 objects: [{"title":"...","html":"<!DOCTYPE html>..."},...]
 No markdown, no code fences, just the JSON array.`;
     } else if (output_type === "social_post") {
