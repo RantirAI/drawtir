@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Download, Trash2, Sparkles, Loader2, Image as ImageIcon } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ArrowLeft, Download, Trash2, Sparkles, Loader2, Image as ImageIcon, X, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAssetProject, useGeneratedAssets, useUpdateAssetProject, useDeleteAsset } from "@/hooks/useAssetProject";
@@ -32,6 +33,27 @@ const CATEGORIES = [
   { value: "other", label: "Other" },
 ];
 
+const BULK_PRESETS = [
+  { id: "main_character", label: "Main Character (idle pose)", category: "character", prompt: "Main player character, front-facing idle pose, full body" },
+  { id: "enemy_basic", label: "Basic Enemy", category: "character", prompt: "A basic enemy creature, front-facing, menacing but simple design" },
+  { id: "enemy_boss", label: "Boss Enemy", category: "character", prompt: "A large intimidating boss enemy, detailed design, front-facing" },
+  { id: "npc_merchant", label: "NPC Merchant", category: "character", prompt: "A friendly merchant NPC character, standing idle with a shop bag or cart" },
+  { id: "sword", label: "Sword", category: "weapon", prompt: "A standard sword weapon, side view, clean isolated design" },
+  { id: "shield", label: "Shield", category: "weapon", prompt: "A defensive shield, front-facing view, clean isolated design" },
+  { id: "bow", label: "Bow & Arrow", category: "weapon", prompt: "A bow with arrow, side view, clean isolated design" },
+  { id: "potion_health", label: "Health Potion", category: "item", prompt: "A red health potion in a glass bottle, front view" },
+  { id: "potion_mana", label: "Mana Potion", category: "item", prompt: "A blue mana potion in a glass bottle, front view" },
+  { id: "coin", label: "Gold Coin", category: "item", prompt: "A shiny gold coin, front view, clean isolated design" },
+  { id: "chest", label: "Treasure Chest", category: "item", prompt: "A wooden treasure chest with gold trim, slightly open, front view" },
+  { id: "key", label: "Key", category: "item", prompt: "An ornate golden key, side view, clean isolated design" },
+  { id: "floor_tile", label: "Floor Tile", category: "environment", prompt: "A seamless floor tile, top-down view, tileable texture" },
+  { id: "wall_tile", label: "Wall Tile", category: "environment", prompt: "A vertical wall tile/block, front view, tileable texture" },
+  { id: "tree", label: "Tree", category: "environment", prompt: "A decorative tree, front view, suitable for game environment" },
+  { id: "door", label: "Door", category: "environment", prompt: "A wooden door, front view, can be open or closed" },
+  { id: "heart_icon", label: "Heart / HP Icon", category: "ui", prompt: "A heart icon for health display, clean pixel-perfect design" },
+  { id: "button_ui", label: "UI Button", category: "ui", prompt: "A game UI button, rectangular with rounded corners, clean design" },
+];
+
 export default function AssetProject() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -43,9 +65,14 @@ export default function AssetProject() {
   const [category, setCategory] = useState("character");
   const [filterCategory, setFilterCategory] = useState("all");
   const [generating, setGenerating] = useState(false);
+  const [generatingBulk, setGeneratingBulk] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0, label: "" });
   const [knowledgeBase, setKnowledgeBase] = useState("");
   const [artStyle, setArtStyle] = useState("pixel_art");
   const [kbTimer, setKbTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const [previewAsset, setPreviewAsset] = useState<any | null>(null);
+  const [selectedBulk, setSelectedBulk] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("generate");
 
   const { data: assets, refetch: refetchAssets } = useGeneratedAssets(id, filterCategory);
 
@@ -70,36 +97,76 @@ export default function AssetProject() {
     if (id) updateProject.mutate({ id, art_style: value });
   };
 
-  const handleGenerate = async () => {
-    if (!prompt.trim() || !id) return;
-    setGenerating(true);
+  const generateSingle = async (promptText: string, cat: string): Promise<boolean> => {
     try {
       const { data, error } = await supabase.functions.invoke("generate-asset", {
-        body: { project_id: id, prompt: prompt.trim(), category },
+        body: { project_id: id, prompt: promptText, category: cat },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Save to database
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
       await supabase.from("generated_assets").insert({
-        project_id: id,
+        project_id: id!,
         user_id: user.id,
-        prompt: prompt.trim(),
+        prompt: promptText,
         image_url: data.image_url,
-        category,
+        category: cat,
         file_name: data.file_name || "asset.png",
       });
+      return true;
+    } catch (e: any) {
+      console.error("Generation failed:", e);
+      return false;
+    }
+  };
 
+  const handleGenerate = async () => {
+    if (!prompt.trim() || !id) return;
+    setGenerating(true);
+    const success = await generateSingle(prompt.trim(), category);
+    if (success) {
       toast.success("Asset generated!");
       setPrompt("");
       refetchAssets();
-    } catch (e: any) {
-      toast.error(e.message || "Generation failed");
-    } finally {
-      setGenerating(false);
+    } else {
+      toast.error("Generation failed");
+    }
+    setGenerating(false);
+  };
+
+  const handleBulkGenerate = async () => {
+    if (!selectedBulk.length || !id) return;
+    const items = BULK_PRESETS.filter(p => selectedBulk.includes(p.id));
+    setGeneratingBulk(true);
+    setBulkProgress({ current: 0, total: items.length, label: "" });
+
+    let successCount = 0;
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      setBulkProgress({ current: i + 1, total: items.length, label: item.label });
+      const success = await generateSingle(item.prompt, item.category);
+      if (success) successCount++;
+      refetchAssets();
+    }
+
+    setGeneratingBulk(false);
+    setSelectedBulk([]);
+    setBulkProgress({ current: 0, total: 0, label: "" });
+    toast.success(`Generated ${successCount}/${items.length} assets!`);
+  };
+
+  const toggleBulkItem = (itemId: string) => {
+    setSelectedBulk(prev => prev.includes(itemId) ? prev.filter(x => x !== itemId) : [...prev, itemId]);
+  };
+
+  const selectAllBulk = () => {
+    if (selectedBulk.length === BULK_PRESETS.length) {
+      setSelectedBulk([]);
+    } else {
+      setSelectedBulk(BULK_PRESETS.map(p => p.id));
     }
   };
 
@@ -114,6 +181,15 @@ export default function AssetProject() {
       URL.revokeObjectURL(a.href);
     } catch {
       toast.error("Download failed");
+    }
+  };
+
+  const navigatePreview = (direction: number) => {
+    if (!assets || !previewAsset) return;
+    const idx = assets.findIndex(a => a.id === previewAsset.id);
+    const newIdx = idx + direction;
+    if (newIdx >= 0 && newIdx < assets.length) {
+      setPreviewAsset(assets[newIdx]);
     }
   };
 
@@ -140,6 +216,8 @@ export default function AssetProject() {
     );
   }
 
+  const previewIndex = assets?.findIndex(a => a.id === previewAsset?.id) ?? -1;
+
   return (
     <div className="min-h-screen bg-background">
       <HorizontalNav />
@@ -153,10 +231,11 @@ export default function AssetProject() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-4">
-            <Tabs defaultValue="generate" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="w-full">
-                <TabsTrigger value="generate" className="flex-1">Generate</TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
+                <TabsTrigger value="generate" className="flex-1 text-xs">Single</TabsTrigger>
+                <TabsTrigger value="bulk" className="flex-1 text-xs">Bulk</TabsTrigger>
+                <TabsTrigger value="settings" className="flex-1 text-xs">Settings</TabsTrigger>
               </TabsList>
 
               <TabsContent value="generate" className="space-y-4 mt-4">
@@ -185,6 +264,55 @@ export default function AssetProject() {
                 </Button>
               </TabsContent>
 
+              <TabsContent value="bulk" className="space-y-4 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs font-medium">Select assets to generate</Label>
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAllBulk}>
+                    {selectedBulk.length === BULK_PRESETS.length ? "Deselect All" : "Select All"}
+                  </Button>
+                </div>
+
+                <div className="space-y-1 max-h-[400px] overflow-y-auto pr-1">
+                  {["character", "weapon", "item", "environment", "ui"].map(cat => {
+                    const items = BULK_PRESETS.filter(p => p.category === cat);
+                    return (
+                      <div key={cat} className="mb-3">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-1 px-1">{cat}</p>
+                        {items.map(item => (
+                          <label key={item.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer">
+                            <Checkbox
+                              checked={selectedBulk.includes(item.id)}
+                              onCheckedChange={() => toggleBulkItem(item.id)}
+                            />
+                            <span className="text-xs">{item.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {generatingBulk && (
+                  <div className="rounded-lg bg-muted/50 p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      <span className="text-xs">Generating {bulkProgress.current}/{bulkProgress.total}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">{bulkProgress.label}</p>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-primary transition-all rounded-full" style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }} />
+                    </div>
+                  </div>
+                )}
+
+                <Button onClick={handleBulkGenerate} disabled={generatingBulk || !selectedBulk.length} className="w-full">
+                  {generatingBulk
+                    ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating...</>
+                    : <><Zap className="mr-2 h-4 w-4" />Generate {selectedBulk.length} Assets</>
+                  }
+                </Button>
+              </TabsContent>
+
               <TabsContent value="settings" className="space-y-4 mt-4">
                 <div>
                   <Label className="text-xs">Art Style</Label>
@@ -199,11 +327,11 @@ export default function AssetProject() {
                 </div>
                 <div>
                   <Label className="text-xs">Knowledge Base</Label>
-                  <p className="text-[10px] text-muted-foreground mb-1">Describe your game's theme, characters, world — the AI will use this context</p>
+                  <p className="text-[10px] text-muted-foreground mb-1">Describe your game's theme, characters, world — the AI uses this context for every generation</p>
                   <Textarea
                     value={knowledgeBase}
                     onChange={e => saveKnowledgeBase(e.target.value)}
-                    placeholder="e.g. A medieval fantasy dungeon crawler with pixel art characters. The color palette is dark with neon accents..."
+                    placeholder="e.g. A medieval fantasy dungeon crawler with pixel art characters..."
                     className="min-h-[200px]"
                   />
                 </div>
@@ -238,8 +366,8 @@ export default function AssetProject() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                 {assets.map(asset => (
-                  <Card key={asset.id} className="overflow-hidden group">
-                    <div className="relative aspect-square bg-muted/50">
+                  <Card key={asset.id} className="overflow-hidden group cursor-pointer" onClick={() => setPreviewAsset(asset)}>
+                    <div className="relative aspect-square bg-muted/30 checkerboard-bg">
                       <img
                         src={asset.image_url}
                         alt={asset.prompt}
@@ -247,10 +375,10 @@ export default function AssetProject() {
                         loading="lazy"
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button size="icon" variant="secondary" className="h-8 w-8" onClick={() => handleDownload(asset.image_url, asset.file_name)}>
+                        <Button size="icon" variant="secondary" className="h-8 w-8" onClick={e => { e.stopPropagation(); handleDownload(asset.image_url, asset.file_name); }}>
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => deleteAsset.mutate(asset.id)}>
+                        <Button size="icon" variant="destructive" className="h-8 w-8" onClick={e => { e.stopPropagation(); deleteAsset.mutate(asset.id); }}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -266,6 +394,68 @@ export default function AssetProject() {
           </div>
         </div>
       </div>
+
+      {/* Full-screen preview modal */}
+      <Dialog open={!!previewAsset} onOpenChange={open => { if (!open) setPreviewAsset(null); }}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-background/95 backdrop-blur-sm border-border/50 overflow-hidden">
+          <div className="flex flex-col h-[85vh]">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-border/30">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{previewAsset?.prompt}</p>
+                <p className="text-xs text-muted-foreground capitalize">{previewAsset?.category}</p>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button size="sm" variant="outline" onClick={() => previewAsset && handleDownload(previewAsset.image_url, previewAsset.file_name)}>
+                  <Download className="mr-2 h-3 w-3" />Download PNG
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setPreviewAsset(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Image */}
+            <div className="flex-1 flex items-center justify-center p-8 relative">
+              {/* Navigation arrows */}
+              {assets && previewIndex > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-muted/80"
+                  onClick={() => navigatePreview(-1)}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              )}
+              {assets && previewIndex < assets.length - 1 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-muted/80"
+                  onClick={() => navigatePreview(1)}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              )}
+
+              <img
+                src={previewAsset?.image_url}
+                alt={previewAsset?.prompt}
+                className="max-w-full max-h-full object-contain rounded-lg"
+                style={{ imageRendering: artStyle === "pixel_art" ? "pixelated" : "auto" }}
+              />
+            </div>
+
+            {/* Footer with counter */}
+            {assets && (
+              <div className="text-center pb-4">
+                <span className="text-xs text-muted-foreground">{previewIndex + 1} / {assets.length}</span>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
