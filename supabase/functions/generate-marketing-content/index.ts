@@ -10,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { project_id, output_type, platform, custom_prompt } = await req.json();
+    const { project_id, output_type, platform, custom_prompt, refine_html, refine_feedback } = await req.json();
 
     if (!project_id || !output_type) {
       return new Response(JSON.stringify({ error: "project_id and output_type required" }), {
@@ -50,7 +50,20 @@ IMAGES: ${(project.images || []).length > 0 ? project.images.join(", ") : "No im
     let userPrompt = custom_prompt || `Generate marketing content for ${project.name}`;
     const targetPlatform = platform || "general";
 
-    if (output_type === "poster") {
+    // Refine mode: user wants to iterate on an existing design
+    if (refine_html && refine_feedback) {
+      systemPrompt = `You are a world-class creative director. The user has an existing HTML poster/design and wants you to refine it based on their feedback.
+
+RULES:
+1. Keep the same general structure and style unless told otherwise
+2. Apply the user's requested changes precisely
+3. Return a complete, self-contained HTML document with Tailwind CSS CDN and Google Fonts
+4. The result must be a fully working standalone HTML page
+5. Return ONLY a JSON array of 1 object: [{"title":"Refined Design","html":"<!DOCTYPE html>..."}]
+6. No markdown, no code fences, just the JSON array.`;
+
+      userPrompt = `Here is the existing HTML design:\n\n${refine_html}\n\nUser feedback / changes requested:\n${refine_feedback}\n\nBrand context:\n${brandContext}`;
+    } else if (output_type === "poster") {
       systemPrompt = `You are a world-class creative director and visual designer. Generate exactly 3 self-contained HTML poster designs that look like they belong in a design magazine or Behance featured project.
 
 Each poster MUST be a complete HTML document with:
