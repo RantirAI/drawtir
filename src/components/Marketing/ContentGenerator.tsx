@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useGenerateContent, useSaveMarketingOutput } from "@/hooks/useMarketingProject";
-import { Loader2, Sparkles, Save } from "lucide-react";
+import { Loader2, Sparkles, Save, Maximize2, Download } from "lucide-react";
 
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -43,6 +44,7 @@ export default function ContentGenerator({ projectId }: Props) {
   const [platform, setPlatform] = useState("general");
   const [prompt, setPrompt] = useState("");
   const [results, setResults] = useState<any[]>([]);
+  const [previewItem, setPreviewItem] = useState<any | null>(null);
   const generate = useGenerateContent();
   const save = useSaveMarketingOutput();
 
@@ -61,6 +63,18 @@ export default function ContentGenerator({ projectId }: Props) {
       content: item,
       platform,
     });
+  };
+
+  const handleDownload = (item: any) => {
+    if (item.html) {
+      const blob = new Blob([item.html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${item.title || "poster"}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
   };
 
   return (
@@ -115,12 +129,20 @@ export default function ContentGenerator({ projectId }: Props) {
               <div key={i} className="border rounded-lg overflow-hidden bg-card">
                 {(outputType === "poster" || outputType === "slide") && item.html ? (
                   <div className="relative">
-                    <iframe srcDoc={item.html} className="w-full h-[400px] border-none" sandbox="allow-scripts" />
-                    <div className="p-3 flex items-center justify-between border-t">
+                    <iframe srcDoc={item.html} className="w-full h-[400px] border-none pointer-events-none" sandbox="allow-scripts" />
+                    <div className="p-3 flex items-center justify-between border-t gap-2">
                       <span className="text-sm font-medium truncate">{item.title}</span>
-                      <Button size="sm" variant="outline" onClick={() => handleSave(item, i)} disabled={save.isPending}>
-                        <Save className="h-3 w-3 mr-1" /> Save
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button size="sm" variant="ghost" onClick={() => setPreviewItem(item)} title="Preview">
+                          <Maximize2 className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDownload(item)} title="Download">
+                          <Download className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleSave(item, i)} disabled={save.isPending}>
+                          <Save className="h-3 w-3 mr-1" /> Save
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ) : outputType === "social_post" ? (
@@ -151,6 +173,37 @@ export default function ContentGenerator({ projectId }: Props) {
           </div>
         </div>
       )}
+
+      {/* Full-screen preview dialog */}
+      <Dialog open={!!previewItem} onOpenChange={() => setPreviewItem(null)}>
+        <DialogContent className="max-w-[95vw] w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b">
+              <span className="font-semibold truncate">{previewItem?.title}</span>
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => previewItem && handleDownload(previewItem)}>
+                  <Download className="h-3 w-3 mr-1" /> Download
+                </Button>
+                <Button size="sm" onClick={() => { if (previewItem) { handleSave(previewItem, 0); setPreviewItem(null); } }} disabled={save.isPending}>
+                  <Save className="h-3 w-3 mr-1" /> Save
+                </Button>
+              </div>
+            </div>
+            {previewItem?.html && (
+              <iframe srcDoc={previewItem.html} className="flex-1 w-full border-none" sandbox="allow-scripts" />
+            )}
+            {previewItem && !previewItem.html && previewItem.caption && (
+              <div className="p-6 overflow-auto flex-1">
+                <p className="whitespace-pre-wrap">{previewItem.caption}</p>
+                {previewItem.hashtags && <p className="text-primary mt-3">{previewItem.hashtags.map((h: string) => `#${h}`).join(" ")}</p>}
+              </div>
+            )}
+            {previewItem && !previewItem.html && previewItem.content && (
+              <div className="p-6 overflow-auto flex-1" dangerouslySetInnerHTML={{ __html: renderMarkdown(previewItem.content) }} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
