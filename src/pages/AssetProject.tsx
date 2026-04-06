@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import HorizontalNav from "@/components/Navigation/HorizontalNav";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Download, Trash2, Sparkles, Loader2, Image as ImageIcon, X, ChevronLeft, ChevronRight, Zap } from "lucide-react";
+import { ArrowLeft, Download, Trash2, Sparkles, Loader2, Image as ImageIcon, X, ChevronLeft, ChevronRight, Zap, Gamepad2, Maximize2, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useAssetProject, useGeneratedAssets, useUpdateAssetProject, useDeleteAsset } from "@/hooks/useAssetProject";
+import { useAssetProject, useGeneratedAssets, useUpdateAssetProject, useDeleteAsset, useGameBuilds, useCreateGameBuild, useUpdateGameBuild, useDeleteGameBuild } from "@/hooks/useAssetProject";
 
 const ART_STYLES = [
   { value: "pixel_art", label: "Pixel Art" },
