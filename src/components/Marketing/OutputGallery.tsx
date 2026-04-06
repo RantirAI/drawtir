@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useMarketingOutputs } from "@/hooks/useMarketingProject";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,44 @@ import { Trash2, Download, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+
+function renderMarkdown(text: string): string {
+  if (!text) return "";
+  let html = text
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    // Headers
+    .replace(/^######\s+(.+)$/gm, '<h6 class="text-sm font-bold mt-4 mb-1 text-foreground">$1</h6>')
+    .replace(/^#####\s+(.+)$/gm, '<h5 class="text-sm font-bold mt-4 mb-1 text-foreground">$1</h5>')
+    .replace(/^####\s+(.+)$/gm, '<h4 class="text-base font-bold mt-5 mb-2 text-foreground">$1</h4>')
+    .replace(/^###\s+(.+)$/gm, '<h3 class="text-lg font-bold mt-6 mb-2 text-foreground border-b border-border pb-1">$1</h3>')
+    .replace(/^##\s+(.+)$/gm, '<h2 class="text-xl font-bold mt-8 mb-3 text-primary">$1</h2>')
+    .replace(/^#\s+(.+)$/gm, '<h1 class="text-2xl font-bold mt-6 mb-4 text-primary">$1</h1>')
+    // Bold + italic
+    .replace(/\*\*\*(.+?)\*\*\*/g, '<strong class="text-foreground"><em>$1</em></strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground">$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr class="my-4 border-border" />')
+    // List items
+    .replace(/^\*\s+(.+)$/gm, '<li class="ml-4 list-disc mb-1">$1</li>')
+    .replace(/^-\s+(.+)$/gm, '<li class="ml-4 list-disc mb-1">$1</li>')
+    .replace(/^\d+\.\s+(.+)$/gm, '<li class="ml-4 list-decimal mb-1">$1</li>')
+    // Tables (basic pipe tables)
+    .replace(/^\|(.+)\|$/gm, (match, inner) => {
+      const cells = inner.split("|").map((c: string) => c.trim());
+      if (cells.every((c: string) => /^[-:]+$/.test(c))) return '';
+      const cellHtml = cells.map((c: string) => `<td class="border border-border px-3 py-1.5 text-sm">${c}</td>`).join("");
+      return `<tr>${cellHtml}</tr>`;
+    })
+    // Line breaks
+    .replace(/\n\n/g, '</p><p class="mb-3">')
+    .replace(/\n/g, '<br />');
+  
+  // Wrap table rows
+  html = html.replace(/(<tr>.*?<\/tr>(?:\s*<tr>.*?<\/tr>)*)/gs, '<table class="w-full border-collapse border border-border my-4 rounded">$1</table>');
+  
+  return `<div class="prose max-w-none"><p class="mb-3">${html}</p></div>`;
+}
 
 interface Props {
   projectId: string;
@@ -106,7 +144,7 @@ export default function OutputGallery({ projectId }: Props) {
                     {c.hashtags && <p className="text-xs text-primary mt-2">{c.hashtags.map((h: string) => `#${h}`).join(" ")}</p>}
                   </div>
                 ) : (
-                  <div className="p-4 h-[250px] overflow-auto text-sm whitespace-pre-wrap">{c.content || JSON.stringify(c)}</div>
+                  <div className="p-4 h-[250px] overflow-auto text-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(c.content || JSON.stringify(c)) }} />
                 )}
                 <div className="p-3 border-t flex items-center justify-between">
                   <div>
@@ -163,7 +201,7 @@ export default function OutputGallery({ projectId }: Props) {
                 )}
               </div>
             ) : content ? (
-              <div className="p-6 max-w-2xl mx-auto text-sm whitespace-pre-wrap">{content.content || JSON.stringify(content, null, 2)}</div>
+              <div className="p-6 max-w-3xl mx-auto text-sm" dangerouslySetInnerHTML={{ __html: renderMarkdown(content.content || JSON.stringify(content, null, 2)) }} />
             ) : null}
           </div>
         </DialogContent>
