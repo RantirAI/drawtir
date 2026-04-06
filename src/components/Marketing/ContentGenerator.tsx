@@ -129,12 +129,20 @@ export default function ContentGenerator({ projectId }: Props) {
               <div key={i} className="border rounded-lg overflow-hidden bg-card">
                 {(outputType === "poster" || outputType === "slide") && item.html ? (
                   <div className="relative">
-                    <iframe srcDoc={item.html} className="w-full h-[400px] border-none" sandbox="allow-scripts" />
-                    <div className="p-3 flex items-center justify-between border-t">
+                    <iframe srcDoc={item.html} className="w-full h-[400px] border-none pointer-events-none" sandbox="allow-scripts" />
+                    <div className="p-3 flex items-center justify-between border-t gap-2">
                       <span className="text-sm font-medium truncate">{item.title}</span>
-                      <Button size="sm" variant="outline" onClick={() => handleSave(item, i)} disabled={save.isPending}>
-                        <Save className="h-3 w-3 mr-1" /> Save
-                      </Button>
+                      <div className="flex items-center gap-1.5">
+                        <Button size="sm" variant="ghost" onClick={() => setPreviewItem(item)} title="Preview">
+                          <Maximize2 className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleDownload(item)} title="Download">
+                          <Download className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleSave(item, i)} disabled={save.isPending}>
+                          <Save className="h-3 w-3 mr-1" /> Save
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ) : outputType === "social_post" ? (
