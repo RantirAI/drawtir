@@ -1,60 +1,64 @@
 
 
-## Plan: Comments & Approval Flow Implementation
+## Plan: Marketing Agent Dashboard
 
-### ✅ Phase 1: Database Schema (COMPLETED)
+A new `/marketing` page where users create marketing projects, each with a persistent knowledge base, brand assets, and AI-powered content generation.
 
-**Created:**
-- `poster_comments` table with RLS policies
-- `poster_approvals` table with RLS policies  
-- `comment_mentions` table with RLS policies
-- `approval_status` enum ('draft', 'pending_review', 'changes_requested', 'approved', 'published')
-- Helper functions: `can_access_poster()`, `can_edit_poster()`
-- Realtime enabled for both tables
+### Data Model
 
-### ✅ Phase 2: Comments Feature (COMPLETED)
+**New table: `marketing_projects`**
+- id, user_id, name, description, knowledge_base (text), primary_color, logos (text[]), images (text[]), created_at, updated_at
 
-**Created:**
-- `src/hooks/useComments.ts` - Real-time comments hook with CRUD + resolution
-- `src/components/Comments/CommentsPanel.tsx` - Sidebar panel with filtering
-- `src/components/Comments/CommentThread.tsx` - Threaded conversations
-- `src/components/Comments/CommentInput.tsx` - @mention support for workspace members
+**New table: `marketing_outputs`**
+- id, project_id, user_id, output_type (poster/slide/social_post/video_script), title, content (jsonb - stores generated HTML/text/poster data), platform (linkedin/instagram/tiktok/general), created_at
 
-### ✅ Phase 3: Approval Workflow (COMPLETED)
+### New Edge Function: `generate-marketing-content`
 
-**Created:**
-- `src/hooks/useApproval.ts` - Approval state management
-- `src/components/Approval/ApprovalPanel.tsx` - Submit/Review/Approve UI
-- `src/components/Approval/ApprovalStatusBadge.tsx` - Visual status indicators
+Accepts: project_id, output_type, platform, custom_prompt. Fetches the project's knowledge base, images, branding from the database, then calls Lovable AI (gemini-3-flash-preview) to generate:
+- **Posters**: Self-contained HTML with the project's colors/logos baked in (similar to existing AI Wall)
+- **Social posts**: Platform-specific copy (LinkedIn professional, Instagram casual, TikTok short-form)
+- **Slide decks**: HTML slides summarizing features/value props
+- **Marketing strategy**: Text-based plans and content calendars
 
-### ✅ Phase 4: UI Integration (PARTIALLY COMPLETED)
+### New Pages & Components
 
-**Completed:**
-- Added "Comments" button to EditorTopBar with badge for unresolved count
-- Integrated CommentsPanel in CanvasContainerNew
+**`src/pages/Marketing.tsx`** - Dashboard listing all marketing projects with create/delete.
 
-**Remaining (optional):**
-- Add approval status indicator to gallery cards
-- Add "Submit for Review" action in editor sidebar
-- Add "Review Queue" view for workspace owners/admins
-- Filter gallery by approval status
+**`src/pages/MarketingProject.tsx`** - Single project view with tabs:
+- **Knowledge Base** - Rich text editor for product info, auto-saved
+- **Brand Assets** - Upload logos, set primary color, upload feature images over time
+- **Generate** - Pick output type (poster/social/slides/strategy), pick platform, describe what you want, AI generates 2-4 variations
+- **Outputs** - Gallery of all generated content, filterable by type/platform
 
-### Data Flow Diagram
+### Route Changes
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    APPROVAL WORKFLOW                        │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   DRAFT ──► PENDING_REVIEW ──┬──► APPROVED ──► PUBLISHED   │
-│     ▲                        │                              │
-│     │                        ▼                              │
-│     └─────────── CHANGES_REQUESTED                         │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+Add to `App.tsx`:
+- `/marketing` → Marketing dashboard
+- `/marketing/:id` → Single project view
 
-Permissions:
-• Editor: Can create, edit, submit for review
-• Owner: Can approve, request changes, publish
-• Viewer: Can view and comment only
-```
+### File Summary
+
+**New files:**
+- `supabase/migrations/...marketing_tables.sql`
+- `supabase/functions/generate-marketing-content/index.ts`
+- `src/pages/Marketing.tsx`
+- `src/pages/MarketingProject.tsx`
+- `src/hooks/useMarketingProject.ts`
+- `src/components/Marketing/KnowledgeBaseEditor.tsx`
+- `src/components/Marketing/BrandAssetsPanel.tsx`
+- `src/components/Marketing/ContentGenerator.tsx`
+- `src/components/Marketing/OutputGallery.tsx`
+
+**Modified files:**
+- `src/App.tsx` - Add routes
+- `src/components/Navigation/HorizontalNav.tsx` - Add Marketing nav link
+- `supabase/config.toml` - Register edge function
+
+### Technical Details
+
+- Images uploaded to existing `media` storage bucket, URLs stored in the project record
+- Knowledge base is plain text stored directly in the table (searchable, easy to pass to AI)
+- Generated posters use the same iframe-based approach as AI Wall (self-contained HTML with Tailwind CDN)
+- Social post generation returns structured JSON with caption, hashtags, and suggested image description
+- All content generation goes through a single edge function with branching logic based on `output_type`
+
