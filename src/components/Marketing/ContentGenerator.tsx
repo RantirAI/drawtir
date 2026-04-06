@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useGenerateContent, useSaveMarketingOutput } from "@/hooks/useMarketingProject";
 import { Loader2, Sparkles, Save, Maximize2, Download } from "lucide-react";
+import html2canvas from "html2canvas";
+import { toast } from "sonner";
 
 function renderMarkdown(text: string): string {
   if (!text) return "";
@@ -65,8 +67,52 @@ export default function ContentGenerator({ projectId }: Props) {
     });
   };
 
-  const handleDownload = (item: any) => {
-    if (item.html) {
+  const handleDownload = async (item: any) => {
+    if (!item.html) return;
+    toast.info("Rendering image...");
+    try {
+      const container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "-9999px";
+      container.style.top = "0";
+      container.style.width = "1080px";
+      container.style.height = "1350px";
+      document.body.appendChild(container);
+
+      const iframe = document.createElement("iframe");
+      iframe.style.width = "1080px";
+      iframe.style.height = "1350px";
+      iframe.style.border = "none";
+      container.appendChild(iframe);
+
+      await new Promise<void>((resolve) => {
+        iframe.onload = () => resolve();
+        iframe.srcdoc = item.html;
+      });
+      // Wait for fonts/styles to load
+      await new Promise((r) => setTimeout(r, 1500));
+
+      const iframeDoc = iframe.contentDocument;
+      if (!iframeDoc?.body) throw new Error("Could not access iframe content");
+
+      const canvas = await html2canvas(iframeDoc.body, {
+        width: 1080,
+        height: 1350,
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      document.body.removeChild(container);
+
+      const link = document.createElement("a");
+      link.download = `${item.title || "poster"}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      toast.success("Downloaded as PNG!");
+    } catch (err) {
+      console.error("Download failed:", err);
+      // Fallback to HTML download
       const blob = new Blob([item.html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -74,6 +120,7 @@ export default function ContentGenerator({ projectId }: Props) {
       a.download = `${item.title || "poster"}.html`;
       a.click();
       URL.revokeObjectURL(url);
+      toast.info("Downloaded as HTML (image rendering failed)");
     }
   };
 
