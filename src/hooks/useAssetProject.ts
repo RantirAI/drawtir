@@ -121,3 +121,72 @@ export function useDeleteAsset() {
     onError: (e: Error) => toast.error(e.message),
   });
 }
+
+export function useGameBuilds(projectId: string | undefined) {
+  return useQuery({
+    queryKey: ["game-builds", projectId],
+    enabled: !!projectId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("game_builds")
+        .select("*")
+        .eq("project_id", projectId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useCreateGameBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { project_id: string; game_type: string; instructions: string; game_code: string; asset_ids: string[] }) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+      const { data: build, error } = await supabase
+        .from("game_builds")
+        .insert({ ...data, user_id: user.id })
+        .select()
+        .single();
+      if (error) throw error;
+      return build;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["game-builds", vars.project_id] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useUpdateGameBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; game_code?: string; instructions?: string }) => {
+      const { error } = await supabase
+        .from("game_builds")
+        .update(updates)
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["game-builds"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
+
+export function useDeleteGameBuild() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("game_builds").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["game-builds"] });
+      toast.success("Game build deleted");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+}
