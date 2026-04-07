@@ -336,6 +336,14 @@ export default function AssetProject() {
     { value: "topdown_rpg", label: "Top-down RPG" },
     { value: "puzzle", label: "Tile-based Puzzle" },
     { value: "visual_novel", label: "Visual Novel" },
+    { value: "shooter", label: "Shooter" },
+    { value: "racing", label: "Racing" },
+    { value: "tower_defense", label: "Tower Defense" },
+    { value: "endless_runner", label: "Endless Runner" },
+    { value: "fighting", label: "Fighting" },
+    { value: "strategy", label: "Strategy" },
+    { value: "card_game", label: "Card Game" },
+    { value: "custom", label: "Custom (describe in instructions)" },
   ];
 
   return (
