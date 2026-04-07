@@ -570,14 +570,17 @@ export default function AssetProject() {
             {/* Asset Selector */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <Label className="text-xs">Select Assets for Game</Label>
-                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAllAssetsForGame}>
-                  {allAssets && selectedAssetIds.length === allAssets.length ? "Deselect All" : "Select All"}
-                </Button>
+                <Label className="text-xs">Assets (optional)</Label>
+                {allAssets && allAssets.length > 0 && (
+                  <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAllAssetsForGame}>
+                    {selectedAssetIds.length === allAssets.length ? "Deselect All" : "Select All"}
+                  </Button>
+                )}
               </div>
+              <p className="text-[10px] text-muted-foreground mb-1">Leave empty and the AI will draw all visuals with code</p>
               <div className="space-y-1 max-h-[250px] overflow-y-auto pr-1 border rounded-md p-2">
                 {!allAssets?.length ? (
-                  <p className="text-xs text-muted-foreground py-4 text-center">No assets yet. Generate some in the Assets tab first!</p>
+                  <p className="text-xs text-muted-foreground py-3 text-center">No assets — AI will generate all visuals</p>
                 ) : (
                   allAssets.map(asset => (
                     <label key={asset.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer">
