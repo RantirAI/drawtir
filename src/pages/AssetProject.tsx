@@ -366,6 +366,7 @@ export default function AssetProject() {
 
         <h1 className="text-2xl font-bold mb-6">{project.name}</h1>
 
+        {mainTab === "assets" ? (
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-4">
