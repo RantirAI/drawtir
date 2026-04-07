@@ -532,6 +532,142 @@ export default function AssetProject() {
             )}
           </div>
         </div>
+        ) : (
+        /* Game Builder Tab */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Game Settings Sidebar */}
+          <div className="lg:col-span-1 space-y-4">
+            <div>
+              <Label className="text-xs">Game Type</Label>
+              <Select value={gameType} onValueChange={setGameType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {GAME_TYPES.map(t => (
+                    <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs">Game Instructions (optional)</Label>
+              <Textarea
+                value={gameInstructions}
+                onChange={e => setGameInstructions(e.target.value)}
+                placeholder="e.g. Make a 3-level platformer where the player collects coins and fights enemies..."
+                className="min-h-[100px]"
+              />
+            </div>
+
+            {/* Asset Selector */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-xs">Select Assets for Game</Label>
+                <Button variant="ghost" size="sm" className="text-xs h-7" onClick={selectAllAssetsForGame}>
+                  {allAssets && selectedAssetIds.length === allAssets.length ? "Deselect All" : "Select All"}
+                </Button>
+              </div>
+              <div className="space-y-1 max-h-[250px] overflow-y-auto pr-1 border rounded-md p-2">
+                {!allAssets?.length ? (
+                  <p className="text-xs text-muted-foreground py-4 text-center">No assets yet. Generate some in the Assets tab first!</p>
+                ) : (
+                  allAssets.map(asset => (
+                    <label key={asset.id} className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-muted/50 cursor-pointer">
+                      <Checkbox
+                        checked={selectedAssetIds.includes(asset.id)}
+                        onCheckedChange={() => toggleAssetForGame(asset.id)}
+                      />
+                      <img src={asset.image_url} alt="" className="w-8 h-8 object-contain rounded" />
+                      <span className="text-xs truncate flex-1">{asset.prompt}</span>
+                    </label>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Button onClick={handleGenerateGame} disabled={generatingGame} className="w-full">
+              {generatingGame ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating Game...</> : <><Gamepad2 className="mr-2 h-4 w-4" />Generate Game</>}
+            </Button>
+
+            {/* Previous Builds */}
+            {gameBuilds && gameBuilds.length > 0 && (
+              <div>
+                <Label className="text-xs">Previous Builds</Label>
+                <div className="space-y-1 max-h-[150px] overflow-y-auto mt-1">
+                  {gameBuilds.map((build: any) => (
+                    <button
+                      key={build.id}
+                      onClick={() => loadGameBuild(build)}
+                      className={`w-full text-left px-3 py-2 rounded text-xs hover:bg-muted/50 transition-colors ${activeGameBuildId === build.id ? 'bg-primary/10 border border-primary/30' : 'bg-muted/20'}`}
+                    >
+                      <span className="capitalize font-medium">{build.game_type.replace("_", " ")}</span>
+                      <span className="text-muted-foreground ml-2">{new Date(build.created_at).toLocaleDateString()}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Game Preview */}
+          <div className="lg:col-span-2">
+            {!activeGameCode ? (
+              <Card className="border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-20">
+                  <Gamepad2 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="font-medium mb-1">No game yet</h3>
+                  <p className="text-sm text-muted-foreground text-center max-w-md">
+                    Select your assets, pick a game type, and click "Generate Game" to create a playable HTML5 game using AI
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {/* Game iframe */}
+                <div className="relative border rounded-lg overflow-hidden bg-black" style={{ height: "500px" }}>
+                  <iframe
+                    ref={iframeRef}
+                    srcDoc={activeGameCode}
+                    className="w-full h-full border-0"
+                    sandbox="allow-scripts allow-same-origin"
+                    title="Game Preview"
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <Button size="icon" variant="secondary" className="h-8 w-8" onClick={handleFullscreen} title="Fullscreen">
+                      <Maximize2 className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="secondary" className="h-8 w-8" onClick={handleDownloadGame} title="Download HTML">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Refinement */}
+                <div className="flex gap-2">
+                  <Textarea
+                    value={refinePrompt}
+                    onChange={e => setRefinePrompt(e.target.value)}
+                    placeholder="Tweak your game... e.g. 'Make the character jump higher' or 'Add a second level'"
+                    className="min-h-[60px] flex-1"
+                  />
+                  <Button onClick={handleRefineGame} disabled={generatingGame || !refinePrompt.trim()} className="self-end">
+                    {generatingGame ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                  </Button>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleDownloadGame}>
+                    <Download className="mr-2 h-4 w-4" />Download as HTML
+                  </Button>
+                  <Button variant="outline" onClick={handleFullscreen}>
+                    <Maximize2 className="mr-2 h-4 w-4" />Play Fullscreen
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+        )}
       </div>
 
       {/* Full-screen preview modal */}
