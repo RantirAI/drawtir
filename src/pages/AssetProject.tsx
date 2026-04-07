@@ -331,13 +331,38 @@ export default function AssetProject() {
 
   const previewIndex = assets?.findIndex(a => a.id === previewAsset?.id) ?? -1;
 
+  const GAME_TYPES = [
+    { value: "platformer", label: "Platformer" },
+    { value: "topdown_rpg", label: "Top-down RPG" },
+    { value: "puzzle", label: "Tile-based Puzzle" },
+    { value: "visual_novel", label: "Visual Novel" },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <HorizontalNav />
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/assets")} className="mb-4">
-          <ArrowLeft className="mr-2 h-4 w-4" />Back to Projects
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/assets")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />Back to Projects
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant={mainTab === "assets" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setMainTab("assets")}
+            >
+              <ImageIcon className="mr-2 h-4 w-4" />Assets
+            </Button>
+            <Button
+              variant={mainTab === "game" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setMainTab("game")}
+            >
+              <Gamepad2 className="mr-2 h-4 w-4" />Build Game
+            </Button>
+          </div>
+        </div>
 
         <h1 className="text-2xl font-bold mb-6">{project.name}</h1>
 
