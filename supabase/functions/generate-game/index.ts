@@ -95,13 +95,13 @@ MODIFICATION INSTRUCTIONS:
 ${instructions || "Improve the game"}
 
 AVAILABLE ASSETS:
-${assetList || "No specific assets — use colored shapes as placeholders."}
+${hasAssets ? assetList : "No assets provided — create ALL visuals using Canvas drawing API. Make them look polished and professional."}
 
 GAME CONTEXT: ${project.knowledge_base || "A fun 2D game"}
 
 Output the COMPLETE modified HTML file. Keep everything that works, only change what's requested.`;
     } else {
-      userPrompt = `Create a ${game_type} game with the following specifications:
+      userPrompt = `Create a ${game_type.replace("_", " ")} game with the following specifications:
 
 GAME TYPE: ${gameDesc}
 
@@ -110,8 +110,7 @@ ${project.knowledge_base || "A fun and engaging game"}
 
 ART STYLE: ${project.art_style || "pixel_art"}
 
-AVAILABLE ASSETS (use these as sprites in the game):
-${assetList || "No specific assets available — use colored shapes/rectangles as placeholders for characters, enemies, items, etc."}
+${hasAssets ? `AVAILABLE ASSETS (use these as sprites in the game):\n${assetList}` : "NO ASSET IMAGES PROVIDED — Draw ALL game visuals using Canvas 2D API (shapes, gradients, paths). Make characters, enemies, items, and environments look visually appealing using only code-drawn graphics."}
 
 ${instructions ? `ADDITIONAL INSTRUCTIONS:\n${instructions}` : ""}
 
