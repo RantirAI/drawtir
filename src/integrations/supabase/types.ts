@@ -206,6 +206,50 @@ export type Database = {
           },
         ]
       }
+      game_builds: {
+        Row: {
+          asset_ids: string[] | null
+          created_at: string
+          game_code: string
+          game_type: string
+          id: string
+          instructions: string | null
+          project_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_ids?: string[] | null
+          created_at?: string
+          game_code?: string
+          game_type?: string
+          id?: string
+          instructions?: string | null
+          project_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_ids?: string[] | null
+          created_at?: string
+          game_code?: string
+          game_type?: string
+          id?: string
+          instructions?: string | null
+          project_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "game_builds_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "asset_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_assets: {
         Row: {
           category: string
