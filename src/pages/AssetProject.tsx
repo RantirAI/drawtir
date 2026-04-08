@@ -34,9 +34,14 @@ const CATEGORIES = [
 ];
 
 const BULK_PRESETS = [
-  { id: "main_character", label: "Main Character (idle pose)", category: "character", prompt: "Main player character, front-facing idle pose, full body" },
-  { id: "enemy_basic", label: "Basic Enemy", category: "character", prompt: "A basic enemy creature, front-facing, menacing but simple design" },
-  { id: "enemy_boss", label: "Boss Enemy", category: "character", prompt: "A large intimidating boss enemy, detailed design, front-facing" },
+  { id: "main_char_idle", label: "Main Character (Idle)", category: "character", prompt: "Main player character, front-facing idle standing pose, full body, relaxed posture" },
+  { id: "main_char_run", label: "Main Character (Running)", category: "character", prompt: "Main player character, side-view running pose, mid-stride, full body in motion" },
+  { id: "main_char_attack", label: "Main Character (Attacking)", category: "character", prompt: "Main player character, attacking pose with weapon swinging, dynamic action pose" },
+  { id: "main_char_hurt", label: "Main Character (Hurt)", category: "character", prompt: "Main player character, hurt/damaged pose, staggering backward, pained expression" },
+  { id: "main_char_death", label: "Main Character (Dying)", category: "character", prompt: "Main player character, falling/collapsing death pose, dramatic" },
+  { id: "enemy_basic_idle", label: "Basic Enemy (Idle)", category: "character", prompt: "A basic enemy creature, front-facing idle stance, menacing but simple design" },
+  { id: "enemy_basic_attack", label: "Basic Enemy (Attacking)", category: "character", prompt: "A basic enemy creature, lunging forward in attack pose, aggressive stance" },
+  { id: "enemy_boss", label: "Boss Enemy", category: "character", prompt: "A large intimidating boss enemy, detailed design, front-facing battle-ready stance" },
   { id: "npc_merchant", label: "NPC Merchant", category: "character", prompt: "A friendly merchant NPC character, standing idle with a shop bag or cart" },
   { id: "sword", label: "Sword", category: "weapon", prompt: "A standard sword weapon, side view, clean isolated design" },
   { id: "shield", label: "Shield", category: "weapon", prompt: "A defensive shield, front-facing view, clean isolated design" },
@@ -52,6 +57,8 @@ const BULK_PRESETS = [
   { id: "door", label: "Door", category: "environment", prompt: "A wooden door, front view, can be open or closed" },
   { id: "heart_icon", label: "Heart / HP Icon", category: "ui", prompt: "A heart icon for health display, clean pixel-perfect design" },
   { id: "button_ui", label: "UI Button", category: "ui", prompt: "A game UI button, rectangular with rounded corners, clean design" },
+  { id: "projectile", label: "Projectile / Bullet", category: "weapon", prompt: "A glowing energy projectile or bullet, side view, clean isolated design" },
+  { id: "explosion", label: "Explosion Effect", category: "other", prompt: "An explosion effect sprite, bright fiery burst, centered, clean isolated" },
 ];
 
 export default function AssetProject() {
