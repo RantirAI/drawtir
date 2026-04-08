@@ -99,14 +99,45 @@ serve(async (req) => {
       });
     }
 
+    // Remove background using remove.bg API
+    let finalBase64 = base64;
+    const REMOVE_BG_API_KEY = Deno.env.get("REMOVE_BG_API_KEY");
+    if (REMOVE_BG_API_KEY) {
+      try {
+        console.log("Removing background...");
+        const formData = new FormData();
+        const blob = new Blob([bytes], { type: "image/png" });
+        formData.append("image_file", blob, "image.png");
+        formData.append("size", "auto");
+
+        const bgResponse = await fetch("https://api.remove.bg/v1.0/removebg", {
+          method: "POST",
+          headers: { "X-Api-Key": REMOVE_BG_API_KEY },
+          body: formData,
+        });
+
+        if (bgResponse.ok) {
+          const resultBlob = await bgResponse.blob();
+          const arrayBuffer = await resultBlob.arrayBuffer();
+          finalBase64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+          console.log("Background removed successfully");
+        } else {
+          console.error("Background removal failed, using original image:", bgResponse.status);
+        }
+      } catch (bgErr) {
+        console.error("Background removal error, using original:", bgErr);
+      }
+    } else {
+      console.log("REMOVE_BG_API_KEY not set, skipping background removal");
+    }
+
     // Upload to storage
-    const base64 = imageData.replace(/^data:image\/\w+;base64,/, "");
-    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    const finalBytes = Uint8Array.from(atob(finalBase64), (c) => c.charCodeAt(0));
     const fileName = `assets/${project_id}/${crypto.randomUUID()}.png`;
 
     const { error: uploadErr } = await supabase.storage
       .from("media")
-      .upload(fileName, bytes, { contentType: "image/png", upsert: false });
+      .upload(fileName, finalBytes, { contentType: "image/png", upsert: false });
 
     if (uploadErr) {
       console.error("Upload error:", uploadErr);
