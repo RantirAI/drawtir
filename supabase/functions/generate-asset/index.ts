@@ -49,9 +49,9 @@ serve(async (req) => {
     const contextParts = [
       `Create a SINGLE 2D game asset in ${styleDesc}.`,
       "IMPORTANT: Generate exactly ONE asset/character/item centered in the image. Do NOT place multiple characters, sprites, or variations in the same image. Only one isolated element.",
+      "CRITICAL: The asset MUST be on a completely clean, solid white background. No gradients, no scenery, no shadows on the background, no ground, no environment. Just the single isolated asset/character on pure white. This is essential so the background can be removed cleanly.",
       project.knowledge_base ? `Game context: ${project.knowledge_base}` : "",
       `Asset request: ${prompt}`,
-      "The asset should have a transparent or clean solid-color background suitable for use in a game engine.",
       "Make the asset high quality, well-composed, and ready to use in a game.",
     ].filter(Boolean);
 

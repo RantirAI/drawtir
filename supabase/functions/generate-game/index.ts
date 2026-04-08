@@ -65,12 +65,21 @@ serve(async (req) => {
 
     const hasAssets = assetList && assetList.trim().length > 0;
 
+    const noAssetSpriteRules = `Since no asset images are provided, you MUST create ALL visual elements using detailed Canvas 2D drawing. Follow these sprite design rules:
+- Draw each entity (player, enemies, items, environment) as a DETAILED multi-part sprite using paths, arcs, gradients, and shadows — NOT simple colored rectangles or circles.
+- Every character MUST have multiple animation states: IDLE (subtle breathing/bobbing), RUNNING/MOVING (leg/arm movement), ATTACKING (weapon swing/projectile), HURT (flash red, knockback), DYING (fade out, collapse animation). Implement a simple sprite state machine.
+- Use frame-based animation: track animationFrame counter, cycle through visual states (e.g., alternate leg positions every N frames for running).
+- Add visual polish: eyes, limbs, weapons, armor details drawn with Canvas paths. Use gradients for shading. Add drop shadows beneath characters.
+- Environment should have parallax layers or detailed tile patterns, not flat colors.
+- Particle effects for: explosions, damage hits, collectible pickups, dust trails when moving.
+- UI elements should be stylized: health bars with gradients and borders, score with glow effects, animated wave/level indicators.`;
+
     const systemPrompt = `You are an expert HTML5 game developer. You generate COMPLETE, SELF-CONTAINED HTML files with embedded JavaScript that create playable 2D games using the HTML5 Canvas API.
 
 CRITICAL RULES:
 1. Output ONLY the HTML code. No markdown, no code fences, no explanations. Just the raw HTML starting with <!DOCTYPE html>.
 2. The game must be a SINGLE HTML file with all CSS and JavaScript embedded.
-3. ${hasAssets ? "Load game assets (character sprites, items, etc.) using the provided image URLs via new Image() objects." : "Since no asset images are provided, create ALL visual elements using Canvas drawing (shapes, gradients, patterns). Make them look polished and visually appealing — use colors, shadows, and details to make drawn sprites look good."}
+3. ${hasAssets ? "Load game assets (character sprites, items, etc.) using the provided image URLs via new Image() objects." : noAssetSpriteRules}
 4. Implement a proper game loop using requestAnimationFrame.
 5. Handle keyboard input (arrow keys or WASD) and also add touch/click controls for mobile.
 6. Include these game states: START_SCREEN, PLAYING, GAME_OVER (and WIN if applicable).
@@ -78,10 +87,11 @@ CRITICAL RULES:
 8. Make the canvas responsive — fill the viewport. Use window.innerWidth and window.innerHeight.
 9. Include scoring, a HUD (score, health/lives), and visual feedback.
 10. Use clean, well-structured code with comments.
-11. ${hasAssets ? "All asset image URLs are absolute HTTPS URLs — load them directly. Handle image load errors gracefully with fallback colored rectangles." : "Draw all game entities using Canvas 2D API — rectangles, circles, paths, gradients. Make characters and objects visually distinct and appealing."}
+11. ${hasAssets ? "All asset image URLs are absolute HTTPS URLs — load them directly. Handle image load errors gracefully with fallback colored rectangles." : "Every entity must have a draw function with animation state logic. No plain rectangles allowed for characters."}
 12. Make the game FUN and polished — add particle effects, screen shake, smooth animations.
 13. Style the page with a dark background (body margin:0, overflow:hidden).
-14. You are NOT limited to platformers — you can build ANY type of 2D game. Match the game type requested.`;
+14. You are NOT limited to platformers — you can build ANY type of 2D game. Match the game type requested.
+15. Characters MUST have at least these visual states: idle, moving, attacking, hurt, dying. Implement frame-based animation for each state.`;
 
     let userPrompt: string;
 
