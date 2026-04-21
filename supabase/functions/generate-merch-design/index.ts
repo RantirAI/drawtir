@@ -173,36 +173,50 @@ serve(async (req) => {
     const knowledgeContext = project.knowledge_base
       ? `\n\nBrand context (use this to inform tone and message — do NOT invent unrelated taglines): ${project.knowledge_base.slice(0, 800)}`
       : "";
-    const customPrompt = prompt ? `\n\nUser direction: ${prompt}` : "";
+    const isBag = BAG_PRODUCTS.has(product_type);
+    const userDirectionBlock = prompt
+      ? `\n\nUSER DIRECTION (HIGHEST PRIORITY — FOLLOW LITERALLY): "${prompt}"
+- Treat this as a strict brief. Do EXACTLY what the user describes. Do NOT add unrelated elements, do NOT reinterpret, do NOT "improve" beyond what was asked.
+- If the user only asks for a wordmark, output ONLY a wordmark. If the user asks for a single icon, output ONLY that icon.`
+      : `\n\nNo specific user direction was provided. Keep the design extremely simple, restrained, and brand-appropriate (logo + at most one supporting element). Do NOT invent extra concepts.`;
     const colorDirective = brandColor ? `Use the brand color ${brandColor} as the primary accent. Do not introduce unrelated colors.` : "Use a restrained, intentional color palette. Avoid random rainbow colors.";
 
     const logoDirective = logoUrl
       ? `\n\nBRAND LOGO: A reference image of the official brand logo is provided. You MUST use THIS EXACT logo in the design — do not redraw it, do not invent a new logo, do not modify its shape or letterforms. Place it cleanly and integrate it into the composition. The logo's identity must remain perfectly recognizable.`
       : "";
 
-    const baseDesignPrompt = `Design a professional, print-ready apparel graphic for a ${productLabel}. Brand: "${project.name}".
+    const baseDesignPrompt = `Design a professional, print-ready ${isBag ? "bag/accessory" : "apparel"} graphic for a ${productLabel}. Brand: "${project.name}".
 
 Style: ${styleDesc}
-${colorDirective}${logoDirective}${knowledgeContext}${customPrompt}
+${colorDirective}${logoDirective}${knowledgeContext}${userDirectionBlock}
+
+ABSOLUTE PROHIBITIONS — NEVER include any of the following unless the user direction explicitly asks for them:
+- NO infographics, NO charts, NO graphs, NO data visualizations, NO statistics, NO percentages, NO bar/pie charts
+- NO icon grids, NO feature lists, NO bullet-point layouts, NO "how it works" diagrams
+- NO website-mockup or app-screenshot style layouts
+- NO random decorative text, NO lorem ipsum, NO fake fictional taglines, NO invented product names
+- NO clipart, NO emoji collages, NO generic stock illustrations
+- NO multiple competing focal points — one clear hero element only
 
 CRITICAL QUALITY REQUIREMENTS:
 - The design must be ISOLATED on a pure solid white background (#FFFFFF)
-- No mockup, no garment, no person, no model — just the flat graphic design
-- Clean, intentional, professional composition — NOT random, NOT cluttered, NOT chaotic
-- Typography must be perfectly legible, correctly spelled, and properly kerned (no garbled or fake letters)
-- All text must be real readable words tied to the brand — never lorem ipsum or nonsense
+- No mockup, no garment, no bag, no person, no model — just the flat graphic design
+- Clean, intentional, professional, MINIMAL composition
+- Typography must be perfectly legible, correctly spelled, properly kerned — only real words tied to the brand
 - Sharp vector-quality edges, high resolution, suitable for screen printing or DTG
 - Centered with balanced margins
-- Tasteful and brand-appropriate — avoid amateurish clip-art, avoid overly busy elements
-- The result should look like work from a senior apparel designer, not AI noise`;
+- The result should look like work from a senior ${isBag ? "accessory" : "apparel"} designer`;
+
+    const frontPanelLabel = isBag ? "FRONT panel of the bag (main visible face)" : "FRONT design — chest area";
+    const backPanelLabel = isBag ? "BACK panel of the bag" : "BACK design";
 
     const frontPrompt = `${baseDesignPrompt}
 
-PANEL: FRONT design — a refined hero graphic or wordmark for the chest area. Medium scale, balanced, immediately readable. If a logo is provided, the front should feature it prominently and cleanly.`;
+PANEL: ${frontPanelLabel}. A refined hero graphic or wordmark, medium scale, balanced and immediately readable. If a logo is provided, feature it prominently and cleanly.`;
 
     const backPrompt = `${baseDesignPrompt}
 
-PANEL: BACK design — a larger complementary piece that feels like the same collection as the front. Can include a tagline (drawn from brand context only), supporting graphic, or expanded wordmark. Maintain the same color palette and visual language as the front.`;
+PANEL: ${backPanelLabel}. A complementary piece from the same collection as the front. Maintain identical color palette, typography, and visual language. Keep it minimal — do not add new concepts the user did not request.`;
 
     console.log("Generating front design...");
     const frontRaw = await generateImage(LOVABLE_API_KEY, frontPrompt, logoUrl ?? undefined);
@@ -215,12 +229,14 @@ PANEL: BACK design — a larger complementary piece that feels like the same col
       removeBackground(REMOVE_BG_API_KEY, backRaw),
     ]);
 
-    const mockupBase = `Create a realistic, professional product photograph of a ${base_color} ${productLabel}. Studio lighting, clean light grey background, slightly angled flat-lay or ghost-mannequin style. Place the provided design centered on the FRONT_OR_BACK of the garment, scaled appropriately and following the natural fabric drape. The design should look professionally printed onto the fabric. High-quality e-commerce product photography style.`;
+    const mockupSurface = isBag ? "bag" : "garment";
+    const mockupFrontArea = isBag ? "front panel" : "front (chest area)";
+    const mockupBase = `Create a realistic, professional product photograph of a ${base_color} ${productLabel}. Studio lighting, clean light grey background, slightly angled flat-lay style. Place the provided design centered on the FRONT_OR_BACK of the ${mockupSurface}, scaled appropriately and following the natural material drape/structure. The design should look professionally printed onto the surface. High-quality e-commerce product photography style.`;
 
     console.log("Generating front mockup...");
     const frontMockupRaw = await generateImage(
       LOVABLE_API_KEY,
-      mockupBase.replace("FRONT_OR_BACK", "front (chest area)"),
+      mockupBase.replace("FRONT_OR_BACK", mockupFrontArea),
       frontTransparent
     );
     console.log("Generating back mockup...");
