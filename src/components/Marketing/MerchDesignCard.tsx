@@ -1,10 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Trash2, Maximize2, Box, Users, FileImage, Loader2 } from "lucide-react";
+import { Download, Trash2, Maximize2, Box, Users, FileImage, Loader2, Wand2 } from "lucide-react";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useDeleteMerchDesign, useGenerateMerchSizes } from "@/hooks/useMerchDesigns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useDeleteMerchDesign, useGenerateMerchSizes, useRefineMerchDesign } from "@/hooks/useMerchDesigns";
 import { generatePrintReadyPNG, getPrintSpecLabel } from "@/lib/printReady";
 import { toast } from "sonner";
 import Merch3DPreview from "./Merch3DPreview";
@@ -38,8 +41,29 @@ export default function MerchDesignCard({ design }: Props) {
   const [show3D, setShow3D] = useState(false);
   const [showSizes, setShowSizes] = useState(false);
   const [printingSide, setPrintingSide] = useState<"front" | "back" | null>(null);
+  const [showRefine, setShowRefine] = useState(false);
+  const [refinePrompt, setRefinePrompt] = useState("");
+  const [refineFront, setRefineFront] = useState(true);
+  const [refineBack, setRefineBack] = useState(true);
   const del = useDeleteMerchDesign();
   const genSizes = useGenerateMerchSizes();
+  const refine = useRefineMerchDesign();
+
+  const handleRefine = () => {
+    const sides: ("front" | "back")[] = [];
+    if (refineFront) sides.push("front");
+    if (refineBack) sides.push("back");
+    if (!refinePrompt.trim() || sides.length === 0) return;
+    refine.mutate(
+      { design_id: design.id, project_id: design.project_id, refine_prompt: refinePrompt.trim(), sides },
+      {
+        onSuccess: () => {
+          setShowRefine(false);
+          setRefinePrompt("");
+        },
+      }
+    );
+  };
 
   const productLabel = design.product_type.charAt(0).toUpperCase() + design.product_type.slice(1);
   const hasSizes = !!(design.size_small_url && design.size_medium_url && design.size_large_url);
@@ -98,6 +122,10 @@ export default function MerchDesignCard({ design }: Props) {
 
         <div className="p-2 flex flex-wrap gap-1 border-t border-border/40 mt-auto">
           <Button size="sm" variant="ghost" className="h-7 text-xs"
+            onClick={() => setShowRefine(true)}>
+            <Wand2 className="h-3 w-3" /> Refine
+          </Button>
+          <Button size="sm" variant="ghost" className="h-7 text-xs"
             onClick={() => setShow3D(true)}>
             <Box className="h-3 w-3" /> 3D
           </Button>
@@ -130,6 +158,52 @@ export default function MerchDesignCard({ design }: Props) {
           </Button>
         </div>
       </Card>
+
+      <Dialog open={showRefine} onOpenChange={(o) => !refine.isPending && setShowRefine(o)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Refine Design — {productLabel}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>What should change?</Label>
+              <Textarea
+                value={refinePrompt}
+                onChange={(e) => setRefinePrompt(e.target.value)}
+                placeholder="e.g. Make the typography bolder, swap the icon for a mountain, use a tighter layout, remove the tagline..."
+                rows={4}
+                disabled={refine.isPending}
+              />
+              <p className="text-xs text-muted-foreground">
+                The AI will keep the original design's identity and apply your refinements. Mockups will be regenerated automatically.
+              </p>
+            </div>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <Checkbox checked={refineFront} onCheckedChange={(v) => setRefineFront(!!v)} disabled={refine.isPending} />
+                Refine front
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-sm">
+                <Checkbox checked={refineBack} onCheckedChange={(v) => setRefineBack(!!v)} disabled={refine.isPending} />
+                Refine back
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setShowRefine(false)} disabled={refine.isPending}>Cancel</Button>
+            <Button
+              onClick={handleRefine}
+              disabled={refine.isPending || !refinePrompt.trim() || (!refineFront && !refineBack)}
+            >
+              {refine.isPending ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Refining...</>
+              ) : (
+                <><Wand2 className="h-4 w-4" /> Apply Refinement</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!preview} onOpenChange={() => setPreview(null)}>
         <DialogContent className="max-w-4xl">

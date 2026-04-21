@@ -61,6 +61,25 @@ export function useDeleteMerchDesign() {
   });
 }
 
+export function useRefineMerchDesign() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ design_id, refine_prompt, sides }: { design_id: string; project_id: string; refine_prompt: string; sides: ("front" | "back")[] }) => {
+      const { data, error } = await supabase.functions.invoke("refine-merch-design", {
+        body: { design_id, refine_prompt, sides },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data.design;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["merch-designs", vars.project_id] });
+      toast.success("Design refined");
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to refine design"),
+  });
+}
+
 export function useGenerateMerchSizes() {
   const qc = useQueryClient();
   return useMutation({
