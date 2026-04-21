@@ -32,6 +32,7 @@ const COLORS = [
 ];
 
 const STYLES = [
+  { value: "corporate", label: "Corporate" },
   { value: "minimal", label: "Minimal" },
   { value: "vintage", label: "Vintage" },
   { value: "streetwear", label: "Streetwear" },
@@ -44,7 +45,7 @@ const STYLES = [
 export default function MerchDesignPanel({ projectId }: Props) {
   const [productType, setProductType] = useState("hoodie");
   const [baseColor, setBaseColor] = useState("black");
-  const [style, setStyle] = useState("streetwear");
+  const [style, setStyle] = useState("corporate");
   const [prompt, setPrompt] = useState("");
   const [useLogo, setUseLogo] = useState(true);
   const [useBrandColor, setUseBrandColor] = useState(true);

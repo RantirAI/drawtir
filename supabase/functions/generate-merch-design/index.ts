@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const STYLE_PROMPTS: Record<string, string> = {
+  corporate: "professional corporate design, clean modern aesthetic, refined and tasteful, sophisticated typography (sans-serif like Helvetica/Inter), structured layout with strong grid alignment, restrained color palette, premium business-appropriate look, suitable for company merchandise and team apparel",
   minimal: "minimal design, clean lines, monochrome palette, lots of negative space, refined typography, modern and understated",
   vintage: "vintage retro design, distressed textures, weathered look, retro typography (70s/80s), faded and aged color palette, classic Americana feel",
   streetwear: "streetwear graphic design, bold layered graphics, oversized typography, urban aesthetic, hype-beast style, high contrast",
@@ -158,40 +159,48 @@ serve(async (req) => {
       });
     }
 
-    const styleDesc = STYLE_PROMPTS[style] || STYLE_PROMPTS.minimal;
+    const styleDesc = STYLE_PROMPTS[style] || STYLE_PROMPTS.corporate;
     const productLabel = PRODUCT_LABELS[product_type] || "t-shirt";
     const brandColor = use_brand_color && project.primary_color ? project.primary_color : null;
     const logoUrl = use_logo && project.logos?.length ? project.logos[0] : null;
     const knowledgeContext = project.knowledge_base
-      ? `\n\nBrand context: ${project.knowledge_base.slice(0, 800)}`
+      ? `\n\nBrand context (use this to inform tone and message — do NOT invent unrelated taglines): ${project.knowledge_base.slice(0, 800)}`
       : "";
     const customPrompt = prompt ? `\n\nUser direction: ${prompt}` : "";
-    const colorDirective = brandColor ? `Incorporate the brand color ${brandColor} prominently in the design.` : "";
+    const colorDirective = brandColor ? `Use the brand color ${brandColor} as the primary accent. Do not introduce unrelated colors.` : "Use a restrained, intentional color palette. Avoid random rainbow colors.";
 
-    const baseDesignPrompt = `Design an apparel graphic for a ${productLabel}. Brand: "${project.name}".
+    const logoDirective = logoUrl
+      ? `\n\nBRAND LOGO: A reference image of the official brand logo is provided. You MUST use THIS EXACT logo in the design — do not redraw it, do not invent a new logo, do not modify its shape or letterforms. Place it cleanly and integrate it into the composition. The logo's identity must remain perfectly recognizable.`
+      : "";
+
+    const baseDesignPrompt = `Design a professional, print-ready apparel graphic for a ${productLabel}. Brand: "${project.name}".
 
 Style: ${styleDesc}
-${colorDirective}${knowledgeContext}${customPrompt}
+${colorDirective}${logoDirective}${knowledgeContext}${customPrompt}
 
-CRITICAL REQUIREMENTS:
+CRITICAL QUALITY REQUIREMENTS:
 - The design must be ISOLATED on a pure solid white background (#FFFFFF)
-- No mockup, no garment, no person — just the flat graphic design itself
-- High resolution, print-ready quality, sharp details
-- The design should be centered with clean margins
-- Suitable for screen printing or DTG printing on apparel`;
+- No mockup, no garment, no person, no model — just the flat graphic design
+- Clean, intentional, professional composition — NOT random, NOT cluttered, NOT chaotic
+- Typography must be perfectly legible, correctly spelled, and properly kerned (no garbled or fake letters)
+- All text must be real readable words tied to the brand — never lorem ipsum or nonsense
+- Sharp vector-quality edges, high resolution, suitable for screen printing or DTG
+- Centered with balanced margins
+- Tasteful and brand-appropriate — avoid amateurish clip-art, avoid overly busy elements
+- The result should look like work from a senior apparel designer, not AI noise`;
 
     const frontPrompt = `${baseDesignPrompt}
 
-PANEL: FRONT design — a strong hero graphic or wordmark, eye-catching, balanced composition. Medium-to-large scale graphic intended for the chest/front of the garment.`;
+PANEL: FRONT design — a refined hero graphic or wordmark for the chest area. Medium scale, balanced, immediately readable. If a logo is provided, the front should feature it prominently and cleanly.`;
 
     const backPrompt = `${baseDesignPrompt}
 
-PANEL: BACK design — a larger, more detailed complementary piece. Often features bigger artwork, additional typography or scene-work. Should feel like the same collection as the front but with its own presence.`;
+PANEL: BACK design — a larger complementary piece that feels like the same collection as the front. Can include a tagline (drawn from brand context only), supporting graphic, or expanded wordmark. Maintain the same color palette and visual language as the front.`;
 
     console.log("Generating front design...");
-    const frontRaw = await generateImage(LOVABLE_API_KEY, frontPrompt);
+    const frontRaw = await generateImage(LOVABLE_API_KEY, frontPrompt, logoUrl ?? undefined);
     console.log("Generating back design...");
-    const backRaw = await generateImage(LOVABLE_API_KEY, backPrompt);
+    const backRaw = await generateImage(LOVABLE_API_KEY, backPrompt, logoUrl ?? undefined);
 
     console.log("Removing backgrounds...");
     const [frontTransparent, backTransparent] = await Promise.all([
