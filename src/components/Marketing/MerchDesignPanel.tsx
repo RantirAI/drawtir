@@ -32,6 +32,7 @@ const COLORS = [
 ];
 
 const STYLES = [
+  { value: "corporate", label: "Corporate" },
   { value: "minimal", label: "Minimal" },
   { value: "vintage", label: "Vintage" },
   { value: "streetwear", label: "Streetwear" },
