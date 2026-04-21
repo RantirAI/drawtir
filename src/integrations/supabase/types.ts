@@ -425,6 +425,9 @@ export type Database = {
           product_type: string
           project_id: string
           prompt: string | null
+          size_large_url: string | null
+          size_medium_url: string | null
+          size_small_url: string | null
           style: string
           updated_at: string
           use_brand_color: boolean
@@ -442,6 +445,9 @@ export type Database = {
           product_type?: string
           project_id: string
           prompt?: string | null
+          size_large_url?: string | null
+          size_medium_url?: string | null
+          size_small_url?: string | null
           style?: string
           updated_at?: string
           use_brand_color?: boolean
@@ -459,6 +465,9 @@ export type Database = {
           product_type?: string
           project_id?: string
           prompt?: string | null
+          size_large_url?: string | null
+          size_medium_url?: string | null
+          size_small_url?: string | null
           style?: string
           updated_at?: string
           use_brand_color?: boolean
