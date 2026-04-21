@@ -20,6 +20,11 @@ const PRODUCTS = [
   { value: "cap", label: "Cap" },
   { value: "tote", label: "Tote Bag" },
   { value: "mug", label: "Mug" },
+  { value: "handbag", label: "Handbag" },
+  { value: "paper_bag", label: "Paper Bag" },
+  { value: "shopping_bag", label: "Shopping Bag" },
+  { value: "backpack", label: "Backpack" },
+  { value: "drawstring_bag", label: "Drawstring Bag" },
 ];
 
 const COLORS = [
