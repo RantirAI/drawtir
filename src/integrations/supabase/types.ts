@@ -413,6 +413,68 @@ export type Database = {
         }
         Relationships: []
       }
+      merch_designs: {
+        Row: {
+          back_design_url: string | null
+          back_mockup_url: string | null
+          base_color: string
+          created_at: string
+          front_design_url: string | null
+          front_mockup_url: string | null
+          id: string
+          product_type: string
+          project_id: string
+          prompt: string | null
+          style: string
+          updated_at: string
+          use_brand_color: boolean
+          use_logo: boolean
+          user_id: string
+        }
+        Insert: {
+          back_design_url?: string | null
+          back_mockup_url?: string | null
+          base_color?: string
+          created_at?: string
+          front_design_url?: string | null
+          front_mockup_url?: string | null
+          id?: string
+          product_type?: string
+          project_id: string
+          prompt?: string | null
+          style?: string
+          updated_at?: string
+          use_brand_color?: boolean
+          use_logo?: boolean
+          user_id: string
+        }
+        Update: {
+          back_design_url?: string | null
+          back_mockup_url?: string | null
+          base_color?: string
+          created_at?: string
+          front_design_url?: string | null
+          front_mockup_url?: string | null
+          id?: string
+          product_type?: string
+          project_id?: string
+          prompt?: string | null
+          style?: string
+          updated_at?: string
+          use_brand_color?: boolean
+          use_logo?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "merch_designs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poster_approvals: {
         Row: {
           created_at: string

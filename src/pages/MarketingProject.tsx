@@ -8,6 +8,7 @@ import KnowledgeBaseEditor from "@/components/Marketing/KnowledgeBaseEditor";
 import BrandAssetsPanel from "@/components/Marketing/BrandAssetsPanel";
 import ContentGenerator from "@/components/Marketing/ContentGenerator";
 import OutputGallery from "@/components/Marketing/OutputGallery";
+import MerchDesignPanel from "@/components/Marketing/MerchDesignPanel";
 
 export default function MarketingProject() {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +39,7 @@ export default function MarketingProject() {
             <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
             <TabsTrigger value="brand">Brand Assets</TabsTrigger>
             <TabsTrigger value="generate">Generate</TabsTrigger>
+            <TabsTrigger value="merch">Merch</TabsTrigger>
             <TabsTrigger value="outputs">Outputs</TabsTrigger>
           </TabsList>
 
@@ -51,6 +53,10 @@ export default function MarketingProject() {
 
           <TabsContent value="generate">
             <ContentGenerator projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="merch">
+            <MerchDesignPanel projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="outputs">
