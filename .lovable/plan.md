@@ -1,68 +1,89 @@
 
 
-## Plan: AI Game Builder from Generated Assets
+# Merch Design Studio for Marketing Projects
 
-Build a game builder that takes the user's generated assets and knowledge base, then uses AI to generate a complete playable 2D game — rendered in-browser and exportable as a standalone HTML file.
+Add a new **Merch** tab inside each marketing project where users can generate AI-designed apparel mockups (front + back) using the project's logo, brand color, and knowledge base as context.
 
-### How It Works
+## What the user gets
 
-1. User navigates to a new "Build Game" tab within their asset project
-2. User selects which assets to include (or selects all), picks a game type (platformer, top-down RPG, puzzle, visual novel), and optionally adds game-specific instructions
-3. AI generates a complete self-contained HTML5 Canvas game using the asset image URLs, the project's knowledge base for theming/story, and the selected game type
-4. The game renders live in an iframe preview on the page
-5. User can re-prompt to tweak gameplay (e.g., "make the character jump higher", "add a second level", "make enemies faster")
-6. User can download the entire game as a single HTML file or play it fullscreen
+Inside `/marketing/:id`, a new **Merch** tab next to Knowledge Base / Brand Assets / Generate / Outputs.
 
-### Architecture
+**Flow:**
+1. Pick a product type — Hoodie, T-Shirt, Crewneck, Cap, Tote Bag, Mug
+2. Pick a base color (black, white, heather grey, navy, custom)
+3. Pick a design style — Minimal, Vintage, Streetwear, Bold Typography, Illustrated, Y2K, Grunge
+4. Optional prompt: "Make it about our launch event" / "Use the mascot"
+5. Click **Generate Design Set** → AI produces:
+   - **Front design** (isolated PNG, transparent background)
+   - **Back design** (isolated PNG, transparent background)
+   - **Front mockup** (design composited onto the chosen garment)
+   - **Back mockup** (design composited onto the chosen garment)
+6. Gallery of past merch sets, each downloadable, regenerable, and saveable to Outputs
 
-**New Edge Function: `generate-game`**
-- Accepts: `project_id`, `asset_ids[]`, `game_type`, `instructions`, optional `previous_code` (for iterative refinement)
-- Fetches the project's knowledge base, art style, and selected asset URLs from the database
-- Calls `google/gemini-2.5-pro` (needs strong reasoning for code generation) with a detailed system prompt that instructs it to generate a complete, self-contained HTML5 game using Canvas API
-- The system prompt includes the asset URLs as sprite references, game type templates, and the knowledge base for story/theme context
-- Returns the generated HTML game code as a string
-- Handles iterative refinement by accepting previous game code and modification instructions
+The AI automatically pulls in the project's logo, primary color, and knowledge base so designs feel on-brand without re-explaining.
 
-**New UI: "Build Game" tab in `AssetProject.tsx`**
-- Asset selector: grid of generated assets with checkboxes to pick which ones to include
-- Game type dropdown: Platformer, Top-down RPG, Tile-based puzzle, Visual novel
-- Instructions textarea for custom game requirements
-- "Generate Game" button that calls the edge function
-- Live preview iframe showing the generated game
-- Refinement prompt input below the preview for iterative changes
-- "Download as HTML" and "Play Fullscreen" buttons
-- Generation history: stores previous versions so user can go back
+## UI layout
 
-**Database Changes**
-- New table `game_builds`: id, project_id, user_id, game_type, instructions, game_code (text), asset_ids (text[]), created_at
-- RLS policies: users can CRUD their own game builds
+```text
+[Merch Tab]
+┌────────────────────────────────────────────────┐
+│  Product:  [Hoodie ▼]   Color: [⬛][⬜][grey]+  │
+│  Style:    [Streetwear ▼]                      │
+│  Prompt:   [Optional: extra direction...]      │
+│  ☑ Use project logo   ☑ Use brand color        │
+│                            [Generate Design]   │
+└────────────────────────────────────────────────┘
 
-### Game Generation Strategy
+  Recent Designs
+  ┌─────────┐ ┌─────────┐ ┌─────────┐
+  │ Hoodie  │ │ T-Shirt │ │ Tote    │
+  │ [front] │ │ [front] │ │ [front] │
+  │ [back]  │ │ [back]  │ │ [back]  │
+  │ ⬇ ↻ 🗑  │ │ ⬇ ↻ 🗑  │ │ ⬇ ↻ 🗑   │
+  └─────────┘ └─────────┘ └─────────┘
+```
 
-The AI will generate a single self-contained HTML file with embedded JavaScript that:
-- Loads asset images from their public URLs
-- Implements a game loop with requestAnimationFrame
-- Handles keyboard/touch input
-- Includes collision detection, scoring, and basic physics based on game type
-- Has a start screen, gameplay, and game-over states
-- Works standalone when downloaded (assets are referenced by absolute URL)
+## Technical plan
 
-### File Summary
+**Database** — new table `merch_designs`:
+- `id`, `project_id`, `user_id`, `created_at`
+- `product_type` (text), `base_color` (text), `style` (text), `prompt` (text)
+- `front_design_url`, `back_design_url` (transparent PNGs)
+- `front_mockup_url`, `back_mockup_url` (composited mockups)
+- RLS: user can CRUD their own rows
 
-**New files:**
-- `supabase/migrations/..._game_builds.sql` — Game builds table with RLS
-- `supabase/functions/generate-game/index.ts` — AI game code generation
-- No new page files — adds a "Build Game" tab to existing `AssetProject.tsx`
+**Edge function** `generate-merch-design`:
+1. Load `marketing_projects` row (logo, primary_color, knowledge_base, name)
+2. Build a style-aware prompt per design panel:
+   - Front: large hero graphic / wordmark
+   - Back: complementary design (often bigger, more detail)
+   - Both reference brand color, optional logo, project description
+   - Enforce "isolated design on pure white background" for clean compositing
+3. Call **Gemini 3.1 Flash Image Preview** (Nano Banana 2) for the 2 design panels
+4. Run each through **remove.bg** (key already in secrets) → transparent PNGs
+5. Generate the two mockups: send the transparent design + a mockup-instruction prompt back to Gemini ("place this design on the front of a [black hoodie], realistic product photo, studio lighting, centered") — produces final composited mockup
+6. Upload all 4 PNGs to the `media` bucket under `merch/{project_id}/{design_id}/`
+7. Insert row into `merch_designs`, return URLs
 
-**Modified files:**
-- `src/pages/AssetProject.tsx` — Add "Build Game" tab with asset picker, game type selector, live preview, and refinement prompt
-- `src/hooks/useAssetProject.ts` — Add hooks for game builds CRUD
+**Frontend** — new files:
+- `src/components/Marketing/MerchDesignPanel.tsx` — generation form + recent gallery
+- `src/components/Marketing/MerchDesignCard.tsx` — single design with front/back preview, download, regenerate, delete, save-to-outputs
+- `src/hooks/useMerchDesigns.ts` — list / create / delete React Query hooks
+- Add `<TabsTrigger value="merch">Merch</TabsTrigger>` + `<TabsContent>` in `src/pages/MarketingProject.tsx`
+- Register `generate-merch-design` in `supabase/config.toml` with `verify_jwt = false`
 
-### Technical Details
+**Style presets** (drives prompt quality):
+- Minimal — clean lines, monochrome, lots of negative space
+- Vintage — distressed textures, retro typography, faded palette
+- Streetwear — bold layered graphics, oversized typography, urban
+- Bold Typography — wordmark-driven, oversized text, geometric
+- Illustrated — hand-drawn character or scene, organic linework
+- Y2K — chrome, gradients, futuristic 2000s aesthetic
+- Grunge — torn edges, splatter, rough textures
 
-- Uses `google/gemini-2.5-pro` for game code generation (complex reasoning needed for functional game code)
-- Game code is a single HTML string rendered via `srcDoc` in a sandboxed iframe
-- Iterative refinement sends the previous game code + new instructions back to the AI
-- Downloaded HTML file is fully self-contained and playable offline (assets load from public URLs)
-- Game builds are saved to the database so users can revisit and continue refining
+## Out of scope (can come later)
+- Print-ready files with bleed/CMYK export
+- Direct Printful / Printify integration for ordering
+- Multiple size variants (S/M/L mockups)
+- 3D rotating preview
 
