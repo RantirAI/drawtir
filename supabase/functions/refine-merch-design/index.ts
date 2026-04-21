@@ -11,7 +11,7 @@ const PRODUCT_LABELS: Record<string, string> = {
   cap: "baseball cap", tote: "canvas tote bag", mug: "ceramic mug",
 };
 
-async function generateImage(apiKey: string, prompt: string, inputImageUrls: string[] = []): Promise<string> {
+async function generateImage(apiKey: string, prompt: string, inputImageUrls: string[] = [], model = "google/gemini-3.1-flash-image-preview"): Promise<string> {
   const content: any[] = [{ type: "text", text: prompt }];
   for (const url of inputImageUrls) {
     if (url) content.push({ type: "image_url", image_url: { url } });
@@ -21,7 +21,7 @@ async function generateImage(apiKey: string, prompt: string, inputImageUrls: str
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3.1-flash-image-preview",
+      model,
       messages: [{ role: "user", content }],
       modalities: ["image", "text"],
     }),
@@ -131,18 +131,22 @@ serve(async (req) => {
     const logoUrl = design.use_logo && project?.logos?.length ? project.logos[0] : null;
     const brandColor = design.use_brand_color && project?.primary_color ? project.primary_color : null;
 
-    const refinePromptBase = (side: "front" | "back", originalUrl: string) => `Refine and redesign this existing apparel ${side} graphic for a ${productLabel}. Brand: "${project?.name || ""}".
+    const refinePromptBase = (side: "front" | "back") => `You are EDITING an existing apparel graphic — not creating a new one. The FIRST image attached is the CURRENT design and is your starting canvas.${logoUrl ? " The SECOND image is the official brand logo." : ""}
 
-USER REFINEMENT REQUEST: ${refine_prompt}
+USER EDIT INSTRUCTION (apply this literally and ONLY this):
+"${refine_prompt}"
 
-CRITICAL:
-- Keep the overall identity, brand voice and visual language of the ORIGINAL design (provided as the first image reference) — this is a refinement, not a completely new design.
-- Apply the user's refinement request precisely.
-${logoUrl ? "- A brand logo reference is also provided. If the design uses the logo, keep it EXACTLY as provided — do not redraw or alter it." : ""}
-${brandColor ? `- Maintain the brand accent color ${brandColor}.` : ""}
-- Output must be ISOLATED on a pure solid white background (#FFFFFF), no garment, no model, no mockup.
-- Professional, print-ready, sharp, perfectly legible typography (real words, properly kerned).
-- Senior apparel designer quality — clean, intentional, not chaotic.`;
+STRICT RULES — VIOLATING THESE IS A FAILURE:
+1. The first image is your canvas. PRESERVE EVERYTHING the user did not ask to change: same composition, same layout, same typography style, same colors, same icons, same arrangement, same proportions.
+2. Apply ONLY the user's edit instruction. Do NOT redesign. Do NOT reinterpret. Do NOT "improve" or "polish" things the user did not mention. Do NOT swap fonts, shift colors, or move elements unless explicitly requested.
+3. If the user asks to change ONE element (e.g. "make the title bigger"), only that element changes — everything else stays pixel-faithful to the original.
+4. ${logoUrl ? "If the original uses the logo, keep the EXACT logo from the second reference image — never redraw or restyle it." : "Keep any logo/wordmark from the original exactly as-is."}
+5. ${brandColor ? `Brand accent color stays ${brandColor}.` : "Keep the original color palette."}
+6. Output: ISOLATED flat graphic on pure solid white background (#FFFFFF). No garment, no model, no mockup, no product shadows.
+7. Sharp, print-ready, perfectly legible typography (real words, correctly spelled, properly kerned).
+8. Context: this is the ${side.toUpperCase()} panel of a ${productLabel}. Brand: "${project?.name || ""}".
+
+You are an EDITOR, not a designer. The user trusts the original. Make the requested change and NOTHING else.`;
 
     const updates: Record<string, string> = {};
     const basePath = `merch/${design.project_id}/${design.id}`;
@@ -155,7 +159,8 @@ ${brandColor ? `- Maintain the brand accent color ${brandColor}.` : ""}
       console.log(`Refining ${side} design...`);
       const refs = [originalUrl];
       if (logoUrl) refs.push(logoUrl);
-      const raw = await generateImage(LOVABLE_API_KEY, refinePromptBase(side, originalUrl), refs);
+      // Pro image model — much better at faithful edits than flash
+      const raw = await generateImage(LOVABLE_API_KEY, refinePromptBase(side), refs, "google/gemini-3-pro-image-preview");
       const transparent = await removeBackground(REMOVE_BG_API_KEY, raw);
 
       console.log(`Regenerating ${side} mockup...`);
