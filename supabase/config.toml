@@ -44,3 +44,6 @@ verify_jwt = false
 
 [functions.generate-merch-design]
 verify_jwt = false
+
+[functions.generate-merch-sizes]
+verify_jwt = false
