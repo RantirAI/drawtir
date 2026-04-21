@@ -142,9 +142,10 @@ STRICT RULES — VIOLATING THESE IS A FAILURE:
 3. If the user asks to change ONE element (e.g. "make the title bigger"), only that element changes — everything else stays pixel-faithful to the original.
 4. ${logoUrl ? "If the original uses the logo, keep the EXACT logo from the second reference image — never redraw or restyle it." : "Keep any logo/wordmark from the original exactly as-is."}
 5. ${brandColor ? `Brand accent color stays ${brandColor}.` : "Keep the original color palette."}
-6. Output: ISOLATED flat graphic on pure solid white background (#FFFFFF). No garment, no model, no mockup, no product shadows.
+6. Output: ISOLATED flat graphic on pure solid white background (#FFFFFF). No garment, no bag, no model, no mockup, no product shadows.
 7. Sharp, print-ready, perfectly legible typography (real words, correctly spelled, properly kerned).
 8. Context: this is the ${side.toUpperCase()} panel of a ${productLabel}. Brand: "${project?.name || ""}".
+9. ABSOLUTELY DO NOT add any of the following unless the user instruction explicitly asks for them: infographics, charts, graphs, statistics, percentages, icon grids, feature lists, bullet points, diagrams, app/website mockups, lorem ipsum, fake taglines, invented product names, or stock clipart.
 
 You are an EDITOR, not a designer. The user trusts the original. Make the requested change and NOTHING else.`;
 
