@@ -60,3 +60,22 @@ export function useDeleteMerchDesign() {
     onError: (e: any) => toast.error(e.message),
   });
 }
+
+export function useGenerateMerchSizes() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ design_id }: { design_id: string; project_id: string }) => {
+      const { data, error } = await supabase.functions.invoke("generate-merch-sizes", {
+        body: { design_id },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data.design;
+    },
+    onSuccess: (_, vars) => {
+      qc.invalidateQueries({ queryKey: ["merch-designs", vars.project_id] });
+      toast.success("Size variants generated");
+    },
+    onError: (e: any) => toast.error(e.message || "Failed to generate sizes"),
+  });
+}
