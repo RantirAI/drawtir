@@ -24,7 +24,14 @@ const PRODUCT_LABELS: Record<string, string> = {
   cap: "baseball cap",
   tote: "canvas tote bag",
   mug: "ceramic mug",
+  handbag: "structured handbag (leather-look)",
+  paper_bag: "premium retail paper shopping bag with rope handles",
+  shopping_bag: "reusable woven shopping bag",
+  backpack: "minimal everyday backpack",
+  drawstring_bag: "cinch drawstring bag",
 };
+
+const BAG_PRODUCTS = new Set(["tote", "handbag", "paper_bag", "shopping_bag", "backpack", "drawstring_bag"]);
 
 async function generateImage(apiKey: string, prompt: string, inputImageUrl?: string): Promise<string> {
   const content: any[] = [{ type: "text", text: prompt }];
