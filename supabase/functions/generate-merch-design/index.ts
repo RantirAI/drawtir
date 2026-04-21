@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const STYLE_PROMPTS: Record<string, string> = {
+  corporate: "professional corporate design, clean modern aesthetic, refined and tasteful, sophisticated typography (sans-serif like Helvetica/Inter), structured layout with strong grid alignment, restrained color palette, premium business-appropriate look, suitable for company merchandise and team apparel",
   minimal: "minimal design, clean lines, monochrome palette, lots of negative space, refined typography, modern and understated",
   vintage: "vintage retro design, distressed textures, weathered look, retro typography (70s/80s), faded and aged color palette, classic Americana feel",
   streetwear: "streetwear graphic design, bold layered graphics, oversized typography, urban aesthetic, hype-beast style, high contrast",
