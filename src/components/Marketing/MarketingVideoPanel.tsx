@@ -345,9 +345,9 @@ export default function MarketingVideoPanel({
 
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-xs text-muted-foreground flex-1">
-            We'll write a {country || defaultCountry || "locale"}-aware script in {currency || defaultCurrency || "your currency"}, generate{" "}
+            We'll write a {country || defaultCountry || "locale"}-aware {format === "podcast" ? "two-host conversation" : "script"} in {currency || defaultCurrency || "your currency"}, generate{" "}
             {duration <= 15 ? 4 : duration <= 30 ? 6 : 8} branded scenes (with logos painted onto subjects and your real screenshots),
-            voice it with {voiceName}, and render a downloadable video.
+            voice it with {format === "podcast" ? `${hostAVoiceName} & ${hostBVoiceName}` : voiceName}, and render a downloadable video.
           </p>
           <Button onClick={handleGenerate} disabled={generate.isPending || !!renderingId}>
             {generate.isPending ? (
