@@ -218,26 +218,72 @@ export default function MarketingVideoPanel({
           </div>
 
           <div className="space-y-2">
-            <Label>Voice</Label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
-                <Volume2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{voiceName || "Pick a voice"}</span>
+            <Label>Format</Label>
+            <Select value={format} onValueChange={(v) => setFormat(v as "monologue" | "podcast")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monologue">Monologue — single narrator</SelectItem>
+                <SelectItem value="podcast">Podcast — two hosts in conversation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {format === "monologue" ? (
+            <div className="space-y-2">
+              <Label>Voice</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                  <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{voiceName || "Pick a voice"}</span>
+                </div>
+                <Button variant="outline" type="button" onClick={() => setVoicePickerTarget("mono")}>
+                  Change
+                </Button>
               </div>
-              <Button variant="outline" type="button" onClick={() => setVoiceDrawerOpen(true)}>
-                Change
-              </Button>
             </div>
-            <div className="hidden">
-              <VoiceSelector
-                open={voiceDrawerOpen}
-                onClose={() => setVoiceDrawerOpen(false)}
-                onSelectVoice={(id, name) => {
+          ) : (
+            <div className="space-y-2 md:col-span-2">
+              <Label>Hosts (pick 2 distinct voices)</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                    <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: (primaryColor || "#9b87f5") + "30", color: primaryColor || "#9b87f5" }}>A</span>
+                    <span className="text-sm truncate">{hostAVoiceName || "Pick host A"}</span>
+                  </div>
+                  <Button variant="outline" type="button" size="sm" onClick={() => setVoicePickerTarget("A")}>
+                    Change
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                    <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-foreground/10 text-foreground">B</span>
+                    <span className="text-sm truncate">{hostBVoiceName || "Pick host B"}</span>
+                  </div>
+                  <Button variant="outline" type="button" size="sm" onClick={() => setVoicePickerTarget("B")}>
+                    Change
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="hidden">
+            <VoiceSelector
+              open={voicePickerTarget !== null}
+              onClose={() => setVoicePickerTarget(null)}
+              onSelectVoice={(id, name) => {
+                if (voicePickerTarget === "mono") {
                   setVoiceId(id);
                   setVoiceName(name);
-                }}
-              />
-            </div>
+                } else if (voicePickerTarget === "A") {
+                  setHostAVoiceId(id);
+                  setHostAVoiceName(name);
+                } else if (voicePickerTarget === "B") {
+                  setHostBVoiceId(id);
+                  setHostBVoiceName(name);
+                }
+              }}
+            />
           </div>
         </div>
 
