@@ -56,9 +56,14 @@ export default function MarketingVideoPanel({
   const [duration, setDuration] = useState(30);
   const [tone, setTone] = useState("professional");
   const [prompt, setPrompt] = useState("");
+  const [format, setFormat] = useState<"monologue" | "podcast">("monologue");
   const [voiceId, setVoiceId] = useState("EXAVITQu4vr4xnSDxMaL");
   const [voiceName, setVoiceName] = useState("Sarah");
-  const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
+  const [hostAVoiceId, setHostAVoiceId] = useState("EXAVITQu4vr4xnSDxMaL");
+  const [hostAVoiceName, setHostAVoiceName] = useState("Sarah");
+  const [hostBVoiceId, setHostBVoiceId] = useState("JBFqnCBsd6RMkjVDRZzb");
+  const [hostBVoiceName, setHostBVoiceName] = useState("George");
+  const [voicePickerTarget, setVoicePickerTarget] = useState<"mono" | "A" | "B" | null>(null);
   const [renderingId, setRenderingId] = useState<string | null>(null);
   const [renderProgress, setRenderProgress] = useState(0);
 
@@ -66,7 +71,7 @@ export default function MarketingVideoPanel({
   const [country, setCountry] = useState("");
   const [currency, setCurrency] = useState("");
   const [language, setLanguage] = useState("");
-  const [burnSubs, setBurnSubs] = useState(true);
+  const [burnSubs, setBurnSubs] = useState(false);
 
   useEffect(() => {
     setCountry(defaultCountry || "");
@@ -80,23 +85,36 @@ export default function MarketingVideoPanel({
   const saveBlob = useSaveMarketingVideoBlob();
 
   const handleGenerate = async () => {
-    if (!voiceId) {
+    if (format === "monologue" && !voiceId) {
       toast.error("Please pick a voice first");
+      return;
+    }
+    if (format === "podcast" && (!hostAVoiceId || !hostBVoiceId)) {
+      toast.error("Please pick both host voices");
+      return;
+    }
+    if (format === "podcast" && hostAVoiceId === hostBVoiceId) {
+      toast.error("Pick two different voices for Host A and Host B");
       return;
     }
     try {
       const video = await generate.mutateAsync({
         project_id: projectId,
         duration_seconds: duration,
-        voice_id: voiceId,
-        voice_name: voiceName,
+        voice_id: format === "podcast" ? hostAVoiceId : voiceId,
+        voice_name: format === "podcast" ? hostAVoiceName : voiceName,
         prompt,
-        title: title.trim() || `${brandName || "Brand"} ${duration}s video`,
+        title: title.trim() || `${brandName || "Brand"} ${duration}s ${format === "podcast" ? "podcast" : "video"}`,
         tone,
         country: country.trim() || undefined,
         currency: currency.trim().toUpperCase() || undefined,
         language: language.trim() || undefined,
         burn_subtitles: burnSubs,
+        format,
+        host_a_voice_id: format === "podcast" ? hostAVoiceId : undefined,
+        host_a_voice_name: format === "podcast" ? hostAVoiceName : undefined,
+        host_b_voice_id: format === "podcast" ? hostBVoiceId : undefined,
+        host_b_voice_name: format === "podcast" ? hostBVoiceName : undefined,
       });
       await renderAndUpload(video);
     } catch {
@@ -200,26 +218,72 @@ export default function MarketingVideoPanel({
           </div>
 
           <div className="space-y-2">
-            <Label>Voice</Label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
-                <Volume2 className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm">{voiceName || "Pick a voice"}</span>
+            <Label>Format</Label>
+            <Select value={format} onValueChange={(v) => setFormat(v as "monologue" | "podcast")}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monologue">Monologue — single narrator</SelectItem>
+                <SelectItem value="podcast">Podcast — two hosts in conversation</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {format === "monologue" ? (
+            <div className="space-y-2">
+              <Label>Voice</Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                  <Volume2 className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">{voiceName || "Pick a voice"}</span>
+                </div>
+                <Button variant="outline" type="button" onClick={() => setVoicePickerTarget("mono")}>
+                  Change
+                </Button>
               </div>
-              <Button variant="outline" type="button" onClick={() => setVoiceDrawerOpen(true)}>
-                Change
-              </Button>
             </div>
-            <div className="hidden">
-              <VoiceSelector
-                open={voiceDrawerOpen}
-                onClose={() => setVoiceDrawerOpen(false)}
-                onSelectVoice={(id, name) => {
+          ) : (
+            <div className="space-y-2 md:col-span-2">
+              <Label>Hosts (pick 2 distinct voices)</Label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                    <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold" style={{ backgroundColor: (primaryColor || "#9b87f5") + "30", color: primaryColor || "#9b87f5" }}>A</span>
+                    <span className="text-sm truncate">{hostAVoiceName || "Pick host A"}</span>
+                  </div>
+                  <Button variant="outline" type="button" size="sm" onClick={() => setVoicePickerTarget("A")}>
+                    Change
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 flex items-center gap-2 px-3 h-10 rounded-md border border-border bg-background">
+                    <span className="h-5 w-5 rounded-full flex items-center justify-center text-[10px] font-bold bg-foreground/10 text-foreground">B</span>
+                    <span className="text-sm truncate">{hostBVoiceName || "Pick host B"}</span>
+                  </div>
+                  <Button variant="outline" type="button" size="sm" onClick={() => setVoicePickerTarget("B")}>
+                    Change
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="hidden">
+            <VoiceSelector
+              open={voicePickerTarget !== null}
+              onClose={() => setVoicePickerTarget(null)}
+              onSelectVoice={(id, name) => {
+                if (voicePickerTarget === "mono") {
                   setVoiceId(id);
                   setVoiceName(name);
-                }}
-              />
-            </div>
+                } else if (voicePickerTarget === "A") {
+                  setHostAVoiceId(id);
+                  setHostAVoiceName(name);
+                } else if (voicePickerTarget === "B") {
+                  setHostBVoiceId(id);
+                  setHostBVoiceName(name);
+                }
+              }}
+            />
           </div>
         </div>
 
@@ -281,9 +345,9 @@ export default function MarketingVideoPanel({
 
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-xs text-muted-foreground flex-1">
-            We'll write a {country || defaultCountry || "locale"}-aware script in {currency || defaultCurrency || "your currency"}, generate{" "}
+            We'll write a {country || defaultCountry || "locale"}-aware {format === "podcast" ? "two-host conversation" : "script"} in {currency || defaultCurrency || "your currency"}, generate{" "}
             {duration <= 15 ? 4 : duration <= 30 ? 6 : 8} branded scenes (with logos painted onto subjects and your real screenshots),
-            voice it with {voiceName}, and render a downloadable video.
+            voice it with {format === "podcast" ? `${hostAVoiceName} & ${hostBVoiceName}` : voiceName}, and render a downloadable video.
           </p>
           <Button onClick={handleGenerate} disabled={generate.isPending || !!renderingId}>
             {generate.isPending ? (
