@@ -29,14 +29,36 @@ export default function MarketingVideoCard({ video, projectId, isRendering, rend
   const [regenerateImages, setRegenerateImages] = useState(false);
   const [voicePickerOpen, setVoicePickerOpen] = useState(false);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!video.video_url) return;
-    const a = document.createElement("a");
-    a.href = video.video_url;
-    a.download = `${video.title.replace(/[^a-z0-9]/gi, "-")}.${video.video_url.endsWith(".mp4") ? "mp4" : "webm"}`;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    a.click();
+
+    const fallbackDownload = () => {
+      const a = document.createElement("a");
+      a.href = video.video_url!;
+      a.download = `${video.title.replace(/[^a-z0-9]/gi, "-")}.${video.video_url!.endsWith(".mp4") ? "mp4" : "webm"}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+
+    try {
+      const response = await fetch(video.video_url);
+      if (!response.ok) throw new Error("Download failed");
+
+      const blob = await response.blob();
+      const extension = blob.type.includes("mp4") || video.video_url.endsWith(".mp4") ? "mp4" : "webm";
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+
+      a.href = blobUrl;
+      a.download = `${video.title.replace(/[^a-z0-9]/gi, "-")}.${extension}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      fallbackDownload();
+    }
   };
 
   const handleRefine = async () => {
