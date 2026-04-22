@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, Video, Volume2, Globe, ChevronDown, ChevronUp, Mic, Users } from "lucide-react";
+import { Loader2, Sparkles, Video, Volume2, Globe, ChevronDown, ChevronUp } from "lucide-react";
 import VoiceSelector from "@/components/Panels/VoiceSelector";
 import {
   useMarketingVideos,
