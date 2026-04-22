@@ -43,10 +43,12 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 
 function pickRecorderMime(): { mime: string; ext: string } {
   const candidates = [
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+    "video/mp4;codecs=avc1,mp4a",
+    "video/mp4",
     "video/webm;codecs=vp9,opus",
     "video/webm;codecs=vp8,opus",
     "video/webm",
-    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
   ];
   for (const m of candidates) {
     if ((window as any).MediaRecorder && MediaRecorder.isTypeSupported(m)) {
