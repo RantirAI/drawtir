@@ -371,6 +371,71 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_videos: {
+        Row: {
+          audio_url: string | null
+          created_at: string
+          duration_seconds: number
+          id: string
+          project_id: string
+          prompt: string | null
+          scenes: Json
+          script: string | null
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          voice_id: string
+          voice_name: string
+        }
+        Insert: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          project_id: string
+          prompt?: string | null
+          scenes?: Json
+          script?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          voice_id: string
+          voice_name: string
+        }
+        Update: {
+          audio_url?: string | null
+          created_at?: string
+          duration_seconds?: number
+          id?: string
+          project_id?: string
+          prompt?: string | null
+          scenes?: Json
+          script?: string | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          voice_id?: string
+          voice_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_videos_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_library: {
         Row: {
           created_at: string

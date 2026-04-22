@@ -47,3 +47,9 @@ verify_jwt = false
 
 [functions.generate-merch-sizes]
 verify_jwt = false
+
+[functions.generate-marketing-video]
+verify_jwt = false
+
+[functions.save-marketing-video]
+verify_jwt = false
