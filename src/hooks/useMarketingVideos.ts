@@ -112,6 +112,30 @@ export function useSaveMarketingVideoBlob() {
   });
 }
 
+export function useRefineMarketingVideo() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (params: {
+      video_id: string;
+      project_id: string;
+      feedback?: string;
+      voice_id?: string;
+      voice_name?: string;
+      regenerate_images?: boolean;
+    }) => {
+      const { data, error } = await supabase.functions.invoke("refine-marketing-video", { body: params });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data.video as MarketingVideo;
+    },
+    onSuccess: (_v, vars) => {
+      qc.invalidateQueries({ queryKey: ["marketing-videos", vars.project_id] });
+      toast.success("Refined! Re-rendering video...");
+    },
+    onError: (e: any) => toast.error(e.message || "Refine failed"),
+  });
+}
+
 export function useDeleteMarketingVideo() {
   const qc = useQueryClient();
   return useMutation({

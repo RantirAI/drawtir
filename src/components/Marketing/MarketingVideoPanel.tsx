@@ -105,13 +105,16 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
     }
   };
 
-  // Auto-resume rendering for any video that finished generation but never got a final video_url
+  // Auto-render any video that has audio + scenes but no final video_url (freshly generated or refined)
   useEffect(() => {
-    const pending = videos.find((v) => !v.video_url && v.audio_url && v.scenes?.length && v.id !== renderingId);
-    if (pending && !renderingId && !generate.isPending) {
-      // Don't auto-render older pending videos to avoid surprises; only when freshly created.
-      // No-op here.
+    if (renderingId || generate.isPending) return;
+    const pending = videos.find(
+      (v) => !v.video_url && v.audio_url && Array.isArray(v.scenes) && v.scenes.length > 0
+    );
+    if (pending) {
+      renderAndUpload(pending);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videos, renderingId, generate.isPending]);
 
   return (
