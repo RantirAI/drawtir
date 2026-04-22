@@ -12,6 +12,7 @@ import ContentGenerator from "@/components/Marketing/ContentGenerator";
 import OutputGallery from "@/components/Marketing/OutputGallery";
 import MerchDesignPanel from "@/components/Marketing/MerchDesignPanel";
 import MarketingVideoPanel from "@/components/Marketing/MarketingVideoPanel";
+import PromptEngineerPanel from "@/components/Marketing/PromptEngineerPanel";
 
 export default function MarketingProject() {
   const { id } = useParams<{ id: string }>();
@@ -45,6 +46,7 @@ export default function MarketingProject() {
             <TabsTrigger value="brand">Brand Assets</TabsTrigger>
             <TabsTrigger value="featured">Featured Images</TabsTrigger>
             <TabsTrigger value="settings">Brand Settings</TabsTrigger>
+            <TabsTrigger value="prompts">Prompt Engineer</TabsTrigger>
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="merch">Merch</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
@@ -72,6 +74,10 @@ export default function MarketingProject() {
               brandVoice={p.brand_voice || ""}
               forbiddenWords={p.forbidden_words || []}
             />
+          </TabsContent>
+
+          <TabsContent value="prompts">
+            <PromptEngineerPanel projectId={project.id} />
           </TabsContent>
 
           <TabsContent value="generate">
