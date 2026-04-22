@@ -147,8 +147,12 @@ export async function renderMarketingVideo(
     const t = (performance.now() - startedAt) / 1000;
     if (t >= finalDuration) {
       stopped = true;
-      try { recorder.stop(); } catch {}
-      try { audio.pause(); } catch {}
+      try { recorder.requestData(); } catch {}
+      // Give the encoder a tick to flush the final chunk before stopping
+      setTimeout(() => {
+        try { recorder.stop(); } catch {}
+        try { audio.pause(); } catch {}
+      }, 200);
       return;
     }
 
