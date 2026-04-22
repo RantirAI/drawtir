@@ -21,11 +21,13 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 }
 
 function pickRecorderMime(): { mime: string; ext: string } {
+  // Prefer WebM — MediaRecorder MP4 output (Safari/Chrome) often produces files
+  // with broken/unseekable metadata. WebM is reliably playable everywhere modern.
   const candidates = [
-    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
     "video/webm;codecs=vp9,opus",
     "video/webm;codecs=vp8,opus",
     "video/webm",
+    "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
   ];
   for (const m of candidates) {
     if ((window as any).MediaRecorder && MediaRecorder.isTypeSupported(m)) {
