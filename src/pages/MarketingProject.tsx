@@ -9,6 +9,7 @@ import BrandAssetsPanel from "@/components/Marketing/BrandAssetsPanel";
 import ContentGenerator from "@/components/Marketing/ContentGenerator";
 import OutputGallery from "@/components/Marketing/OutputGallery";
 import MerchDesignPanel from "@/components/Marketing/MerchDesignPanel";
+import MarketingVideoPanel from "@/components/Marketing/MarketingVideoPanel";
 
 export default function MarketingProject() {
   const { id } = useParams<{ id: string }>();
@@ -40,6 +41,7 @@ export default function MarketingProject() {
             <TabsTrigger value="brand">Brand Assets</TabsTrigger>
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="merch">Merch</TabsTrigger>
+            <TabsTrigger value="videos">Videos</TabsTrigger>
             <TabsTrigger value="outputs">Outputs</TabsTrigger>
           </TabsList>
 
@@ -57,6 +59,15 @@ export default function MarketingProject() {
 
           <TabsContent value="merch">
             <MerchDesignPanel projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="videos">
+            <MarketingVideoPanel
+              projectId={project.id}
+              primaryColor={project.primary_color}
+              logoUrl={project.logos?.[0] || null}
+              brandName={project.name}
+            />
           </TabsContent>
 
           <TabsContent value="outputs">
