@@ -291,6 +291,47 @@ export type Database = {
           },
         ]
       }
+      marketing_featured_images: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          label: string
+          project_id: string
+          sort_order: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          label: string
+          project_id: string
+          sort_order?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          label?: string
+          project_id?: string
+          sort_order?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_featured_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_outputs: {
         Row: {
           content: Json
@@ -334,11 +375,16 @@ export type Database = {
       }
       marketing_projects: {
         Row: {
+          brand_voice: string | null
+          country: string | null
           created_at: string
+          currency: string | null
           description: string | null
+          forbidden_words: string[] | null
           id: string
           images: string[] | null
           knowledge_base: string | null
+          language: string | null
           logos: string[] | null
           name: string
           primary_color: string | null
@@ -346,11 +392,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          brand_voice?: string | null
+          country?: string | null
           created_at?: string
+          currency?: string | null
           description?: string | null
+          forbidden_words?: string[] | null
           id?: string
           images?: string[] | null
           knowledge_base?: string | null
+          language?: string | null
           logos?: string[] | null
           name: string
           primary_color?: string | null
@@ -358,11 +409,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          brand_voice?: string | null
+          country?: string | null
           created_at?: string
+          currency?: string | null
           description?: string | null
+          forbidden_words?: string[] | null
           id?: string
           images?: string[] | null
           knowledge_base?: string | null
+          language?: string | null
           logos?: string[] | null
           name?: string
           primary_color?: string | null
@@ -374,14 +430,19 @@ export type Database = {
       marketing_videos: {
         Row: {
           audio_url: string | null
+          burn_subtitles: boolean
+          country: string | null
           created_at: string
+          currency: string | null
           duration_seconds: number
           id: string
+          language: string | null
           project_id: string
           prompt: string | null
           scenes: Json
           script: string | null
           status: string
+          subtitles: Json | null
           thumbnail_url: string | null
           title: string
           updated_at: string
@@ -392,14 +453,19 @@ export type Database = {
         }
         Insert: {
           audio_url?: string | null
+          burn_subtitles?: boolean
+          country?: string | null
           created_at?: string
+          currency?: string | null
           duration_seconds?: number
           id?: string
+          language?: string | null
           project_id: string
           prompt?: string | null
           scenes?: Json
           script?: string | null
           status?: string
+          subtitles?: Json | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
@@ -410,14 +476,19 @@ export type Database = {
         }
         Update: {
           audio_url?: string | null
+          burn_subtitles?: boolean
+          country?: string | null
           created_at?: string
+          currency?: string | null
           duration_seconds?: number
           id?: string
+          language?: string | null
           project_id?: string
           prompt?: string | null
           scenes?: Json
           script?: string | null
           status?: string
+          subtitles?: Json | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
