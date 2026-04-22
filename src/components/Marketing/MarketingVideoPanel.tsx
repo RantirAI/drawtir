@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, Video, Volume2, Globe, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Sparkles, Video, Volume2, Globe, ChevronDown, ChevronUp, Mic, Users } from "lucide-react";
 import VoiceSelector from "@/components/Panels/VoiceSelector";
 import {
   useMarketingVideos,
@@ -56,9 +56,14 @@ export default function MarketingVideoPanel({
   const [duration, setDuration] = useState(30);
   const [tone, setTone] = useState("professional");
   const [prompt, setPrompt] = useState("");
+  const [format, setFormat] = useState<"monologue" | "podcast">("monologue");
   const [voiceId, setVoiceId] = useState("EXAVITQu4vr4xnSDxMaL");
   const [voiceName, setVoiceName] = useState("Sarah");
-  const [voiceDrawerOpen, setVoiceDrawerOpen] = useState(false);
+  const [hostAVoiceId, setHostAVoiceId] = useState("EXAVITQu4vr4xnSDxMaL");
+  const [hostAVoiceName, setHostAVoiceName] = useState("Sarah");
+  const [hostBVoiceId, setHostBVoiceId] = useState("JBFqnCBsd6RMkjVDRZzb");
+  const [hostBVoiceName, setHostBVoiceName] = useState("George");
+  const [voicePickerTarget, setVoicePickerTarget] = useState<"mono" | "A" | "B" | null>(null);
   const [renderingId, setRenderingId] = useState<string | null>(null);
   const [renderProgress, setRenderProgress] = useState(0);
 
@@ -66,7 +71,7 @@ export default function MarketingVideoPanel({
   const [country, setCountry] = useState("");
   const [currency, setCurrency] = useState("");
   const [language, setLanguage] = useState("");
-  const [burnSubs, setBurnSubs] = useState(true);
+  const [burnSubs, setBurnSubs] = useState(false);
 
   useEffect(() => {
     setCountry(defaultCountry || "");
@@ -80,23 +85,36 @@ export default function MarketingVideoPanel({
   const saveBlob = useSaveMarketingVideoBlob();
 
   const handleGenerate = async () => {
-    if (!voiceId) {
+    if (format === "monologue" && !voiceId) {
       toast.error("Please pick a voice first");
+      return;
+    }
+    if (format === "podcast" && (!hostAVoiceId || !hostBVoiceId)) {
+      toast.error("Please pick both host voices");
+      return;
+    }
+    if (format === "podcast" && hostAVoiceId === hostBVoiceId) {
+      toast.error("Pick two different voices for Host A and Host B");
       return;
     }
     try {
       const video = await generate.mutateAsync({
         project_id: projectId,
         duration_seconds: duration,
-        voice_id: voiceId,
-        voice_name: voiceName,
+        voice_id: format === "podcast" ? hostAVoiceId : voiceId,
+        voice_name: format === "podcast" ? hostAVoiceName : voiceName,
         prompt,
-        title: title.trim() || `${brandName || "Brand"} ${duration}s video`,
+        title: title.trim() || `${brandName || "Brand"} ${duration}s ${format === "podcast" ? "podcast" : "video"}`,
         tone,
         country: country.trim() || undefined,
         currency: currency.trim().toUpperCase() || undefined,
         language: language.trim() || undefined,
         burn_subtitles: burnSubs,
+        format,
+        host_a_voice_id: format === "podcast" ? hostAVoiceId : undefined,
+        host_a_voice_name: format === "podcast" ? hostAVoiceName : undefined,
+        host_b_voice_id: format === "podcast" ? hostBVoiceId : undefined,
+        host_b_voice_name: format === "podcast" ? hostBVoiceName : undefined,
       });
       await renderAndUpload(video);
     } catch {
