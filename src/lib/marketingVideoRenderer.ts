@@ -15,6 +15,8 @@ export interface SubtitleWord {
   word: string;
   start: number;
   end: number;
+  speaker?: "A" | "B" | null;
+  speaker_name?: string | null;
 }
 
 export interface RenderOptions {
