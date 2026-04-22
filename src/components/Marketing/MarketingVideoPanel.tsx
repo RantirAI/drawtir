@@ -4,10 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Sparkles, Video, Volume2 } from "lucide-react";
+import { Loader2, Sparkles, Video, Volume2, Globe, ChevronDown, ChevronUp } from "lucide-react";
 import VoiceSelector from "@/components/Panels/VoiceSelector";
-import { useMarketingVideos, useGenerateMarketingVideo, useSaveMarketingVideoBlob, MarketingVideo } from "@/hooks/useMarketingVideos";
+import {
+  useMarketingVideos,
+  useGenerateMarketingVideo,
+  useSaveMarketingVideoBlob,
+  MarketingVideo,
+} from "@/hooks/useMarketingVideos";
+import { useFeaturedImages } from "@/hooks/useFeaturedImages";
 import { renderMarketingVideo } from "@/lib/marketingVideoRenderer";
 import MarketingVideoCard from "./MarketingVideoCard";
 import { toast } from "sonner";
@@ -17,6 +24,9 @@ interface Props {
   primaryColor?: string | null;
   logoUrl?: string | null;
   brandName?: string;
+  defaultCountry?: string | null;
+  defaultCurrency?: string | null;
+  defaultLanguage?: string | null;
 }
 
 const DURATIONS = [
@@ -33,7 +43,15 @@ const TONES = [
   { value: "luxurious", label: "Luxurious" },
 ];
 
-export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, brandName }: Props) {
+export default function MarketingVideoPanel({
+  projectId,
+  primaryColor,
+  logoUrl,
+  brandName,
+  defaultCountry,
+  defaultCurrency,
+  defaultLanguage,
+}: Props) {
   const [title, setTitle] = useState("");
   const [duration, setDuration] = useState(30);
   const [tone, setTone] = useState("professional");
@@ -44,7 +62,20 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
   const [renderingId, setRenderingId] = useState<string | null>(null);
   const [renderProgress, setRenderProgress] = useState(0);
 
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [country, setCountry] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [language, setLanguage] = useState("");
+  const [burnSubs, setBurnSubs] = useState(true);
+
+  useEffect(() => {
+    setCountry(defaultCountry || "");
+    setCurrency(defaultCurrency || "");
+    setLanguage(defaultLanguage || "");
+  }, [defaultCountry, defaultCurrency, defaultLanguage]);
+
   const { data: videos = [], isLoading } = useMarketingVideos(projectId);
+  const { data: featured = [] } = useFeaturedImages(projectId);
   const generate = useGenerateMarketingVideo();
   const saveBlob = useSaveMarketingVideoBlob();
 
@@ -62,8 +93,11 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
         prompt,
         title: title.trim() || `${brandName || "Brand"} ${duration}s video`,
         tone,
+        country: country.trim() || undefined,
+        currency: currency.trim().toUpperCase() || undefined,
+        language: language.trim() || undefined,
+        burn_subtitles: burnSubs,
       });
-      // Kick off client-side rendering of the actual MP4/WebM
       await renderAndUpload(video);
     } catch {
       // toast handled by hook
@@ -86,8 +120,10 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
           brandColor: primaryColor || "#9b87f5",
           logoUrl: logoUrl || null,
           brandName: brandName || "",
+          subtitles: video.subtitles || [],
+          burnSubtitles: video.burn_subtitles ?? true,
           onProgress: (p) => setRenderProgress(p),
-        }
+        },
       );
       await saveBlob.mutateAsync({
         video_id: video.id,
@@ -105,17 +141,19 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
     }
   };
 
-  // Auto-render any video that has audio + scenes but no final video_url (freshly generated or refined)
   useEffect(() => {
     if (renderingId || generate.isPending) return;
     const pending = videos.find(
-      (v) => !v.video_url && v.audio_url && Array.isArray(v.scenes) && v.scenes.length > 0
+      (v) => !v.video_url && v.audio_url && Array.isArray(v.scenes) && v.scenes.length > 0,
     );
-    if (pending) {
-      renderAndUpload(pending);
-    }
+    if (pending) renderAndUpload(pending);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videos, renderingId, generate.isPending]);
+
+  const featuredHint =
+    featured.length === 0
+      ? "Tip: add labeled product screenshots in 'Featured Images' so the AI can show your real UI in the video."
+      : `${featured.length} featured screenshot${featured.length === 1 ? "" : "s"} available — the AI will weave them into the video.`;
 
   return (
     <div className="space-y-6">
@@ -124,6 +162,8 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
           <Video className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Generate Marketing Video</h3>
         </div>
+
+        <p className="text-xs text-muted-foreground">{featuredHint}</p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
@@ -193,9 +233,57 @@ export default function MarketingVideoPanel({ projectId, primaryColor, logoUrl, 
           />
         </div>
 
+        <div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-xs gap-1 px-2"
+            onClick={() => setAdvancedOpen((v) => !v)}
+          >
+            {advancedOpen ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            Advanced (locale & captions)
+          </Button>
+        </div>
+
+        {advancedOpen && (
+          <div className="space-y-4 rounded-md border border-border/60 bg-muted/20 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Globe className="h-4 w-4 text-primary" /> Locale override (defaults from project)
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs">Country</Label>
+                <Input value={country} onChange={(e) => setCountry(e.target.value)} placeholder={defaultCountry || "United States"} />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Currency</Label>
+                <Input
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+                  placeholder={defaultCurrency || "USD"}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs">Language</Label>
+                <Input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder={defaultLanguage || "English"} />
+              </div>
+            </div>
+            <div className="flex items-center justify-between rounded-md border border-border/60 bg-background px-3 py-2">
+              <div>
+                <div className="text-sm font-medium">Burn subtitles into video</div>
+                <div className="text-xs text-muted-foreground">Word-timed captions for silent autoplay & accessibility.</div>
+              </div>
+              <Switch checked={burnSubs} onCheckedChange={setBurnSubs} />
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-xs text-muted-foreground flex-1">
-            We'll write the script, generate {duration <= 15 ? 4 : duration <= 30 ? 6 : 8} branded scenes, voice it with {voiceName}, and render a downloadable video — all on-brand using your knowledge base.
+            We'll write a {country || defaultCountry || "locale"}-aware script in {currency || defaultCurrency || "your currency"}, generate{" "}
+            {duration <= 15 ? 4 : duration <= 30 ? 6 : 8} branded scenes (with logos painted onto subjects and your real screenshots),
+            voice it with {voiceName}, and render a downloadable video.
           </p>
           <Button onClick={handleGenerate} disabled={generate.isPending || !!renderingId}>
             {generate.isPending ? (

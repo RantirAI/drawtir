@@ -9,6 +9,16 @@ export interface MarketingVideoScene {
   image_url: string;
   start: number;
   duration: number;
+  scene_type?: "cinematic" | "featured" | "logo_subject" | string | null;
+  featured_image_url?: string | null;
+  featured_image_label?: string | null;
+  featured_image_treatment?: "fullscreen" | "device_mockup" | string | null;
+}
+
+export interface SubtitleWord {
+  word: string;
+  start: number;
+  end: number;
 }
 
 export interface MarketingVideo {
@@ -28,6 +38,11 @@ export interface MarketingVideo {
   status: string;
   created_at: string;
   updated_at: string;
+  country?: string | null;
+  currency?: string | null;
+  language?: string | null;
+  subtitles?: SubtitleWord[];
+  burn_subtitles?: boolean;
 }
 
 export function useMarketingVideos(projectId: string | undefined) {
@@ -58,6 +73,10 @@ export function useGenerateMarketingVideo() {
       prompt: string;
       title: string;
       tone: string;
+      country?: string;
+      currency?: string;
+      language?: string;
+      burn_subtitles?: boolean;
     }) => {
       const { data, error } = await supabase.functions.invoke("generate-marketing-video", {
         body: params,

@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import KnowledgeBaseEditor from "@/components/Marketing/KnowledgeBaseEditor";
 import BrandAssetsPanel from "@/components/Marketing/BrandAssetsPanel";
+import BrandSettingsPanel from "@/components/Marketing/BrandSettingsPanel";
+import FeaturedImagesPanel from "@/components/Marketing/FeaturedImagesPanel";
 import ContentGenerator from "@/components/Marketing/ContentGenerator";
 import OutputGallery from "@/components/Marketing/OutputGallery";
 import MerchDesignPanel from "@/components/Marketing/MerchDesignPanel";
@@ -18,6 +20,8 @@ export default function MarketingProject() {
 
   if (isLoading) return <div className="min-h-screen bg-background"><HorizontalNav /><div className="text-center py-20 text-muted-foreground">Loading...</div></div>;
   if (!project) return <div className="min-h-screen bg-background"><HorizontalNav /><div className="text-center py-20 text-muted-foreground">Project not found</div></div>;
+
+  const p = project as any;
 
   return (
     <div className="min-h-screen bg-background">
@@ -36,9 +40,11 @@ export default function MarketingProject() {
         </div>
 
         <Tabs defaultValue="knowledge" className="space-y-6">
-          <TabsList>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="knowledge">Knowledge Base</TabsTrigger>
             <TabsTrigger value="brand">Brand Assets</TabsTrigger>
+            <TabsTrigger value="featured">Featured Images</TabsTrigger>
+            <TabsTrigger value="settings">Brand Settings</TabsTrigger>
             <TabsTrigger value="generate">Generate</TabsTrigger>
             <TabsTrigger value="merch">Merch</TabsTrigger>
             <TabsTrigger value="videos">Videos</TabsTrigger>
@@ -51,6 +57,21 @@ export default function MarketingProject() {
 
           <TabsContent value="brand">
             <BrandAssetsPanel projectId={project.id} primaryColor={project.primary_color || "#9b87f5"} logos={project.logos || []} images={project.images || []} />
+          </TabsContent>
+
+          <TabsContent value="featured">
+            <FeaturedImagesPanel projectId={project.id} />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <BrandSettingsPanel
+              projectId={project.id}
+              country={p.country || ""}
+              currency={p.currency || "USD"}
+              language={p.language || "English"}
+              brandVoice={p.brand_voice || ""}
+              forbiddenWords={p.forbidden_words || []}
+            />
           </TabsContent>
 
           <TabsContent value="generate">
@@ -67,6 +88,9 @@ export default function MarketingProject() {
               primaryColor={project.primary_color}
               logoUrl={project.logos?.[0] || null}
               brandName={project.name}
+              defaultCountry={p.country}
+              defaultCurrency={p.currency}
+              defaultLanguage={p.language}
             />
           </TabsContent>
 
