@@ -15,6 +15,8 @@ export interface SubtitleWord {
   word: string;
   start: number;
   end: number;
+  speaker?: "A" | "B" | null;
+  speaker_name?: string | null;
 }
 
 export interface RenderOptions {
@@ -405,10 +407,20 @@ export async function renderMarketingVideo(
     }
     ctx.restore();
 
-    // Burned-in subtitles (bottom center)
+    // Burned-in subtitles + speaker chip (bottom)
     if (burnSubs && subtitles.length) {
       const sub = getActiveSubtitle(subtitles, t);
       if (sub && sub.text) {
+        // Find active speaker from word at time t
+        let activeSpeaker: string | null = null;
+        let activeSpeakerKey: "A" | "B" | null = null;
+        for (const w of subtitles) {
+          if (t >= w.start && t <= w.end + 0.05) {
+            activeSpeaker = w.speaker_name || null;
+            activeSpeakerKey = (w.speaker as any) || null;
+            break;
+          }
+        }
         ctx.save();
         ctx.font = "700 28px Inter, system-ui, sans-serif";
         ctx.textAlign = "center";
@@ -416,7 +428,6 @@ export async function renderMarketingVideo(
         const text = sub.text;
         const tw = ctx.measureText(text).width;
         const padX = 24;
-        const padY = 12;
         const bw = Math.min(width - 80, tw + padX * 2);
         const bh = 48;
         const bx = (width - bw) / 2;
@@ -426,6 +437,58 @@ export async function renderMarketingVideo(
         ctx.fill();
         ctx.fillStyle = "#fff";
         ctx.fillText(text, width / 2, by + bh / 2 + 1, bw - padX * 2);
+        ctx.restore();
+
+        if (activeSpeaker) {
+          ctx.save();
+          ctx.font = "700 14px Inter, system-ui, sans-serif";
+          const label = activeSpeaker.toUpperCase();
+          const lw = ctx.measureText(label).width;
+          const lpadX = 12;
+          const lbw = lw + lpadX * 2;
+          const lbh = 26;
+          const lbx = (width - lbw) / 2;
+          const lby = by - lbh - 8;
+          ctx.fillStyle = activeSpeakerKey === "B" ? "#ffffff" : brandColor;
+          roundRectPath(ctx, lbx, lby, lbw, lbh, lbh / 2);
+          ctx.fill();
+          ctx.fillStyle = activeSpeakerKey === "B" ? "#0a0a0f" : "#fff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(label, width / 2, lby + lbh / 2 + 1);
+          ctx.restore();
+        }
+      }
+    }
+
+    // Always-on speaker chip for podcast mode (even when subs off)
+    if (!burnSubs && subtitles.length) {
+      let activeSpeaker: string | null = null;
+      let activeSpeakerKey: "A" | "B" | null = null;
+      for (const w of subtitles) {
+        if (t >= w.start && t <= w.end + 0.05) {
+          activeSpeaker = w.speaker_name || null;
+          activeSpeakerKey = (w.speaker as any) || null;
+          break;
+        }
+      }
+      if (activeSpeaker) {
+        ctx.save();
+        ctx.font = "700 14px Inter, system-ui, sans-serif";
+        const label = activeSpeaker.toUpperCase();
+        const lw = ctx.measureText(label).width;
+        const lpadX = 14;
+        const lbw = lw + lpadX * 2;
+        const lbh = 28;
+        const lbx = (width - lbw) / 2;
+        const lby = height - lbh - 32;
+        ctx.fillStyle = activeSpeakerKey === "B" ? "#ffffff" : brandColor;
+        roundRectPath(ctx, lbx, lby, lbw, lbh, lbh / 2);
+        ctx.fill();
+        ctx.fillStyle = activeSpeakerKey === "B" ? "#0a0a0f" : "#fff";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(label, width / 2, lby + lbh / 2 + 1);
         ctx.restore();
       }
     }

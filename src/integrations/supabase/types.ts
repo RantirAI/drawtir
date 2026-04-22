@@ -434,7 +434,13 @@ export type Database = {
           country: string | null
           created_at: string
           currency: string | null
+          dialog: Json
           duration_seconds: number
+          format: string
+          host_a_voice_id: string | null
+          host_a_voice_name: string | null
+          host_b_voice_id: string | null
+          host_b_voice_name: string | null
           id: string
           language: string | null
           project_id: string
@@ -457,7 +463,13 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          dialog?: Json
           duration_seconds?: number
+          format?: string
+          host_a_voice_id?: string | null
+          host_a_voice_name?: string | null
+          host_b_voice_id?: string | null
+          host_b_voice_name?: string | null
           id?: string
           language?: string | null
           project_id: string
@@ -480,7 +492,13 @@ export type Database = {
           country?: string | null
           created_at?: string
           currency?: string | null
+          dialog?: Json
           duration_seconds?: number
+          format?: string
+          host_a_voice_id?: string | null
+          host_a_voice_name?: string | null
+          host_b_voice_id?: string | null
+          host_b_voice_name?: string | null
           id?: string
           language?: string | null
           project_id?: string

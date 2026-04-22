@@ -19,6 +19,17 @@ export interface SubtitleWord {
   word: string;
   start: number;
   end: number;
+  speaker?: "A" | "B" | null;
+  speaker_name?: string | null;
+}
+
+export interface DialogTurn {
+  speaker: "A" | "B";
+  speaker_name: string;
+  start: number;
+  end: number;
+  scene_index: number;
+  text: string;
 }
 
 export interface MarketingVideo {
@@ -43,6 +54,12 @@ export interface MarketingVideo {
   language?: string | null;
   subtitles?: SubtitleWord[];
   burn_subtitles?: boolean;
+  format?: "monologue" | "podcast";
+  host_a_voice_id?: string | null;
+  host_a_voice_name?: string | null;
+  host_b_voice_id?: string | null;
+  host_b_voice_name?: string | null;
+  dialog?: DialogTurn[];
 }
 
 export function useMarketingVideos(projectId: string | undefined) {
@@ -68,8 +85,8 @@ export function useGenerateMarketingVideo() {
     mutationFn: async (params: {
       project_id: string;
       duration_seconds: number;
-      voice_id: string;
-      voice_name: string;
+      voice_id?: string;
+      voice_name?: string;
       prompt: string;
       title: string;
       tone: string;
@@ -77,6 +94,11 @@ export function useGenerateMarketingVideo() {
       currency?: string;
       language?: string;
       burn_subtitles?: boolean;
+      format?: "monologue" | "podcast";
+      host_a_voice_id?: string;
+      host_a_voice_name?: string;
+      host_b_voice_id?: string;
+      host_b_voice_name?: string;
     }) => {
       const { data, error } = await supabase.functions.invoke("generate-marketing-video", {
         body: params,
@@ -141,6 +163,10 @@ export function useRefineMarketingVideo() {
       voice_id?: string;
       voice_name?: string;
       regenerate_images?: boolean;
+      host_a_voice_id?: string;
+      host_a_voice_name?: string;
+      host_b_voice_id?: string;
+      host_b_voice_name?: string;
     }) => {
       const { data, error } = await supabase.functions.invoke("refine-marketing-video", { body: params });
       if (error) throw error;

@@ -18,6 +18,8 @@ interface PlanScene {
   logo_subject_kind?: "shirt" | "hat" | "mug" | "laptop" | "tote" | "phone_case";
 }
 
+interface DialogTurn { speaker: "A" | "B"; text: string; scene_index: number; }
+
 async function callAI(apiKey: string, body: any) {
   const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -74,28 +76,64 @@ async function generateVoiceWithAlignment(text: string, voiceId: string) {
   const json = await r.json();
   const audio = Uint8Array.from(atob(json.audio_base64), (c) => c.charCodeAt(0)).buffer;
   const align = json.alignment || json.normalized_alignment;
-  const words: { word: string; start: number; end: number }[] = [];
+  const words: any[] = [];
+  let duration = 0;
   if (align?.characters?.length) {
     const chars: string[] = align.characters;
     const starts: number[] = align.character_start_times_seconds;
     const ends: number[] = align.character_end_times_seconds;
-    let buf = "";
-    let wStart = 0;
+    duration = ends[ends.length - 1] || 0;
+    let buf = ""; let wStart = 0;
     for (let i = 0; i < chars.length; i++) {
       const c = chars[i];
-      if (/\s/.test(c)) {
-        if (buf) {
-          words.push({ word: buf, start: wStart, end: ends[i - 1] ?? wStart });
-          buf = "";
-        }
-      } else {
-        if (!buf) wStart = starts[i];
-        buf += c;
-      }
+      if (/\s/.test(c)) { if (buf) { words.push({ word: buf, start: wStart, end: ends[i - 1] ?? wStart }); buf = ""; } }
+      else { if (!buf) wStart = starts[i]; buf += c; }
     }
     if (buf) words.push({ word: buf, start: wStart, end: ends[ends.length - 1] });
   }
-  return { audio, words };
+  return { audio, words, duration };
+}
+
+async function generatePodcastAudio(
+  turns: DialogTurn[],
+  hostA: { id: string; name: string },
+  hostB: { id: string; name: string },
+  gapSeconds = 0.18,
+) {
+  const parts: ArrayBuffer[] = [];
+  const allWords: any[] = [];
+  const turnTimings: any[] = [];
+  let cursor = 0;
+  for (const turn of turns) {
+    const voiceId = turn.speaker === "A" ? hostA.id : hostB.id;
+    const speakerName = turn.speaker === "A" ? hostA.name : hostB.name;
+    const r = await generateVoiceWithAlignment(turn.text, voiceId);
+    parts.push(r.audio);
+    const turnStart = cursor;
+    for (const w of r.words) {
+      allWords.push({
+        word: w.word,
+        start: +(w.start + cursor).toFixed(3),
+        end: +(w.end + cursor).toFixed(3),
+        speaker: turn.speaker,
+        speaker_name: speakerName,
+      });
+    }
+    cursor += r.duration + gapSeconds;
+    turnTimings.push({
+      speaker: turn.speaker,
+      speaker_name: speakerName,
+      start: +turnStart.toFixed(3),
+      end: +(cursor - gapSeconds).toFixed(3),
+      scene_index: turn.scene_index,
+      text: turn.text,
+    });
+  }
+  const total = parts.reduce((s, p) => s + p.byteLength, 0);
+  const merged = new Uint8Array(total);
+  let off = 0;
+  for (const p of parts) { merged.set(new Uint8Array(p), off); off += p.byteLength; }
+  return { audio: merged.buffer, words: allWords, turnTimings };
 }
 
 serve(async (req) => {
@@ -104,21 +142,12 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const { data: claimsData, error: claimsErr } = await supabase.auth.getClaims(authHeader.replace("Bearer ", ""));
     if (claimsErr || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     const userId = claimsData.claims.sub;
 
@@ -132,13 +161,15 @@ serve(async (req) => {
       voice_id,
       voice_name,
       regenerate_images = false,
+      // Podcast voice swaps
+      host_a_voice_id,
+      host_a_voice_name,
+      host_b_voice_id,
+      host_b_voice_name,
     } = body;
 
     if (!video_id) {
-      return new Response(JSON.stringify({ error: "video_id required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "video_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const serviceClient = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -150,11 +181,10 @@ serve(async (req) => {
       .eq("user_id", userId)
       .single();
     if (vErr || !video) {
-      return new Response(JSON.stringify({ error: "Video not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return new Response(JSON.stringify({ error: "Video not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    const isPodcast = (video.format || "monologue") === "podcast";
 
     const { data: project } = await serviceClient
       .from("marketing_projects")
@@ -172,6 +202,15 @@ serve(async (req) => {
 
     const finalVoiceId = voice_id || video.voice_id;
     const finalVoiceName = voice_name || video.voice_name;
+    const finalHostA = {
+      id: host_a_voice_id || video.host_a_voice_id,
+      name: host_a_voice_name || video.host_a_voice_name || "Host A",
+    };
+    const finalHostB = {
+      id: host_b_voice_id || video.host_b_voice_id,
+      name: host_b_voice_name || video.host_b_voice_name || "Host B",
+    };
+
     const duration = video.duration_seconds;
     const sceneCount = (video.scenes as any[])?.length || (duration <= 15 ? 4 : duration <= 30 ? 6 : 8);
     const targetWords = Math.round(duration * WPS);
@@ -189,11 +228,12 @@ serve(async (req) => {
       ? featuredList.map((f, i) => `${i + 1}. "${f.label}" — ${f.description || "(no description)"}`).join("\n")
       : "(no labeled product screenshots — do NOT use scene_type=featured)";
 
-    const sys = `You are refining an existing marketing video script. Apply the user's feedback while keeping it ~${duration}s (~${targetWords} words). Return ${sceneCount} scenes. Brand: ${project.name}. Color accent: ${brandColor}.
+    const localeBlock = `LOCALE: Brand operates in ${country}. Audience speaks ${language}. ALL currency figures must be ${currency}.
+${brandVoice ? `BRAND VOICE: ${brandVoice}\n` : ""}${forbidden.length ? `FORBIDDEN: never use ${forbidden.join(", ")}\n` : ""}`;
 
-LOCALE: Brand operates in ${country}. Audience speaks ${language}. ALL currency figures must be ${currency}.
-${brandVoice ? `BRAND VOICE: ${brandVoice}\n` : ""}
-${forbidden.length ? `FORBIDDEN: never use ${forbidden.join(", ")}\n` : ""}`;
+    const sys = isPodcast
+      ? `You are refining a brand-podcast video script: a natural conversation between TWO hosts (A=${finalHostA.name}, B=${finalHostB.name}). Apply the user's feedback while keeping it ~${duration}s (~${targetWords} words). Return ${sceneCount} scenes AND a dialog array of 6–14 turns alternating between A and B. Tone natural, end with B delivering CTA. ${localeBlock}`
+      : `You are refining an existing marketing video script. Apply the user's feedback while keeping it ~${duration}s (~${targetWords} words). Return ${sceneCount} scenes. Brand: ${project.name}. Color accent: ${brandColor}. ${localeBlock}`;
 
     const userMsg = `BRAND KNOWLEDGE:
 ${kb || "(none)"}
@@ -214,42 +254,53 @@ Rewrite the full script and split into ${sceneCount} scenes. Each scene chooses 
 - "cinematic" — premium photography (visual_prompt only)
 - "featured" — show real product screenshot (set featured_image_label EXACTLY from catalog, treatment fullscreen|device_mockup)
 - "logo_subject" — person/product with brand applied (set logo_subject_kind)
-Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/logos in image, accent ${brandColor}). End with clear CTA.`;
+Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/logos in image, accent ${brandColor}). End with clear CTA.${
+      isPodcast
+        ? `\n\nALSO produce 'dialog' — back-and-forth turns between A/B that, read in order, fill ~${targetWords} words. Each turn maps to a scene_index (0-based, < ${sceneCount}).`
+        : ""
+    }`;
+
+    const sceneItem: any = {
+      type: "object",
+      properties: {
+        caption: { type: "string" },
+        voiceover: { type: "string" },
+        scene_type: { type: "string", enum: ["cinematic", "featured", "logo_subject"] },
+        visual_prompt: { type: "string" },
+        featured_image_label: { type: "string" },
+        featured_image_treatment: { type: "string", enum: ["fullscreen", "device_mockup"] },
+        logo_subject_kind: { type: "string", enum: ["shirt", "hat", "mug", "laptop", "tote", "phone_case"] },
+      },
+      required: ["caption", "voiceover", "scene_type", "visual_prompt"],
+      additionalProperties: false,
+    };
+    const planParams: any = {
+      type: "object",
+      properties: { full_script: { type: "string" }, scenes: { type: "array", items: sceneItem } },
+      required: ["full_script", "scenes"],
+      additionalProperties: false,
+    };
+    if (isPodcast) {
+      planParams.properties.dialog = {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            speaker: { type: "string", enum: ["A", "B"] },
+            text: { type: "string" },
+            scene_index: { type: "integer" },
+          },
+          required: ["speaker", "text", "scene_index"],
+          additionalProperties: false,
+        },
+      };
+      planParams.required = ["full_script", "scenes", "dialog"];
+    }
 
     const planResp = await callAI(LOVABLE_API_KEY, {
       model: "google/gemini-2.5-flash",
       messages: [{ role: "system", content: sys }, { role: "user", content: userMsg }],
-      tools: [{
-        type: "function",
-        function: {
-          name: "build_video_plan",
-          parameters: {
-            type: "object",
-            properties: {
-              full_script: { type: "string" },
-              scenes: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    caption: { type: "string" },
-                    voiceover: { type: "string" },
-                    scene_type: { type: "string", enum: ["cinematic", "featured", "logo_subject"] },
-                    visual_prompt: { type: "string" },
-                    featured_image_label: { type: "string" },
-                    featured_image_treatment: { type: "string", enum: ["fullscreen", "device_mockup"] },
-                    logo_subject_kind: { type: "string", enum: ["shirt", "hat", "mug", "laptop", "tote", "phone_case"] },
-                  },
-                  required: ["caption", "voiceover", "scene_type", "visual_prompt"],
-                  additionalProperties: false,
-                },
-              },
-            },
-            required: ["full_script", "scenes"],
-            additionalProperties: false,
-          },
-        },
-      }],
+      tools: [{ type: "function", function: { name: "build_video_plan", parameters: planParams } }],
       tool_choice: { type: "function", function: { name: "build_video_plan" } },
     });
 
@@ -258,6 +309,7 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
     const plan = JSON.parse(toolCall.function.arguments);
     const planScenes: PlanScene[] = plan.scenes;
     const fullScript: string = plan.full_script;
+    const dialog: DialogTurn[] = isPodcast ? (plan.dialog || []) : [];
 
     const basePath = `marketing-videos/${video.project_id}/${video.id}`;
     const stamp = Date.now();
@@ -265,7 +317,6 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
     const existingScenes = (video.scenes as any[]) || [];
 
     const sceneAssetPromises = planScenes.map(async (s, i): Promise<any> => {
-      // FEATURED scenes always use the actual screenshot (fast — no AI needed for fullscreen).
       if (s.scene_type === "featured" && s.featured_image_label) {
         const match = featuredList.find(
           (f) => f.label.toLowerCase().trim() === s.featured_image_label!.toLowerCase().trim(),
@@ -279,24 +330,12 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
                 [match.image_url],
               );
               const bg = await uploadDataUrl(serviceClient, composed, `${basePath}/scene-${i + 1}-${stamp}.png`);
-              return {
-                image_url: bg,
-                featured_image_url: match.image_url,
-                featured_image_label: match.label,
-                featured_image_treatment: "device_mockup",
-                scene_type: "featured",
-              };
+              return { image_url: bg, featured_image_url: match.image_url, featured_image_label: match.label, featured_image_treatment: "device_mockup", scene_type: "featured" };
             } catch (e) {
               console.warn(`Mockup compose failed scene ${i + 1}:`, e);
             }
           }
-          return {
-            image_url: match.image_url,
-            featured_image_url: match.image_url,
-            featured_image_label: match.label,
-            featured_image_treatment: s.featured_image_treatment || "fullscreen",
-            scene_type: "featured",
-          };
+          return { image_url: match.image_url, featured_image_url: match.image_url, featured_image_label: match.label, featured_image_treatment: s.featured_image_treatment || "fullscreen", scene_type: "featured" };
         }
       }
 
@@ -323,7 +362,6 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
         return { image_url: stored, featured_image_url: null, featured_image_label: null, featured_image_treatment: null, scene_type: s.scene_type };
       }
 
-      // Reuse existing image
       const fallback = existingScenes[i] || existingScenes[existingScenes.length - 1] || {};
       return {
         image_url: fallback.image_url || video.thumbnail_url,
@@ -336,8 +374,20 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
 
     const sceneAssets = await Promise.all(sceneAssetPromises);
 
-    // Voiceover always regenerates (script or voice may have changed)
-    const { audio: audioBuf, words } = await generateVoiceWithAlignment(fullScript, finalVoiceId);
+    let audioBuf: ArrayBuffer; let words: any[]; let turnTimings: any[] = [];
+    let actualDuration = duration;
+
+    if (isPodcast) {
+      if (!finalHostA.id || !finalHostB.id) throw new Error("Podcast video missing host voices");
+      const r = await generatePodcastAudio(dialog, finalHostA, finalHostB);
+      audioBuf = r.audio; words = r.words; turnTimings = r.turnTimings;
+      if (turnTimings.length) actualDuration = Math.max(turnTimings[turnTimings.length - 1].end, duration);
+    } else {
+      const r = await generateVoiceWithAlignment(fullScript, finalVoiceId);
+      audioBuf = r.audio; words = r.words;
+      if (r.duration) actualDuration = Math.max(r.duration, duration);
+    }
+
     const audioPath = `${basePath}/voiceover-${stamp}.mp3`;
     const { error: audioErr } = await serviceClient.storage.from("media").upload(audioPath, audioBuf, {
       contentType: "audio/mpeg",
@@ -346,35 +396,70 @@ Each scene: caption (2-6 words), voiceover line, visual_prompt (no text/letters/
     if (audioErr) throw new Error(`Audio upload: ${audioErr.message}`);
     const audio_url = serviceClient.storage.from("media").getPublicUrl(audioPath).data.publicUrl;
 
-    const perScene = duration / planScenes.length;
-    const scenes = planScenes.map((s, i) => ({
-      caption: s.caption,
-      voiceover: s.voiceover,
-      visual_prompt: s.visual_prompt,
-      scene_type: sceneAssets[i].scene_type,
-      image_url: sceneAssets[i].image_url,
-      featured_image_url: sceneAssets[i].featured_image_url,
-      featured_image_label: sceneAssets[i].featured_image_label,
-      featured_image_treatment: sceneAssets[i].featured_image_treatment,
-      start: +(i * perScene).toFixed(2),
-      duration: +perScene.toFixed(2),
-    }));
+    let scenes: any[];
+    if (isPodcast && turnTimings.length) {
+      const firstStart: Record<number, number> = {};
+      for (const t of turnTimings) if (firstStart[t.scene_index] === undefined) firstStart[t.scene_index] = t.start;
+      scenes = planScenes.map((s, i) => {
+        const start = firstStart[i] ?? (i === 0 ? 0 : firstStart[i - 1] ?? 0);
+        let nextStart = actualDuration;
+        for (let j = i + 1; j < planScenes.length; j++) {
+          if (firstStart[j] !== undefined) { nextStart = firstStart[j]; break; }
+        }
+        return {
+          caption: s.caption,
+          voiceover: s.voiceover,
+          visual_prompt: s.visual_prompt,
+          scene_type: sceneAssets[i].scene_type,
+          image_url: sceneAssets[i].image_url,
+          featured_image_url: sceneAssets[i].featured_image_url,
+          featured_image_label: sceneAssets[i].featured_image_label,
+          featured_image_treatment: sceneAssets[i].featured_image_treatment,
+          start: +start.toFixed(2),
+          duration: +Math.max(0.5, nextStart - start).toFixed(2),
+        };
+      });
+    } else {
+      const perScene = actualDuration / planScenes.length;
+      scenes = planScenes.map((s, i) => ({
+        caption: s.caption,
+        voiceover: s.voiceover,
+        visual_prompt: s.visual_prompt,
+        scene_type: sceneAssets[i].scene_type,
+        image_url: sceneAssets[i].image_url,
+        featured_image_url: sceneAssets[i].featured_image_url,
+        featured_image_label: sceneAssets[i].featured_image_label,
+        featured_image_treatment: sceneAssets[i].featured_image_treatment,
+        start: +(i * perScene).toFixed(2),
+        duration: +perScene.toFixed(2),
+      }));
+    }
+
+    const updatePayload: any = {
+      voice_id: isPodcast ? finalHostA.id : finalVoiceId,
+      voice_name: isPodcast ? `${finalHostA.name} & ${finalHostB.name}` : finalVoiceName,
+      prompt: feedback ? (video.prompt ? `${video.prompt}\n\nRefinement: ${feedback}` : feedback) : video.prompt,
+      script: fullScript,
+      scenes,
+      audio_url,
+      video_url: null,
+      thumbnail_url: scenes[0]?.image_url || video.thumbnail_url,
+      status: "rendering",
+      subtitles: words,
+      duration_seconds: Math.round(actualDuration),
+      updated_at: new Date().toISOString(),
+    };
+    if (isPodcast) {
+      updatePayload.host_a_voice_id = finalHostA.id;
+      updatePayload.host_a_voice_name = finalHostA.name;
+      updatePayload.host_b_voice_id = finalHostB.id;
+      updatePayload.host_b_voice_name = finalHostB.name;
+      updatePayload.dialog = turnTimings;
+    }
 
     const { data: updated, error: updErr } = await serviceClient
       .from("marketing_videos")
-      .update({
-        voice_id: finalVoiceId,
-        voice_name: finalVoiceName,
-        prompt: feedback ? (video.prompt ? `${video.prompt}\n\nRefinement: ${feedback}` : feedback) : video.prompt,
-        script: fullScript,
-        scenes,
-        audio_url,
-        video_url: null,
-        thumbnail_url: scenes[0]?.image_url || video.thumbnail_url,
-        status: "rendering",
-        subtitles: words,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq("id", video.id)
       .select()
       .single();
