@@ -138,7 +138,7 @@ export async function renderMarketingVideo(
   const stopPromise = new Promise<void>((res) => (stopResolve = res));
   recorder.onstop = () => stopResolve();
 
-  recorder.start();
+  recorder.start(1000);
   audio.currentTime = 0;
   await audio.play().catch(() => {});
 
