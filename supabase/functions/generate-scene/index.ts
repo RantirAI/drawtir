@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, reveCreateImage, uploadPngToMedia } from "../_shared/reve.ts";
+import { ideogramCreateImage } from "../_shared/ideogram.ts";
 
 const SCENE_SYSTEM = `You are a world-class art director. Convert the user's idea into a JSON scene spec for a poster/landing frame.
 
