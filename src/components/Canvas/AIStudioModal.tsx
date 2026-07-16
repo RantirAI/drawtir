@@ -307,3 +307,42 @@ export function AIStudioModal({
     </Dialog>
   );
 }
+
+function ProviderToggle({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: "reve" | "ideogram";
+  onChange: (v: "reve" | "ideogram") => void;
+  disabled?: boolean;
+}) {
+  const options: Array<{ id: "reve" | "ideogram"; label: string; hint: string }> = [
+    { id: "reve", label: "Reve", hint: "Cinematic, photoreal" },
+    { id: "ideogram", label: "Ideogram", hint: "Typography, graphic" },
+  ];
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Model</span>
+      <div className="inline-flex rounded-md border border-border/60 bg-muted/30 p-0.5">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(o.id)}
+            title={o.hint}
+            className={`px-2.5 py-1 text-xs rounded-sm transition-colors ${
+              value === o.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
