@@ -240,8 +240,9 @@ export function AIStudioModal({
 
           <TabsContent value="scene" className="space-y-3 mt-4">
             <p className="text-xs text-muted-foreground">
-              One prompt → a full editable frame: background (Reve), headline, subheading, CTA, decorative shapes.
+              One prompt → a full editable frame: background image, headline, subheading, CTA, decorative shapes.
             </p>
+            <ProviderToggle value={sceneProvider} onChange={setSceneProvider} disabled={loading} />
             <Textarea
               placeholder="A revolutionary photography landing page — dark cinematic hero, bold serif headline 'See Differently', golden hour skyline background..."
               value={scenePrompt}
@@ -259,8 +260,9 @@ export function AIStudioModal({
 
           <TabsContent value="replace" className="space-y-3 mt-4">
             <p className="text-xs text-muted-foreground">
-              Rewrite the selected image with Reve — keep composition, change anything: lighting, subject, style.
+              Rewrite the selected image — keep composition, change anything: lighting, subject, style.
             </p>
+            <ProviderToggle value={replaceProvider} onChange={setReplaceProvider} disabled={loading} />
             <div className="text-xs px-3 py-2 rounded-md bg-muted/50 border border-border/50">
               Target: {selectedElement?.imageUrl
                 ? "selected image element"
