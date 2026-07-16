@@ -53,3 +53,12 @@ verify_jwt = false
 
 [functions.save-marketing-video]
 verify_jwt = false
+
+[functions.generate-scene]
+verify_jwt = false
+
+[functions.magic-replace]
+verify_jwt = false
+
+[functions.auto-animate]
+verify_jwt = false
