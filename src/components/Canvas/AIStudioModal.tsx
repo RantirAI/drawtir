@@ -148,6 +148,8 @@ export function AIStudioModal({
   const [scenePrompt, setScenePrompt] = useState("");
   const [replaceInstruction, setReplaceInstruction] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sceneProvider, setSceneProvider] = useState<"reve" | "ideogram">("reve");
+  const [replaceProvider, setReplaceProvider] = useState<"reve" | "ideogram">("reve");
 
   const runScene = async () => {
     if (!scenePrompt.trim()) return toast.error("Describe your scene");
