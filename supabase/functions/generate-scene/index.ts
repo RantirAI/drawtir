@@ -77,23 +77,29 @@ serve(async (req) => {
       throw new Error("Invalid scene JSON from AI");
     }
 
-    console.log("[generate-scene] spec ready, generating background with Reve");
+    console.log(`[generate-scene] spec ready, generating background with ${imageProvider}`);
 
-    // 2) Generate background via Reve
+    // 2) Generate background via chosen provider
     const ar = spec.aspectRatio ?? "16:9";
     let bgUrl: string | null = null;
     try {
-      const bytes = await reveCreateImage({
-        prompt: spec.backgroundPrompt,
-        aspect_ratio: ar,
-        quality: 3,
-      });
+      const bytes = imageProvider === "ideogram"
+        ? await ideogramCreateImage({
+            prompt: spec.backgroundPrompt,
+            aspect_ratio: ar,
+            rendering_speed: "QUALITY",
+          })
+        : await reveCreateImage({
+            prompt: spec.backgroundPrompt,
+            aspect_ratio: ar as any,
+            quality: 3,
+          });
       const authHeader = req.headers.get("Authorization");
-      const { publicUrl } = await uploadPngToMedia(authHeader, bytes, "scene-bg");
+      const { publicUrl } = await uploadPngToMedia(authHeader, bytes, `scene-bg-${imageProvider}`);
       bgUrl = publicUrl;
       console.log("[generate-scene] bg uploaded", bgUrl);
     } catch (e) {
-      console.error("[generate-scene] Reve failed, using fallback color:", e);
+      console.error(`[generate-scene] ${imageProvider} failed, using fallback color:`, e);
     }
 
     return new Response(
