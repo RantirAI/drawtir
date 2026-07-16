@@ -4673,6 +4673,63 @@ export default function CanvasContainerNew({
           toast.success(`"${title}" added to canvas!`);
         }}
       />
+
+      {/* AI Studio */}
+      <AIStudioModal
+        open={showAIStudio}
+        onOpenChange={setShowAIStudio}
+        selectedFrame={selectedFrame ?? null}
+        selectedElement={selectedElement ?? null}
+        onSceneGenerated={(frame) => {
+          const spacing = 24;
+          const rightmost = frames.reduce(
+            (acc, f) => {
+              const right = f.x + f.width;
+              return right > acc.right ? { right, y: f.y } : acc;
+            },
+            { right: -Infinity, y: 100 }
+          );
+          const placed: Frame = {
+            ...frame,
+            x: isFinite(rightmost.right) ? rightmost.right + spacing : 100,
+            y: frames.length ? frames[0].y : 100,
+          };
+          setFrames(prev => [...prev, placed]);
+          setSelectedFrameId(placed.id);
+          requestAnimationFrame(() => { try { fitFrameToView(placed.id); } catch {} });
+        }}
+        onImageReplaced={(newUrl) => {
+          if (!selectedFrameId) return;
+          if (selectedElement) {
+            setFrames(prev => prev.map(f => f.id === selectedFrameId ? {
+              ...f,
+              elements: (f.elements || []).map(el => el.id === selectedElement.id ? { ...el, imageUrl: newUrl, fillImage: newUrl } : el),
+            } : f));
+          } else {
+            setFrames(prev => prev.map(f => f.id === selectedFrameId ? { ...f, backgroundType: "image", backgroundImage: newUrl } : f));
+          }
+        }}
+        onAnimationsApplied={(animations) => {
+          if (!selectedFrameId) return;
+          const byId = new Map(animations.map(a => [a.id, a]));
+          setFrames(prev => prev.map(f => f.id === selectedFrameId ? {
+            ...f,
+            elements: (f.elements || []).map(el => {
+              const a = byId.get(el.id);
+              if (!a) return el;
+              return {
+                ...el,
+                animation: a.type,
+                animationDuration: a.duration,
+                animationDelay: a.delay,
+                animationTimingFunction: a.timingFunction,
+                animationIterationCount: "1",
+                animationCategory: "in" as const,
+              };
+            }),
+          } : f));
+        }}
+      />
     </div>
   );
 }
