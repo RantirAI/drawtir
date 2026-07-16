@@ -101,7 +101,7 @@ export async function uploadPngToMedia(
   // Best-effort media library entry
   if (userId) {
     try {
-      await supabase.from("media_library").insert({
+      await admin.from("media_library").insert({
         user_id: userId,
         file_name: fileName,
         file_url: pub.publicUrl,
