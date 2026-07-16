@@ -64,16 +64,19 @@ export async function uploadPngToMedia(
   bytes: Uint8Array,
   prefix: string,
 ): Promise<{ publicUrl: string; userId: string | null }> {
-  const supabase = createClient(
-    Deno.env.get("SUPABASE_URL") ?? "",
-    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-    authHeader ? { global: { headers: { Authorization: authHeader } } } : {},
-  );
+  // Use service role for the storage write so RLS on the media bucket doesn't block it.
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const admin = createClient(Deno.env.get("SUPABASE_URL") ?? "", serviceKey);
 
   let userId: string | null = null;
   if (authHeader) {
     try {
-      const { data } = await supabase.auth.getUser();
+      const userClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        { global: { headers: { Authorization: authHeader } } },
+      );
+      const { data } = await userClient.auth.getUser();
       userId = data.user?.id ?? null;
     } catch {
       try {
@@ -87,18 +90,18 @@ export async function uploadPngToMedia(
   const fileName = `${prefix}-${Date.now()}.png`;
   const path = `${folder}/${fileName}`;
 
-  const { error } = await supabase.storage.from("media").upload(path, bytes, {
+  const { error } = await admin.storage.from("media").upload(path, bytes, {
     contentType: "image/png",
     upsert: true,
   });
   if (error) throw new Error(`Upload failed: ${error.message}`);
 
-  const { data: pub } = supabase.storage.from("media").getPublicUrl(path);
+  const { data: pub } = admin.storage.from("media").getPublicUrl(path);
 
   // Best-effort media library entry
   if (userId) {
     try {
-      await supabase.from("media_library").insert({
+      await admin.from("media_library").insert({
         user_id: userId,
         file_name: fileName,
         file_url: pub.publicUrl,
