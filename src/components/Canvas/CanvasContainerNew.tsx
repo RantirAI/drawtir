@@ -37,6 +37,7 @@ import { InteractivityPanel } from "@/components/Panels/InteractivityPanel";
 import { PresentationMode } from "@/components/Presentation/PresentationMode";
 import { CommentsPanel } from "@/components/Comments/CommentsPanel";
 import { AIWallModal } from "./AIWallModal";
+import { AIStudioModal } from "./AIStudioModal";
 import { useComments } from "@/hooks/useComments";
 import DrawtirFooter from "../Footer/DrawtirFooter";
 import { Label } from "@/components/ui/label";
@@ -205,6 +206,7 @@ export default function CanvasContainerNew({
   const [showPresentationMode, setShowPresentationMode] = useState(false);
   const [showCommentsPanel, setShowCommentsPanel] = useState(false);
   const [showAIWallModal, setShowAIWallModal] = useState(false);
+  const [showAIStudio, setShowAIStudio] = useState(false);
   const [isResizingTimeline, setIsResizingTimeline] = useState(false);
   const [snapToGuides, setSnapToGuides] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
@@ -4329,6 +4331,7 @@ export default function CanvasContainerNew({
         onAddRichText={handleAddRichText}
         onDisablePanMode={() => setIsPanning(false)}
         onAIWall={() => setShowAIWallModal(true)}
+        onAIStudio={() => setShowAIStudio(true)}
       />
       
 
