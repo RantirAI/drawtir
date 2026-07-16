@@ -148,13 +148,15 @@ export function AIStudioModal({
   const [scenePrompt, setScenePrompt] = useState("");
   const [replaceInstruction, setReplaceInstruction] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sceneProvider, setSceneProvider] = useState<"reve" | "ideogram">("reve");
+  const [replaceProvider, setReplaceProvider] = useState<"reve" | "ideogram">("reve");
 
   const runScene = async () => {
     if (!scenePrompt.trim()) return toast.error("Describe your scene");
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-scene", {
-        body: { prompt: scenePrompt.trim() },
+        body: { prompt: scenePrompt.trim(), provider: sceneProvider },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -179,7 +181,7 @@ export function AIStudioModal({
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("magic-replace", {
-        body: { imageUrl: source, instruction: replaceInstruction.trim() },
+        body: { imageUrl: source, instruction: replaceInstruction.trim(), provider: replaceProvider },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -238,8 +240,9 @@ export function AIStudioModal({
 
           <TabsContent value="scene" className="space-y-3 mt-4">
             <p className="text-xs text-muted-foreground">
-              One prompt → a full editable frame: background (Reve), headline, subheading, CTA, decorative shapes.
+              One prompt → a full editable frame: background image, headline, subheading, CTA, decorative shapes.
             </p>
+            <ProviderToggle value={sceneProvider} onChange={setSceneProvider} disabled={loading} />
             <Textarea
               placeholder="A revolutionary photography landing page — dark cinematic hero, bold serif headline 'See Differently', golden hour skyline background..."
               value={scenePrompt}
@@ -257,8 +260,9 @@ export function AIStudioModal({
 
           <TabsContent value="replace" className="space-y-3 mt-4">
             <p className="text-xs text-muted-foreground">
-              Rewrite the selected image with Reve — keep composition, change anything: lighting, subject, style.
+              Rewrite the selected image — keep composition, change anything: lighting, subject, style.
             </p>
+            <ProviderToggle value={replaceProvider} onChange={setReplaceProvider} disabled={loading} />
             <div className="text-xs px-3 py-2 rounded-md bg-muted/50 border border-border/50">
               Target: {selectedElement?.imageUrl
                 ? "selected image element"
@@ -303,3 +307,42 @@ export function AIStudioModal({
     </Dialog>
   );
 }
+
+function ProviderToggle({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: "reve" | "ideogram";
+  onChange: (v: "reve" | "ideogram") => void;
+  disabled?: boolean;
+}) {
+  const options: Array<{ id: "reve" | "ideogram"; label: string; hint: string }> = [
+    { id: "reve", label: "Reve", hint: "Cinematic, photoreal" },
+    { id: "ideogram", label: "Ideogram", hint: "Typography, graphic" },
+  ];
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-[11px] uppercase tracking-wide text-muted-foreground">Model</span>
+      <div className="inline-flex rounded-md border border-border/60 bg-muted/30 p-0.5">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            disabled={disabled}
+            onClick={() => onChange(o.id)}
+            title={o.hint}
+            className={`px-2.5 py-1 text-xs rounded-sm transition-colors ${
+              value === o.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          >
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+

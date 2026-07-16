@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders, reveCreateImage, uploadPngToMedia } from "../_shared/reve.ts";
+import { ideogramCreateImage } from "../_shared/ideogram.ts";
 
 const SCENE_SYSTEM = `You are a world-class art director. Convert the user's idea into a JSON scene spec for a poster/landing frame.
 
@@ -33,7 +34,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, provider } = await req.json();
+    const imageProvider: "reve" | "ideogram" = provider === "ideogram" ? "ideogram" : "reve";
     if (!prompt || typeof prompt !== "string") throw new Error("prompt required");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -75,23 +77,29 @@ serve(async (req) => {
       throw new Error("Invalid scene JSON from AI");
     }
 
-    console.log("[generate-scene] spec ready, generating background with Reve");
+    console.log(`[generate-scene] spec ready, generating background with ${imageProvider}`);
 
-    // 2) Generate background via Reve
+    // 2) Generate background via chosen provider
     const ar = spec.aspectRatio ?? "16:9";
     let bgUrl: string | null = null;
     try {
-      const bytes = await reveCreateImage({
-        prompt: spec.backgroundPrompt,
-        aspect_ratio: ar,
-        quality: 3,
-      });
+      const bytes = imageProvider === "ideogram"
+        ? await ideogramCreateImage({
+            prompt: spec.backgroundPrompt,
+            aspect_ratio: ar,
+            rendering_speed: "QUALITY",
+          })
+        : await reveCreateImage({
+            prompt: spec.backgroundPrompt,
+            aspect_ratio: ar as any,
+            quality: 3,
+          });
       const authHeader = req.headers.get("Authorization");
-      const { publicUrl } = await uploadPngToMedia(authHeader, bytes, "scene-bg");
+      const { publicUrl } = await uploadPngToMedia(authHeader, bytes, `scene-bg-${imageProvider}`);
       bgUrl = publicUrl;
       console.log("[generate-scene] bg uploaded", bgUrl);
     } catch (e) {
-      console.error("[generate-scene] Reve failed, using fallback color:", e);
+      console.error(`[generate-scene] ${imageProvider} failed, using fallback color:`, e);
     }
 
     return new Response(
