@@ -181,7 +181,7 @@ export function AIStudioModal({
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("magic-replace", {
-        body: { imageUrl: source, instruction: replaceInstruction.trim() },
+        body: { imageUrl: source, instruction: replaceInstruction.trim(), provider: replaceProvider },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
