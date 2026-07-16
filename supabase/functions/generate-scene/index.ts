@@ -34,7 +34,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, provider } = await req.json();
+    const imageProvider: "reve" | "ideogram" = provider === "ideogram" ? "ideogram" : "reve";
     if (!prompt || typeof prompt !== "string") throw new Error("prompt required");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
