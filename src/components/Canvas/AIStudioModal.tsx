@@ -156,7 +156,7 @@ export function AIStudioModal({
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-scene", {
-        body: { prompt: scenePrompt.trim() },
+        body: { prompt: scenePrompt.trim(), provider: sceneProvider },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
